@@ -1,3 +1,46 @@
 INFO 2025-09-04 09:16:33,569 judge_handler Judge connected from: ('176.65.148.92', 52670)
 INFO 2025-09-04 09:16:33,569 base_handler Disconnecting client due to too-large message size (1129270862 bytes): ('176.65.148.92', 52670)
 INFO 2025-09-04 09:16:33,569 judge_handler Judge disconnected from: ('176.65.148.92', 52670) with name None
+INFO 2025-09-04 09:29:55,237 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-04 09:29:55,238 judge_handler MAY_CHAM1: Updated problem list
+INFO 2025-09-04 09:29:55,239 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-04 09:29:55,246 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-04 09:29:55,248 judge_handler MAY_CHAM1: Updated problem list
+INFO 2025-09-04 09:29:55,249 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-04 09:29:55,258 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-04 09:29:55,260 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-04 09:30:26,173 judge_handler MAY_CHAM1: Updated problem list
+INFO 2025-09-04 09:30:26,174 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-04 09:30:26,175 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-04 09:32:02,351 judge_list Free judges: 3
+INFO 2025-09-04 09:32:02,351 judge_list Dispatched submission 54 to: MAY_CHAM_TOC_DO_CAO
+INFO 2025-09-04 09:32:02,364 judge_handler Submission acknowledged: 54
+INFO 2025-09-04 09:32:04,953 judge_handler MAY_CHAM_TOC_DO_CAO: Submission generated compiler messages: 54
+INFO 2025-09-04 09:32:04,957 judge_handler MAY_CHAM_TOC_DO_CAO: Grading has begun on: 54
+INFO 2025-09-04 09:32:05,014 judge_handler MAY_CHAM_TOC_DO_CAO: 4 test case(s) completed on: 54
+INFO 2025-09-04 09:32:05,264 judge_handler MAY_CHAM_TOC_DO_CAO: 10 test case(s) completed on: 54
+INFO 2025-09-04 09:32:05,514 judge_handler MAY_CHAM_TOC_DO_CAO: 5 test case(s) completed on: 54
+INFO 2025-09-04 09:32:05,532 judge_handler MAY_CHAM_TOC_DO_CAO: 1 test case(s) completed on: 54
+INFO 2025-09-04 09:32:05,536 judge_handler MAY_CHAM_TOC_DO_CAO: Grading has ended on: 54
+INFO 2025-09-04 09:32:05,536 judge_list Judge available after grading 54: MAY_CHAM_TOC_DO_CAO
+INFO 2025-09-04 09:33:17,603 judge_list Free judges: 3
+INFO 2025-09-04 09:33:17,604 judge_list Dispatched submission 55 to: MAY_CHAM1
+INFO 2025-09-04 09:33:17,611 judge_handler Submission acknowledged: 55
+INFO 2025-09-04 09:33:20,244 judge_handler MAY_CHAM1: Submission generated compiler messages: 55
+INFO 2025-09-04 09:33:20,248 judge_handler MAY_CHAM1: Grading has begun on: 55
+INFO 2025-09-04 09:33:20,287 judge_handler MAY_CHAM1: 2 test case(s) completed on: 55
+INFO 2025-09-04 09:33:20,537 judge_handler MAY_CHAM1: 12 test case(s) completed on: 55
+INFO 2025-09-04 09:33:20,788 judge_handler MAY_CHAM1: 5 test case(s) completed on: 55
+INFO 2025-09-04 09:33:20,837 judge_handler MAY_CHAM1: 1 test case(s) completed on: 55
+INFO 2025-09-04 09:33:20,841 judge_handler MAY_CHAM1: Grading has ended on: 55
+INFO 2025-09-04 09:33:20,841 judge_list Judge available after grading 55: MAY_CHAM1
+INFO 2025-09-04 09:38:43,440 judge_list Free judges: 3
+INFO 2025-09-04 09:38:43,440 judge_list Dispatched submission 56 to: MAY_CHAM_TOC_DO_CAO
+INFO 2025-09-04 09:38:43,447 judge_handler Submission acknowledged: 56
+INFO 2025-09-04 09:38:45,993 judge_handler MAY_CHAM_TOC_DO_CAO: Submission generated compiler messages: 56
+INFO 2025-09-04 09:38:45,996 judge_handler MAY_CHAM_TOC_DO_CAO: Grading has begun on: 56
+INFO 2025-09-04 09:38:46,221 judge_handler MAY_CHAM_TOC_DO_CAO: 13 test case(s) completed on: 56
+INFO 2025-09-04 09:38:46,472 judge_handler MAY_CHAM_TOC_DO_CAO: 5 test case(s) completed on: 56
+INFO 2025-09-04 09:38:46,558 judge_handler MAY_CHAM_TOC_DO_CAO: 2 test case(s) completed on: 56
+INFO 2025-09-04 09:38:46,565 judge_handler MAY_CHAM_TOC_DO_CAO: Grading has ended on: 56
+INFO 2025-09-04 09:38:46,565 judge_list Judge available after grading 56: MAY_CHAM_TOC_DO_CAO

@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://github.com/DMOJ/online-judge/blob/master/logo.png?raw=true" width="120px">
+  <img src="https://github.com/KienPC1234/fptoj/blob/main/logo.png?raw=true" width="120px">
   <br>
   FPTOJ: FPT Online Judge
 </h1>
@@ -9,9 +9,6 @@
   </a>
   <a href="LICENSE.md">
     <img alt="License" src="https://img.shields.io/github/license/DMOJ/online-judge"/>
-  </a>
-  <a href="https://dmoj.ca/about/discord/">
-    <img src="https://img.shields.io/discord/677340492651954177?color=%237289DA&label=Discord"/>
   </a>
 </p>
 
@@ -46,7 +43,7 @@ See it live at [fptoj.com](https://fptoj.com/)!
 
 ## Installation
 
-Check out the install documentation at [docs.dmoj.ca](https://docs.dmoj.ca/#/site/installation). Feel free to reach out to us on [Discord](https://dmoj.ca/about/discord/) if you have any questions.
+Check out the install documentation at [docs.dmoj.ca](https://docs.dmoj.ca/#/site/installation).
 
 ## Screenshots
 
