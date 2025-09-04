@@ -14,12 +14,14 @@ from django.forms import BooleanField, CharField, ChoiceField, Form, ModelForm, 
 from django.urls import reverse_lazy
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _, ngettext_lazy
-from turnstile.fields import TurnstileField
+
 from judge.models import Contest, Language, Organization, Problem, ProblemPointsVote, Profile, Submission, \
     WebAuthnCredential
 from judge.utils.mail import validate_email_domain
 from judge.utils.subscription import newsletter_id
 from judge.widgets import AceWidget, MartorWidget, Select2MultipleWidget, Select2Widget
+
+from turnstile.fields import TurnstileField
 
 TOTP_CODE_LENGTH = 6
 
@@ -173,6 +175,7 @@ class EditOrganizationForm(ModelForm):
 
 class CustomAuthenticationForm(AuthenticationForm):
     captcha = TurnstileField()
+    
     def __init__(self, *args, **kwargs):
         super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
         self.fields['username'].widget.attrs.update({'placeholder': _('Username')})
