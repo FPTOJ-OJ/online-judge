@@ -1,0 +1,65 @@
+@forward "vars-common";
+
+$is_light_theme: true;
+
+// Màu nền và thành phần cho light mode
+$color_primary0: #fff;
+$color_primary5: #f8f8f8;   // nền sáng nhẹ
+$color_primary10: #eee;     // nền chính
+$color_primary25: #ccc;     // đường viền
+$color_primary33: #aaa;     // widget
+$color_primary50: #808080;
+$color_primary66: #555;     // tabs
+$color_primary75: #3b3b3b;  // widget
+$color_primary90: #111;
+$color_primary100: #000;
+
+// Màu liên kết: dùng màu cam FPT cho tiêu đề
+$color_link50: #0073e6;  // Mặc định
+$color_link75: #3399ff;  // Đã truy cập (visited)
+$color_link100: #005bb5; // Hover
+$color_link200: #003f7f; // Active   // active
+
+$color_pageBg: #fff;   // nền trang
+
+// Các màu one-off
+$color_base_description_blockquote: #eee;
+$color_contest_ranking_disqualified: #ffa8a8;
+$color_martor_resize_dragger: #e8e8e8;
+
+// Màu xếp hạng (theo bảng màu FPT)
+$color_rating_none: #999;
+$color_rating_newbie: #999;
+$color_rating_amateur: #00B140;    // xanh lá cây FPT
+$color_rating_expert: #0066B3;     // xanh nước biển FPT
+$color_rating_candidate_master: mediumpurple;
+$color_rating_master: #FF6600;     // cam FPT
+$color_rating_grandmaster: #e00;
+$color_rating_target: #700;
+
+$color_select2_search_dropdown: $color_primary0;
+
+$color_user_submission_activity0: #ddd;
+$color_user_submission_activity1: #9be9a8;
+$color_user_submission_activity2: #40c463;
+$color_user_submission_activity3: #2f9c4c;
+$color_user_submission_activity4: #216e39;
+
+$color_info25: #def;
+$color_info50: #bdf;
+$color_info100: #368;
+$color_success25: #ded;
+$color_success50: #adb;
+$color_success100: #173;
+$color_warning25: #ffd;
+$color_warning50: #feb;
+$color_warning100: #863;
+$color_danger25: #edd;
+$color_danger50: #dbb;
+$color_danger100: #944;
+
+$color_problem_submit_select2: #757575;
+
+$path_to_root: '.';     // đường dẫn tương đối từ style.css tới STATIC_ROOT
+
+@mixin vars-img {}

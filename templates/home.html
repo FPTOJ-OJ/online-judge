@@ -1,0 +1,48 @@
+{% extends "blog/list.html" %}
+
+{% block before_posts %}
+    <!-- Bảng mô tả -->
+    <div class="home-description sidebox">
+        <h3>Chào mừng đến với THPT FPT - Online Judge <i class="fa fa-globe"></i></h3>
+        <div class="sidebox-content">
+            <section class="sticky post" style="margin: 0.5em 1.4em;">
+            <p>
+                Đây là nơi chia sẻ kiến thức về lập trình, thuật toán và thi đấu lập trình dành riêng cho FSCHOOLERS. 
+                Hãy cùng khám phá các bài toán thú vị và thảo luận cùng cộng đồng!
+            </p>
+            <p>
+                - 🌟 Học thuật toán qua bài tập thực tế. <br>
+                - 🏆 Tham gia các cuộc thi lập trình. <br>
+                - 📚 Chia sẻ kinh nghiệm và mẹo giải bài. <br>
+            </p>
+            <p>
+                Bắt đầu ngay bằng cách <a href="/problems/">xem danh sách bài toán</a> hoặc <a href="/contests/">tham gia cuộc thi</a>!
+            </p>
+            </section>
+        </div>
+    </div>
+
+    <!-- Nội dung top của trang chủ -->
+    {% if misc_config.home_page_top %}
+        {{ render_django(misc_config.home_page_top, request=request, user_count=user_count, problem_count=problem_count, submission_count=submission_count, language_count=language_count, perms=perms) }}
+    {% endif %}
+{% endblock %}
+
+
+{% block meta %}
+    {% if misc_config.meta_description %}
+        <meta name="description" content="{{ misc_config['meta_description'] }}">
+    {% endif %}
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "url": "{{ DMOJ_SCHEME }}://{{ site.domain }}/",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "{{ DMOJ_SCHEME }}://{{ site.domain }}/problems/?search={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,1 @@
+window.confirm_and_rejudge=function(form){if(confirm('Bạn chắc chắn muốn chấm lại?')){form.submit();}};;

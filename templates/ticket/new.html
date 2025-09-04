@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block media %}{{ form.media.css }}{% endblock %}
+
+{% block js_media %}{{ form.media.js }}{% endblock %}
+
+{% block body %}
+    <form id="ticket-form" action="" method="POST" class="form-area">
+        {% block guideline_message %}{% endblock %}
+        {% csrf_token %}
+        <div class="title-block{% if form.title.errors %} error{% endif %}">{{ form.title }}</div>
+        {% if form.errors %}
+            <div class="form-errors">
+                {{ form.non_field_errors() }}
+                {{ form.title.errors }}
+                {{ form.body.errors }}
+            </div>
+        {% endif %}
+        <div class="body-block">{{ form.body }}</div>
+        <button type="submit" class="submit">{{ _('Create') }}</button>
+        {% if form.captcha %}
+        <div style="display: flex; justify-content: center; margin-top: 0.5em;">
+            {{ form.captcha }}
+        </div>
+        {% if form.captcha.errors %}
+            <div class="form-field-error" style="color: red; text-align: center; list-style: none;">
+                {% for error in form.captcha.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    </form>
+{% endblock %}

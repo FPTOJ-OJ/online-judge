@@ -1,0 +1,3 @@
+INFO 2025-09-04 09:16:33,569 judge_handler Judge connected from: ('176.65.148.92', 52670)
+INFO 2025-09-04 09:16:33,569 base_handler Disconnecting client due to too-large message size (1129270862 bytes): ('176.65.148.92', 52670)
+INFO 2025-09-04 09:16:33,569 judge_handler Judge disconnected from: ('176.65.148.92', 52670) with name None

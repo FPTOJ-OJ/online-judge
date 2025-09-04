@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://fptoj.com/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/contests/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/about/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/about/faq/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/about/tos/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/status/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/post/1-first-post</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/kienadmin</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problem/hello</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problem/chiadoan</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problem/report</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=name</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=group</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-ac_rate</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=editorial</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-user_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organizations/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=-rating</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=performance_points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=-problem_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/kienadminsw</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/testuser</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/trikien1234no</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/contests/2025/3/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/runtimes/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/runtimes/matrix/</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/kienadmin/solved</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-name</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-group</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=ac_rate</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=-editorial</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/problems/?order=user_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=rating</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=-performance_points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/users/?order=problem_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/kienadminsw/solved</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/testuser/solved</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/user/trikien1234no/solved</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=-rating</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=performance_points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=-problem_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=rating</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=-performance_points</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://fptoj.com/organization/1-dmoj/users?order=problem_count</loc>
+  <lastmod>2025-03-04T12:42:30+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+
+
+</urlset>

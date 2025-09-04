@@ -1,0 +1,70 @@
+@forward "vars-common";
+
+$is_light_theme: false;
+
+// Màu nền và thành phần cho dark mode
+$color_primary0: #0f0f0f;
+$color_primary5: #111;      // nền sáng nhẹ
+$color_primary10: #181818;  // nền chính
+$color_primary25: #3b3b3b;  // đường viền
+$color_primary33: #555;     // widget
+$color_primary50: #808080;
+$color_primary66: #aaa;     // tab
+$color_primary75: #ccc;     // widget
+$color_primary90: #eee;
+$color_primary100: #f8f8f8;
+
+
+$color_link50: #0073e6;  // Mặc định
+$color_link75: #3399ff;  // Đã truy cập (visited)
+$color_link100: #005bb5; // Hover
+$color_link200: #003f7f; // Active
+
+$color_pageBg: #222;       // nền trang (với một số phần cần tối hơn)
+
+// Các màu one-off
+$color_base_description_blockquote: #3b3b3b;
+$color_contest_ranking_disqualified: #622;
+$color_martor_resize_dragger: #232323;
+
+// Cập nhật màu xếp hạng với bảng màu FPT:
+// - Màu xanh lá cây FPT cho mức "amateur"
+// - Màu xanh nước biển FPT cho mức "expert"
+// - Màu cam FPT cho mức "master"
+$color_rating_none: #aaa;
+$color_rating_newbie: #aaa;
+$color_rating_amateur: #00B140;    // xanh lá cây FPT
+$color_rating_expert: #0066B3;     // xanh nước biển FPT
+$color_rating_candidate_master: mediumpurple;
+$color_rating_master: #FF6600;     // cam FPT
+$color_rating_grandmaster: #e00;
+$color_rating_target: #f55;
+
+$color_select2_search_dropdown: $color_primary10;
+
+$color_user_submission_activity0: #3b3b3b;
+$color_user_submission_activity1: #0e4429;
+$color_user_submission_activity2: #006d32;
+$color_user_submission_activity3: #26a641;
+$color_user_submission_activity4: #39d353;
+
+$color_info25: #023;
+$color_info50: #068;
+$color_info100: #7df;
+$color_success25: #031;
+$color_success50: #172;
+$color_success100: #6f8;
+$color_warning25: #320;
+$color_warning50: #960;
+$color_warning100: #fd6;
+$color_danger25: #311;
+$color_danger50: #822;
+$color_danger100: #f99;
+
+$color_problem_submit_select2: #8a8a8a;
+
+$path_to_root: '..';    // đường dẫn tương đối từ style.css tới STATIC_ROOT
+
+@mixin vars-img {
+    filter: invert(1) hue-rotate(180deg);
+}

@@ -1,0 +1,1 @@
+window.confirm_and_rejudge=function(form){if(confirm('Are you sure you want to rejudge?')){form.submit();}};;

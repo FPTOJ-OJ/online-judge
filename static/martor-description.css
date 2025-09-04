@@ -1,0 +1,325 @@
+form .martor-preview {
+  line-height: 1.5em;
+  font-size: 1em;
+  font-family: "Segoe UI", "Lucida Grande", Arial, sans-serif;
+  min-height: 400px;
+}
+form .martor-preview p {
+  margin: 1em 0 !important;
+  padding: 0 !important;
+}
+form .martor-preview img {
+  max-width: 100%;
+  height: auto;
+}
+form .martor-preview h1, form .martor-preview h2, form .martor-preview h3, form .martor-preview h4, form .martor-preview h5, form .martor-preview h6 {
+  font-weight: normal;
+  color: #111;
+  margin-bottom: 0.75em;
+  padding: 0;
+  background: 0;
+}
+form .martor-preview h3, form .martor-preview h4, form .martor-preview h5, form .martor-preview h6 {
+  font-weight: bold;
+}
+form .martor-preview h1 {
+  font-size: 2.5em;
+}
+form .martor-preview h2 {
+  font-size: 2em;
+}
+form .martor-preview h3 {
+  font-size: 1.6em;
+  margin: 0;
+  padding: 0;
+}
+form .martor-preview h4 {
+  font-size: 1.4em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  line-height: 1.225;
+  padding-bottom: 0.3em;
+  padding-top: 0.5em;
+}
+form .martor-preview h5 {
+  font-size: 1.15em;
+  margin-top: 0;
+}
+form .martor-preview h6 {
+  font-size: 0.9em;
+}
+form .martor-preview blockquote {
+  color: #808080;
+  margin: 0;
+  padding-left: 1.5em;
+  border-left: 0.5em #eee solid;
+}
+form .martor-preview hr {
+  display: block;
+  height: 0;
+  border: 0;
+  font-style: italic;
+  border-bottom: 1px solid #ccc;
+  margin: 25px 0 20px 0;
+  padding: 0;
+}
+form .martor-preview pre, form .martor-preview code, form .martor-preview kbd, form .martor-preview samp, form .martor-preview span.code {
+  color: #000;
+  page-break-inside: avoid;
+  font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+  font-size: 0.98em;
+}
+form .martor-preview code, form .martor-preview span.code {
+  font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace !important;
+  margin: 0 2px;
+  padding: 0 5px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: #3b3b3b;
+}
+form .martor-preview pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 1.5em 0 1.5em 0;
+  padding: 1em;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  color: #000;
+  border-radius: 4px;
+}
+form .martor-preview pre code, form .martor-preview pre div.code {
+  border: 0;
+  line-height: 1em;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 1em;
+  color: #000;
+}
+form .martor-preview b, form .martor-preview strong {
+  font-weight: bold;
+}
+form .martor-preview dfn {
+  font-style: italic;
+}
+form .martor-preview ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+form .martor-preview mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+form .martor-preview sub {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+form .martor-preview sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+  top: -0.5em;
+}
+form .martor-preview sub {
+  bottom: -0.25em;
+}
+form .martor-preview ul, form .martor-preview ol {
+  padding: 0 0 0 2em;
+}
+form .martor-preview li p:last-child {
+  margin: 0;
+}
+form .martor-preview dd {
+  margin: 0 0 0 2em;
+}
+form .martor-preview img {
+  border: 0;
+  -ms-interpolation-mode: bicubic;
+  vertical-align: middle;
+}
+form .martor-preview td {
+  vertical-align: top;
+}
+form .martor-preview ul li {
+  list-style: unset !important;
+}
+form .martor-preview ul, form .martor-preview ol {
+  margin-left: 0 !important;
+}
+form .martor-preview h5 {
+  text-transform: none !important;
+}
+
+.main-martor-fullscreen {
+  z-index: 99999 !important;
+}
+
+.section-martor {
+  /* Hacks for dark mode only */
+  /* Scroll bar */
+}
+.section-martor div[data-tab^=editor-tab-] {
+  padding: 0;
+}
+.section-martor .markdown-selector.markdown-emoji {
+  display: none !important;
+}
+.section-martor .tab-martor-menu a.item {
+  font-size: 0.8rem;
+}
+.section-martor .martor-toolbar {
+  -moz-box-flex: 0 !important;
+       flex: 0 1 auto !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.section-martor .martor-field {
+  height: 400px;
+}
+.section-martor .ui.tabular.menu + .attached:not(.top).segment,
+.section-martor .ui.tabular.menu + .attached:not(.top).segment + .attached:not(.top).segment {
+  width: auto !important;
+}
+.section-martor .resizable .resizable-b {
+  background: #e8e8e8 !important;
+}
+.section-martor .ui.basic.inverted.buttons .button, .section-martor .ui.basic.inverted.button {
+  box-shadow: 0px 0px 0px 0px #fff inset !important;
+}
+.section-martor .ui.attached.inverted.menu {
+  border-bottom: 2px solid #aaa !important;
+}
+.section-martor ::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #f8f8f8;
+}
+.section-martor ::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+  background-color: #f8f8f8;
+}
+.section-martor ::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #555;
+}
+
+.ace_scrollbar-v {
+  cursor: ns-resize;
+}
+
+.martor-toolbar {
+  padding: 0 0.85714286em !important;
+  padding-bottom: 4px !important;
+}
+.martor-toolbar .ui.icon .markdown-image-upload {
+  position: relative;
+  overflow: hidden;
+}
+.martor-toolbar .ui.icon .markdown-image-upload input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 25px;
+  padding: 0;
+  padding-left: 35px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  cursor: inherit;
+  display: block;
+}
+
+.emoji-loader-init {
+  min-height: 200px !important;
+}
+
+.insert-emoji {
+  cursor: pointer;
+}
+
+/* Full Screen Mode */
+.main-martor-fullscreen {
+  background: #fff;
+  position: fixed;
+  z-index: 999;
+  max-height: 100%;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  left: 0;
+  top: 0;
+}
+.main-martor-fullscreen .fields.martor-toolbar {
+  border-bottom: 1px solid #eee;
+  margin: 0;
+}
+.main-martor-fullscreen .section-martor {
+  height: 90%;
+  position: relative;
+}
+
+.marked-emoji {
+  max-width: 20px;
+}
+
+.martor {
+  height: 500px;
+  max-height: 500px;
+}
+
+.martor-field {
+  width: 100%;
+  height: 250px;
+  min-height: 100px;
+}
+
+form .martor-preview-stale {
+  background: -moz-repeating-linear-gradient(135deg, #fff, #fff 10px, #f8f8f8 10px, #f8f8f8 20px) !important;
+  background: repeating-linear-gradient(-45deg, #fff, #fff 10px, #f8f8f8 10px, #f8f8f8 20px) !important;
+}
+
+.icon.expand-editor {
+  position: absolute;
+  bottom: 0.8em;
+  right: 0;
+}
+
+.no-border {
+  border: none !important;
+}
+
+/* Live Preview */
+form .enable-living .martor-preview {
+  display: block !important;
+}
+form .enable-living .tab-martor-menu a.item {
+  display: none !important;
+}
+
+/* Django Admin */
+.submit-row a {
+  -moz-box-sizing: content-box;
+       box-sizing: content-box;
+}
+
+body.overflow {
+  overflow: hidden !important;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+  padding: 5px 15px;
+}
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3Jlc291cmNlcy9tYXJ0b3ItZGVzY3JpcHRpb24uc2NzcyIsIi4uL3Jlc291cmNlcy9iYXNlLWRlc2NyaXB0aW9uLnNjc3MiLCIuLi9zYXNzX3Byb2Nlc3NlZC9tYXJ0b3ItZGVzY3JpcHRpb24uY3NzIiwiLi4vcmVzb3VyY2VzL3ZhcnMuc2NzcyIsIi4uL3Jlc291cmNlcy92YXJzLWNvbW1vbi5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUdBO0VDQUksa0JBQUE7RUFDQSxjQUFBO0VBQ0EsMkRBQUE7RURDQSxpQkFBQTtBRURKO0FERUk7RUFDSSx3QkFBQTtFQUNBLHFCQUFBO0FDQVI7QURHSTtFQUNJLGVBQUE7RUFDQSxZQUFBO0FDRFI7QURRSTtFQUNJLG1CQUFBO0VBQ0EsV0VWVTtFRldWLHFCQUFBO0VBQ0EsVUFBQTtFQUNBLGFBQUE7QUNOUjtBRFNJO0VBQ0ksaUJBQUE7QUNQUjtBRFVJO0VBQ0ksZ0JBQUE7QUNSUjtBRFdJO0VBQ0ksY0FBQTtBQ1RSO0FEWUk7RUFDSSxnQkFBQTtFQUNBLFNBQUE7RUFDQSxVQUFBO0FDVlI7QURhSTtFQUNJLGdCQUFBO0VBQ0EsMkNBQUE7RUFDQSxrQkFBQTtFQUNBLHFCQUFBO0VBQ0Esa0JBQUE7QUNYUjtBRGNJO0VBQ0ksaUJBQUE7RUFDQSxhQUFBO0FDWlI7QURlSTtFQUNJLGdCQUFBO0FDYlI7QURnQkk7RUFDSSxjRXZEVTtFRndEVixTQUFBO0VBQ0EsbUJBQUE7RUFDQSw2QkFBQTtBQ2RSO0FEaUJJO0VBQ0ksY0FBQTtFQUNBLFNBQUE7RUFDQSxTQUFBO0VBQ0Esa0JBQUE7RUFDQSw2QkFBQTtFQUNBLHFCQUFBO0VBQ0EsVUFBQTtBQ2ZSO0FEa0JJO0VBQ0ksV0VwRVc7RUZxRVgsd0JBQUE7RUFDQSxpT0c1RVU7RUg2RVYsaUJBQUE7QUNoQlI7QURtQkk7RUFDSSw0T0FBQTtFQUNBLGFBQUE7RUFDQSxjQUFBO0VBQ0Esc0JBQUE7RUFDQSx5QkV2RlM7RUZ3RlQsa0JHMUZlO0VIMkZmLGlCQUFBO0VBQ0EsY0VwRlU7QURtRWxCO0FEb0JJO0VBV0kscUJBQUE7RUFDQSxxQkFBQTtFQUNBLHVCQUFBO0VBQ0EsWUFBQTtFQUNBLHNCQUFBO0VBQ0EseUJFN0dTO0VGOEdULFdFdEdXO0VGdUdYLGtCR2pIZTtBRnFGdkI7QURXUTtFQUNJLFNBQUE7RUFDQSxnQkFBQTtFQUNBLFNBQUE7RUFDQSxVQUFBO0VBQ0EsdUJBQUE7RUFDQSxjQUFBO0VBQ0EsV0U3Rk87QURvRm5CO0FEc0JJO0VBQ0ksaUJBQUE7QUNwQlI7QUR1Qkk7RUFDSSxrQkFBQTtBQ3JCUjtBRHdCSTtFQUNJLGdCQUFBO0VBQ0EsV0FBQTtFQUNBLHFCQUFBO0FDdEJSO0FEeUJJO0VBQ0ksZ0JBQUE7RUFDQSxXQUFBO0VBQ0Esa0JBQUE7RUFDQSxpQkFBQTtBQ3ZCUjtBRDBCSTtFQUNJLGNBQUE7RUFDQSxjQUFBO0VBQ0Esa0JBQUE7RUFDQSx3QkFBQTtBQ3hCUjtBRDJCSTtFQUNJLGNBQUE7RUFDQSxjQUFBO0VBQ0Esa0JBQUE7RUFDQSx3QkFBQTtFQUNBLFdBQUE7QUN6QlI7QUQ0Qkk7RUFDSSxlQUFBO0FDMUJSO0FENkJJO0VBQ0ksa0JBQUE7QUMzQlI7QUQ4Qkk7RUFDSSxTQUFBO0FDNUJSO0FEK0JJO0VBQ0ksaUJBQUE7QUM3QlI7QURnQ0k7RUFDSSxTQUFBO0VBQ0EsK0JBQUE7RUFDQSxzQkFBQTtBQzlCUjtBRGlDSTtFQUNJLG1CQUFBO0FDL0JSO0FGNUlJO0VBQ0ksNEJBQUE7QUU4SVI7QUYzSUk7RUFDSSx5QkFBQTtBRTZJUjtBRjFJSTtFQUNJLCtCQUFBO0FFNElSOztBRnhJQTtFQUNJLHlCQUFBO0FFMklKOztBRnhJQTtFQWdDSSw2QkFBQTtFQVNBLGVBQUE7QUVvR0o7QUY1SUk7RUFDSSxVQUFBO0FFOElSO0FGM0lJO0VBQ0ksd0JBQUE7QUU2SVI7QUYxSUk7RUFDSSxpQkFBQTtBRTRJUjtBRnpJSTtFQUNJLDJCQUFBO09BQUEseUJBQUE7RUFDQSxnQkFBQTtFQUNBLGtCQUFBO0FFMklSO0FGeElJO0VBQ0ksYUFBQTtBRTBJUjtBRnZJSTs7RUFFSSxzQkFBQTtBRXlJUjtBRnRJSTtFQUNJLDhCQUFBO0FFd0lSO0FGcElJO0VBQ0ksaURBQUE7QUVzSVI7QUZuSUk7RUFDSSx3Q0FBQTtBRXFJUjtBRmpJSTtFQUNDLG9EQUFBO0VBQ0EsbUJBQUE7RUFDQSx5QkdoRVk7QURtTWpCO0FGaElJO0VBQ0ksV0FBQTtFQUNILFVBQUE7RUFDQSx5Qkd0RVk7QUR3TWpCO0FGL0hJO0VBQ0MsbUJBQUE7RUFDQSxvREFBQTtFQUNBLHNCR3ZFYTtBRHdNbEI7O0FGN0hBO0VBQ0ksaUJBQUE7QUVnSUo7O0FGM0hBO0VBQ0ksa0NBQUE7RUFDQSw4QkFBQTtBRThISjtBRjVISTtFQUNJLGtCQUFBO0VBQ0EsZ0JBQUE7QUU4SFI7QUY1SFE7RUFDSSxrQkFBQTtFQUNBLE1BQUE7RUFDQSxRQUFBO0VBQ0EsZUFBQTtFQUNBLGdCQUFBO0VBQ0EsZUFBQTtFQUNBLFVBQUE7RUFDQSxrQkFBQTtFQUNBLGlCQUFBO0VBQ0Esd0JBQUE7RUFDQSxVQUFBO0VBQ0EsYUFBQTtFQUNBLGVBQUE7RUFDQSxjQUFBO0FFOEhaOztBRnpIQTtFQUNJLDRCQUFBO0FFNEhKOztBRnpIQTtFQUNJLGVBQUE7QUU0SEo7O0FGekhBLHFCQUFBO0FBQ0E7RUFDSSxnQkc1SGE7RUg2SGIsZUFBQTtFQUNBLFlBQUE7RUFDQSxnQkFBQTtFQUNBLFlBQUE7RUFDQSxXQUFBO0VBQ0EsU0FBQTtFQUNBLE9BQUE7RUFDQSxNQUFBO0FFNEhKO0FGMUhJO0VBQ0ksNkJBQUE7RUFDQSxTQUFBO0FFNEhSO0FGekhJO0VBQ0ksV0FBQTtFQUNBLGtCQUFBO0FFMkhSOztBRnZIQTtFQUNJLGVBQUE7QUUwSEo7O0FGdkhBO0VBQ0ksYUFBQTtFQUNBLGlCQUFBO0FFMEhKOztBRnZIQTtFQUNJLFdBQUE7RUFDQSxhQUFBO0VBQ0EsaUJBQUE7QUUwSEo7O0FGdkhBO0VBQ0ksMEdBQUE7RUFBQSxxR0FBQTtBRTBISjs7QUZ2SEE7RUFDSSxrQkFBQTtFQUNBLGFBQUE7RUFDQSxRQUFBO0FFMEhKOztBRnZIQTtFQUNJLHVCQUFBO0FFMEhKOztBRnZIQSxpQkFBQTtBQUVJO0VBQ0kseUJBQUE7QUV5SFI7QUZ0SEk7RUFDSSx3QkFBQTtBRXdIUjs7QUZwSEEsaUJBQUE7QUFDQTtFQUNJLDRCQUFBO09BQUEsdUJBQUE7QUV1SEo7O0FGcEhBO0VBQ0ksMkJBQUE7QUV1SEo7O0FGcEhBO0VBQ0ksaUJBQUE7QUV1SEoiLCJmaWxlIjoibWFydG9yLWRlc2NyaXB0aW9uLmNzcyJ9 */
