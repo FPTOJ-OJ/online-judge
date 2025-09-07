@@ -163,8 +163,16 @@ class ProblemDataCompiler(object):
                 batch = None
         if batch:
             end_batch()
-
-        init = {}
+        
+        init = {
+            'io_mode': self.data.io_mode,
+        }
+        
+        if self.data.io_mode == 'file':
+            if not self.data.input_filename or not self.data.output_filename:
+                raise ProblemDataError(_('File IO mode requires input and output filenames.'))
+            init['input_file'] = self.data.input_filename
+            init['output_file'] = self.data.output_filename
 
         if self.data.zipfile:
             zippath = split_path_first(self.data.zipfile.name)

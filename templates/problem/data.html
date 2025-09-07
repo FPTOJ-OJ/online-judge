@@ -444,18 +444,30 @@
     </form>
     <div style="display: none" class="generator-args-editor"><textarea></textarea><a class="button">{{ _('Save') }}</a></div>
     <div style="display: none" class="batch-dependencies-editor"><textarea></textarea><a class="button">{{ _('Save') }}</a></div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    window.alert = function(msg) {
-        Swal.fire({
-            text: msg,
-            icon: 'info',
-            confirmButtonText: 'OK',
-            timer: 3000, 
-            timerProgressBar: true
-        });
-    };
+document.addEventListener("DOMContentLoaded", function () {
+    const ioMode = document.querySelector('[name="problem-data-io_mode"]');
+    const inputFieldRow = document.querySelector('[name="problem-data-input_filename"]')?.closest("tr");
+    const outputFieldRow = document.querySelector('[name="problem-data-output_filename"]')?.closest("tr");
+
+    if (!ioMode || !inputFieldRow || !outputFieldRow) return;
+
+    function toggleFileFields() {
+        if (ioMode.value === "file") {
+            inputFieldRow.style.display = "";
+            outputFieldRow.style.display = "";
+        } else {
+            inputFieldRow.style.display = "none";
+            outputFieldRow.style.display = "none";
+        }
+    }
+
+    ioMode.addEventListener("change", toggleFileFields);
+    toggleFileFields();
+});
+
 </script>
+
 <script>
 document.getElementById("auto-fill").addEventListener("click", async function () {
     const link = this; // Lưu tham chiếu đến thẻ a

@@ -8,6 +8,7 @@ class ThreadingTCPListener(ThreadingMixIn, TCPServer):
 
 class Server:
     def __init__(self, addresses, handler):
+        print("👉 Binding bridged server on addresses:", addresses, flush=True)
         self.servers = [ThreadingTCPListener(address, handler) for address in addresses]
         self._shutdown = threading.Event()
 

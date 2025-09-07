@@ -63,11 +63,29 @@ class ProblemDataForm(ModelForm):
 
     class Meta:
         model = ProblemData
-        fields = ['zipfile', 'generator', 'unicode', 'nobigmath', 'output_limit', 'output_prefix',
-                  'checker', 'checker_args']
+        fields = [
+            'zipfile', 'generator', 'unicode', 'nobigmath',
+            'output_limit', 'output_prefix', 'checker', 'checker_args',
+            'io_mode', 'input_filename', 'output_filename',
+        ]
         widgets = {
             'checker_args': HiddenInput,
+            'io_mode': Select(attrs={'style': 'width: 10em'}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        io_mode = cleaned_data.get('io_mode')
+        input_filename = cleaned_data.get('input_filename')
+        output_filename = cleaned_data.get('output_filename')
+
+        if io_mode == 'file':
+            if not input_filename:
+                raise ValidationError(_('Input filename is required in File IO mode.'))
+            if not output_filename:
+                raise ValidationError(_('Output filename is required in File IO mode.'))
+
+        return cleaned_data
 
 
 class ProblemCaseForm(ModelForm):
