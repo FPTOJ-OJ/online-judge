@@ -41,3 +41,4 @@ icalendar
 importlib-metadata<5
 django-turnstile
 django-recaptcha
+websocket-client

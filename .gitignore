@@ -20,3 +20,4 @@ sass_processed
 __pycache__
 dmojsite/
 userdata
+static
