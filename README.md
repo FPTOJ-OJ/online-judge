@@ -1,14 +1,14 @@
 <h1 align="center">
-  <img src="https://github.com/KienPC1234/fptoj/blob/main/logo.png?raw=true" width="120px">
+  <img src="https://github.com/FPTOJ-OJ/online-judge/blob/main/logo.png?raw=true" width="120px">
   <br>
   FPTOJ: FPT Online Judge
 </h1>
 <p align="center">
- <a href="https://github.com/KienPC1234/fptoj/actions?query=workflow%3Abuild">
-  <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/KienPC1234/fptoj/build.yml?branch=main"/>
+ <a href="https://github.com/FPTOJ-OJ/online-judge/actions?query=workflow%3Abuild">
+  <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/FPTOJ-OJ/online-judge/build.yml?branch=main"/>
 </a>
   <a href="LICENSE.md">
-    <img alt="License" src="https://img.shields.io/github/license/KienPC1234/fptoj"/>
+    <img alt="License" src="https://img.shields.io/github/license/FPTOJ-OJ/online-judge"/>
   </a>
 </p>
 
@@ -18,7 +18,7 @@ See it live at [fptoj.com](https://fptoj.com/)!
 
 ## Features
 
-* [Support for over **60 language runtimes**](https://github.com/KienPC1234/fptoj#supported-languages)
+* [Support for over **60 language runtimes**](https://github.com/FPTOJ-OJ/online-judge#supported-languages)
 * Highly robust judging system:
    * Supports **interactive** and **signature-graded** tasks
    * Supports **runtime data generators** and **custom output validators**
