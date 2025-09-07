@@ -44,3 +44,1631 @@ INFO 2025-09-04 09:38:46,472 judge_handler MAY_CHAM_TOC_DO_CAO: 5 test case(s) c
 INFO 2025-09-04 09:38:46,558 judge_handler MAY_CHAM_TOC_DO_CAO: 2 test case(s) completed on: 56
 INFO 2025-09-04 09:38:46,565 judge_handler MAY_CHAM_TOC_DO_CAO: Grading has ended on: 56
 INFO 2025-09-04 09:38:46,565 judge_list Judge available after grading 56: MAY_CHAM_TOC_DO_CAO
+INFO 2025-09-05 14:35:00,417 judge_handler Judge connected from: ('103.124.95.24', 39572)
+INFO 2025-09-05 14:35:00,425 judge_handler Judge authenticated: ('103.124.95.24', 39572) (dev_judge)
+INFO 2025-09-05 14:35:00,425 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 14:38:20,336 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 14:38:20,343 judge_handler Judge disconnected from: ('103.124.95.24', 39572) with name dev_judge
+INFO 2025-09-05 14:39:29,013 judge_handler Judge connected from: ('103.124.95.24', 39988)
+INFO 2025-09-05 14:39:29,026 judge_handler Judge authenticated: ('103.124.95.24', 39988) (dev_judge)
+INFO 2025-09-05 14:39:29,026 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 14:41:14,915 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 14:41:14,923 judge_handler Judge disconnected from: ('103.124.95.24', 39988) with name dev_judge
+INFO 2025-09-05 14:42:12,730 judge_handler Judge connected from: ('103.124.95.24', 36494)
+INFO 2025-09-05 14:42:12,755 judge_handler Judge authenticated: ('103.124.95.24', 36494) (dev_judge)
+INFO 2025-09-05 14:42:12,755 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 14:44:26,884 judge_list Free judges: 1
+INFO 2025-09-05 14:44:26,884 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 14:44:26,897 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 14:44:30,313 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 14:44:30,316 judge_handler dev_judge: Grading has begun on: 57
+ERROR 2025-09-05 14:44:30,321 judge_handler Judge dev_judge failed while handling submission 57
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 271, in open
+    return open(os.path.join(self.problem_root_dir, key), 'rb')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/data/problems/laptop/laptop.inp'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 42, in grade
+    self._launch_process(case, io_mode, input_file, output_file, input_file_io)
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 98, in _launch_process
+    sandbox_files[input_file] = case.problem.problem_data.as_fd(input_file, normalize=not case.has_binary_data)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 280, in as_fd
+    with self.open(key) as f:
+         ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 274, in open
+    zipinfo = self.archive.getinfo(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/zipfile/__init__.py", line 1532, in getinfo
+    raise KeyError(
+KeyError: "There is no item named 'laptop.inp' in the archive"
+
+INFO 2025-09-05 14:44:30,358 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 14:49:44,873 judge_handler dev_judge: Updated problem list
+INFO 2025-09-05 14:49:44,877 judge_handler dev_judge: Updated problem list
+INFO 2025-09-05 14:49:56,436 judge_list Free judges: 1
+INFO 2025-09-05 14:49:56,437 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 14:49:56,444 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 14:49:59,617 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 14:49:59,619 judge_handler dev_judge: Grading has begun on: 57
+ERROR 2025-09-05 14:49:59,624 judge_handler Judge dev_judge failed while handling submission 57
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 271, in open
+    return open(os.path.join(self.problem_root_dir, key), 'rb')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/data/problems/laptop/LAPTOP.INP'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 42, in grade
+    self._launch_process(case, io_mode, input_file, output_file, input_file_io)
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 98, in _launch_process
+    sandbox_files[input_file] = case.problem.problem_data.as_fd(input_file, normalize=not case.has_binary_data)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 280, in as_fd
+    with self.open(key) as f:
+         ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/problem.py", line 274, in open
+    zipinfo = self.archive.getinfo(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/zipfile/__init__.py", line 1532, in getinfo
+    raise KeyError(
+KeyError: "There is no item named 'LAPTOP.INP' in the archive"
+
+INFO 2025-09-05 14:49:59,641 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:17:21,581 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:17:21,591 judge_handler Judge disconnected from: ('103.124.95.24', 36494) with name dev_judge
+INFO 2025-09-05 16:18:07,630 judge_handler Judge connected from: ('103.124.95.24', 32882)
+INFO 2025-09-05 16:18:07,634 judge_handler Judge authenticated: ('103.124.95.24', 32882) (dev_judge)
+INFO 2025-09-05 16:18:07,634 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:21:20,364 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:21:20,371 judge_handler Judge disconnected from: ('103.124.95.24', 32882) with name dev_judge
+INFO 2025-09-05 16:22:18,003 judge_handler Judge connected from: ('103.124.95.24', 33164)
+INFO 2025-09-05 16:22:18,007 judge_handler Judge authenticated: ('103.124.95.24', 33164) (dev_judge)
+INFO 2025-09-05 16:22:18,007 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:23:46,244 judge_list Free judges: 1
+INFO 2025-09-05 16:23:46,244 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:23:46,251 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:23:48,765 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:23:48,767 judge_handler dev_judge: Grading has begun on: 57
+ERROR 2025-09-05 16:23:48,771 judge_handler Judge dev_judge failed while handling submission 57
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 35, in grade
+    sandbox = FileIOSandbox(case.problem.problem_data, input_file, output_file, self._dir)
+                                                                                ^^^^^^^^^
+AttributeError: 'StandardGrader' object has no attribute '_dir'
+
+INFO 2025-09-05 16:23:48,788 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:29:32,603 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:29:32,612 judge_handler Judge disconnected from: ('103.124.95.24', 33164) with name dev_judge
+INFO 2025-09-05 16:30:11,354 judge_handler Judge connected from: ('103.124.95.24', 50892)
+INFO 2025-09-05 16:30:11,357 judge_handler Judge authenticated: ('103.124.95.24', 50892) (dev_judge)
+INFO 2025-09-05 16:30:11,358 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:31:04,644 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:31:04,650 judge_handler Judge disconnected from: ('103.124.95.24', 50892) with name dev_judge
+INFO 2025-09-05 16:31:12,307 judge_handler Judge connected from: ('103.124.95.24', 39756)
+INFO 2025-09-05 16:31:12,311 judge_handler Judge authenticated: ('103.124.95.24', 39756) (dev_judge)
+INFO 2025-09-05 16:31:12,311 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:31:30,916 judge_list Free judges: 1
+INFO 2025-09-05 16:31:30,917 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:31:30,922 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:31:33,377 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:31:33,380 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:31:33,392 judge_handler dev_judge: 20 test case(s) completed on: 57
+INFO 2025-09-05 16:31:33,400 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 16:31:33,400 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:45:11,975 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:45:11,980 judge_handler Judge disconnected from: ('103.124.95.24', 39756) with name dev_judge
+INFO 2025-09-05 16:45:47,935 judge_list Free judges: 0
+INFO 2025-09-05 16:45:47,935 judge_list Queued submission: 57
+INFO 2025-09-05 16:46:02,924 judge_handler Judge connected from: ('103.124.95.24', 41288)
+INFO 2025-09-05 16:46:02,927 judge_handler Judge authenticated: ('103.124.95.24', 41288) (dev_judge)
+INFO 2025-09-05 16:46:02,927 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:46:02,932 judge_list Dispatched queued submission 57: dev_judge
+INFO 2025-09-05 16:46:02,949 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:46:05,376 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:46:05,380 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:46:07,934 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:10,436 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:12,687 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:15,188 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:17,690 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:20,191 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:22,693 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:25,194 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:27,445 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:29,947 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:32,449 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:34,950 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:37,451 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:39,953 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:42,455 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:44,956 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:47,457 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:49,959 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:52,461 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:54,786 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:46:54,791 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 16:46:54,792 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:51:10,038 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:51:10,047 judge_handler Judge disconnected from: ('103.124.95.24', 41288) with name dev_judge
+INFO 2025-09-05 16:51:50,902 judge_handler Judge connected from: ('103.124.95.24', 45578)
+INFO 2025-09-05 16:51:50,905 judge_handler Judge authenticated: ('103.124.95.24', 45578) (dev_judge)
+INFO 2025-09-05 16:51:50,905 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:52:03,171 judge_list Free judges: 1
+INFO 2025-09-05 16:52:03,172 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:52:03,187 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:52:05,669 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:52:05,671 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:52:08,169 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:10,671 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:13,172 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:15,674 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:18,176 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:20,678 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:23,179 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:25,681 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:28,182 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:30,684 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:33,185 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:35,687 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:37,938 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:40,440 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:42,941 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:45,693 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:48,194 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:50,696 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:53,197 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:55,567 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:52:55,574 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 16:52:55,575 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:53:37,310 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:53:37,319 judge_handler Judge disconnected from: ('103.124.95.24', 45578) with name dev_judge
+INFO 2025-09-05 16:54:23,623 judge_handler Judge connected from: ('103.124.95.24', 46978)
+INFO 2025-09-05 16:54:23,626 judge_handler Judge authenticated: ('103.124.95.24', 46978) (dev_judge)
+INFO 2025-09-05 16:54:23,626 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:54:35,773 judge_list Free judges: 1
+INFO 2025-09-05 16:54:35,773 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:54:35,780 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:54:38,264 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:54:38,267 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:54:40,888 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:43,390 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:45,641 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:48,143 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:50,895 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:53,397 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:55,648 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:54:58,149 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:00,651 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:03,152 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:05,653 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:08,155 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:10,656 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:13,158 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:15,660 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:18,161 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:20,412 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:22,914 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:25,665 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:27,987 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:55:27,991 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 16:55:27,991 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:56:38,836 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:56:38,843 judge_handler Judge disconnected from: ('103.124.95.24', 46978) with name dev_judge
+INFO 2025-09-05 16:56:45,574 judge_handler Judge connected from: ('103.124.95.24', 40134)
+INFO 2025-09-05 16:56:45,577 judge_handler Judge authenticated: ('103.124.95.24', 40134) (dev_judge)
+INFO 2025-09-05 16:56:45,578 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:57:03,435 judge_list Free judges: 1
+INFO 2025-09-05 16:57:03,435 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:57:03,443 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:57:06,074 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:57:06,077 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:57:08,844 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:11,345 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:13,847 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:16,348 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:18,850 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:21,351 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:23,602 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:57:26,104 judge_handler dev_judge: 1 test case(s) completed on: 57
+ERROR 2025-09-05 16:57:27,161 judge_handler Judge dev_judge failed while handling submission 57
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 33, in grade
+    self.binary = self._generate_binary()
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 166, in _generate_binary
+    return executors[self.language].Executor(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 66, in __call__
+    obj.compile()
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 228, in compile
+    self.warning = self.get_compile_output(process)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 201, in get_compile_output
+    output = safe_communicate(process, None, outlimit=limit, errlimit=limit)[self.compile_output_index]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/utils/communicate.py", line 61, in safe_communicate
+    ready = poller.poll()
+            ^^^^^^^^^^^^^
+KeyboardInterrupt
+
+INFO 2025-09-05 16:57:27,181 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 16:57:30,862 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 16:57:30,871 judge_handler Judge disconnected from: ('103.124.95.24', 40134) with name dev_judge
+INFO 2025-09-05 16:57:44,393 judge_handler Judge connected from: ('103.124.95.24', 55444)
+INFO 2025-09-05 16:57:44,396 judge_handler Judge authenticated: ('103.124.95.24', 55444) (dev_judge)
+INFO 2025-09-05 16:57:44,397 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 16:57:53,511 judge_list Free judges: 1
+INFO 2025-09-05 16:57:53,512 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 16:57:53,517 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 16:57:55,962 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 16:57:55,964 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 16:57:58,658 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:01,160 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:03,661 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:06,163 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:08,664 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:11,166 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:13,667 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:16,169 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:18,670 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:21,172 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:23,674 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:25,925 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:28,427 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:30,928 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:33,430 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:35,931 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:38,432 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:40,934 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:43,435 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:45,871 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 16:58:45,877 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 16:58:45,877 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-05 17:08:43,001 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-05 17:08:43,008 judge_handler Judge disconnected from: ('103.124.95.24', 55444) with name dev_judge
+INFO 2025-09-05 17:11:37,005 judge_handler Judge connected from: ('103.124.95.24', 55482)
+INFO 2025-09-05 17:11:37,008 judge_handler Judge authenticated: ('103.124.95.24', 55482) (dev_judge)
+INFO 2025-09-05 17:11:37,009 judge_list Minimum tier changed from None to 1
+INFO 2025-09-05 17:11:47,967 judge_list Free judges: 1
+INFO 2025-09-05 17:11:47,967 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-05 17:11:47,975 judge_handler Submission acknowledged: 57
+INFO 2025-09-05 17:11:50,357 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-05 17:11:50,361 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-05 17:11:53,020 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:11:55,521 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:11:57,773 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:00,274 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:02,776 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:05,277 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:07,779 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:10,030 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:12,532 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:15,033 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:17,535 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:19,786 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:22,287 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:24,789 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:27,290 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:29,792 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:32,293 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:34,795 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:37,297 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:39,586 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-05 17:12:39,589 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-05 17:12:39,589 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-06 11:17:02,861 judge_handler Judge connected from: ('103.124.95.24', 50268)
+INFO 2025-09-06 11:17:02,866 judge_handler Judge authenticated: ('103.124.95.24', 50268) (dev_judge)
+INFO 2025-09-06 11:17:02,866 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:17:25,851 judge_list Free judges: 1
+INFO 2025-09-06 11:17:25,852 judge_list Dispatched submission 57 to: dev_judge
+INFO 2025-09-06 11:17:25,860 judge_handler Submission acknowledged: 57
+INFO 2025-09-06 11:17:28,237 judge_handler dev_judge: Submission generated compiler messages: 57
+INFO 2025-09-06 11:17:28,240 judge_handler dev_judge: Grading has begun on: 57
+INFO 2025-09-06 11:17:30,884 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:33,385 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:35,887 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:38,138 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:40,640 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:43,141 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:45,393 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:47,894 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:50,396 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:53,147 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:55,398 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:17:57,901 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:00,402 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:02,903 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:05,405 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:07,906 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:10,408 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:12,910 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:15,411 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:17,790 judge_handler dev_judge: 1 test case(s) completed on: 57
+INFO 2025-09-06 11:18:17,795 judge_handler dev_judge: Grading has ended on: 57
+INFO 2025-09-06 11:18:17,796 judge_list Judge available after grading 57: dev_judge
+INFO 2025-09-06 11:18:24,518 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:18:24,525 judge_handler Judge disconnected from: ('103.124.95.24', 50268) with name dev_judge
+INFO 2025-09-06 11:18:54,527 judge_handler Judge connected from: ('103.124.95.24', 34258)
+INFO 2025-09-06 11:18:54,531 judge_handler Judge authenticated: ('103.124.95.24', 34258) (dev_judge)
+INFO 2025-09-06 11:18:54,531 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:19:00,861 judge_list Free judges: 1
+INFO 2025-09-06 11:19:00,861 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:19:00,877 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:19:03,317 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:19:03,321 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:19:05,791 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:08,543 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:10,794 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:13,295 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:15,797 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:18,299 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:20,800 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:23,302 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:25,803 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:28,305 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:30,806 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:33,308 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:35,809 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:38,560 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:41,312 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:43,814 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:46,315 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:49,066 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:51,568 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:54,048 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:19:54,053 judge_handler dev_judge: Grading has ended on: 58
+INFO 2025-09-06 11:19:54,054 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:20:09,407 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:20:09,414 judge_handler Judge disconnected from: ('103.124.95.24', 34258) with name dev_judge
+INFO 2025-09-06 11:20:16,071 judge_handler Judge connected from: ('103.124.95.24', 42398)
+INFO 2025-09-06 11:20:16,074 judge_handler Judge authenticated: ('103.124.95.24', 42398) (dev_judge)
+INFO 2025-09-06 11:20:16,074 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:20:20,955 judge_list Free judges: 1
+INFO 2025-09-06 11:20:20,955 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:20:20,961 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:20:23,433 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:20:23,437 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:20:26,083 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:28,585 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:31,086 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:33,337 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:36,089 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:38,590 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:41,092 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:43,593 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:45,845 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:48,346 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:50,848 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:53,349 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:56,101 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:20:58,602 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:01,104 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:03,606 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:06,107 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:08,609 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:11,110 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:13,569 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:13,573 judge_handler dev_judge: Grading has ended on: 58
+INFO 2025-09-06 11:21:13,573 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:21:42,268 judge_list Free judges: 1
+INFO 2025-09-06 11:21:42,268 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:21:42,282 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:21:44,818 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:21:44,820 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:21:47,379 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:49,881 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:52,382 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:54,884 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:57,386 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:21:59,887 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:02,389 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:04,890 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:07,392 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:09,893 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:12,645 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:14,896 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:17,397 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:19,899 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:22,400 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:24,901 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:27,403 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:29,905 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:32,406 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:34,745 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:22:34,749 judge_handler dev_judge: Grading has ended on: 58
+INFO 2025-09-06 11:22:34,749 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:26:18,435 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:26:18,440 judge_handler Judge disconnected from: ('103.124.95.24', 42398) with name dev_judge
+INFO 2025-09-06 11:26:24,558 judge_handler Judge connected from: ('103.124.95.24', 54714)
+INFO 2025-09-06 11:26:24,561 judge_handler Judge authenticated: ('103.124.95.24', 54714) (dev_judge)
+INFO 2025-09-06 11:26:24,562 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:26:33,821 judge_list Free judges: 1
+INFO 2025-09-06 11:26:33,822 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:26:33,835 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:26:36,283 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:26:36,285 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:26:38,822 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:41,323 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:43,825 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:46,326 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:48,828 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:51,329 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:53,831 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:56,582 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:26:59,084 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:01,335 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:04,087 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:06,588 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:09,090 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:11,591 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:14,093 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:16,844 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:19,346 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:22,097 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:24,849 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:27,138 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:27:27,143 judge_handler dev_judge: Grading has ended on: 58
+INFO 2025-09-06 11:27:27,143 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:27:39,576 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:27:39,582 judge_handler Judge disconnected from: ('103.124.95.24', 54714) with name dev_judge
+INFO 2025-09-06 11:27:45,536 judge_handler Judge connected from: ('103.124.95.24', 40624)
+INFO 2025-09-06 11:27:45,540 judge_handler Judge authenticated: ('103.124.95.24', 40624) (dev_judge)
+INFO 2025-09-06 11:27:45,540 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:27:57,433 judge_list Free judges: 1
+INFO 2025-09-06 11:27:57,433 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:27:57,440 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:27:59,944 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:27:59,947 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:28:03,553 judge_handler dev_judge: 1 test case(s) completed on: 58
+ERROR 2025-09-06 11:28:04,299 judge_handler Judge dev_judge failed while handling submission 58
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 33, in grade
+    self.binary = self._generate_binary()
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 192, in _generate_binary
+    binary = executors[self.language].Executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 66, in __call__
+    obj.compile()
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 228, in compile
+    self.warning = self.get_compile_output(process)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 201, in get_compile_output
+    output = safe_communicate(process, None, outlimit=limit, errlimit=limit)[self.compile_output_index]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/utils/communicate.py", line 61, in safe_communicate
+    ready = poller.poll()
+            ^^^^^^^^^^^^^
+KeyboardInterrupt
+
+INFO 2025-09-06 11:28:04,320 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:28:06,994 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:28:07,002 judge_handler Judge disconnected from: ('103.124.95.24', 40624) with name dev_judge
+INFO 2025-09-06 11:28:35,032 judge_handler Judge connected from: ('103.124.95.24', 42428)
+INFO 2025-09-06 11:28:35,036 judge_handler Judge authenticated: ('103.124.95.24', 42428) (dev_judge)
+INFO 2025-09-06 11:28:35,036 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:28:41,226 judge_list Free judges: 1
+INFO 2025-09-06 11:28:41,226 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:28:41,355 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:28:43,814 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:28:43,816 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:28:56,551 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:29:08,808 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:29:21,315 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:29:33,821 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:29:46,328 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:29:59,085 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:30:11,341 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:30:24,098 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:30:36,605 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:30:49,112 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:31:01,368 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:31:13,874 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:31:26,381 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:31:38,888 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:31:51,395 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:03,901 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:16,408 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:28,915 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:41,421 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:53,932 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:32:53,935 judge_handler dev_judge: Grading has ended on: 58
+INFO 2025-09-06 11:32:53,936 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:35:57,158 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:35:57,168 judge_handler Judge disconnected from: ('103.124.95.24', 42428) with name dev_judge
+INFO 2025-09-06 11:36:03,037 judge_handler Judge connected from: ('103.124.95.24', 56098)
+INFO 2025-09-06 11:36:03,043 judge_handler Judge authenticated: ('103.124.95.24', 56098) (dev_judge)
+INFO 2025-09-06 11:36:03,044 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:36:12,795 judge_list Free judges: 1
+INFO 2025-09-06 11:36:12,795 judge_list Dispatched submission 58 to: dev_judge
+INFO 2025-09-06 11:36:12,806 judge_handler Submission acknowledged: 58
+INFO 2025-09-06 11:36:15,305 judge_handler dev_judge: Submission generated compiler messages: 58
+INFO 2025-09-06 11:36:15,307 judge_handler dev_judge: Grading has begun on: 58
+INFO 2025-09-06 11:36:19,056 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:22,558 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:26,060 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:29,311 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:32,813 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:36,315 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:39,567 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:43,069 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:46,571 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:50,073 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:50,673 judge_list Free judges: 0
+INFO 2025-09-06 11:36:50,674 judge_list Queued submission: 59
+INFO 2025-09-06 11:36:53,575 judge_handler dev_judge: 1 test case(s) completed on: 58
+INFO 2025-09-06 11:36:57,077 judge_handler dev_judge: 1 test case(s) completed on: 58
+ERROR 2025-09-06 11:36:58,806 judge_handler Judge dev_judge failed while handling submission 58
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 33, in grade
+    self.binary = self._generate_binary()
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 192, in _generate_binary
+    binary = executors[self.language].Executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 66, in __call__
+    obj.compile()
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 228, in compile
+    self.warning = self.get_compile_output(process)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 201, in get_compile_output
+    output = safe_communicate(process, None, outlimit=limit, errlimit=limit)[self.compile_output_index]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/utils/communicate.py", line 61, in safe_communicate
+    ready = poller.poll()
+            ^^^^^^^^^^^^^
+KeyboardInterrupt
+
+INFO 2025-09-06 11:36:58,823 judge_list Judge available after grading 58: dev_judge
+INFO 2025-09-06 11:36:58,829 judge_list Dispatched queued submission 59: dev_judge
+ERROR 2025-09-06 11:37:03,026 base_handler Error in base packet handling
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/base_handler.py", line 44, in __call__
+    handler.handle()
+  File "/home/kien/site_dev/judge/bridge/base_handler.py", line 172, in handle
+    self.read_sized_packet(self.read_size())
+                           ^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/judge/bridge/base_handler.py", line 110, in read_size
+    recv = self.request.recv(size_pack.size - len(buffer))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer
+ERROR 2025-09-06 11:37:03,041 judge_handler Judge dev_judge disconnected while handling submission 59
+INFO 2025-09-06 11:37:03,054 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:37:03,060 judge_handler Judge disconnected from: ('103.124.95.24', 56098) with name dev_judge
+INFO 2025-09-06 11:37:08,746 judge_handler Judge connected from: ('103.124.95.24', 36116)
+INFO 2025-09-06 11:37:08,749 judge_handler Judge authenticated: ('103.124.95.24', 36116) (dev_judge)
+INFO 2025-09-06 11:37:08,749 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:37:21,813 judge_list Free judges: 1
+INFO 2025-09-06 11:37:21,813 judge_list Dispatched submission 59 to: dev_judge
+INFO 2025-09-06 11:37:21,820 judge_handler Submission acknowledged: 59
+INFO 2025-09-06 11:37:24,343 judge_handler dev_judge: Submission generated compiler messages: 59
+INFO 2025-09-06 11:37:24,346 judge_handler dev_judge: Grading has begun on: 59
+INFO 2025-09-06 11:37:28,013 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:31,515 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:34,767 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:38,269 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:41,771 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:45,273 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:48,775 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:52,527 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:37:56,029 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:00,031 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:03,283 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:06,785 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:10,287 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:13,789 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:17,291 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:20,793 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:24,545 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:28,047 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:31,549 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:34,894 judge_handler dev_judge: 1 test case(s) completed on: 59
+INFO 2025-09-06 11:38:34,901 judge_handler dev_judge: Grading has ended on: 59
+INFO 2025-09-06 11:38:34,901 judge_list Judge available after grading 59: dev_judge
+INFO 2025-09-06 11:46:59,301 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 11:46:59,308 judge_handler Judge disconnected from: ('103.124.95.24', 36116) with name dev_judge
+INFO 2025-09-06 11:47:05,381 judge_handler Judge connected from: ('103.124.95.24', 35704)
+INFO 2025-09-06 11:47:05,386 judge_handler Judge authenticated: ('103.124.95.24', 35704) (dev_judge)
+INFO 2025-09-06 11:47:05,386 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 11:47:11,331 judge_list Free judges: 1
+INFO 2025-09-06 11:47:11,331 judge_list Dispatched submission 60 to: dev_judge
+INFO 2025-09-06 11:47:11,337 judge_handler Submission acknowledged: 60
+INFO 2025-09-06 11:47:13,808 judge_handler dev_judge: Submission generated compiler messages: 60
+INFO 2025-09-06 11:47:13,811 judge_handler dev_judge: Grading has begun on: 60
+INFO 2025-09-06 11:47:16,395 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:18,904 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:21,405 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:24,157 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:26,659 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:29,160 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:31,662 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:33,913 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:36,414 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:38,915 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:41,420 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:43,921 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:46,423 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:48,924 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:51,426 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:53,927 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:56,429 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:47:58,930 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:48:01,432 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:48:03,822 judge_handler dev_judge: 1 test case(s) completed on: 60
+INFO 2025-09-06 11:48:03,828 judge_handler dev_judge: Grading has ended on: 60
+INFO 2025-09-06 11:48:03,828 judge_list Judge available after grading 60: dev_judge
+INFO 2025-09-06 12:21:30,841 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:21:30,850 judge_handler Judge disconnected from: ('103.124.95.24', 35704) with name dev_judge
+INFO 2025-09-06 12:21:36,636 judge_handler Judge connected from: ('103.124.95.24', 40516)
+INFO 2025-09-06 12:21:36,639 judge_handler Judge authenticated: ('103.124.95.24', 40516) (dev_judge)
+INFO 2025-09-06 12:21:36,639 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:22:32,711 judge_list Free judges: 1
+INFO 2025-09-06 12:22:32,712 judge_list Dispatched submission 61 to: dev_judge
+INFO 2025-09-06 12:22:32,723 judge_handler Submission acknowledged: 61
+INFO 2025-09-06 12:22:35,249 judge_handler dev_judge: Submission generated compiler messages: 61
+INFO 2025-09-06 12:22:35,251 judge_handler dev_judge: Grading has begun on: 61
+INFO 2025-09-06 12:22:37,925 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:40,427 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:42,678 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:45,180 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:47,681 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:50,183 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:52,685 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:54,936 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:57,688 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:22:59,939 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:02,440 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:04,942 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:07,444 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:09,945 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:12,447 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:14,948 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:17,450 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:19,952 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:22,453 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:24,843 judge_handler dev_judge: 1 test case(s) completed on: 61
+INFO 2025-09-06 12:23:24,847 judge_handler dev_judge: Grading has ended on: 61
+INFO 2025-09-06 12:23:24,847 judge_list Judge available after grading 61: dev_judge
+INFO 2025-09-06 12:29:42,420 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:29:42,428 judge_handler Judge disconnected from: ('103.124.95.24', 40516) with name dev_judge
+INFO 2025-09-06 12:29:48,470 judge_handler Judge connected from: ('103.124.95.24', 51550)
+INFO 2025-09-06 12:29:48,474 judge_handler Judge authenticated: ('103.124.95.24', 51550) (dev_judge)
+INFO 2025-09-06 12:29:48,474 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:29:57,587 judge_list Free judges: 1
+INFO 2025-09-06 12:29:57,588 judge_list Dispatched submission 62 to: dev_judge
+INFO 2025-09-06 12:29:57,600 judge_handler Submission acknowledged: 62
+INFO 2025-09-06 12:30:00,115 judge_handler dev_judge: Submission generated compiler messages: 62
+INFO 2025-09-06 12:30:00,117 judge_handler dev_judge: Grading has begun on: 62
+ERROR 2025-09-06 12:30:02,544 judge_handler Judge dev_judge failed while handling submission 62
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 55, in grade
+    self._launch_process(case, io_mode, input_file, output_file, input_file_io)
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 143, in _launch_process
+    self._current_proc = self.binary.launch(
+                         ^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/base_executor.py", line 297, in launch
+    os.symlink(dst, src)
+FileExistsError: [Errno 17] File exists: '/dev/stdin' -> '/tmp/tmp094nbpoi/LAPTOP.INP'
+
+INFO 2025-09-06 12:30:02,563 judge_list Judge available after grading 62: dev_judge
+INFO 2025-09-06 12:42:07,985 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:42:07,995 judge_handler Judge disconnected from: ('103.124.95.24', 51550) with name dev_judge
+INFO 2025-09-06 12:42:18,803 judge_handler Judge connected from: ('103.124.95.24', 53228)
+INFO 2025-09-06 12:42:18,807 judge_handler Judge authenticated: ('103.124.95.24', 53228) (dev_judge)
+INFO 2025-09-06 12:42:18,807 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:42:44,939 judge_list Free judges: 1
+INFO 2025-09-06 12:42:44,939 judge_list Dispatched submission 62 to: dev_judge
+INFO 2025-09-06 12:42:44,945 judge_handler Submission acknowledged: 62
+INFO 2025-09-06 12:42:47,375 judge_handler dev_judge: Submission generated compiler messages: 62
+INFO 2025-09-06 12:42:47,377 judge_handler dev_judge: Grading has begun on: 62
+INFO 2025-09-06 12:42:49,827 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:42:52,328 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:42:54,830 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:42:57,331 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:42:59,833 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:02,335 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:04,837 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:07,338 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:09,840 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:12,341 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:14,843 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:17,345 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:19,846 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:22,098 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:24,599 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:27,351 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:29,602 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:32,354 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:34,855 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:37,238 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:43:37,243 judge_handler dev_judge: Grading has ended on: 62
+INFO 2025-09-06 12:43:37,243 judge_list Judge available after grading 62: dev_judge
+INFO 2025-09-06 12:49:36,578 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:49:36,586 judge_handler Judge disconnected from: ('103.124.95.24', 53228) with name dev_judge
+INFO 2025-09-06 12:49:42,405 judge_handler Judge connected from: ('103.124.95.24', 53086)
+INFO 2025-09-06 12:49:42,408 judge_handler Judge authenticated: ('103.124.95.24', 53086) (dev_judge)
+INFO 2025-09-06 12:49:42,409 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:50:02,830 judge_list Free judges: 1
+INFO 2025-09-06 12:50:02,831 judge_list Dispatched submission 62 to: dev_judge
+INFO 2025-09-06 12:50:02,842 judge_handler Submission acknowledged: 62
+INFO 2025-09-06 12:50:05,298 judge_handler dev_judge: Submission generated compiler messages: 62
+INFO 2025-09-06 12:50:05,300 judge_handler dev_judge: Grading has begun on: 62
+INFO 2025-09-06 12:50:07,929 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:10,430 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:12,932 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:15,433 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:17,935 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:20,437 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:22,939 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:25,440 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:27,942 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:30,443 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:32,945 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:35,446 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:37,948 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:40,450 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:42,951 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:45,453 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:47,954 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:50,456 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:52,957 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:55,427 judge_handler dev_judge: 1 test case(s) completed on: 62
+INFO 2025-09-06 12:50:55,434 judge_handler dev_judge: Grading has ended on: 62
+INFO 2025-09-06 12:50:55,434 judge_list Judge available after grading 62: dev_judge
+INFO 2025-09-06 12:51:05,321 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:51:05,328 judge_handler Judge disconnected from: ('103.124.95.24', 53086) with name dev_judge
+INFO 2025-09-06 12:51:11,612 judge_handler Judge connected from: ('103.124.95.24', 57376)
+INFO 2025-09-06 12:51:11,615 judge_handler Judge authenticated: ('103.124.95.24', 57376) (dev_judge)
+INFO 2025-09-06 12:51:11,615 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:51:22,354 judge_list Free judges: 1
+INFO 2025-09-06 12:51:22,354 judge_list Dispatched submission 63 to: dev_judge
+INFO 2025-09-06 12:51:22,368 judge_handler Submission acknowledged: 63
+INFO 2025-09-06 12:51:24,877 judge_handler dev_judge: Submission generated compiler messages: 63
+INFO 2025-09-06 12:51:24,880 judge_handler dev_judge: Grading has begun on: 63
+INFO 2025-09-06 12:51:27,377 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:29,878 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:32,629 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:34,880 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:37,632 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:39,883 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:42,386 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:44,886 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:47,387 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:49,889 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:52,391 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:54,892 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:57,394 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:51:59,895 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:02,397 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:04,648 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:07,150 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:09,651 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:12,403 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:14,796 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:52:14,803 judge_handler dev_judge: Grading has ended on: 63
+INFO 2025-09-06 12:52:14,803 judge_list Judge available after grading 63: dev_judge
+INFO 2025-09-06 12:53:23,630 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 12:53:23,637 judge_handler Judge disconnected from: ('103.124.95.24', 57376) with name dev_judge
+INFO 2025-09-06 12:53:29,490 judge_handler Judge connected from: ('103.124.95.24', 54708)
+INFO 2025-09-06 12:53:29,493 judge_handler Judge authenticated: ('103.124.95.24', 54708) (dev_judge)
+INFO 2025-09-06 12:53:29,493 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 12:53:35,008 judge_list Free judges: 1
+INFO 2025-09-06 12:53:35,008 judge_list Dispatched submission 63 to: dev_judge
+INFO 2025-09-06 12:53:35,018 judge_handler Submission acknowledged: 63
+INFO 2025-09-06 12:53:37,538 judge_handler dev_judge: Submission generated compiler messages: 63
+INFO 2025-09-06 12:53:37,542 judge_handler dev_judge: Grading has begun on: 63
+INFO 2025-09-06 12:53:40,252 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:42,504 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:45,005 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:47,507 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:50,009 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:52,510 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:55,012 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:53:57,513 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:00,015 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:02,516 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:05,018 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:07,519 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:10,021 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:12,523 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:15,024 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:17,776 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:20,277 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:22,779 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:25,281 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:27,749 judge_handler dev_judge: 1 test case(s) completed on: 63
+INFO 2025-09-06 12:54:27,755 judge_handler dev_judge: Grading has ended on: 63
+INFO 2025-09-06 12:54:27,755 judge_list Judge available after grading 63: dev_judge
+INFO 2025-09-06 13:02:48,717 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:02:48,725 judge_handler Judge disconnected from: ('103.124.95.24', 54708) with name dev_judge
+INFO 2025-09-06 13:03:08,910 judge_handler Judge connected from: ('103.124.95.24', 50940)
+INFO 2025-09-06 13:03:08,914 judge_handler Judge authenticated: ('103.124.95.24', 50940) (dev_judge)
+INFO 2025-09-06 13:03:08,914 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:03:35,083 judge_list Free judges: 1
+INFO 2025-09-06 13:03:35,083 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:03:35,095 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:03:37,553 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:03:37,556 judge_handler dev_judge: Grading has begun on: 64
+ERROR 2025-09-06 13:03:39,984 judge_handler Judge dev_judge failed while handling submission 64
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 53, in grade
+    self._launch_process(case, io_mode, input_file, output_file, input_file_io)
+TypeError: StandardGrader._launch_process() takes from 3 to 4 positional arguments but 6 were given
+
+INFO 2025-09-06 13:03:40,011 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:04:26,255 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:04:26,262 judge_handler Judge disconnected from: ('103.124.95.24', 50940) with name dev_judge
+INFO 2025-09-06 13:04:32,852 judge_handler Judge connected from: ('103.124.95.24', 42656)
+INFO 2025-09-06 13:04:32,855 judge_handler Judge authenticated: ('103.124.95.24', 42656) (dev_judge)
+INFO 2025-09-06 13:04:32,855 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:04:39,024 judge_list Free judges: 1
+INFO 2025-09-06 13:04:39,025 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:04:39,033 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:04:41,549 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:04:41,550 judge_handler dev_judge: Grading has begun on: 64
+ERROR 2025-09-06 13:04:44,042 judge_handler Judge dev_judge failed while handling submission 64
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 53, in grade
+    self._launch_process(case, io_mode, input_file_io)
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 128, in _launch_process
+    self._current_proc = self.binary.launch(
+                         ^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/base_executor.py", line 305, in launch
+    security=self.get_security(launch_kwargs=kwargs, extra_fs=kwargs.get('extra_fs')),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/base_executor.py", line 236, in get_security
+    read_fs += extra_fs
+TypeError: 'RecursiveDir' object is not iterable
+
+INFO 2025-09-06 13:04:44,064 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:05:21,662 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:05:21,669 judge_handler Judge disconnected from: ('103.124.95.24', 42656) with name dev_judge
+INFO 2025-09-06 13:08:22,737 judge_handler Judge connected from: ('103.124.95.24', 52462)
+INFO 2025-09-06 13:08:22,744 judge_handler Judge authenticated: ('103.124.95.24', 52462) (dev_judge)
+INFO 2025-09-06 13:08:22,745 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:08:28,890 judge_list Free judges: 1
+INFO 2025-09-06 13:08:28,890 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:08:28,896 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:08:31,411 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:08:31,414 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:08:34,004 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:36,505 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:39,007 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:41,508 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:44,010 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:46,261 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:49,013 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:51,264 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:53,766 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:56,268 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:08:58,769 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:01,270 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:03,772 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:06,273 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:08,774 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:11,276 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:13,777 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:16,279 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:18,781 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:21,173 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:09:21,179 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:09:21,179 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:11:13,249 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:11:13,259 judge_handler Judge disconnected from: ('103.124.95.24', 52462) with name dev_judge
+INFO 2025-09-06 13:11:19,034 judge_handler Judge connected from: ('103.124.95.24', 36610)
+INFO 2025-09-06 13:11:19,036 judge_handler Judge authenticated: ('103.124.95.24', 36610) (dev_judge)
+INFO 2025-09-06 13:11:19,037 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:11:25,309 judge_list Free judges: 1
+INFO 2025-09-06 13:11:25,309 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:11:25,316 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:11:27,847 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:11:27,850 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:11:30,547 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:33,049 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:35,300 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:37,801 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:40,303 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:42,805 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:45,306 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:47,808 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:50,059 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:52,561 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:55,062 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:11:57,564 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:00,065 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:02,567 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:05,069 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:07,571 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:10,072 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:12,573 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:15,325 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:17,616 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:12:17,621 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:12:17,621 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:17:17,250 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:17:17,254 judge_handler Judge disconnected from: ('103.124.95.24', 36610) with name dev_judge
+INFO 2025-09-06 13:17:25,561 judge_handler Judge connected from: ('103.124.95.24', 41252)
+INFO 2025-09-06 13:17:25,564 judge_handler Judge authenticated: ('103.124.95.24', 41252) (dev_judge)
+INFO 2025-09-06 13:17:25,565 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:17:30,890 judge_list Free judges: 1
+INFO 2025-09-06 13:17:30,890 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:17:30,897 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:17:33,453 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:17:33,455 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:17:36,074 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:38,575 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:41,076 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:43,578 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:45,829 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:48,330 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:50,832 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:53,333 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:55,835 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:17:58,336 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:00,838 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:03,090 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:05,591 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:08,343 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:10,594 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:13,096 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:15,847 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:18,349 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:21,100 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:23,430 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:18:23,435 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:18:23,435 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:22:31,370 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:22:31,379 judge_handler Judge disconnected from: ('103.124.95.24', 41252) with name dev_judge
+INFO 2025-09-06 13:22:37,073 judge_handler Judge connected from: ('103.124.95.24', 54062)
+INFO 2025-09-06 13:22:37,076 judge_handler Judge authenticated: ('103.124.95.24', 54062) (dev_judge)
+INFO 2025-09-06 13:22:37,077 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:22:43,031 judge_list Free judges: 1
+INFO 2025-09-06 13:22:43,031 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:22:43,037 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:22:45,488 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:22:45,490 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:22:48,086 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:22:50,588 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:22:53,089 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:22:55,591 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:22:58,092 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:00,594 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:03,095 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:05,597 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:08,098 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:10,600 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:13,101 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:15,603 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:18,104 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:20,856 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:23,357 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:26,359 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:28,861 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:31,363 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:33,864 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:36,139 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:23:36,142 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:23:36,142 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:25:58,666 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:25:58,675 judge_handler Judge disconnected from: ('103.124.95.24', 54062) with name dev_judge
+INFO 2025-09-06 13:26:07,213 judge_handler Judge connected from: ('103.124.95.24', 32888)
+INFO 2025-09-06 13:26:07,216 judge_handler Judge authenticated: ('103.124.95.24', 32888) (dev_judge)
+INFO 2025-09-06 13:26:07,216 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:26:14,727 judge_list Free judges: 1
+INFO 2025-09-06 13:26:14,728 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:26:14,738 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:26:17,244 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:26:17,248 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:26:19,982 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:22,483 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:24,735 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:27,236 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:29,740 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:32,242 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:34,744 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:37,245 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:39,996 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:42,498 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:45,500 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:48,001 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:50,503 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:53,005 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:55,506 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:26:58,007 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:00,509 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:03,010 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:05,512 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:07,970 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:07,975 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:27:07,975 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:27:21,624 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:27:21,632 judge_handler Judge disconnected from: ('103.124.95.24', 32888) with name dev_judge
+INFO 2025-09-06 13:27:27,676 judge_handler Judge connected from: ('103.124.95.24', 45584)
+INFO 2025-09-06 13:27:27,679 judge_handler Judge authenticated: ('103.124.95.24', 45584) (dev_judge)
+INFO 2025-09-06 13:27:27,679 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:27:34,141 judge_list Free judges: 1
+INFO 2025-09-06 13:27:34,142 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:27:34,148 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:27:36,632 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:27:36,634 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:27:39,189 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:41,691 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:44,193 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:46,694 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:49,196 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:51,698 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:54,199 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:56,701 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:27:58,952 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:01,453 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:04,205 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:06,957 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:09,208 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:11,960 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:14,461 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:16,963 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:19,464 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:21,966 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:24,467 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:26,923 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:28:26,927 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:28:26,927 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:31:11,180 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:31:11,188 judge_handler Judge disconnected from: ('103.124.95.24', 45584) with name dev_judge
+INFO 2025-09-06 13:31:16,994 judge_handler Judge connected from: ('103.124.95.24', 35308)
+INFO 2025-09-06 13:31:16,998 judge_handler Judge authenticated: ('103.124.95.24', 35308) (dev_judge)
+INFO 2025-09-06 13:31:16,999 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:31:22,849 judge_list Free judges: 1
+INFO 2025-09-06 13:31:22,849 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:31:22,858 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:31:25,409 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:31:25,412 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:31:28,009 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:30,510 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:33,012 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:35,513 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:38,015 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:40,516 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:43,018 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:45,519 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:48,020 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:50,522 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:52,773 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:55,274 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:31:57,776 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:00,277 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:02,779 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:05,281 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:07,782 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:10,534 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:13,035 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:15,414 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:32:15,419 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:32:15,419 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:34:41,329 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:34:41,337 judge_handler Judge disconnected from: ('103.124.95.24', 35308) with name dev_judge
+INFO 2025-09-06 13:34:47,225 judge_handler Judge connected from: ('103.124.95.24', 53924)
+INFO 2025-09-06 13:34:47,228 judge_handler Judge authenticated: ('103.124.95.24', 53924) (dev_judge)
+INFO 2025-09-06 13:34:47,228 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 13:34:48,110 judge_list Free judges: 1
+INFO 2025-09-06 13:34:48,110 judge_list Dispatched submission 64 to: dev_judge
+INFO 2025-09-06 13:34:48,123 judge_handler Submission acknowledged: 64
+INFO 2025-09-06 13:34:50,634 judge_handler dev_judge: Submission generated compiler messages: 64
+INFO 2025-09-06 13:34:50,637 judge_handler dev_judge: Grading has begun on: 64
+INFO 2025-09-06 13:34:53,235 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:34:55,737 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:34:58,238 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:00,739 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:03,491 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:05,994 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:08,745 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:11,497 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:14,248 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:16,750 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:20,002 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:22,753 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:25,755 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:28,506 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:31,257 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:33,759 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:36,510 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:39,262 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:41,764 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:44,362 judge_handler dev_judge: 1 test case(s) completed on: 64
+INFO 2025-09-06 13:35:44,369 judge_handler dev_judge: Grading has ended on: 64
+INFO 2025-09-06 13:35:44,369 judge_list Judge available after grading 64: dev_judge
+INFO 2025-09-06 13:36:18,853 judge_list Free judges: 1
+INFO 2025-09-06 13:36:18,854 judge_list Dispatched submission 65 to: dev_judge
+INFO 2025-09-06 13:36:18,860 judge_handler Submission acknowledged: 65
+INFO 2025-09-06 13:36:21,567 judge_handler dev_judge: Submission generated compiler messages: 65
+INFO 2025-09-06 13:36:21,571 judge_handler dev_judge: Grading has begun on: 65
+INFO 2025-09-06 13:36:24,537 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:27,289 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:29,790 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:32,291 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:35,293 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:38,044 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:40,546 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:43,297 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:45,799 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:48,550 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:51,302 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:54,304 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:56,808 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:36:59,556 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:01,807 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:04,559 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:07,061 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:09,562 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:12,313 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:14,785 judge_handler dev_judge: 1 test case(s) completed on: 65
+INFO 2025-09-06 13:37:14,790 judge_handler dev_judge: Grading has ended on: 65
+INFO 2025-09-06 13:37:14,790 judge_list Judge available after grading 65: dev_judge
+INFO 2025-09-06 13:37:43,969 judge_list Free judges: 1
+INFO 2025-09-06 13:37:43,969 judge_list Dispatched submission 66 to: dev_judge
+INFO 2025-09-06 13:37:43,975 judge_handler Submission acknowledged: 66
+INFO 2025-09-06 13:37:46,661 judge_handler dev_judge: Submission generated compiler messages: 66
+INFO 2025-09-06 13:37:46,664 judge_handler dev_judge: Grading has begun on: 66
+INFO 2025-09-06 13:37:49,332 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:37:52,084 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:37:54,836 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:37:57,587 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:00,090 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:02,841 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:05,343 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:08,095 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:10,847 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:13,348 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:16,100 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:18,601 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:21,103 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:23,854 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:26,356 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:28,857 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:31,609 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:34,111 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:36,613 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:39,226 judge_handler dev_judge: 1 test case(s) completed on: 66
+INFO 2025-09-06 13:38:39,231 judge_handler dev_judge: Grading has ended on: 66
+INFO 2025-09-06 13:38:39,231 judge_list Judge available after grading 66: dev_judge
+INFO 2025-09-06 13:45:59,438 judge_list Free judges: 1
+INFO 2025-09-06 13:45:59,439 judge_list Dispatched submission 67 to: dev_judge
+INFO 2025-09-06 13:45:59,452 judge_handler Submission acknowledged: 67
+INFO 2025-09-06 13:46:02,079 judge_handler dev_judge: Submission generated compiler messages: 67
+INFO 2025-09-06 13:46:02,082 judge_handler dev_judge: Grading has begun on: 67
+INFO 2025-09-06 13:46:04,851 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:07,352 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:09,854 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:12,605 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:15,107 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:17,859 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:20,363 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:22,864 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:25,615 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:28,117 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:30,869 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:33,621 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:36,123 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:38,874 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:41,625 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:44,377 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:47,129 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:49,881 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:52,383 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:54,932 judge_handler dev_judge: 1 test case(s) completed on: 67
+INFO 2025-09-06 13:46:54,941 judge_handler dev_judge: Grading has ended on: 67
+INFO 2025-09-06 13:46:54,941 judge_list Judge available after grading 67: dev_judge
+INFO 2025-09-06 13:49:39,834 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 13:49:39,843 judge_handler Judge disconnected from: ('103.124.95.24', 53924) with name dev_judge
+INFO 2025-09-06 14:17:30,142 judge_handler Judge connected from: ('103.124.95.24', 38798)
+INFO 2025-09-06 14:17:30,147 judge_handler Judge authenticated: ('103.124.95.24', 38798) (dev_judge)
+INFO 2025-09-06 14:17:30,147 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 14:18:07,762 judge_handler dev_judge: Updated problem list
+INFO 2025-09-06 14:18:07,770 judge_handler dev_judge: Updated problem list
+INFO 2025-09-06 14:18:34,417 judge_list Free judges: 1
+INFO 2025-09-06 14:18:34,417 judge_list Dispatched submission 68 to: dev_judge
+INFO 2025-09-06 14:18:34,426 judge_handler Submission acknowledged: 68
+INFO 2025-09-06 14:18:36,979 judge_handler dev_judge: Submission generated compiler messages: 68
+INFO 2025-09-06 14:18:36,983 judge_handler dev_judge: Grading has begun on: 68
+INFO 2025-09-06 14:18:39,686 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:42,438 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:44,940 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:47,692 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:50,193 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:52,945 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:55,947 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:18:58,448 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:01,200 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:03,701 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:06,452 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:09,204 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:12,206 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:14,957 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:17,459 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:19,960 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:22,462 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:25,213 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:27,715 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:30,341 judge_handler dev_judge: 1 test case(s) completed on: 68
+INFO 2025-09-06 14:19:30,348 judge_handler dev_judge: Grading has ended on: 68
+INFO 2025-09-06 14:19:30,348 judge_list Judge available after grading 68: dev_judge
+INFO 2025-09-06 14:19:35,459 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 14:19:35,467 judge_handler Judge disconnected from: ('103.124.95.24', 38798) with name dev_judge
+INFO 2025-09-06 14:35:15,411 judge_handler Judge connected from: ('103.124.95.24', 46786)
+INFO 2025-09-06 14:35:15,415 judge_handler Judge authenticated: ('103.124.95.24', 46786) (dev_judge)
+INFO 2025-09-06 14:35:15,415 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 14:35:21,752 judge_list Free judges: 1
+INFO 2025-09-06 14:35:21,752 judge_list Dispatched submission 69 to: dev_judge
+INFO 2025-09-06 14:35:21,761 judge_handler Submission acknowledged: 69
+INFO 2025-09-06 14:35:24,473 judge_handler dev_judge: Submission generated compiler messages: 69
+INFO 2025-09-06 14:35:24,475 judge_handler dev_judge: Grading has begun on: 69
+INFO 2025-09-06 14:35:27,174 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:29,926 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:32,427 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:35,179 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:37,930 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:40,683 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:43,184 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:45,936 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:48,688 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:51,189 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:53,941 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:56,442 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:35:59,194 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:01,946 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:04,697 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:07,449 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:10,200 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:12,701 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:15,453 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:18,236 judge_handler dev_judge: 1 test case(s) completed on: 69
+INFO 2025-09-06 14:36:18,240 judge_handler dev_judge: Grading has ended on: 69
+INFO 2025-09-06 14:36:18,240 judge_list Judge available after grading 69: dev_judge
+INFO 2025-09-06 14:40:12,140 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 14:40:12,145 judge_handler Judge disconnected from: ('103.124.95.24', 46786) with name dev_judge
+INFO 2025-09-06 14:53:43,911 judge_handler Judge connected from: ('103.124.95.24', 40018)
+INFO 2025-09-06 14:53:43,925 judge_handler Judge authenticated: ('103.124.95.24', 40018) (dev_judge)
+INFO 2025-09-06 14:53:43,925 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 14:53:48,788 judge_list Free judges: 1
+INFO 2025-09-06 14:53:48,789 judge_list Dispatched submission 70 to: dev_judge
+INFO 2025-09-06 14:53:48,796 judge_handler Submission acknowledged: 70
+INFO 2025-09-06 14:53:51,522 judge_handler dev_judge: Submission generated compiler messages: 70
+INFO 2025-09-06 14:53:51,525 judge_handler dev_judge: Grading has begun on: 70
+INFO 2025-09-06 14:53:54,184 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:53:56,936 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:53:59,437 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:02,439 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:04,940 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:08,192 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:10,944 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:13,695 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:16,197 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:18,948 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:21,449 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:24,201 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:26,703 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:29,205 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:31,706 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:34,458 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:37,211 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:39,713 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:42,465 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:45,096 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 14:54:45,102 judge_handler dev_judge: Grading has ended on: 70
+INFO 2025-09-06 14:54:45,102 judge_list Judge available after grading 70: dev_judge
+INFO 2025-09-06 14:59:51,683 judge_handler dev_judge: Updated problem list
+INFO 2025-09-06 15:00:02,587 judge_list Free judges: 1
+INFO 2025-09-06 15:00:02,587 judge_list Dispatched submission 70 to: dev_judge
+INFO 2025-09-06 15:00:02,601 judge_handler Submission acknowledged: 70
+INFO 2025-09-06 15:00:05,234 judge_handler dev_judge: Submission generated compiler messages: 70
+INFO 2025-09-06 15:00:05,236 judge_handler dev_judge: Grading has begun on: 70
+INFO 2025-09-06 15:00:08,137 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:10,889 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:13,640 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:16,142 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:19,144 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:21,902 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:24,654 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:27,405 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:30,157 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:33,158 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:35,660 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:38,662 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:41,413 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:43,915 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:46,417 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:00:49,169 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:04:06,588 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:04:06,598 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:04:06,603 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:04:06,611 judge_handler dev_judge: 1 test case(s) completed on: 70
+INFO 2025-09-06 15:04:06,626 judge_handler dev_judge: Grading has ended on: 70
+INFO 2025-09-06 15:04:06,626 judge_list Judge available after grading 70: dev_judge
+INFO 2025-09-06 15:04:44,215 judge_list Free judges: 1
+INFO 2025-09-06 15:04:44,216 judge_list Dispatched submission 71 to: dev_judge
+INFO 2025-09-06 15:04:44,223 judge_handler Submission acknowledged: 71
+INFO 2025-09-06 15:04:47,270 judge_handler dev_judge: Submission generated compiler messages: 71
+INFO 2025-09-06 15:04:47,272 judge_handler dev_judge: Grading has begun on: 71
+INFO 2025-09-06 15:04:50,295 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:04:53,047 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:04:55,548 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:04:58,299 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:01,051 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:03,803 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:06,304 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:09,306 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:12,057 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:14,559 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:17,310 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:19,812 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:22,563 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:25,565 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:28,067 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:30,818 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:33,820 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:36,821 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:39,823 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:42,617 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:05:42,622 judge_handler dev_judge: Grading has ended on: 71
+INFO 2025-09-06 15:05:42,622 judge_list Judge available after grading 71: dev_judge
+INFO 2025-09-06 15:05:54,032 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 15:05:54,043 judge_handler Judge disconnected from: ('103.124.95.24', 40018) with name dev_judge
+INFO 2025-09-06 15:22:06,424 judge_handler Judge connected from: ('103.124.95.24', 52600)
+INFO 2025-09-06 15:22:06,427 judge_handler Judge authenticated: ('103.124.95.24', 52600) (dev_judge)
+INFO 2025-09-06 15:22:06,427 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 15:22:13,833 judge_list Free judges: 1
+INFO 2025-09-06 15:22:13,833 judge_list Dispatched submission 71 to: dev_judge
+INFO 2025-09-06 15:22:13,841 judge_handler Submission acknowledged: 71
+INFO 2025-09-06 15:22:16,729 judge_handler dev_judge: Submission generated compiler messages: 71
+INFO 2025-09-06 15:22:16,732 judge_handler dev_judge: Grading has begun on: 71
+INFO 2025-09-06 15:22:19,438 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:22,190 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:24,941 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:27,443 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:30,195 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:32,696 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:35,197 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:37,699 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:40,450 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:42,952 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:45,453 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:48,205 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:50,707 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:53,208 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:55,710 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:22:58,462 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:23:00,963 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:23:03,714 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:23:06,216 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:23:08,614 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:23:08,618 judge_handler dev_judge: Grading has ended on: 71
+INFO 2025-09-06 15:23:08,619 judge_list Judge available after grading 71: dev_judge
+INFO 2025-09-06 15:27:45,072 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 15:27:45,077 judge_handler Judge disconnected from: ('103.124.95.24', 52600) with name dev_judge
+INFO 2025-09-06 15:28:26,064 judge_handler Judge connected from: ('103.124.95.24', 52834)
+INFO 2025-09-06 15:28:26,067 judge_handler Judge authenticated: ('103.124.95.24', 52834) (dev_judge)
+INFO 2025-09-06 15:28:26,067 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 15:30:41,154 judge_list Free judges: 1
+INFO 2025-09-06 15:30:41,155 judge_list Dispatched submission 71 to: dev_judge
+INFO 2025-09-06 15:30:41,165 judge_handler Submission acknowledged: 71
+INFO 2025-09-06 15:30:43,780 judge_handler dev_judge: Submission generated compiler messages: 71
+INFO 2025-09-06 15:30:43,782 judge_handler dev_judge: Grading has begun on: 71
+INFO 2025-09-06 15:30:46,392 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:30:49,144 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:30:51,645 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:30:54,396 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:30:57,148 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:30:59,899 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:02,401 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:04,902 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:07,653 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:10,155 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:12,656 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:15,157 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:17,908 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:20,660 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:23,161 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:25,663 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:28,414 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:30,915 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:33,667 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:36,228 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 15:31:36,232 judge_handler dev_judge: Grading has ended on: 71
+INFO 2025-09-06 15:31:36,232 judge_list Judge available after grading 71: dev_judge
+INFO 2025-09-06 15:44:13,059 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 15:44:13,064 judge_handler Judge disconnected from: ('103.124.95.24', 52834) with name dev_judge
+INFO 2025-09-06 16:12:47,576 judge_handler Judge connected from: ('103.124.95.24', 36460)
+INFO 2025-09-06 16:12:47,580 judge_handler Judge authenticated: ('103.124.95.24', 36460) (dev_judge)
+INFO 2025-09-06 16:12:47,580 judge_list Minimum tier changed from None to 1
+INFO 2025-09-06 16:12:52,808 judge_list Free judges: 1
+INFO 2025-09-06 16:12:52,808 judge_list Dispatched submission 71 to: dev_judge
+INFO 2025-09-06 16:12:52,819 judge_handler Submission acknowledged: 71
+INFO 2025-09-06 16:12:55,518 judge_handler dev_judge: Submission generated compiler messages: 71
+INFO 2025-09-06 16:12:55,521 judge_handler dev_judge: Grading has begun on: 71
+INFO 2025-09-06 16:12:58,340 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:01,091 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:03,593 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:06,344 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:09,096 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:11,597 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:14,099 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:16,850 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:19,852 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:22,354 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:25,105 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:27,606 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:30,358 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-06 16:13:33,109 judge_handler dev_judge: 1 test case(s) completed on: 71
+ERROR 2025-09-06 16:13:33,297 judge_handler Judge dev_judge failed while handling submission 71
+Traceback (most recent call last):
+  File "/home/kien/site_dev/judge/bridge/judge_handler.py", line 462, in on_internal_error
+    raise ValueError('\n\n' + packet['message'])
+ValueError: 
+
+Traceback (most recent call last):
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 415, in _worker_process_main
+    ipc_msg = next(case_gen)
+              ^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/judge.py", line 506, in _grade_cases
+    result = self.grader.grade(case)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 31, in grade
+    self.binary = self._generate_binary()
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/graders/standard.py", line 182, in _generate_binary
+    binary = executors[self.language].Executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 66, in __call__
+    obj.compile()
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 228, in compile
+    self.warning = self.get_compile_output(process)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/executors/compiled_executor.py", line 201, in get_compile_output
+    output = safe_communicate(process, None, outlimit=limit, errlimit=limit)[self.compile_output_index]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kien/site_dev/dmojsite/lib/python3.12/site-packages/dmoj/utils/communicate.py", line 61, in safe_communicate
+    ready = poller.poll()
+            ^^^^^^^^^^^^^
+KeyboardInterrupt
+
+INFO 2025-09-06 16:13:33,318 judge_list Judge available after grading 71: dev_judge
+INFO 2025-09-06 16:13:36,506 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-06 16:13:36,515 judge_handler Judge disconnected from: ('103.124.95.24', 36460) with name dev_judge
+INFO 2025-09-07 12:50:13,379 judge_handler Judge connected from: ('103.124.95.24', 52012)
+INFO 2025-09-07 12:50:13,383 judge_handler Judge authenticated: ('103.124.95.24', 52012) (dev_judge)
+INFO 2025-09-07 12:50:13,383 judge_list Minimum tier changed from None to 1
+INFO 2025-09-07 12:50:29,450 judge_list Free judges: 1
+INFO 2025-09-07 12:50:29,451 judge_list Dispatched submission 71 to: dev_judge
+INFO 2025-09-07 12:50:29,464 judge_handler Submission acknowledged: 71
+INFO 2025-09-07 12:50:31,946 judge_handler dev_judge: Submission generated compiler messages: 71
+INFO 2025-09-07 12:50:31,948 judge_handler dev_judge: Grading has begun on: 71
+INFO 2025-09-07 12:50:34,647 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:36,898 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:39,400 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:41,901 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:44,403 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:46,904 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:49,406 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:51,907 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:54,409 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:56,910 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:50:59,412 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:01,914 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:04,415 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:06,917 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:09,419 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:11,670 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:14,171 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:16,673 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:19,175 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:21,607 judge_handler dev_judge: 1 test case(s) completed on: 71
+INFO 2025-09-07 12:51:21,611 judge_handler dev_judge: Grading has ended on: 71
+INFO 2025-09-07 12:51:21,611 judge_list Judge available after grading 71: dev_judge
+INFO 2025-09-07 12:57:50,201 judge_list Minimum tier changed from 1 to None
+INFO 2025-09-07 12:57:50,209 judge_handler Judge disconnected from: ('103.124.95.24', 52012) with name dev_judge

@@ -210,6 +210,41 @@
         <i class="fa fa-server fa-fw"></i><span class="pi-name">{{ _('Memory limit:') }}</span>
         <span class="pi-value">{{ problem.memory_limit|kbsimpleformat }}</span>
     </div>
+    {% if problem.data_files %}
+        <div class="problem-info-entry">
+            <i class="fa fa-keyboard-o fa-fw"></i><span class="pi-name">{{ _('Input:') }}</span>
+            <span class="pi-value">
+                {% if problem.data_files.io_mode == 'std' %}
+                    stdin
+                {% elif problem.data_files.io_mode == 'file' %}
+                    {% if problem.data_files.input_filename %}
+                        {{ problem.data_files.input_filename }}
+                    {% else %}
+                        {{ _('N/A') }}
+                    {% endif %}
+                {% else %}
+                    {{ _('N/A') }}
+                {% endif %}
+            </span>
+        </div>
+    
+        <div class="problem-info-entry">
+            <i class="fa fa-print fa-fw"></i><span class="pi-name">{{ _('Output:') }}</span>
+            <span class="pi-value">
+                {% if problem.data_files.io_mode == 'std' %}
+                    stdout
+                {% elif problem.data_files.io_mode == 'file' %}
+                    {% if problem.data_files.output_filename %}
+                        {{ problem.data_files.output_filename }}
+                    {% else %}
+                        {{ _('N/A') }}
+                    {% endif %}
+                {% else %}
+                    {{ _('N/A') }}
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
     <div class="problem-lang-limits">
         {% for name, limit in problem.language_memory_limit %}
             <div class="lang-limit">
@@ -218,6 +253,7 @@
             </div>
         {% endfor %}
     </div>
+    
 
     <hr style="padding-top: 0.7em">
 

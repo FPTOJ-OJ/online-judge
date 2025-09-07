@@ -30,8 +30,14 @@ CHECKERS = (
     ('linecount', _('Line-by-line')),
 )
 
+IO_MODES = (
+        ('std', _('Standard IO')),
+        ('file', _('File IO')),
+)
 
 class ProblemData(models.Model):
+    
+
     problem = models.OneToOneField('Problem', verbose_name=_('problem'), related_name='data_files',
                                    on_delete=models.CASCADE)
     zipfile = models.FileField(verbose_name=_('data zip file'), storage=problem_data_storage, null=True, blank=True,
@@ -46,6 +52,17 @@ class ProblemData(models.Model):
     nobigmath = models.BooleanField(verbose_name=_('disable bigInteger / bigDecimal'), null=True, blank=True)
     checker_args = models.TextField(verbose_name=_('checker arguments'), blank=True,
                                     help_text=_('Checker arguments as a JSON object.'))
+    
+    io_mode = models.CharField(
+        max_length=10,
+        choices=IO_MODES,
+        default='std',
+        verbose_name=_('I/O mode')
+    )
+    input_filename = models.CharField(max_length=100, blank=True, null=True,
+                                      verbose_name=_('custom input filename'))
+    output_filename = models.CharField(max_length=100, blank=True, null=True,
+                                       verbose_name=_('custom output filename'))
 
     __original_zipfile = None
 
