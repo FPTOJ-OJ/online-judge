@@ -1613,3 +1613,136 @@ INFO 2025-09-09 04:48:41,242 judge_handler Judge authenticated: ('172.17.0.2', 4
 INFO 2025-09-09 05:10:21,575 judge_handler Judge connected from: ('176.65.148.2', 3384)
 INFO 2025-09-09 05:10:21,576 base_handler Disconnecting client due to too-large message size (1129270862 bytes): ('176.65.148.2', 3384)
 INFO 2025-09-09 05:10:21,576 judge_handler Judge disconnected from: ('176.65.148.2', 3384) with name None
+INFO 2025-09-09 06:29:01,016 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,017 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:01,018 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,037 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,038 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,042 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:01,046 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,049 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,051 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:01,241 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,244 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:01,245 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,257 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,258 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:01,258 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,266 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 06:29:01,267 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 06:29:01,268 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 06:29:20,946 judge_handler Judge disconnected from: ('172.17.0.4', 57030) with name MAY_CHAM1_V2
+INFO 2025-09-09 06:29:36,130 judge_handler Judge connected from: ('172.17.0.4', 39978)
+INFO 2025-09-09 06:29:36,134 judge_handler Judge authenticated: ('172.17.0.4', 39978) (MAY_CHAM1_V2)
+INFO 2025-09-09 07:20:18,916 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 07:20:18,919 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 07:20:18,920 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 07:20:18,924 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 07:20:18,934 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 07:20:18,942 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 07:20:18,942 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 07:20:19,141 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 07:20:19,142 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 07:20:19,145 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 07:20:19,154 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 07:20:19,155 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 07:20:19,158 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 07:20:19,167 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 08:08:13,856 judge_handler Judge disconnected from: ('172.17.0.4', 39978) with name MAY_CHAM1_V2
+INFO 2025-09-09 08:09:00,051 judge_handler Judge connected from: ('172.17.0.4', 47344)
+INFO 2025-09-09 08:09:00,054 judge_handler Judge authenticated: ('172.17.0.4', 47344) (MAY_CHAM1_V2)
+INFO 2025-09-09 09:24:48,589 judge_handler Judge connected from: ('167.94.145.111', 40232)
+INFO 2025-09-09 09:24:48,624 base_handler Potentially wrong protocol (zlib error): ('167.94.145.111', 40232): b'\x00\x00\x00\x1d'
+Traceback (most recent call last):
+  File "/home/kien/site/judge/bridge/base_handler.py", line 169, in handle
+    self.read_sized_packet(tag)
+  File "/home/kien/site/judge/bridge/base_handler.py", line 89, in read_sized_packet
+    self._on_packet(b''.join(buffer))
+  File "/home/kien/site/judge/bridge/base_handler.py", line 128, in _on_packet
+    decompressed = zlib.decompress(data).decode('utf-8')
+                   ^^^^^^^^^^^^^^^^^^^^^
+zlib.error: Error -3 while decompressing data: incorrect header check
+INFO 2025-09-09 09:24:48,625 judge_handler Judge disconnected from: ('167.94.145.111', 40232) with name None
+INFO 2025-09-09 09:24:52,340 judge_handler Judge connected from: ('167.94.145.111', 40234)
+ERROR 2025-09-09 09:24:55,451 base_handler Error in base packet handling
+Traceback (most recent call last):
+  File "/home/kien/site/judge/bridge/base_handler.py", line 44, in __call__
+    handler.handle()
+  File "/home/kien/site/judge/bridge/base_handler.py", line 149, in handle
+    tag = self.read_size()
+          ^^^^^^^^^^^^^^^^
+  File "/home/kien/site/judge/bridge/base_handler.py", line 110, in read_size
+    recv = self.request.recv(size_pack.size - len(buffer))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer
+INFO 2025-09-09 09:24:55,704 judge_handler Judge connected from: ('167.94.145.111', 45168)
+INFO 2025-09-09 09:24:55,704 base_handler Disconnecting client due to too-large message size (369295616 bytes): ('167.94.145.111', 45168)
+INFO 2025-09-09 09:24:55,705 judge_handler Judge disconnected from: ('167.94.145.111', 45168) with name None
+INFO 2025-09-09 09:24:56,224 judge_handler Judge connected from: ('167.94.145.111', 45178)
+INFO 2025-09-09 09:25:00,060 base_handler Disconnecting client due to too-large message size (1195725856 bytes): ('167.94.145.111', 45178)
+INFO 2025-09-09 09:25:00,060 judge_handler Judge disconnected from: ('167.94.145.111', 45178) with name None
+INFO 2025-09-09 09:25:00,375 judge_handler Judge disconnected from: ('167.94.145.111', 40234) with name None
+INFO 2025-09-09 09:25:00,687 judge_handler Judge connected from: ('167.94.145.111', 45218)
+ERROR 2025-09-09 09:25:00,855 base_handler Error in base packet handling
+Traceback (most recent call last):
+  File "/home/kien/site/judge/bridge/base_handler.py", line 44, in __call__
+    handler.handle()
+  File "/home/kien/site/judge/bridge/base_handler.py", line 149, in handle
+    tag = self.read_size()
+          ^^^^^^^^^^^^^^^^
+  File "/home/kien/site/judge/bridge/base_handler.py", line 110, in read_size
+    recv = self.request.recv(size_pack.size - len(buffer))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer
+INFO 2025-09-09 09:25:04,183 judge_handler Judge connected from: ('167.94.145.111', 42908)
+INFO 2025-09-09 09:25:04,185 base_handler Potentially wrong protocol (zlib error): ('167.94.145.111', 42908): b'\x00\x00\x00j'
+Traceback (most recent call last):
+  File "/home/kien/site/judge/bridge/base_handler.py", line 169, in handle
+    self.read_sized_packet(tag)
+  File "/home/kien/site/judge/bridge/base_handler.py", line 89, in read_sized_packet
+    self._on_packet(b''.join(buffer))
+  File "/home/kien/site/judge/bridge/base_handler.py", line 128, in _on_packet
+    decompressed = zlib.decompress(data).decode('utf-8')
+                   ^^^^^^^^^^^^^^^^^^^^^
+zlib.error: Error -3 while decompressing data: incorrect header check
+INFO 2025-09-09 09:25:04,185 judge_handler Judge disconnected from: ('167.94.145.111', 42908) with name None
+INFO 2025-09-09 09:25:04,520 judge_handler Judge disconnected from: ('167.94.145.111', 45218) with name None
+INFO 2025-09-09 09:25:04,745 judge_handler Judge connected from: ('167.94.145.111', 42926)
+INFO 2025-09-09 09:25:04,780 base_handler Potentially wrong protocol (zlib error): ('167.94.145.111', 42926): b'\x00\x00\x00/'
+Traceback (most recent call last):
+  File "/home/kien/site/judge/bridge/base_handler.py", line 169, in handle
+    self.read_sized_packet(tag)
+  File "/home/kien/site/judge/bridge/base_handler.py", line 89, in read_sized_packet
+    self._on_packet(b''.join(buffer))
+  File "/home/kien/site/judge/bridge/base_handler.py", line 128, in _on_packet
+    decompressed = zlib.decompress(data).decode('utf-8')
+                   ^^^^^^^^^^^^^^^^^^^^^
+zlib.error: Error -3 while decompressing data: incorrect header check
+INFO 2025-09-09 09:25:04,781 judge_handler Judge disconnected from: ('167.94.145.111', 42926) with name None
+INFO 2025-09-09 09:45:57,191 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 09:45:57,194 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 09:45:57,199 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 09:45:57,215 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 09:45:57,217 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 09:45:57,219 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 09:45:57,232 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 09:45:57,355 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 09:45:57,355 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 09:45:57,358 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 09:45:57,372 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 09:45:57,377 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 09:45:57,380 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 09:45:57,381 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 09:45:57,396 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 09:46:04,439 judge_handler Judge disconnected from: ('172.17.0.4', 47344) with name MAY_CHAM1_V2
+INFO 2025-09-09 09:46:55,872 judge_handler Judge connected from: ('172.17.0.4', 45794)
+INFO 2025-09-09 09:46:55,876 judge_handler Judge authenticated: ('172.17.0.4', 45794) (MAY_CHAM1_V2)
+INFO 2025-09-09 09:49:37,218 judge_handler Judge disconnected from: ('172.17.0.2', 41092) with name MAY_CHAM_DU_PHONG
+INFO 2025-09-09 09:49:46,981 judge_handler Judge disconnected from: ('172.17.0.3', 38512) with name MAY_CHAM_TOC_DO_CAO
+INFO 2025-09-09 09:50:32,651 judge_handler Judge connected from: ('172.17.0.2', 53626)
+INFO 2025-09-09 09:50:32,654 judge_handler Judge authenticated: ('172.17.0.2', 53626) (MAY_CHAM_DU_PHONG)
+INFO 2025-09-09 09:50:41,644 judge_handler Judge connected from: ('172.17.0.3', 48842)
+INFO 2025-09-09 09:50:41,648 judge_handler Judge authenticated: ('172.17.0.3', 48842) (MAY_CHAM_TOC_DO_CAO)
+INFO 2025-09-09 09:59:19,477 judge_handler Judge disconnected from: ('172.17.0.4', 45794) with name MAY_CHAM1_V2
+INFO 2025-09-09 10:00:12,401 judge_handler Judge connected from: ('172.17.0.4', 42130)
+INFO 2025-09-09 10:00:12,405 judge_handler Judge authenticated: ('172.17.0.4', 42130) (MAY_CHAM1_V2)
