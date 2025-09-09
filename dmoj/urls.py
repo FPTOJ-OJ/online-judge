@@ -20,6 +20,7 @@ from judge.views.register import ActivationView, RegistrationView
 from judge.views.select2 import AssigneeSelect2View, ClassSelect2View, CommentSelect2View, ContestSelect2View, \
     ContestUserSearchSelect2View, OrganizationSelect2View, ProblemSelect2View, TicketUserSelect2View, \
     UserSearchSelect2View, UserSelect2View
+from judge.views.problem_data import add_single_test_case
 from judge.views.widgets import martor_image_uploader
 from martor.views import markdown_search_user
 
@@ -92,6 +93,7 @@ def paged_list_view(view, name):
 
 
 urlpatterns = [
+    path('problem/<str:problem>/data/add_test_case/', add_single_test_case, name='add_single_test_case'),
     path('', blog.PostList.as_view(template_name='home.html', title=_('Home')), kwargs={'page': 1}, name='home'),
     path('500/', exception),
     path('admin/', admin.site.urls),

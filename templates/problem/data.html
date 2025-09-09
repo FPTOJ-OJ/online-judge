@@ -470,19 +470,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 document.getElementById("auto-fill").addEventListener("click", async function () {
-    const link = this; // Lưu tham chiếu đến thẻ a
-    const originalText = link.textContent; // Lưu text gốc
-    link.textContent = "Đang autofill testcase..."; // Thay đổi text khi đang chạy
+    const link = this;
+    const originalText = link.textContent;
+    link.textContent = "Đang autofill testcase...";
 
     try {
-        // Lấy CSRF token từ form
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
         if (!csrfToken) {
             console.error("Không tìm thấy CSRF token");
             return;
         }
 
-        // Lấy danh sách file từ window.valid_files
         const validFiles = window.valid_files || [];
         if (!validFiles.length) {
             console.error("Không tìm thấy danh sách file hợp lệ trong window.valid_files");
@@ -511,7 +509,7 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
         const testCases = [];
         for (const input of inputFiles) {
             const output = outputFiles.find(out => out.index === input.index);
-            if (output) testCases.push({ input: input.file, output: output.file, index: input.index });
+            if (output) testCases.push({ index: input.index, input_file: input.file, output_file: output.file });
             else console.warn(`Không tìm thấy file output tương ứng cho ${input.file}`);
         }
 
@@ -522,68 +520,34 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
 
         console.log(`Tìm thấy ${testCases.length} test case:`, testCases);
 
-        const formData = new FormData();
-        formData.append("csrfmiddlewaretoken", csrfToken);
-        formData.append("cases-TOTAL_FORMS", testCases.length);
-        formData.append("cases-INITIAL_FORMS", 0);
-        formData.append("cases-MAX_NUM_FORMS", 1000);
+        const payload = {
+            total_testcase: testCases.length,
+            testcases: testCases
+        };
 
-        testCases.forEach((testCase, index) => {
-            formData.append(`cases-${index}-type`, "C");
-            formData.append(`cases-${index}-order`, index + 1);
-            formData.append(`cases-${index}-input_file`, testCase.input);
-            formData.append(`cases-${index}-output_file`, testCase.output);
-            formData.append(`cases-${index}-points`, 1);
-        });
-
-        const response = await fetch(window.location.href, {
+        const response = await fetch("{{ add_test_case_url }}", {
             method: "POST",
-            body: formData,
-            headers: { "X-CSRFToken": csrfToken }
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            }
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Lỗi khi gửi POST request:", response.status, errorText);
-            alert("Lỗi khi gửi dữ liệu. Vui lòng kiểm tra console để biết chi tiết.");
+            const error = await response.json();
+            console.error("Lỗi khi gửi POST request:", error);
+            alert(`Đã xảy ra lỗi: ${error.error || 'Vui lòng kiểm tra console.'}`);
             return;
         }
 
-        const responseText = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(responseText, "text/html");
-        const newTable = doc.querySelector("#case-table");
-
-        if (newTable) {
-            document.querySelector("#case-table").outerHTML = newTable.outerHTML;
-            console.log("Đã cập nhật #case-table với dữ liệu mới");
-
-            $("#case-table").find("select").each(function () {
-                if (!$(this).hasClass("select2-hidden-accessible")) {
-                    $(this).select2({
-                        theme: "{{ DMOJ_SELECT2_THEME }}",
-                        data: window.valid_files,
-                        allowClear: true,
-                        placeholder: ""
-                    });
-                }
-            });
-
-            $("#case-table").find("tbody:first tr").each(function () {
-                $("#case-table").trigger("add-row", [$(this)]);
-            });
-
-            alert("Đã khởi tạo xong!");
-        } else {
-            console.error("Không tìm thấy #case-table trong phản hồi");
-            alert("Cập nhật giao diện thất bại. Vui lòng kiểm tra console.");
-        }
+        // Redirect to problem data page
+        window.location.href = "{{ problem_data_url }}";
 
     } catch (e) {
         console.error("Lỗi trong quá trình auto-fill:", e.message);
         alert("Đã xảy ra lỗi. Vui lòng kiểm tra console để biết chi tiết.");
     } finally {
-        // Quay lại text gốc
         link.textContent = originalText;
     }
 });

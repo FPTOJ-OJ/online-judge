@@ -1746,3 +1746,73 @@ INFO 2025-09-09 09:50:41,648 judge_handler Judge authenticated: ('172.17.0.3', 4
 INFO 2025-09-09 09:59:19,477 judge_handler Judge disconnected from: ('172.17.0.4', 45794) with name MAY_CHAM1_V2
 INFO 2025-09-09 10:00:12,401 judge_handler Judge connected from: ('172.17.0.4', 42130)
 INFO 2025-09-09 10:00:12,405 judge_handler Judge authenticated: ('172.17.0.4', 42130) (MAY_CHAM1_V2)
+INFO 2025-09-09 10:12:43,791 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 10:12:43,792 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 10:12:43,792 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 10:12:43,810 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 10:12:43,812 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 10:13:00,914 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 10:13:00,915 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 10:13:00,916 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 10:13:00,941 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:04:29,611 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:04:29,612 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:04:29,612 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:04:29,625 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:04:29,630 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:04:42,188 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:04:42,190 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:04:42,191 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:04:42,199 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:04:42,200 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:04:42,207 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:05:40,605 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:05:40,608 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:05:40,611 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:05:40,627 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:05:40,629 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:05:40,630 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:06:49,464 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:06:49,466 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:06:49,469 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:06:49,486 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:07:29,641 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:07:29,642 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:07:29,643 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:07:29,654 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:08:17,635 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:08:17,635 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:08:17,635 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:08:17,649 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:08:17,651 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:11:24,760 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:11:24,763 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:11:24,764 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:11:24,782 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:11:24,790 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:11:24,790 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:12:58,896 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:12:58,897 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:12:58,902 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:12:58,919 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:12:58,921 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:14:12,026 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:14:12,027 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:14:12,030 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:14:12,044 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:32:59,157 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:32:59,158 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:32:59,160 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:32:59,171 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:33:09,425 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:33:09,425 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:33:09,426 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:33:09,440 judge_handler MAY_CHAM_TOC_DO_CAO: Updated problem list
+INFO 2025-09-09 11:33:09,441 judge_handler MAY_CHAM1_V2: Updated problem list
+INFO 2025-09-09 11:33:09,455 judge_handler MAY_CHAM_DU_PHONG: Updated problem list
+INFO 2025-09-09 11:33:10,840 judge_handler Judge connected from: ('93.123.109.18', 39486)
+INFO 2025-09-09 11:33:10,841 base_handler Disconnecting client due to too-large message size (1195725856 bytes): ('93.123.109.18', 39486)
+INFO 2025-09-09 11:33:10,842 judge_handler Judge disconnected from: ('93.123.109.18', 39486) with name None
+INFO 2025-09-09 11:33:11,397 judge_handler Judge connected from: ('93.123.109.18', 39498)
+INFO 2025-09-09 11:33:11,398 base_handler Disconnecting client due to too-large message size (369295616 bytes): ('93.123.109.18', 39498)
+INFO 2025-09-09 11:33:11,399 judge_handler Judge disconnected from: ('93.123.109.18', 39498) with name None
