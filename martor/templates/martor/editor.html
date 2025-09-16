@@ -1,23 +1,66 @@
 {% load i18n %}
+<script id="CKEDITOR_Script">
+if (!window.__CKEDITOR_LOADED__) {
+    window.__CKEDITOR_LOADED__ = true;
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
+    document.head.appendChild(link);
+
+    // Load theo thứ tự
+    loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
+        .then(() => loadScript('https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js'))
+        .then(() => loadScript('/static/martor/js/editor-switch.js'))
+        .catch(err => console.error('Failed to load editor scripts', err));
+}
+</script>
+
 <div class="main-martor main-martor-{{ field_name }}" data-field-name="{{ field_name }}">
   <div class="section-martor">
-    <div class="ui top attached tabular pointing secondary menu tab-martor-menu">
-      <a class="item active" data-tab="editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
-      <a class="item" data-tab="preview-tab-{{ field_name }}"><i class="eye icon"></i>{% trans "Preview" %}</a>
-      {% include "martor/toolbar.html" %}
+    <!-- Toggle Editor -->
+    <div class="ui right floated item editor-toggle">
+      <select id="editor-switch-{{ field_name }}" onchange="switchEditor(this, '{{ field_name }}')">
+        <option value="martor">Martor (Markdown)</option>
+        <option value="ckeditor">CKEditor (HTML)</option>
+      </select>
     </div>
-    <div class="ui bottom attached tab segment active" data-tab="editor-tab-{{ field_name }}">
-      <div class="ui active dimmer upload-progress" style="display:none">
-        <div class="ui text loader">{% trans "Uploading... please wait..." %}</div>
-      </div>
-      <div id="martor-{{ field_name }}" class="martor-field martor-field-{{ field_name }}"></div>
-      {{ martor }}
-      <i class="angle double down grey icon expand-editor"></i>
-    </div>
-    <div class="ui bottom attached tab segment martor-preview" data-tab="preview-tab-{{ field_name }}">
-      <p>{% trans "Nothing to preview" %}</p>
-    </div>
-  </div><!-- end  /.section-martor -->
 
-  {% include 'martor/guide.html' %}
+    <!-- Martor Editor -->
+    <div id="martor-container-{{ field_name }}" class="editor-container" style="display: block;">
+      <div class="ui top attached tabular pointing secondary menu tab-martor-menu">
+        <a class="item active" data-tab="editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
+        <a class="item" data-tab="preview-tab-{{ field_name }}"><i class="eye icon"></i>{% trans "Preview" %}</a>
+        {% include "martor/toolbar.html" %}
+      </div>
+      <div class="ui bottom attached tab segment active" data-tab="editor-tab-{{ field_name }}">
+        <div class="ui active dimmer upload-progress" style="display:none" data-field-name="{{ field_name }}">
+          <div class="ui text loader">{% trans "Uploading... please wait..." %}</div>
+        </div>
+        <div id="martor-{{ field_name }}" class="martor-field martor-field-{{ field_name }}"></div>
+        {{ martor }}
+        <i class="angle double down grey icon expand-editor"></i>
+      </div>
+      <div class="ui bottom attached tab segment martor-preview" data-tab="preview-tab-{{ field_name }}">
+        <p>{% trans "Nothing to preview" %}</p>
+      </div>
+    </div>
+
+    <!-- CKEditor Editor -->
+    <div id="ckeditor-container-{{ field_name }}" class="ck-editor editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen" style="display: block;">
+      <div class="editor-container__editor"><div id="ckeditor-{{ field_name }}"></div></div>
+    </div>
+
+    {% include 'martor/guide.html' %}
+  </div>
 </div>

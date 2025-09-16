@@ -1,0 +1,10 @@
+.ck-editor__editable_inline {
+  min-height: 500px;   /* chỉnh chiều cao tối thiểu */
+  width: 100% !important;  /* full chiều rộng container */
+  box-sizing: border-box;
+}
+.ck-editor {
+  display: block;
+  width: 100%;
+  max-width: 100%; /* tránh bị tràn ngang */
+}

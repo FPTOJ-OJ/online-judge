@@ -3,56 +3,38 @@
     <head>
         <title>{% block title %}{{ title }} - {{ SITE_LONG_NAME }}{% endblock %}</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         {% if misc_config.meta_keywords %}
             <meta name="keywords" content="{{ misc_config.meta_keywords }}">
         {% endif %}
-        {% if meta_description %}
-            <meta name="description" content="{{ meta_description }}">
+        {% if misc_config.meta_description %}
+            <meta name="description" content="{{ misc_config.meta_description }}">
         {% endif %}
-        <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="FPT - Online Judge (FPTOJ) là nền tảng trực tuyến hỗ trợ và quản lý các cuộc thi lập trình dành cho học sinh trong hệ thống Trường FPT.">
-        <meta name="keywords" content="FPTOJ, FPT Online Judge, lập trình, thi lập trình, thuật toán, lập trình thi đấu">
-        <meta name="author" content="FPTOJ">
-        <meta name="robots" content="index, follow">
-    
+        <meta name="author" content="Ha Tri Kien">
         
         <!-- Open Graph / Facebook / Zalo / Discord -->
-        <meta property="og:title" content="FPT - Online Judge | FPTOJ">
-        <meta property="og:description" content="FPT - Online Judge (FPTOJ) là nền tảng trực tuyến hỗ trợ và quản lý các cuộc thi lập trình dành cho học sinh trong hệ thống Trường FPT. 💡 Tham gia ngay để thử thách bản thân, phát triển tư duy thuật toán và kết nối với cộng đồng lập trình!">
-        <meta property="og:image" content="https://fptoj.com/static/preview.png">
+        <meta property="og:title" content="{{ title }} - {{ SITE_LONG_NAME }}">
+        <meta property="og:description" content="{{ misc_config.meta_description }}">
+        <meta property="og:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="FPTOJ">
-        <meta property="og:locale" content="vi_VN">
     
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="FPT - Online Judge | FPTOJ">
-        <meta name="twitter:description" content="FPT - Online Judge (FPTOJ) là nền tảng trực tuyến hỗ trợ và quản lý các cuộc thi lập trình dành cho học sinh trong hệ thống Trường  FPT.">
-        <meta name="twitter:image" content="https://fptoj.com/static/preview.png">
-        <meta name="twitter:site" content="@FPTOJ">
-        <meta name="twitter:creator" content="@FPTOJ">
+        <meta name="twitter:title" content="{{ title }} - {{ SITE_LONG_NAME }}">
+        <meta name="twitter:description" content="{{ misc_config.meta_description }}">
+        <meta name="twitter:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
     
         <!-- Microsoft & Windows -->
-        <meta name="application-name" content="FPTOJ">
-        <meta name="msapplication-tooltip" content="Tham gia thi lập trình và thử thách bản thân cùng FPTOJ!">
-        <meta name="msapplication-starturl" content="https://fptoj.com">
+        <meta name="application-name" content="{{ SITE_LONG_NAME }}">
+        <meta name="msapplication-tooltip" content="{{ misc_config.meta_description }}">
+        <meta name="msapplication-starturl" content="{{ DMOJ_SCHEME }}://{{ site.domain }}">
     
         <!-- Progressive Web App (PWA) -->
         <meta name="theme-color" content="#ffffff">
         <link rel="manifest" href="/manifest.json">
-    
-        <!-- Structured Data (Schema.org) -->
-        <script type="application/ld+json">
-        {
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": " FPT - Online Judge",
-          "url": "https://fptoj.com",
-          "description": "FPT - Online Judge (FPTOJ) là nền tảng trực tuyến hỗ trợ và quản lý các cuộc thi lập trình dành cho học sinh trong hệ thống Trường  FPT."
-        }
         </script>
         <!-- Favicons-->
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
@@ -73,16 +55,10 @@
         <meta name="msapplication-TileImage" content="/mstile-144x144.png">
         {# Chrome 39 for Android colour #}
         <meta name="theme-color" content="#FFBB33">
-        {% if og_image %}
-            <meta property="og:image" content="{{ request.build_absolute_uri(og_image) }}">
-        {% endif %}
         {% block og_title %}{% endblock %}
         <meta property="og:site_name" content="{{ SITE_LONG_NAME }}">
         <meta property="og:url"
-              content="{{ DMOJ_SCHEME }}://{{ DMOJ_CANONICAL|default(site.domain) }}{{ request.get_full_path() }}">
-        {% if meta_description %}
-            <meta property="og:description" content="{{ meta_description }}">
-        {% endif %}
+              content="{{ DMOJ_SCHEME }}://{{ site.domain }}{{ request.get_full_path() }}">
         {% block meta %}{% endblock %}
         {% if not INLINE_FONTAWESOME %}
             <link rel="stylesheet" href="{{ FONTAWESOME_CSS }}">
@@ -255,6 +231,8 @@
             }
         </style>
 <script>
+
+
 $(document).ready(function() {
     $('img').each(function() {
         var imgSrc = $(this).attr('src'); 
@@ -288,6 +266,8 @@ $(document).ready(function() {
 
     $('tr').has('a[href="/problem/report"]').remove();
     $('li').has('a[href="/problem/report"]').remove();
+    $('#editor-switch-body').remove();
+    $('#CKEDITOR_Script').remove();
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

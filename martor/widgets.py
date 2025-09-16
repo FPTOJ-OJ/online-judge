@@ -11,10 +11,9 @@ from .settings import (
 
 
 class MartorWidget(forms.Textarea):
-    UPLOADS_ENABLED = False
+    UPLOADS_ENABLED = True
 
     def render(self, name, value, attrs=None, renderer=None, **kwargs):
-        # Make the settings the default attributes to pass
         attributes_to_pass = {
             'data-enable-configs': MARTOR_ENABLE_CONFIGS,
             'data-upload-url': MARTOR_UPLOAD_URL,
@@ -22,18 +21,12 @@ class MartorWidget(forms.Textarea):
             'data-search-users-url': MARTOR_SEARCH_USERS_URL,
         }
 
-        # Make sure that the martor value is in the class attr passed in
         if 'class' in attrs:
             attrs['class'] += ' martor'
         else:
             attrs['class'] = 'martor'
 
-        # Update and overwrite with the attributes passed in
         attributes_to_pass.update(attrs)
-
-        # Update and overwrite with any attributes that are on the widget
-        # itself. This is also the only way we can push something in without
-        # being part of the render chain.
         attributes_to_pass.update(self.attrs)
 
         widget = super(MartorWidget, self).render(name, value, attributes_to_pass)
@@ -54,6 +47,7 @@ class MartorWidget(forms.Textarea):
                 'plugins/css/ace.min.css',
                 'plugins/css/semantic.css',
                 'plugins/css/resizable.min.css',
+                'martor/css/ckeditor.css',
             ),
         }
         js = (
@@ -67,6 +61,7 @@ class MartorWidget(forms.Textarea):
             'plugins/js/resizable.min.js',
             'martor/js/martor.js',
         )
+
 
 
 class AdminMartorWidget(MartorWidget, widgets.AdminTextareaWidget):

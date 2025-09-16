@@ -166,6 +166,13 @@ def fragment_tree_to_str(tree):
 
 @registry.filter
 def markdown(value, style, math_engine=None, lazy_load=False, strip_paragraphs=False):
+    HTML_MARKER = '<htmlrender>'
+    if value.startswith(HTML_MARKER):
+        # Chỉ sanitize HTML, không parse markdown
+        cleaned_html = get_cleaner(style, settings.MARKDOWN_STYLES.get(style, {}).get('bleach', {})).clean(value[len(HTML_MARKER):])
+        return Markup(cleaned_html)
+
+    # Xử lý markdown bình thường
     styles = settings.MARKDOWN_STYLES.get(style, settings.MARKDOWN_DEFAULT_STYLE)
     escape = styles.get('safe_mode', True)
     nofollow = styles.get('nofollow', True)
@@ -181,9 +188,9 @@ def markdown(value, style, math_engine=None, lazy_load=False, strip_paragraphs=F
 
     renderer = AwesomeRenderer(escape=escape, nofollow=nofollow, texoid=texoid,
                                math=math and math_engine is not None, math_engine=math_engine)
-    markdown = mistune.Markdown(renderer=renderer, inline=AwesomeInlineLexer,
-                                parse_block_html=1, parse_inline_html=1)
-    result = markdown(value)
+    markdown_parser = mistune.Markdown(renderer=renderer, inline=AwesomeInlineLexer,
+                                       parse_block_html=1, parse_inline_html=1)
+    result = markdown_parser(value)
 
     if post_processors or strip_paragraphs:
         tree = fragments_to_tree(result)
@@ -192,6 +199,8 @@ def markdown(value, style, math_engine=None, lazy_load=False, strip_paragraphs=F
         if strip_paragraphs:
             strip_paragraphs_tags(tree)
         result = fragment_tree_to_str(tree)
+
     if bleach_params:
         result = get_cleaner(style, bleach_params).clean(result)
+
     return Markup(result)

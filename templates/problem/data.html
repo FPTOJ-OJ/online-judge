@@ -3,28 +3,38 @@
 {% block js_media %}
     <script type="text/javascript" src="{{ static('libs/jquery-sortable.js') }}"></script>
     <script type="text/javascript" src="{{ static('libs/featherlight/featherlight.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ static('libs/chosen.js/chosen.min.css') }}">
+    <script type="text/javascript" src="{{ static('libs/chosen.js/chosen.jquery.min.js') }}"></script>
     <script type="text/javascript">
         window.valid_files = {{ valid_files_json }};
         $(function () {
             function autofill_if_exists($select, file) {
-                if (!$select.val() && ~window.valid_files.indexOf(file))
-                    $select.val(file).trigger('change');
+                if (!$select.val() && window.valid_files.indexOf(file) !== -1) {
+                    $select.val(file).trigger('chosen:updated').trigger('change');
+                }
             }
 
             var $table = $('#case-table');
             $table.on('add-row', function (e, $tr) {
                 $tr.find('input').filter('[id$=file]').each(function () {
-                    var $select, val = $(this).replaceWith($select = $('<select>').attr({
-                        id: $(this).attr('id'),
-                        name: $(this).attr('name'),
+                    var $input = $(this);
+                    var val = $input.val();
+                    var $select = $('<select>').attr({
+                        id: $input.attr('id'),
+                        name: $input.attr('name'),
                         style: 'width: 100%'
-                    })).val();
-                    $select.select2({
-                        theme: '{{ DMOJ_SELECT2_THEME }}',
-                        data: window.valid_files,
-                        allowClear: true,
-                        placeholder: ''
-                    }).val(val).trigger('change').on('change', function () {
+                    });
+                    // Populate options before Chosen initialization
+                    $.each(window.valid_files, function (i, file) {
+                        $select.append($('<option>').val(file).text(file));
+                    });
+                    $input.replaceWith($select);
+                    $select.val(val); // Set value before initializing Chosen
+                    $select.chosen({
+                        allow_single_deselect: true,
+                        placeholder_text_single: '',
+                        width: '100%'
+                    }).trigger('chosen:updated').on('change', function () {
                         var val = $select.val();
                         if (val) {
                             if ($select.attr('id').endsWith('input_file'))
@@ -110,19 +120,20 @@
                         case 'E':
                             disabled = val == 'S';
                             $opts.toggle(val == 'S');
-                            $files.siblings('.select2').hide();
-                            $checker.toggle(val == 'S');
+                            $files.siblings('.chosen-container').hide();
+                            $checker.siblings('.chosen-container').hide();
                             break;
                         default:
                             $opts.toggle(val == 'C');
-                            $files.siblings('.select2').toggle(val == 'C');
-                            $checker.toggle(val == 'C');
+                            $files.siblings('.chosen-container').toggle(val == 'C');
+                            $checker.siblings('.chosen-container').toggle(val == 'C');
                             var $prevs = $tr.prevAll('tr[data-type=S], tr[data-type=E]');
                             disabled = $prevs.length && $prevs.get(0).getAttribute('data-type') == 'S';
                             $tr.find('input[id$=points], input[id$=pretest]').toggle(val == 'C' && !disabled);
                     }
                     $tr.attr('data-type', val).nextUntil('tr[data-type=S], tr[data-type=E], tr[data-type=""]')
                         .find('input[id$=points], input[id$=pretest]').toggle(!disabled);
+                    $tr.find('select').trigger('chosen:updated');
                 }).change();
 
                 function addToolTip(linkClass, editorClass) {
@@ -225,6 +236,7 @@
                     }
                     if (newIndex != oldIndex)
                         handle_table_reorder();
+                    $item.find('select').trigger('chosen:updated');
                     _super($item, container);
                 }
             });
@@ -234,7 +246,8 @@
             $controls.find('input').change(function () {
                 var $this = $(this), suffix = $this.attr('data-suffix'), checked = $this.is(':checked');
                 $table.find('.' + suffix.replace(/_/g, '-')).toggle(checked);
-                localStorage.setItem('data-visible:' + problem + ':' + suffix, checked ? '1' : '0')
+                localStorage.setItem('data-visible:' + problem + ':' + suffix, checked ? '1' : '0');
+                $table.find('select').trigger('chosen:updated');
             }).each(function () {
                 var $this = $(this), suffix = $this.attr('data-suffix'), filled = false;
                 filled = localStorage.getItem('data-visible:' + problem + ':' + suffix);
@@ -250,14 +263,89 @@
             });
         });
     </script>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+  // CSS dark mode cho Chosen
+  const darkChosenCSS = `
+  .chosen-container .chosen-drop {
+    border-color: #333;
+    background: #212121;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.15);
+  }
+  .chosen-container-single .chosen-single {
+    border-color: #333;
+    background: #212121;
+    background-image: linear-gradient(#353535 1%, #212121 15%);
+    box-shadow: 0 0 2px #5d5d5d inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+    color: #e3e3e3;
+  }
+  .chosen-container-single .chosen-default { color: #999; }
+  .chosen-container-single .chosen-search input[type="text"] {
+    border-color: #333; color: #e3e3e3;
+  }
+  .chosen-container .chosen-results { color: #e3e3e3; }
+  .chosen-container .chosen-results li.disabled-result { color: #505050; }
+  .chosen-container .chosen-results li.highlighted {
+    background-color: #3875d7;
+    background-image: linear-gradient(#3875d7 20%, #2a62bc 90%);
+    color: #fff;
+  }
+  .chosen-container .chosen-results li.no-results {
+    color: #e3e3e3; background: #1f1d1d;
+  }
+  .chosen-container-multi .chosen-choices {
+    border-color: #333;
+    background: #212121;
+    background-image: linear-gradient(#353535 1%, #212121 15%);
+  }
+  .chosen-container-multi .chosen-choices li.search-field input[type="text"] { color: #e3e3e3; }
+  .chosen-container-multi .chosen-choices li.search-choice {
+    border-color: #000;
+    background-color: #212121;
+    background-image: linear-gradient(#353535 1%, #212121 15%);
+    box-shadow: 0 0 2px #5d5d5d inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+    color: #e3e3e3;
+  }
+  .chosen-container-multi .chosen-choices li.search-choice-disabled {
+    border: 1px solid #ccc;
+    background-color: #e4e4e4;
+    background-image: linear-gradient(#f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
+    color: #666;
+  }
+  .chosen-container-multi .chosen-drop .result-selected { color: #505050; }
+  .chosen-container-active .chosen-single {
+    border: 1px solid #5897fb;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  .chosen-container-active.chosen-with-drop .chosen-single {
+    border-color: #333;
+    background-image: linear-gradient(#353535 1%, #212121 15%);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3) inset;
+  }
+  .chosen-container-active .chosen-choices {
+    border: 1px solid #5897fb;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  .chosen-container-active .chosen-choices li.search-field input[type="text"] { color: #e3e3e3!important; }
+  .chosen-disabled { opacity: 0.5 !important; }
+  .chosen-rtl .chosen-search input[type="text"] {
+    color: #e3e3e3;
+    background: url("chosen-sprite.png") no-repeat -30px -20px;
+  }
+  `;
+
+  if (document.body.getAttribute("data-theme") === "dark") {
+    const style = document.createElement("style");
+    style.innerHTML = darkChosenCSS;
+    document.head.appendChild(style);
+  }
+});
+</script>
+
 {% endblock %}
 
 {% block media %}
     <style>
-        #case-table .select2 {
-            text-align: initial;
-        }
-
         .order-column {
             width: 1em;
         }
@@ -470,19 +558,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 document.getElementById("auto-fill").addEventListener("click", async function () {
-    const link = this; // Lưu tham chiếu đến thẻ a
-    const originalText = link.textContent; // Lưu text gốc
-    link.textContent = "Đang autofill testcase..."; // Thay đổi text khi đang chạy
+    const link = this;
+    const originalText = link.textContent;
+    link.textContent = "Đang autofill testcase...";
 
     try {
-        // Lấy CSRF token từ form
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
         if (!csrfToken) {
             console.error("Không tìm thấy CSRF token");
             return;
         }
 
-        // Lấy danh sách file từ window.valid_files
         const validFiles = window.valid_files || [];
         if (!validFiles.length) {
             console.error("Không tìm thấy danh sách file hợp lệ trong window.valid_files");
@@ -490,28 +576,31 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
         }
 
         const extractTestIndex = (file) => {
-            const match = file.match(/(\d+)(?=\.(in|inp|out)$)/);
+            // Nhận .in, .inp, .out, hoa thường hay thường
+            const match = file.match(/(\d+)(?=\.(in|inp|out)$)/i); // i là ignore case
             if (match) return parseInt(match[1], 10);
-            const fallbackMatch = file.match(/(\d+)[^\d]*\.(in|inp|out)$/);
+                
+            const fallbackMatch = file.match(/(\d+)[^\d]*\.(in|inp|out)$/i);
             return fallbackMatch ? parseInt(fallbackMatch[1], 10) : null;
         };
-
+        
         const inputFiles = validFiles
-            .filter(file => file.match(/\.(in|inp)$/))
+            .filter(file => /\.(in|inp)$/i.test(file)) // dùng test() cho regex
+            .map(file => ({ file, index: extractTestIndex(file) }))
+            .filter(item => item.index !== null)
+            .sort((a, b) => a.index - b.index);
+        
+        const outputFiles = validFiles
+            .filter(file => /\.out$/i.test(file))
             .map(file => ({ file, index: extractTestIndex(file) }))
             .filter(item => item.index !== null)
             .sort((a, b) => a.index - b.index);
 
-        const outputFiles = validFiles
-            .filter(file => file.endsWith(".out"))
-            .map(file => ({ file, index: extractTestIndex(file) }))
-            .filter(item => item.index !== null)
-            .sort((a, b) => a.index - b.index);
 
         const testCases = [];
         for (const input of inputFiles) {
             const output = outputFiles.find(out => out.index === input.index);
-            if (output) testCases.push({ input: input.file, output: output.file, index: input.index });
+            if (output) testCases.push({ index: input.index, input_file: input.file, output_file: output.file });
             else console.warn(`Không tìm thấy file output tương ứng cho ${input.file}`);
         }
 
@@ -522,68 +611,34 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
 
         console.log(`Tìm thấy ${testCases.length} test case:`, testCases);
 
-        const formData = new FormData();
-        formData.append("csrfmiddlewaretoken", csrfToken);
-        formData.append("cases-TOTAL_FORMS", testCases.length);
-        formData.append("cases-INITIAL_FORMS", 0);
-        formData.append("cases-MAX_NUM_FORMS", 1000);
+        const payload = {
+            total_testcase: testCases.length,
+            testcases: testCases
+        };
 
-        testCases.forEach((testCase, index) => {
-            formData.append(`cases-${index}-type`, "C");
-            formData.append(`cases-${index}-order`, index + 1);
-            formData.append(`cases-${index}-input_file`, testCase.input);
-            formData.append(`cases-${index}-output_file`, testCase.output);
-            formData.append(`cases-${index}-points`, 1);
-        });
-
-        const response = await fetch(window.location.href, {
+        const response = await fetch("{{ add_test_case_url }}", {
             method: "POST",
-            body: formData,
-            headers: { "X-CSRFToken": csrfToken }
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            }
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Lỗi khi gửi POST request:", response.status, errorText);
-            alert("Lỗi khi gửi dữ liệu. Vui lòng kiểm tra console để biết chi tiết.");
+            const error = await response.json();
+            console.error("Lỗi khi gửi POST request:", error);
+            alert(`Đã xảy ra lỗi: ${error.error || 'Vui lòng kiểm tra console.'}`);
             return;
         }
 
-        const responseText = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(responseText, "text/html");
-        const newTable = doc.querySelector("#case-table");
-
-        if (newTable) {
-            document.querySelector("#case-table").outerHTML = newTable.outerHTML;
-            console.log("Đã cập nhật #case-table với dữ liệu mới");
-
-            $("#case-table").find("select").each(function () {
-                if (!$(this).hasClass("select2-hidden-accessible")) {
-                    $(this).select2({
-                        theme: "{{ DMOJ_SELECT2_THEME }}",
-                        data: window.valid_files,
-                        allowClear: true,
-                        placeholder: ""
-                    });
-                }
-            });
-
-            $("#case-table").find("tbody:first tr").each(function () {
-                $("#case-table").trigger("add-row", [$(this)]);
-            });
-
-            alert("Đã khởi tạo xong!");
-        } else {
-            console.error("Không tìm thấy #case-table trong phản hồi");
-            alert("Cập nhật giao diện thất bại. Vui lòng kiểm tra console.");
-        }
+        // Redirect to problem data page
+        window.location.href = "{{ problem_data_url }}";
 
     } catch (e) {
         console.error("Lỗi trong quá trình auto-fill:", e.message);
         alert("Đã xảy ra lỗi. Vui lòng kiểm tra console để biết chi tiết.");
     } finally {
-        // Quay lại text gốc
         link.textContent = originalText;
     }
 });
