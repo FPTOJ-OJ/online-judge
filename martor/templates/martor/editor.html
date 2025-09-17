@@ -33,6 +33,8 @@ if (!window.__CKEDITOR_LOADED__) {
         console.log(window.__markdownItInstance__.render('# Hello **Markdown** with HTML <b>tag</b>'));
         loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
             .then(() => loadScript('/static/martor/js/editor-switch.js'))
+            .then(() => loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js'))
+            .then(() => loadScript('/static/martor/js/sidebar-math.js'))
             .catch(err => console.error('Failed to load editor scripts', err));
     });
 }

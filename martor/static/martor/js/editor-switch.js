@@ -121,7 +121,6 @@ const {
     Mention,
     PageBreak,
     Paragraph,
-    PasteFromMarkdownExperimental,
     PasteFromOffice,
     PlainTableOutput,
     RemoveFormat,
@@ -233,7 +232,6 @@ function switchEditor(selectElement, fieldName) {
                     Mention,
                     PageBreak,
                     Paragraph,
-                    PasteFromMarkdownExperimental,
                     PasteFromOffice,
                     PlainTableOutput,
                     RemoveFormat,
@@ -280,7 +278,7 @@ function switchEditor(selectElement, fieldName) {
                             'editor-container_include-block-toolbar',
                             'editor-container_include-fullscreen',
                             'main-container'
-                        )
+                     )
                 },
                 heading: {
                     options: [
