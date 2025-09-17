@@ -18,11 +18,23 @@ if (!window.__CKEDITOR_LOADED__) {
     link.href = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
     document.head.appendChild(link);
 
-    // Load theo thứ tự
-    loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
-        .then(() => loadScript('https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js'))
-        .then(() => loadScript('/static/martor/js/editor-switch.js'))
-        .catch(err => console.error('Failed to load editor scripts', err));
+    async function loadMarkdownIt() {
+        const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
+        return markdownIt;
+    }
+
+    loadMarkdownIt().then(markdownIt => {
+        window.__markdownItInstance__ = markdownIt({
+            html: true,      
+            linkify: true,    
+            typographer: true  
+        });
+
+        console.log(window.__markdownItInstance__.render('# Hello **Markdown** with HTML <b>tag</b>'));
+        loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
+            .then(() => loadScript('/static/martor/js/editor-switch.js'))
+            .catch(err => console.error('Failed to load editor scripts', err));
+    });
 }
 </script>
 

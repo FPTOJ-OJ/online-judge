@@ -1,3 +1,74 @@
+class MartorUploadAdapter {
+    constructor(loader, textarea) {
+        this.loader = loader;
+        this.textarea = textarea;
+        this.controller = new AbortController();
+    }
+
+    // Local helper function để lấy cookie
+    _getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim(); // chuẩn JS, không cần jQuery
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const formElement = this.textarea.closest('form');
+                    if (!formElement) return reject('Form not found');
+
+                    const field_name = this.textarea.id.replace('id_', '');
+                    const form = new FormData(formElement);
+                    form.append('markdown-image-upload', file);
+                    form.append('csrfmiddlewaretoken', this._getCookie('csrftoken'));
+
+                    const progressEl = document.querySelector(`.upload-progress[data-field-name="${field_name}"]`);
+                    if (progressEl) progressEl.style.display = 'block';
+
+                    const response = await fetch(this.textarea.dataset.uploadUrl, {
+                        method: 'POST',
+                        body: form,
+                        signal: this.controller.signal
+                    });
+
+                    const data = await response.json();
+
+                    if (progressEl) progressEl.style.display = 'none';
+
+                    if (data.status === 200) {
+                        resolve({ default: data.link });
+                    } else {
+                        reject(data.error || 'Upload failed');
+                    }
+                } catch (err) {
+                    const field_name = this.textarea.id.replace('id_', '');
+                    const progressEl = document.querySelector(`.upload-progress[data-field-name="${field_name}"]`);
+                    if (progressEl) progressEl.style.display = 'none';
+
+                    console.error('Upload error:', err);
+                    reject(err.message || 'Upload failed');
+                }
+            });
+        });
+    }
+
+    abort() {
+        this.controller.abort();
+    }
+}
+
+
 const HTML_MARKER = '<htmlrender>';
 
 const {
@@ -88,7 +159,7 @@ function switchEditor(selectElement, fieldName) {
     const ckeditorContainer = document.getElementById(`ckeditor-container-${fieldName}`);
     const martorEditor = document.getElementById(`martor-${fieldName}`);
     const ckeditorEditor = document.getElementById(`ckeditor-${fieldName}`);
-    const textareaId = document.getElementById(`id_${fieldName}`);
+    const textarea = document.getElementById(`id_${fieldName}`);
     const editorType = selectElement.value;
 
     if (editorType === 'ckeditor') {
@@ -253,7 +324,7 @@ function switchEditor(selectElement, fieldName) {
                             marker: '@',
                             feed: async (query) => {
                                 const response = await fetch(
-                                    `${textareaId.dataset.searchUsersUrl}?username=${query}`,
+                                    `${textarea.dataset.searchUsersUrl}?username=${query}`,
                                     {
                                         headers: {
                                             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
@@ -263,8 +334,8 @@ function switchEditor(selectElement, fieldName) {
                                 const data = await response.json();
                                 if (data.status === 200) {
                                     return data.data.map(user => ({
-                                        id: `@${user.username}`,  // bắt buộc có @ ở đầu
-                                        text: user.username       // label hiển thị
+                                        id: `@${user.username}`,
+                                        text: user.username
                                     }));
                                 }
                                 return [];
@@ -289,41 +360,41 @@ function switchEditor(selectElement, fieldName) {
                 },
                 table: {
                     contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
-                },
-                simpleUpload: {
-                    uploadUrl: textareaId.dataset.uploadUrl, // Use Martor's upload URL
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
                 }
             };
-            const converter = new showdown.Converter();
+
+            const md = window.__markdownItInstance__;
 
             ClassicEditor.create(ckeditorEditor, editorConfig)
                 .then(editor => {
                     window.ckeditorInstances = window.ckeditorInstances || {};
                     window.ckeditorInstances[fieldName] = editor;
                     // Lấy markdown gốc từ textarea
-                   
-                    markdownContent = textareaId.value;
+
+                    markdownContent = textarea.value;
                     if (markdownContent.startsWith(HTML_MARKER)) {
                         markdownContent = markdownContent.slice(HTML_MARKER.length);
                     }
                     // Convert markdown sang HTML
-                    const htmlContent = converter.makeHtml(markdownContent);
-                    
-                    if(!textareaId.value.startsWith(HTML_MARKER)){
-                        textareaId.value = HTML_MARKER + textareaId.value;
+                    const htmlContent = md.render(markdownContent);
+
+                    if (!textarea.value.startsWith(HTML_MARKER)) {
+                        textarea.value = HTML_MARKER + textarea.value;
                     }
 
-                    // Nạp vào CKEditor
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return new MartorUploadAdapter(loader, textarea);
+                    };
+
+                    // Nạp vào CKEditor và cập nhật textarea
                     editor.setData(htmlContent);
                     editor.model.document.on('change:data', () => {
-                        textareaId.value = editor.getData();
-                        if(!textareaId.value.startsWith(HTML_MARKER)){
-                            textareaId.value = HTML_MARKER + textareaId.value;
+                        textarea.value = editor.getData();
+                        if (!textarea.value.startsWith(HTML_MARKER)) {
+                            textarea.value = HTML_MARKER + textarea.value;
                         }
                     });
+
                     setTimeout(() => editor.ui.update(), 50);
                 })
                 .catch(error => console.error('CKEditor initialization failed:', error));
@@ -335,15 +406,14 @@ function switchEditor(selectElement, fieldName) {
         if (window.ckeditorInstances && window.ckeditorInstances[fieldName]) {
             const editor = window.ckeditorInstances[fieldName];
             const htmlContent = editor.getData();
-            // Đẩy thẳng HTML vào ACE editor
-            const aceEditor = ace.edit(`martor-${fieldName}`);
-            aceEditor.setValue(htmlContent, -1);
+            const markdownContent = htmlContent;
 
-            // Cập nhật textarea ẩn (để form submit có HTML)
-            textareaId.value = htmlContent;
-            if (textareaId.value.startsWith(HTML_MARKER)) {
-                textareaId.value = textareaId.value.slice(HTML_MARKER.length);
-            }
+            // Đẩy markdown vào ACE editor (Martor)
+            const aceEditor = ace.edit(`martor-${fieldName}`);
+            aceEditor.setValue(markdownContent, -1);
+
+            // Cập nhật textarea với markdown (không có marker)
+            textarea.value = markdownContent;
 
             // Destroy CKEditor instance
             editor.destroy();
