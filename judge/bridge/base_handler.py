@@ -59,6 +59,7 @@ class ZlibPacketHandler(metaclass=RequestHandlerMeta):
         self.server_address = server.server_address
         self._initial_tag = None
         self._got_packet = False
+        self.request.settimeout(10) 
 
     @property
     def timeout(self):
@@ -106,12 +107,16 @@ class ZlibPacketHandler(metaclass=RequestHandlerMeta):
             raise Disconnect()
 
     def read_size(self, buffer=b''):
-        while len(buffer) < size_pack.size:
-            recv = self.request.recv(size_pack.size - len(buffer))
-            if not recv:
-                raise Disconnect()
-            buffer += recv
-        return size_pack.unpack(buffer)[0]
+        try:
+            while len(buffer) < size_pack.size:
+                recv = self.request.recv(size_pack.size - len(buffer))
+                if not recv:
+                    raise Disconnect()
+                buffer += recv
+            return size_pack.unpack(buffer)[0]
+        except (ConnectionResetError, socket.timeout) as e:
+            print(f"[WARN] Connection lost from {self.client_address}: {e}")
+            raise Disconnect()
 
     def read_proxy_header(self, buffer=b''):
         # Max line length for PROXY protocol is 107, and we received 4 already.

@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.forms import BaseModelFormSet, HiddenInput, ModelForm, NumberInput, Select, formset_factory
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import escape, format_html
@@ -215,6 +215,8 @@ class ProblemDataView(TitleMixin, ProblemManagerMixin):
 
         context['cases_formset'] = self.get_case_formset(valid_files)
         context['all_case_forms'] = chain(context['cases_formset'], [context['cases_formset'].empty_form])
+        context['add_test_case_url'] = reverse('add_single_test_case', args=[self.object.code])
+        context['problem_data_url'] = reverse('problem_data', args=[self.object.code])
         return context
 
     def post(self, request, *args, **kwargs):
@@ -241,6 +243,7 @@ class ProblemDataView(TitleMixin, ProblemManagerMixin):
                                                              valid_files=valid_files))
 
     put = post
+
 
 
 @login_required
@@ -288,3 +291,73 @@ def problem_init_view(request, problem):
             format_html('<a href="{1}">{0}</a>', problem.name,
                         reverse('problem_detail', args=[problem.code])))),
     })
+
+@login_required
+def add_single_test_case(request, problem):
+    problem = get_object_or_404(Problem, code=problem)
+    if not problem.is_editable_by(request.user):
+        raise Http404()
+
+    if request.method == 'POST':
+        try:
+            # Parse JSON payload
+            data = json.loads(request.body)
+            total_testcases = data.get('total_testcase')
+            testcases = data.get('testcases', [])
+        except (json.JSONDecodeError, ValueError):
+            return JsonResponse({'error': _('Invalid JSON payload.')}, status=400)
+
+        # Validate total_testcases
+        if not isinstance(total_testcases, int) or total_testcases <= 0:
+            return JsonResponse({'error': _('Total test cases must be a positive integer.')}, status=400)
+
+        if len(testcases) != total_testcases:
+            return JsonResponse({'error': _('Number of test cases does not match total_testcase.')}, status=400)
+
+        # Get valid files from the problem's zip file
+        problem_data = ProblemData.objects.get_or_create(problem=problem)[0]
+        valid_files = []
+        try:
+            if problem_data.zipfile:
+                valid_files = ZipFile(problem_data.zipfile.path).namelist()
+        except BadZipfile:
+            return JsonResponse({'error': _('Invalid zip file.')}, status=400)
+
+        # Validate test cases
+        for testcase in testcases:
+            index = testcase.get('index')
+            input_file = testcase.get('input_file')
+            output_file = testcase.get('output_file')
+
+            if not all([index, input_file, output_file]):
+                return JsonResponse({'error': _('Each test case must have index, input_file, and output_file.')}, status=400)
+
+            if not isinstance(index, int) or index <= 0:
+                return JsonResponse({'error': _('Test case index must be a positive integer.')}, status=400)
+
+            if input_file not in valid_files or output_file not in valid_files:
+                return JsonResponse({'error': _('Invalid input or output file for test case index %d.') % index}, status=400)
+
+        # Clear existing test cases
+        ProblemTestCase.objects.filter(dataset_id=problem.pk).delete()
+
+        # Create new test cases starting from order 0
+        for i, testcase in enumerate(sorted(testcases, key=lambda x: x['index'])):
+            test_case = ProblemTestCase(
+                dataset_id=problem.pk,
+                order=i,  # Start from 0
+                type='C',  # Standard test case
+                input_file=testcase['input_file'],
+                output_file=testcase['output_file'],
+                points=1,  # Default points
+                is_pretest=False,
+            )
+            test_case.save()
+
+        # Regenerate problem data
+        ProblemDataCompiler.generate(problem, problem_data, problem.cases.order_by('order'), valid_files)
+
+        # Redirect to problem data page to reload test cases
+        return HttpResponseRedirect(reverse('problem_data', args=[problem.code]))
+
+    return HttpResponseRedirect(reverse('problem_data', args=[problem.code]))

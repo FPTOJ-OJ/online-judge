@@ -20,4 +20,5 @@ sass_processed
 __pycache__
 dmojsite/
 userdata
-node_modules
+web.log
+web.log.1
