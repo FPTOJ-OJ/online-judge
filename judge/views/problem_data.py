@@ -84,9 +84,10 @@ class ProblemDataForm(ModelForm):
                 raise ValidationError(_('Input filename is required in File IO mode.'))
             if not output_filename:
                 raise ValidationError(_('Output filename is required in File IO mode.'))
+            cleaned_data['input_filename'] = input_filename.upper()
+            cleaned_data['output_filename'] = output_filename.upper()
 
         return cleaned_data
-
 
 class ProblemCaseForm(ModelForm):
     clean_checker_args = checker_args_cleaner

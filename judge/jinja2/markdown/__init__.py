@@ -2,6 +2,7 @@ import logging
 import re
 from html import unescape
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 import mistune
 from bleach.css_sanitizer import CSSSanitizer
@@ -168,11 +169,23 @@ def fragment_tree_to_str(tree):
 def markdown(value, style, math_engine=None, lazy_load=False, strip_paragraphs=False):
     HTML_MARKER = '<htmlrender>'
     if value.startswith(HTML_MARKER):
-        # Chỉ sanitize HTML, không parse markdown
-        cleaned_html = get_cleaner(style, settings.MARKDOWN_STYLES.get(style, {}).get('bleach', {})).clean(value[len(HTML_MARKER):])
-        return Markup(cleaned_html)
+        html = value[len(HTML_MARKER):]
+        cleaned_html = get_cleaner(style, settings.MARKDOWN_STYLES.get(style, {}).get('bleach', {})).clean(html)
+        
+        # Parse and adjust heading levels to reduce size (increase level by 2)
+        soup = BeautifulSoup(cleaned_html, 'html.parser')
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
+            if tag.name.startswith('h'):
+                try:
+                    level = int(tag.name[1:])
+                    new_level = min(level + 2, 6)  # Cap at h6 to avoid exceeding standard levels
+                    tag.name = f'h{new_level}'
+                except ValueError:
+                    # In case of malformed tag, leave as is
+                    pass
+        
+        return Markup(str(soup))
 
-    # Xử lý markdown bình thường
     styles = settings.MARKDOWN_STYLES.get(style, settings.MARKDOWN_DEFAULT_STYLE)
     escape = styles.get('safe_mode', True)
     nofollow = styles.get('nofollow', True)

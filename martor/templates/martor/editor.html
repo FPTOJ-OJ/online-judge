@@ -1,50 +1,14 @@
 {% load i18n %}
 <script id="CKEDITOR_Script">
-if (!window.__CKEDITOR_LOADED__) {
-    window.__CKEDITOR_LOADED__ = true;
-
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
-        });
-    }
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
-    document.head.appendChild(link);
-
-    async function loadMarkdownIt() {
-        const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
-        return markdownIt;
-    }
-
-    loadMarkdownIt().then(markdownIt => {
-        window.__markdownItInstance__ = markdownIt({
-            html: true,      
-            linkify: true,    
-            typographer: true  
-        });
-
-        console.log(window.__markdownItInstance__.render('# Hello **Markdown** with HTML <b>tag</b>'));
-        loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
-            .then(() => loadScript('/static/martor/js/editor-switch.js'))
-            .then(() => loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js'))
-            .then(() => loadScript('/static/martor/js/sidebar-math.js'))
-            .catch(err => console.error('Failed to load editor scripts', err));
-    });
-}
+if(!window.__CKEDITOR_LOADED__){function loadScript(t){return new Promise(((e,o)=>{const r=document.createElement("script");r.src=t,r.onload=e,r.onerror=o,document.head.appendChild(r)}))}window.__CKEDITOR_LOADED__=!0;const t=document.createElement("link");async function loadMarkdownIt(){const{default:t}=await import("https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm");return t}function getCookie(t){const e=document.cookie.split(";");for(let o of e){const e=o.trim();if(e.startsWith(t+"="))return decodeURIComponent(e.substring(t.length+1))}return null}async function previewProblem(t){const e=await fetch("/widgets/preview/problem",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({content:t,csrfmiddlewaretoken:getCookie("csrftoken")})});if(!e.ok)throw new Error(`HTTP error! Status: ${e.status}`);return await e.text()}function attachPreviewLogic(t){const e=document.getElementById(`id_${t}`),o=document.getElementById(`editor-switch-${t}`);if($(`#ckeditor-container-${t} .tab-ckeditor-menu .item`).tab({onVisible:async function(e){if(this.dataset.tab===`ckeditor-preview-tab-${t}`){const e=this;if(!e)return;let o,r="";const n=window.CKEDITOR&&window.CKEDITOR.instances;if(n&&(o=n[`ckeditor-${t}`]),o&&"function"==typeof o.getData)r=o.getData().replace("<htmlrender>","")||"";else{const e=document.querySelector(`textarea[name="${t}"]`);r=(e?e.value:"").replace("<htmlrender>","")||""}if(!r.trim())return void(e.innerHTML='<p>{% trans "Nothing to preview" %}</p>');try{const t=await previewProblem(r);e.innerHTML=t,window.MathJax&&MathJax.typesetPromise([e])}catch(t){console.error("Preview fetch failed:",t),e.innerHTML='<p style="color:red">Error loading preview</p>'}}}}),e&&o){e.value.trim().startsWith("<htmlrender>")&&(o.value="ckeditor",switchEditor(o,t))}}function initAllEditors(){document.querySelectorAll(".main-martor[data-field-name]").forEach((t=>{attachPreviewLogic(t.dataset.fieldName)}))}function observeNewEditors(){new MutationObserver((t=>{t.forEach((t=>{t.addedNodes.forEach((t=>{if(1===t.nodeType&&t.classList.contains("main-martor")){const e=t.dataset.fieldName;e&&attachPreviewLogic(e)}}))}))})).observe(document.body,{childList:!0,subtree:!0})}t.rel="stylesheet",t.href="https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css",document.head.appendChild(t),loadMarkdownIt().then((t=>{window.__markdownItInstance__=t({html:!0,linkify:!0,typographer:!0}),loadScript("https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js").then((()=>loadScript("/static/martor/js/editor-switch.js"))).then((()=>loadScript("https://unpkg.com/mathlive@0.107.0/mathlive.min.js"))).then((()=>loadScript("/static/martor/js/sidebar-math.js"))).then((()=>{initAllEditors(),observeNewEditors()})).catch((t=>console.error("Failed to load editor scripts",t)))}))}
 </script>
+
 
 <div class="main-martor main-martor-{{ field_name }}" data-field-name="{{ field_name }}">
   <div class="section-martor">
     <!-- Toggle Editor -->
     <div class="ui right floated item editor-toggle">
-      <select id="editor-switch-{{ field_name }}" onchange="switchEditor(this, '{{ field_name }}')">
+      <select id="editor-switch-{{ field_name }}" style="margin-bottom: 10px;" onchange="switchEditor(this, '{{ field_name }}')">
         <option value="martor">Martor (Markdown)</option>
         <option value="ckeditor">CKEditor (HTML)</option>
       </select>
@@ -71,8 +35,17 @@ if (!window.__CKEDITOR_LOADED__) {
     </div>
 
     <!-- CKEditor Editor -->
-    <div id="ckeditor-container-{{ field_name }}" class="ck-editor editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen" style="display: block;">
-      <div class="editor-container__editor"><div id="ckeditor-{{ field_name }}"></div></div>
+    <div id="ckeditor-container-{{ field_name }}" class="ck-editor editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen" style="display: none;">
+      <div class="ui top attached tabular pointing secondary menu tab-ckeditor-menu">
+        <a class="item active" data-tab="ckeditor-editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
+        <a class="item" data-tab="ckeditor-preview-tab-{{ field_name }}"><i class="eye icon"></i> {% trans "Preview" %}</a>
+      </div>
+      <div class="ui bottom attached tab segment active" data-tab="ckeditor-editor-tab-{{ field_name }}">
+        <div class="editor-container__editor"><div id="ckeditor-{{ field_name }}"></div></div>
+      </div>
+      <div class="ui bottom attached tab segment ckeditor-preview" data-tab="ckeditor-preview-tab-{{ field_name }}">
+        <p>{% trans "Nothing to preview" %}</p>
+      </div>
     </div>
 
     {% include 'martor/guide.html' %}

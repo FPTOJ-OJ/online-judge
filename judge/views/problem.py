@@ -612,6 +612,39 @@ class RandomProblem(ProblemList):
 
 user_logger = logging.getLogger('judge.user')
 
+def normalize_filenames(code: str, input_file: str, output_file: str) -> str:
+    input_file = input_file.lower()
+    output_file = output_file.lower()
+
+    def split_filename_ext(filename: str):
+        name, sep, ext = filename.rpartition('.')
+        return (name, ext) if name else (filename, '')
+
+    input_name, input_ext = split_filename_ext(input_file)
+    output_name, output_ext = split_filename_ext(output_file)
+
+    def repl(match):
+        quote = match.group(1)
+        content = match.group(2)
+        content_lower = content.lower()
+
+        if content_lower in [input_file, output_file]:
+            return f'{quote}{content.upper()}{quote}'
+
+        if content_lower.startswith('.') and content_lower[1:] in [input_ext, output_ext]:
+            return f'{quote}{content.upper()}{quote}'
+
+        if content_lower in [input_ext, output_ext]:
+            return f'{quote}{content.upper()}{quote}'
+
+        name, ext = split_filename_ext(content_lower)
+        if name in [input_name, output_name]:
+            return f'{quote}{content.upper()}{quote}'
+
+        return match.group(0)
+
+    return re.sub(r'(["\'])([^"\']+)\1', repl, code)
+
 
 class ProblemSubmit(LoginRequiredMixin, ProblemMixin, TitleMixin, SingleObjectFormView):
     template_name = 'problem/submit.html'
@@ -711,6 +744,18 @@ class ProblemSubmit(LoginRequiredMixin, ProblemMixin, TitleMixin, SingleObjectFo
         if self.remaining_submission_count == 0:
             return generic_message(self.request, _('Too many submissions'),
                                    _('You have exceeded the submission limit for this problem.'))
+
+        # Normalize source code for file IO if applicable
+        if hasattr(self.object, 'data_files') and self.object.data_files:
+            data = self.object.data_files
+            if (data.io_mode == 'file' and
+                data.input_filename and
+                data.output_filename):
+                form.cleaned_data['source'] = normalize_filenames(
+                    form.cleaned_data['source'],
+                    data.input_filename,
+                    data.output_filename
+                )
 
         with transaction.atomic():
             self.new_submission = form.save(commit=False)

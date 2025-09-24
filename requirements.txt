@@ -37,6 +37,7 @@ webauthn<1
 bleach[css]
 django-admin-sortable2
 icalendar
+beautifulsoup4<=4.13.5
 # This is a celery dependency whose latest major version is breaking everything.
 importlib-metadata<5
 django-turnstile

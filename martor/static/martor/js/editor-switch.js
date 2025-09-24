@@ -117,7 +117,6 @@ const {
     LinkImage,
     List,
     ListProperties,
-    MediaEmbed,
     Mention,
     PageBreak,
     Paragraph,
@@ -153,6 +152,12 @@ const {
 const LICENSE_KEY =
     'eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3ODk2MDMxOTksImp0aSI6ImJjNzQyZWIxLTBhZmEtNDA3YS1hYzNjLTA0ZGE1MGYzYzE3YyIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiXSwiZmVhdHVyZXMiOlsiRFJVUCIsIkUyUCIsIkUyVyJdLCJ2YyI6ImE2MDM2MjQyIn0.b7kt1-eR-vznnSsYhHXHlAndd7RpqK947Epvw9rnGPrufUDorlRjfQWJU15if9_Sc4VFP-Vod6O2u7M2HbvcCw';
 
+function normalizeContent(content) {
+    return content
+        .replace(/\u2212/g, "-")
+        .replace(/\u00A0/g, " ");
+}
+
 function switchEditor(selectElement, fieldName) {
     const martorContainer = document.getElementById(`martor-container-${fieldName}`);
     const ckeditorContainer = document.getElementById(`ckeditor-container-${fieldName}`);
@@ -176,7 +181,7 @@ function switchEditor(selectElement, fieldName) {
                         'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
                         'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'code', 'removeFormat', '|',
                         'emoji', 'specialCharacters', 'horizontalLine', 'pageBreak', 'link', 'bookmark',
-                        'insertImage', 'insertImageViaUrl', 'mediaEmbed', 'insertTable', 'insertTableLayout',
+                        'insertImage', 'insertImageViaUrl', 'insertTable', 'insertTableLayout',
                         'highlight', 'blockQuote', 'codeBlock', 'htmlEmbed', '|',
                         'alignment', '|',
                         'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
@@ -228,7 +233,6 @@ function switchEditor(selectElement, fieldName) {
                     LinkImage,
                     List,
                     ListProperties,
-                    MediaEmbed,
                     Mention,
                     PageBreak,
                     Paragraph,
@@ -278,7 +282,7 @@ function switchEditor(selectElement, fieldName) {
                             'editor-container_include-block-toolbar',
                             'editor-container_include-fullscreen',
                             'main-container'
-                     )
+                        )
                 },
                 heading: {
                     options: [
@@ -384,13 +388,23 @@ function switchEditor(selectElement, fieldName) {
                         return new MartorUploadAdapter(loader, textarea);
                     };
 
+                    editor.editing.view.change(writer => {
+                        writer.setAttribute('spellcheck', 'false', editor.editing.view.document.getRoot());
+                    });
+
                     // Nạp vào CKEditor và cập nhật textarea
                     editor.setData(htmlContent);
                     editor.model.document.on('change:data', () => {
-                        textarea.value = editor.getData();
-                        if (!textarea.value.startsWith(HTML_MARKER)) {
-                            textarea.value = HTML_MARKER + textarea.value;
+                        let data = editor.getData();
+
+                        // chuẩn hóa dữ liệu
+                        data = normalizeContent(data);
+
+                        if (!data.startsWith(HTML_MARKER)) {
+                            data = HTML_MARKER + data;
                         }
+
+                        textarea.value = data;
                     });
 
                     setTimeout(() => editor.ui.update(), 50);
