@@ -8,3 +8,11 @@
   width: 100%;
   max-width: 100%; 
 }
+#pdf-iframe {
+    width: 793px;            /* Chiều rộng của iframe */
+    height: 1122px;          /* Chiều cao của iframe */
+    display: block;          /* Để iframe hiển thị như block element */
+    margin-left: auto;       /* Tự động căn lề trái */
+    margin-right: auto;      /* Tự động căn lề phải */
+    margin-bottom: 20px;
+}

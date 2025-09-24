@@ -1,4 +1,49 @@
 {% extends "admin/base_site.html" %}
+{% block extrahead %}
+{{ block.super }}
+<script>
+function replacePdfImages() {
+    document.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src');
+        if (src && src.endsWith('.pdf')) {
+            const iframe = document.createElement('iframe');
+            iframe.src = src;
+            iframe.width = '100%';
+            iframe.height = '600px';
+
+            const link = document.createElement('a');
+            link.href = src;
+            link.textContent = 'Trình duyệt của bạn không hỗ trợ hiển thị PDF. Nhấn vào đây để tải về.';
+            link.target = '_blank';
+
+            const fallback = document.createElement('p');
+            fallback.appendChild(link);
+
+            const container = document.createElement('div');
+            container.appendChild(iframe);
+            container.appendChild(fallback);
+
+            img.replaceWith(container);
+
+            document.querySelectorAll('a.view-pdf').forEach(a => {
+                a.href = src;
+            });
+        }
+    });
+}
+
+// Lắng nghe click vào bất kỳ thẻ <a>
+document.addEventListener('click', function (e) {
+    const link = e.target.closest('a');
+    if (link) {
+        // Chờ một chút để DOM cập nhật xong (ví dụ: nội dung mới được render)
+        setTimeout(() => {
+            replacePdfImages();
+        }, 500); // 500ms là khoảng thời gian hợp lý, có thể điều chỉnh
+    }
+});
+</script>
+{% endblock %}
 
 {% block pretitle %}{{ block.super }}
     <form style="display: none" id="empty-action-form" method="post">

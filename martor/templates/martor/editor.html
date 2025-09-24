@@ -1,6 +1,132 @@
 {% load i18n %}
 <script id="CKEDITOR_Script">
-if(!window.__CKEDITOR_LOADED__){function loadScript(t){return new Promise(((e,o)=>{const r=document.createElement("script");r.src=t,r.onload=e,r.onerror=o,document.head.appendChild(r)}))}window.__CKEDITOR_LOADED__=!0;const t=document.createElement("link");async function loadMarkdownIt(){const{default:t}=await import("https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm");return t}function getCookie(t){const e=document.cookie.split(";");for(let o of e){const e=o.trim();if(e.startsWith(t+"="))return decodeURIComponent(e.substring(t.length+1))}return null}async function previewProblem(t){const e=await fetch("/widgets/preview/problem",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({content:t,csrfmiddlewaretoken:getCookie("csrftoken")})});if(!e.ok)throw new Error(`HTTP error! Status: ${e.status}`);return await e.text()}function attachPreviewLogic(t){const e=document.getElementById(`id_${t}`),o=document.getElementById(`editor-switch-${t}`);if($(`#ckeditor-container-${t} .tab-ckeditor-menu .item`).tab({onVisible:async function(e){if(this.dataset.tab===`ckeditor-preview-tab-${t}`){const e=this;if(!e)return;let o,r="";const n=window.CKEDITOR&&window.CKEDITOR.instances;if(n&&(o=n[`ckeditor-${t}`]),o&&"function"==typeof o.getData)r=o.getData().replace("<htmlrender>","")||"";else{const e=document.querySelector(`textarea[name="${t}"]`);r=(e?e.value:"").replace("<htmlrender>","")||""}if(!r.trim())return void(e.innerHTML='<p>{% trans "Nothing to preview" %}</p>');try{const t=await previewProblem(r);e.innerHTML=t,window.MathJax&&MathJax.typesetPromise([e])}catch(t){console.error("Preview fetch failed:",t),e.innerHTML='<p style="color:red">Error loading preview</p>'}}}}),e&&o){e.value.trim().startsWith("<htmlrender>")&&(o.value="ckeditor",switchEditor(o,t))}}function initAllEditors(){document.querySelectorAll(".main-martor[data-field-name]").forEach((t=>{attachPreviewLogic(t.dataset.fieldName)}))}function observeNewEditors(){new MutationObserver((t=>{t.forEach((t=>{t.addedNodes.forEach((t=>{if(1===t.nodeType&&t.classList.contains("main-martor")){const e=t.dataset.fieldName;e&&attachPreviewLogic(e)}}))}))})).observe(document.body,{childList:!0,subtree:!0})}t.rel="stylesheet",t.href="https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css",document.head.appendChild(t),loadMarkdownIt().then((t=>{window.__markdownItInstance__=t({html:!0,linkify:!0,typographer:!0}),loadScript("https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js").then((()=>loadScript("/static/martor/js/editor-switch.js"))).then((()=>loadScript("https://unpkg.com/mathlive@0.107.0/mathlive.min.js"))).then((()=>loadScript("/static/martor/js/sidebar-math.js"))).then((()=>{initAllEditors(),observeNewEditors()})).catch((t=>console.error("Failed to load editor scripts",t)))}))}
+if (!window.__CKEDITOR_LOADED__) {
+    window.__CKEDITOR_LOADED__ = true;
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
+    document.head.appendChild(link);
+
+    async function loadMarkdownIt() {
+        const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
+        return markdownIt;
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            const trimmed = cookie.trim();
+            if (trimmed.startsWith(name + "=")) {
+                return decodeURIComponent(trimmed.substring(name.length + 1));
+            }
+        }
+        return null;
+    }
+
+    async function previewProblem(content) {
+        const response = await fetch("/widgets/preview/problem", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                content: content,
+                csrfmiddlewaretoken: getCookie("csrftoken")
+            })
+        });
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return await response.text();
+    }
+
+    function attachPreviewLogic(fieldName) {
+        const textarea = document.getElementById(`id_${fieldName}`);
+        const editorSwitch = document.getElementById(`editor-switch-${fieldName}`);
+        $(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
+            onVisible: async function(tabPath) {
+                const currentTabPath = this.dataset.tab;
+                if (currentTabPath === `ckeditor-preview-tab-${fieldName}`) {
+                    const previewBox = this;
+                    if (!previewBox) return;
+                    let previewContent = '';
+                    const ta = document.querySelector(`textarea[name="${fieldName}"]`);
+                    previewContent = (ta ? ta.value : '');
+
+                    if (!previewContent.trim()) {
+                        previewBox.innerHTML = '<p>{% trans "Nothing to preview" %}</p>';
+                        return;
+                    }
+
+                    try {
+                        const html = await previewProblem(previewContent);
+                        previewBox.innerHTML = html;
+                        if (window.MathJax) {
+                            MathJax.typesetPromise([previewBox]);
+                        }
+                    } catch (err) {
+                        console.error("Preview fetch failed:", err);
+                        previewBox.innerHTML = '<p style="color:red">Error loading preview</p>';
+                    }
+                }
+            }
+        });
+
+        if (textarea && editorSwitch) {
+            const content = textarea.value.trim();
+            if (content.startsWith('<htmlrender>')) {
+                editorSwitch.value = 'ckeditor';
+                switchEditor(editorSwitch, fieldName);
+            }
+        }
+    }
+
+    function initAllEditors() {
+        document.querySelectorAll('.main-martor[data-field-name]').forEach(container => {
+            const fieldName = container.dataset.fieldName;
+            attachPreviewLogic(fieldName);
+        });
+    }
+
+    function observeNewEditors() {
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1 && node.classList.contains('main-martor')) {
+                        const fieldName = node.dataset.fieldName;
+                        if (fieldName) attachPreviewLogic(fieldName);
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    loadMarkdownIt().then(markdownIt => {
+        window.__markdownItInstance__ = markdownIt({
+            html: true,
+            linkify: true,
+            typographer: true
+        });
+
+        loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js')
+            .then(() => loadScript('/static/martor/js/editor-switch.js'))
+            .then(() => loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js'))
+            .then(() => loadScript('/static/martor/js/sidebar-math.js'))
+            .then(() => {
+                initAllEditors();
+                observeNewEditors();
+            })
+            .catch(err => console.error('Failed to load editor scripts', err));
+    });
+}
 </script>
 
 

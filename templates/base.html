@@ -8,9 +8,19 @@
         {% if misc_config.meta_keywords %}
             <meta name="keywords" content="{{ misc_config.meta_keywords }}">
         {% endif %}
-        {% if misc_config.meta_description %}
-            <meta name="description" content="{{ misc_config.meta_description }}">
+        {% if request.path == '/' %}
+            {% if misc_config.meta_description %}
+                <meta name="description" content="{{ misc_config.meta_description }}">
+            {% endif %}
+        {% else %}
+            {% if problem is defined and description %}
+                {% set raw_text = description | markdown(problem.markdown_style, MATH_ENGINE) | striptags %}
+                <meta name="description" content="{{ raw_text | truncatewords(30) }}">
+            {% else %}
+                <meta name="description" content="Trang bài tập trực tuyến FPTOJ – nơi luyện tập và thi đấu thuật toán.">
+            {% endif %}
         {% endif %}
+
         <meta name="author" content="Ha Tri Kien">
         
         <!-- Open Graph / Facebook / Zalo / Discord -->
@@ -229,11 +239,22 @@
                 margin-right: auto;      /* Tự động căn lề phải */
                 margin-bottom: 20px;
             }
+            .mention {
+              cursor: pointer;   
+              font-weight: bold;
+            }
+            .mention:hover {
+              color: #0056b3;   
+            }
         </style>
 <script>
 
 
 $(document).ready(function() {
+    $(".mention").on("click", function () {
+        const username = $(this).text().trim();
+        window.location.href = "/user/" + username;
+    });
     $('img').each(function() {
         var imgSrc = $(this).attr('src'); 
         if (imgSrc && imgSrc.endsWith('.pdf')) { 
