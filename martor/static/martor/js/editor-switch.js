@@ -188,6 +188,41 @@ function switchEditor(selectElement, fieldName) {
                     ],
                     shouldNotGroupWhenFull: false
                 },
+                contentStyle: `
+                  /* đảm bảo chọn cả 2 lớp thường thấy trong CK5 editable */
+                  .ck-content ul,
+                  .ck-editor__editable ul {
+                      list-style-type: disc !important;         /* bật bullet */
+                      list-style-position: outside !important;  /* bullet ở ngoài */
+                      margin: 0 0 0 1.25rem !important;         /* thụt lề */
+                      padding-left: 0 !important;
+                  }
+                        
+                  .ck-content ol,
+                  .ck-editor__editable ol {
+                      list-style-type: decimal !important;
+                      margin: 0 0 0 1.25rem !important;
+                      padding-left: 0 !important;
+                  }
+                        
+                  .ck-content li,
+                  .ck-editor__editable li {
+                      margin: 0.25rem 0 !important;
+                  }
+                        
+                  /* nested lists */
+                  .ck-content ul ul,
+                  .ck-content ol ol,
+                  .ck-editor__editable ul ul,
+                  .ck-editor__editable ol ol {
+                      margin-left: 1rem !important;
+                  }
+                        
+                  /* Một số style mặc định cần cho headings / paragraph */
+                  .ck-content h1, .ck-editor__editable h1 { font-size: 1.6em; margin: .5em 0; }
+                  .ck-content h2, .ck-editor__editable h2 { font-size: 1.4em; margin: .45em 0; }
+                  .ck-content p, .ck-editor__editable p { margin: .35em 0; }
+                `,
                 plugins: [
                     Alignment,
                     Autoformat,

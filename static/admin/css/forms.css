@@ -66,15 +66,7 @@ form div.radiolist input[type="radio"] {
     padding: 0;
 }
 
-form ul.inline {
-    margin-left: 0;
-    padding: 0;
-}
 
-form ul.inline li {
-    float: left;
-    padding-right: 7px;
-}
 
 /* ALIGNED FIELDSETS */
 
@@ -102,24 +94,15 @@ form ul.inline li {
     overflow-wrap: break-word;
 }
 
-.aligned ul label {
-    display: inline;
-    float: none;
-    width: auto;
-}
 
 .aligned .form-row input {
-    margin-bottom: 0;
+    margin-bottom: 10px;
 }
 
 .colMS .aligned .vLargeTextField, .colMS .aligned .vXMLLargeTextField {
     width: 350px;
 }
 
-form .aligned ul {
-    margin-left: 160px;
-    padding-left: 10px;
-}
 
 form .aligned div.radiolist {
     display: inline-block;
@@ -158,9 +141,6 @@ form .aligned select + div.help {
     padding-left: 10px;
 }
 
-form .aligned ul li {
-    list-style: none;
-}
 
 form .aligned table p {
     margin-left: 0;
@@ -195,7 +175,6 @@ fieldset .fieldBox {
 }
 
 form .wide p,
-form .wide ul.errorlist,
 form .wide input + p.help,
 form .wide input + div.help {
     margin-left: 200px;
@@ -206,10 +185,6 @@ form .wide div.help {
     padding-left: 50px;
 }
 
-form div.help ul {
-    padding-left: 0;
-    margin-left: 0;
-}
 
 .colM fieldset.wide .vLargeTextField, .colM fieldset.wide .vXMLLargeTextField {
     width: 450px;

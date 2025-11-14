@@ -50,26 +50,55 @@ if (!window.__CKEDITOR_LOADED__) {
     function attachPreviewLogic(fieldName) {
         const textarea = document.getElementById(`id_${fieldName}`);
         const editorSwitch = document.getElementById(`editor-switch-${fieldName}`);
+        
         $(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
             onVisible: async function(tabPath) {
                 const currentTabPath = this.dataset.tab;
                 if (currentTabPath === `ckeditor-preview-tab-${fieldName}`) {
                     const previewBox = this;
                     if (!previewBox) return;
-                    let previewContent = '';
+                
                     const ta = document.querySelector(`textarea[name="${fieldName}"]`);
-                    previewContent = (ta ? ta.value : '');
-
-                    if (!previewContent.trim()) {
+                    const previewContent = ta ? ta.value.trim() : '';
+                
+                    if (!previewContent) {
                         previewBox.innerHTML = '<p>{% trans "Nothing to preview" %}</p>';
                         return;
                     }
-
+                
                     try {
                         const html = await previewProblem(previewContent);
-                        previewBox.innerHTML = html;
+                    
+                        // Tạo iframe để render nội dung preview
+                        const iframe = document.createElement("iframe");
+                        iframe.style.width = "100%";
+                        iframe.style.height = "400px";
+                        iframe.style.border = "1px solid #ccc";
+                    
+                        // Xóa nội dung cũ và gắn iframe vào previewBox
+                        previewBox.innerHTML = "";
+                        previewBox.appendChild(iframe);
+                    
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        doc.open();
+                        doc.write(`
+                            <html>
+                                <head>
+                                    <style>
+                                        body { font-family: Arial, sans-serif; padding: 1rem; }
+                                        pre { background: #f5f5f5; padding: 0.5rem; border-radius: 4px; }
+                                    </style>
+                                </head>
+                                <body>${html}</body>
+                            </html>
+                        `);
+                        doc.close();
+                    
+                        // Nếu có MathJax thì render lại trong iframe
                         if (window.MathJax) {
-                            MathJax.typesetPromise([previewBox]);
+                            iframe.onload = () => {
+                                window.MathJax.typesetPromise([iframe.contentDocument.body]);
+                            };
                         }
                     } catch (err) {
                         console.error("Preview fetch failed:", err);
@@ -79,14 +108,14 @@ if (!window.__CKEDITOR_LOADED__) {
             }
         });
 
-        if (textarea && editorSwitch) {
-            const content = textarea.value.trim();
-            if (content.startsWith('<htmlrender>')) {
-                editorSwitch.value = 'ckeditor';
-                switchEditor(editorSwitch, fieldName);
-            }
+    if (textarea && editorSwitch) {
+        const content = textarea.value.trim();
+        if (content.startsWith('<htmlrender>')) {
+            editorSwitch.value = 'ckeditor';
+            switchEditor(editorSwitch, fieldName);
         }
     }
+}
 
     function initAllEditors() {
         document.querySelectorAll('.main-martor[data-field-name]').forEach(container => {

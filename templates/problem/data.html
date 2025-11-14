@@ -576,8 +576,7 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
         }
 
         const extractTestIndex = (file) => {
-            // Nhận .in, .inp, .out, hoa thường hay thường
-            const match = file.match(/(\d+)(?=\.(in|inp|out)$)/i); // i là ignore case
+            const match = file.match(/(\d+)(?=\.(in|inp|out)$)/i);
             if (match) return parseInt(match[1], 10);
                 
             const fallbackMatch = file.match(/(\d+)[^\d]*\.(in|inp|out)$/i);
@@ -585,15 +584,19 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
         };
         
         const inputFiles = validFiles
-            .filter(file => /\.(in|inp)$/i.test(file)) // dùng test() cho regex
+            .filter(file => /\.(in|inp)$/i.test(file))
             .map(file => ({ file, index: extractTestIndex(file) }))
-            .filter(item => item.index !== null)
+            .filter(item => item.index !== null) // Giữ lại: lọc bỏ file không có index
+            // THAY ĐỔI Ở ĐÂY: Dịch tất cả index lên 1 (0->1, 1->2, ...)
+            .map(item => ({ ...item, index: item.index + 1 })) 
             .sort((a, b) => a.index - b.index);
         
         const outputFiles = validFiles
             .filter(file => /\.out$/i.test(file))
             .map(file => ({ file, index: extractTestIndex(file) }))
-            .filter(item => item.index !== null)
+            .filter(item => item.index !== null) // Giữ lại: lọc bỏ file không có index
+            // THAY ĐỔI Ở ĐÂY: Dịch tất cả index lên 1 (0->1, 1->2, ...)
+            .map(item => ({ ...item, index: item.index + 1 }))
             .sort((a, b) => a.index - b.index);
 
 
@@ -609,7 +612,8 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
             return;
         }
 
-        console.log(`Tìm thấy ${testCases.length} test case:`, testCases);
+        // Log cũng sẽ hiển thị index đã được +1
+        console.log(`Tìm thấy ${testCases.length} test case (index đã +1):`, testCases);
 
         const payload = {
             total_testcase: testCases.length,
@@ -632,7 +636,6 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
             return;
         }
 
-        // Redirect to problem data page
         window.location.href = "{{ problem_data_url }}";
 
     } catch (e) {
