@@ -576,43 +576,72 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
         }
 
         const extractTestIndex = (file) => {
-            const match = file.match(/(\d+)(?=\.(in|inp|out)$)/i);
-            if (match) return parseInt(match[1], 10);
-                
+            const pathMatch = file.match(/[\\\/](?:test|case)(\d+)[\\\/]/i);
+            if (pathMatch) return parseInt(pathMatch[1], 10);
+
+            // ƯU TIÊN 2: (Code gốc của bạn) Tìm số ngay trước extension
+            // Ví dụ: "test001.in" -> trích xuất 001
+            const simpleMatch = file.match(/(\d+)(?=\.(in|inp|out)$)/i);
+            if (simpleMatch) return parseInt(simpleMatch[1], 10);
+            
+            // ƯU TIÊN 3: (Fallback gốc của bạn) Tìm số cuối cùng trong tên file
             const fallbackMatch = file.match(/(\d+)[^\d]*\.(in|inp|out)$/i);
             return fallbackMatch ? parseInt(fallbackMatch[1], 10) : null;
         };
         
-        const inputFiles = validFiles
-            .filter(file => /\.(in|inp)$/i.test(file))
-            .map(file => ({ file, index: extractTestIndex(file) }))
-            .filter(item => item.index !== null) // Giữ lại: lọc bỏ file không có index
-            // THAY ĐỔI Ở ĐÂY: Dịch tất cả index lên 1 (0->1, 1->2, ...)
-            .map(item => ({ ...item, index: item.index + 1 })) 
-            .sort((a, b) => a.index - b.index);
+        // 1. Tạo Map cho output (để tra cứu nhanh O(1))
+        const outputMap = new Map();
         
-        const outputFiles = validFiles
-            .filter(file => /\.out$/i.test(file))
-            .map(file => ({ file, index: extractTestIndex(file) }))
-            .filter(item => item.index !== null) // Giữ lại: lọc bỏ file không có index
-            // THAY ĐỔI Ở ĐÂY: Dịch tất cả index lên 1 (0->1, 1->2, ...)
-            .map(item => ({ ...item, index: item.index + 1 }))
-            .sort((a, b) => a.index - b.index);
+        // 2. Tạo mảng cho input
+        const inputFiles = [];
 
+        // 3. Phân loại file trong MỘT vòng lặp
+        for (const file of validFiles) {
+            const index = extractTestIndex(file); // Dùng hàm mới
+            
+            if (index === null) {
+                console.warn(`Bỏ qua file không có index: ${file}`);
+                continue;
+            }
 
+            if (/\.(in|inp)$/i.test(file)) {
+                // Thêm TẤT CẢ file input tìm thấy
+                inputFiles.push({ file, index });
+            } else if (/\.out$/i.test(file)) {
+                // Chỉ lưu file output ĐẦU TIÊN tìm thấy cho index đó
+                if (!outputMap.has(index)) {
+                    outputMap.set(index, file);
+                } else {
+                     console.warn(`Tìm thấy file output trùng lặp cho index ${index}: Bỏ qua ${file}, giữ lại ${outputMap.get(index)}`);
+                }
+            }
+        }
+
+        // 4. Sắp xếp inputFiles theo index
+        inputFiles.sort((a, b) => a.index - b.index);
+
+        // 5. Lặp qua inputFiles và ghép cặp (rất nhanh)
         const testCases = [];
         for (const input of inputFiles) {
-            const output = outputFiles.find(out => out.index === input.index);
-            if (output) testCases.push({ index: input.index, input_file: input.file, output_file: output.file });
-            else console.warn(`Không tìm thấy file output tương ứng cho ${input.file}`);
+            const output_file = outputMap.get(input.index);
+            
+            if (output_file) {
+                testCases.push({
+                    index: input.index + 1, // Cộng 1 tại đây
+                    input_file: input.file,
+                    output_file: output_file
+                });
+            } else {
+                console.warn(`Không tìm thấy file output tương ứng cho ${input.file} (index gốc: ${input.index})`);
+            }
         }
 
         if (!testCases.length) {
             console.error("Không tìm thấy cặp test case hợp lệ (.in/.inp và .out)");
+            alert("Không tìm thấy cặp test case hợp lệ. Kiểm tra tên file.");
             return;
         }
 
-        // Log cũng sẽ hiển thị index đã được +1
         console.log(`Tìm thấy ${testCases.length} test case (index đã +1):`, testCases);
 
         const payload = {
