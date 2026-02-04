@@ -3,6 +3,13 @@
 
 {% block object-tools-items %}
     {{ block.super }}
+    {% if not is_popup and perms.judge.add_contest %}
+        <li>
+            <a href="{{ themis_create_url }}" class="addlink">
+                {% trans "Create Themis Contest" %}
+            </a>
+        </li>
+    {% endif %}
     {% if not is_popup and perms.judge.contest_rating %}
         <li>
             <a href="{% url 'admin:judge_contest_rate_all' %}" class="ratealllink action-link">

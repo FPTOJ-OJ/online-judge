@@ -46,7 +46,6 @@ from judge.utils.subscription import Subscription
 from judge.utils.unicode import utf8text
 from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, TitleMixin, add_file_response, generic_message
 from .contests import ContestRanking
-from django_recaptcha.fields import ReCaptchaField
 
 __all__ = ['UserPage', 'UserAboutPage', 'UserProblemsPage', 'UserDownloadData', 'UserPrepareData',
            'users', 'edit_profile']

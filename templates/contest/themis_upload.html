@@ -1,0 +1,292 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'upload' %}
+    {% set title = contest.name %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block body %}
+<style>
+    .upload-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .settings-panel {
+        background: #f8f9fa;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .status-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .status-table th, .status-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .status-table th {
+        background-color: #f2f2f2;
+    }
+    .status-pending { color: #666; }
+    .status-success { color: green; font-weight: bold; }
+    .status-error { color: red; }
+</style>
+
+<div class="contest-tab-content upload-container">
+    <h3>{{ _("Client-Side Bulk Upload") }}</h3>
+    <p>{{ _("Select files or a folder. The browser will read them, map them to problems, and submit them directly.") }}</p>
+
+    {% if request.user.is_staff %}
+    <!-- Settings Section -->
+    <div class="settings-panel">
+        <h4>{{ _("Language Mapping Settings") }}</h4>
+        <div id="language-mappings">
+            <!-- JS will populate this -->
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Upload Section -->
+    <div class="form-group" style="text-align: center; background: #fff; padding: 30px; border: 2px dashed #bbb; border-radius: 8px;">
+        <label class="button primary" style="font-size: 1.5em; padding: 15px 30px; cursor: pointer;">
+            <i class="fa fa-folder-open"></i> {{ _("Select Folder / Files to Upload") }}
+            <input type="file" id="file-input" multiple webkitdirectory style="display: none;">
+        </label>
+        <p class="help-block" style="margin-top: 15px;">{{ _("You can select a single folder containing all BAI subfolders, or select multiple .cpp/.py files directly.") }}</p>
+        <div id="file-count" style="margin-top: 10px; font-weight: bold; font-size: 1.2em; color: #0056b3;"></div>
+        
+        <button id="btn-submit-all" class="button" style="display: none; margin-top: 20px; font-size: 1.3em; background-color: #28a745; color: white;">
+            <i class="fa fa-cloud-upload"></i> {{ _("Submit All Files Now") }}
+        </button>
+    </div>
+
+    <!-- Status Table -->
+    <div class="table-responsive">
+        <table class="status-table">
+            <thead>
+                <tr>
+                    <th>{{ _("File") }}</th>
+                    <th>{{ _("Problem") }}</th>
+                    <th>{{ _("Language") }}</th>
+                    <th>{{ _("Status") }}</th>
+                </tr>
+            </thead>
+            <tbody id="status-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Data from Backend
+    const problemsMap = {{ problems_json|safe }}; // {"BAI1": "th_contest_bai1", ...}
+    const availableLanguages = {{ languages_json|safe }}; // [{"id": "cpp", "name": "C++"}, ...]
+    const globalMappings = {{ mappings_json|safe }}; // {".cpp": "CPP17", ...}
+
+    // Default Extension Map (Fallback) - Using common DMOJ keys
+    const defaultExtMap = {
+        'cpp': 'CPP17',
+        'cc': 'CPP17',
+        'c': 'C11',
+        'py': 'PY3',
+        'py3': 'PY3',
+        'pas': 'PAS',
+        'java': 'JAVA'
+    };
+
+    // Initialize UI
+    function init() {
+        const mappingDiv = document.getElementById('language-mappings');
+        let html = '<table class="status-table"><thead><tr><th>Extension</th><th>Language</th></tr></thead><tbody>';
+        
+        // Merge defaults with global mappings (globals take precedence)
+        const combinedMap = { ...defaultExtMap, ...globalMappings };
+        
+        for (const [ext, langId] of Object.entries(combinedMap)) {
+            // Remove dot if present
+            const cleanExt = ext.replace(/^\./, '');
+            html += `<tr><td>.${cleanExt}</td><td>${langId}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        html += '<p class="help-block" style="margin-top: 10px;">{{ _("Admins can configure these globally in the Admin panel under Themis Extension Mappings. You can also manually change the language for each file below.") }}</p>';
+        mappingDiv.innerHTML = html;
+    }
+
+    function getLanguageId(ext) {
+        ext = ext.toLowerCase();
+        
+        // 1. Check Global/DB Mappings
+        if (globalMappings['.' + ext]) return globalMappings['.' + ext];
+        if (globalMappings[ext]) return globalMappings[ext];
+
+        // 2. Check Default Map
+        if (defaultExtMap[ext]) {
+             const target = defaultExtMap[ext];
+             // Verify it exists in availableLanguages
+             const lang = availableLanguages.find(l => l.id === target || l.common_name === target);
+             if (lang) return lang.id;
+        }
+        
+        // 3. Try to match extension to language ID directly
+        const direct = availableLanguages.find(l => l.id.toLowerCase() === ext);
+        if (direct) return direct.id;
+
+        return null;
+    }
+
+    function getProblemCode(filename) {
+        // Remove extension
+        const base = filename.replace(/\.[^/.]+$/, "");
+        
+        // 1. Direct Match (Case Insensitive)
+        if (problemsMap[base.toUpperCase()]) return problemsMap[base.toUpperCase()];
+
+        // 2. Regex Match BAI<number>
+        const match = base.match(/^BAI(\d+)$/i);
+        if (match) {
+            // Reconstruct BAI<n> and check map
+            const key = "BAI" + match[1];
+            if (problemsMap[key]) return problemsMap[key];
+        }
+
+        return null;
+    }
+
+    let queuedFiles = [];
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files).sort((a, b) => a.name.localeCompare(b.name));
+        const tbody = document.getElementById('status-body');
+        const submitBtn = document.getElementById('btn-submit-all');
+        
+        tbody.innerHTML = ''; 
+        queuedFiles = [];
+
+        for (const file of files) {
+            if (file.name.startsWith('.')) continue;
+
+            const probCode = getProblemCode(file.name);
+            const ext = file.name.split('.').pop();
+            const defaultLangId = getLanguageId(ext);
+
+            // Create Row
+            const tr = document.createElement('tr');
+            
+            // File Name
+            const tdFile = document.createElement('td'); 
+            tdFile.innerText = file.name;
+            
+            // Problem Code
+            const tdProb = document.createElement('td');
+            if (probCode) {
+                tdProb.innerText = probCode;
+            } else {
+                tdProb.innerHTML = '<span class="status-error">-</span>';
+            }
+
+            // Language Select
+            const tdLang = document.createElement('td');
+            const select = document.createElement('select');
+            select.className = 'form-control input-sm';
+            
+            // Default "Unknown" option
+            const unknownOpt = document.createElement('option');
+            unknownOpt.value = "";
+            unknownOpt.text = "Unknown";
+            select.appendChild(unknownOpt);
+
+            for (const lang of availableLanguages) {
+                const opt = document.createElement('option');
+                opt.value = lang.id;
+                opt.text = lang.name;
+                if (lang.id === defaultLangId) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            }
+            tdLang.appendChild(select);
+
+            // Status
+            const tdStatus = document.createElement('td');
+            tdStatus.className = 'status-cell';
+            tdStatus.innerText = 'Ready';
+
+            tr.appendChild(tdFile); tr.appendChild(tdProb); tr.appendChild(tdLang); tr.appendChild(tdStatus);
+            tbody.appendChild(tr);
+
+            queuedFiles.push({
+                file: file,
+                row: tr,
+                probCode: probCode,
+                langSelect: select,
+                statusCell: tdStatus
+            });
+        }
+
+        if (queuedFiles.length > 0) {
+            submitBtn.style.display = 'inline-block';
+            document.getElementById('file-count').innerText = queuedFiles.length + ' files selected';
+        }
+    });
+
+    document.getElementById('btn-submit-all').addEventListener('click', async function() {
+        this.disabled = true;
+        this.innerText = 'Processing...';
+
+        for (const item of queuedFiles) {
+            const { file, probCode, langSelect, statusCell } = item;
+            const langId = langSelect.value;
+
+            if (!probCode) {
+                statusCell.innerHTML = '<span class="status-error">{{ _("Skipped (Unknown Problem)") }}</span>';
+                continue;
+            }
+            if (!langId) {
+                statusCell.innerHTML = '<span class="status-error">{{ _("Skipped (Unknown Language)") }}</span>';
+                continue;
+            }
+
+            statusCell.innerText = 'Reading...';
+            try {
+                const text = await file.text();
+                statusCell.innerText = 'Uploading...';
+
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        problem: probCode,
+                        language: langId,
+                        source: text
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    statusCell.innerHTML = `<span class="status-success">{{ _("Submitted") }} <a href="/submission/${result.id}" target="_blank">#${result.id}</a></span>`;
+                } else {
+                    statusCell.innerHTML = `<span class="status-error">${result.error}</span>`;
+                }
+            } catch (err) {
+                console.error(err);
+                statusCell.innerHTML = `<span class="status-error">{{ _("Client Error") }}</span>`;
+            }
+        }
+
+        this.disabled = false;
+        this.innerText = 'Submit All';
+    });
+
+    init();
+</script>
+{% endblock %}

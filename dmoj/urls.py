@@ -16,6 +16,7 @@ from judge.views import TitledTemplateView, api, blog, comment, contests, langua
     two_factor, user, widgets
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
     problem_data_file, problem_init_view
+from judge.views.themis_creation import ThemisCreateView
 from judge.views.register import ActivationView, RegistrationView
 from judge.views.select2 import AssigneeSelect2View, ClassSelect2View, CommentSelect2View, ContestSelect2View, \
     ContestUserSearchSelect2View, OrganizationSelect2View, ProblemSelect2View, TicketUserSelect2View, \
@@ -205,9 +206,12 @@ urlpatterns = [
         path('/moss/delete', contests.ContestMossDelete.as_view(), name='contest_moss_delete'),
         path('/clone', contests.ContestClone.as_view(), name='contest_clone'),
         path('/ranking/', contests.ContestRanking.as_view(), name='contest_ranking'),
+        path('/ranking/csv', contests.ContestRankingCSV.as_view(), name='contest_ranking_csv'),
         path('/ranking/ajax', contests.contest_ranking_ajax, name='contest_ranking_ajax'),
         path('/join', contests.ContestJoin.as_view(), name='contest_join'),
         path('/leave', contests.ContestLeave.as_view(), name='contest_leave'),
+        path('/pdf', contests.ContestPDF.as_view(), name='contest_pdf'),
+        path('/upload', contests.ContestThemisUpload.as_view(), name='contest_themis_upload'),
         path('/stats', contests.ContestStats.as_view(), name='contest_stats'),
 
         path('/rank/<str:problem>/',
@@ -339,6 +343,7 @@ urlpatterns = [
 
     path('tickets/', include([
         path('', ticket.TicketList.as_view(), name='ticket_list'),
+        path('new/', ticket.NewStandaloneTicketView.as_view(), name='new_ticket'),
         path('ajax', ticket.TicketListDataAjax.as_view(), name='ticket_ajax'),
     ])),
 

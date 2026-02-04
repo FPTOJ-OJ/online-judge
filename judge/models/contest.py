@@ -14,6 +14,7 @@ from judge import contest_format
 from judge.models.problem import Problem
 from judge.models.profile import Class, Organization, Profile
 from judge.models.submission import Submission
+from judge.models.runtime import Language
 from judge.ratings import rate_contest
 
 __all__ = ['Contest', 'ContestTag', 'ContestParticipation', 'ContestProblem', 'ContestSubmission', 'Rating']
@@ -645,6 +646,18 @@ class Rating(models.Model):
         unique_together = ('user', 'contest')
         verbose_name = _('contest rating')
         verbose_name_plural = _('contest ratings')
+
+
+class ThemisExtensionMapping(models.Model):
+    extension = models.CharField(max_length=10, unique=True, verbose_name=_('extension'))
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, verbose_name=_('language'))
+
+    def __str__(self):
+        return f".{self.extension} -> {self.language.name}"
+
+    class Meta:
+        verbose_name = _('Themis extension mapping')
+        verbose_name_plural = _('Themis extension mappings')
 
 
 class ContestMoss(models.Model):

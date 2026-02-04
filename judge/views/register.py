@@ -20,7 +20,7 @@ from turnstile.fields import TurnstileField
 
 
 class CustomRegistrationForm(RegistrationForm):
-    captcha2 = TurnstileField()
+    captcha = TurnstileField()
     username = forms.RegexField(regex=r'^\w+$', max_length=30, label=_('Username'),
                                 error_messages={'invalid': _('A username must contain letters, '
                                                              'numbers, or underscores.')})
@@ -35,7 +35,12 @@ class CustomRegistrationForm(RegistrationForm):
     if newsletter_id is not None:
         newsletter = forms.BooleanField(label=_('Subscribe to newsletter?'), initial=True, required=False)
 
-    
+    def __init__(self, *args, **kwargs):
+        super(CustomRegistrationForm, self).__init__(*args, **kwargs)
+        if not getattr(settings, 'TURNSTILE_SITEKEY', None) or not getattr(settings, 'TURNSTILE_SECRET', None):
+            if 'captcha' in self.fields:
+                del self.fields['captcha']
+
     def clean_email(self):
         if User.objects.filter(email=self.cleaned_data['email']).exists():
             raise forms.ValidationError(gettext('The email address "%s" is already taken. Only one registration '

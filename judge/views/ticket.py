@@ -1,6 +1,7 @@
 import json
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied, ValidationError
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
@@ -15,6 +16,7 @@ from django.utils.translation import gettext as _, gettext_lazy
 from django.views import View
 from django.views.generic import ListView
 from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormView
 
 from judge import event_poster as event
 from judge.models import Problem, Profile, Ticket, TicketMessage
@@ -23,18 +25,21 @@ from judge.utils.tickets import filter_visible_tickets, own_ticket_filter
 from judge.utils.views import SingleObjectFormView, TitleMixin, paginate_query_context
 from judge.views.problem import ProblemMixin
 from judge.widgets import MartorWidget
-from django_recaptcha.fields import ReCaptchaField 
+from turnstile.fields import TurnstileField
 ticket_widget = MartorWidget(attrs={'data-markdownfy-url': reverse_lazy('ticket_preview')})
 
 
 class TicketForm(forms.Form):
-    captcha = ReCaptchaField()
+    captcha = TurnstileField()
     title = forms.CharField(max_length=100, label=gettext_lazy('Ticket title'))
     body = forms.CharField(widget=ticket_widget)
 
     def __init__(self, request, *args, **kwargs):
         self.request = request
         super(TicketForm, self).__init__(*args, **kwargs)
+        if not getattr(settings, 'TURNSTILE_SITEKEY', None) or not getattr(settings, 'TURNSTILE_SECRET', None):
+            if 'captcha' in self.fields:
+                del self.fields['captcha']
         self.fields['title'].widget.attrs.update({'placeholder': _('Ticket title')})
         self.fields['body'].widget.attrs.update({'placeholder': _('Issue description')})
 
@@ -75,6 +80,39 @@ class NewTicketView(LoginRequiredMixin, SingleObjectFormView):
 
 
 
+class NewStandaloneTicketView(LoginRequiredMixin, TitleMixin, FormView):
+    form_class = TicketForm
+    template_name = 'ticket/new.html'
+    title = gettext_lazy('New Ticket')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.request.GET.get('url'):
+            initial['title'] = _('Report from %s') % self.request.GET.get('url')
+        return initial
+
+    def get_assignees(self):
+        return Profile.objects.filter(user__is_staff=True)
+
+    def form_valid(self, form):
+        ticket = Ticket(user=self.request.profile, title=form.cleaned_data['title'])
+        ticket.linked_item = self.request.profile
+        ticket.save()
+        message = TicketMessage(ticket=ticket, user=ticket.user, body=form.cleaned_data['body'])
+        message.save()
+        ticket.assignees.set(self.get_assignees())
+        if event.real:
+            event.post('tickets', {
+                'type': 'new-ticket', 'id': ticket.id,
+                'message': message.id, 'user': ticket.user_id,
+                'assignees': list(ticket.assignees.values_list('id', flat=True)),
+            })
+        return HttpResponseRedirect(reverse('ticket', args=[ticket.id]))
 
 
 class NewProblemTicketView(ProblemMixin, TitleMixin, NewTicketView):
@@ -99,7 +137,6 @@ class NewProblemTicketView(ProblemMixin, TitleMixin, NewTicketView):
         if not self.object.is_accessible_by(self.request.user):
             raise Http404()
         return super().form_valid(form)
-
 
 
 

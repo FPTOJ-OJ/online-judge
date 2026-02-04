@@ -178,6 +178,9 @@ class CustomAuthenticationForm(AuthenticationForm):
     
     def __init__(self, *args, **kwargs):
         super(CustomAuthenticationForm, self).__init__(*args, **kwargs)
+        if not getattr(settings, 'TURNSTILE_SITEKEY', None) or not getattr(settings, 'TURNSTILE_SECRET', None):
+            if 'captcha' in self.fields:
+                did_remove = self.fields.pop('captcha', None)
         self.fields['username'].widget.attrs.update({'placeholder': _('Username')})
         self.fields['password'].widget.attrs.update({'placeholder': _('Password')})
 
@@ -314,3 +317,28 @@ class ProblemPointsVoteForm(ModelForm):
     class Meta:
         model = ProblemPointsVote
         fields = ['points', 'note']
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)]
+        return result
+
+
+class ThemisUploadForm(Form):
+    files = MultipleFileField(label=_('Files'), required=False)
+    folder = MultipleFileField(widget=MultipleFileInput(attrs={'webkitdirectory': True, 'directory': True}), label=_('Folder'), required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get('files') and not cleaned_data.get('folder'):
+            raise ValidationError(_('Please upload either files or a folder.'))
+        return cleaned_data

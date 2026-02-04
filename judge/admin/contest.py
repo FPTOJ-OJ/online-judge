@@ -14,11 +14,16 @@ from django.utils.translation import gettext_lazy as _, ngettext
 from django.views.decorators.http import require_POST
 from reversion.admin import VersionAdmin
 
-from judge.models import Class, Contest, ContestProblem, ContestSubmission, Profile, Rating, Submission
+from judge.models import Class, Contest, ContestProblem, ContestSubmission, Profile, Rating, Submission, ThemisExtensionMapping
 from judge.ratings import rate_contest
 from judge.utils.views import NoBatchDeleteMixin
 from judge.widgets import AdminAceWidget, AdminHeavySelect2MultipleWidget, AdminHeavySelect2Widget, \
     AdminMartorWidget, AdminSelect2MultipleWidget, AdminSelect2Widget
+
+
+class ThemisExtensionMappingAdmin(admin.ModelAdmin):
+    list_display = ('extension', 'language')
+    search_fields = ('extension', 'language__name')
 
 
 class AdminHeavySelect2Widget(AdminHeavySelect2Widget):
@@ -137,6 +142,11 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
     change_list_template = 'admin/judge/contest/change_list.html'
     filter_horizontal = ['rate_exclude']
     date_hierarchy = 'start_time'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['themis_create_url'] = reverse('admin:judge_contest_themis_create')
+        return super().changelist_view(request, extra_context=extra_context)
 
     def get_actions(self, request):
         actions = super(ContestAdmin, self).get_actions(request)
@@ -263,10 +273,12 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
                                       contest__participation__virtual=0).update(locked_after=locked_after)
 
     def get_urls(self):
+        from judge.views.themis_creation import ThemisCreateView
         return [
             path('rate/all/', self.rate_all_view, name='judge_contest_rate_all'),
             path('<int:id>/rate/', self.rate_view, name='judge_contest_rate'),
             path('<int:contest_id>/judge/<int:problem_id>/', self.rejudge_view, name='judge_contest_rejudge'),
+            path('themis/create/', self.admin_site.admin_view(ThemisCreateView.as_view()), name='judge_contest_themis_create'),
         ] + super(ContestAdmin, self).get_urls()
 
     @method_decorator(require_POST)

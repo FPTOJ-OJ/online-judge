@@ -1,4 +1,5 @@
 import json
+import csv
 from calendar import Calendar, SUNDAY
 from collections import defaultdict, namedtuple
 from datetime import date, datetime, time, timedelta
@@ -13,7 +14,7 @@ from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import BooleanField, Case, Count, F, FloatField, IntegerField, Max, Min, Q, Sum, Value, When
 from django.db.models.expressions import CombinedExpression, Exists, OuterRef
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.defaultfilters import date as date_filter
 from django.urls import reverse
@@ -31,9 +32,9 @@ from reversion import revisions
 
 from judge import event_poster as event
 from judge.comments import CommentedDetailView
-from judge.forms import ContestCloneForm
+from judge.forms import ContestCloneForm, ThemisUploadForm
 from judge.models import Contest, ContestMoss, ContestParticipation, ContestProblem, ContestTag, \
-    Problem, Profile, Submission
+    Problem, Profile, Submission, Language, ContestSubmission, SubmissionSource, ThemisExtensionMapping
 from judge.tasks import run_moss
 from judge.utils.celery import redirect_to_task_status
 from judge.utils.opengraph import generate_opengraph
@@ -46,7 +47,7 @@ from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, SingleOb
 __all__ = ['ContestList', 'ContestDetail', 'ContestRanking', 'ContestJoin', 'ContestLeave', 'ContestCalendar',
            'ContestClone', 'ContestStats', 'ContestMossView', 'ContestMossDelete', 'contest_ranking_ajax',
            'ContestParticipationList', 'ContestParticipationDisqualify', 'get_contest_ranking_list',
-           'base_contest_ranking_list']
+           'base_contest_ranking_list', 'ContestThemisUpload']
 
 
 def _find_contest(request, key, private_check=True):
@@ -192,7 +193,7 @@ class ContestMixin(object):
         return self.object.is_editable_by(self.request.user)
 
     def get_context_data(self, **kwargs):
-        context = super(ContestMixin, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
             try:
                 context['live_participation'] = (
@@ -229,7 +230,7 @@ class ContestMixin(object):
         return context
 
     def get_object(self, queryset=None):
-        contest = super(ContestMixin, self).get_object(queryset)
+        contest = super().get_object(queryset)
 
         profile = self.request.profile
         if (profile is not None and
@@ -248,7 +249,7 @@ class ContestMixin(object):
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            return super(ContestMixin, self).dispatch(request, *args, **kwargs)
+            return super().dispatch(request, *args, **kwargs)
         except Http404:
             key = kwargs.get(self.slug_url_kwarg, None)
             if key:
@@ -310,6 +311,8 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
         )
         context['enable_comments'] = settings.DMOJ_ENABLE_COMMENTS
         context['enable_social'] = settings.DMOJ_ENABLE_SOCIAL
+        from judge.utils.pdfoid import PDF_RENDERING_ENABLED
+        context['has_pdf_render'] = PDF_RENDERING_ENABLED
         return context
 
 
@@ -444,6 +447,10 @@ class ContestJoin(LoginRequiredMixin, ContestMixin, SingleObjectMixin, View):
 
         profile.current_contest = participation
         profile.save()
+        
+        # Ensure points are computed for virtual join
+        participation.recompute_results()
+        
         contest._updating_stats_only = True
         contest.update_user_count()
         return HttpResponseRedirect(reverse('problem_list'))
@@ -766,19 +773,65 @@ class ContestRanking(ContestRankingBase):
 
     def get_ranking_list(self):
         if not self.object.can_see_full_scoreboard(self.request.user):
+            # If they can only see their own score, still try to show their virtual participation if applicable
             queryset = self.object.users.filter(user=self.request.profile, virtual=ContestParticipation.LIVE)
             return get_contest_ranking_list(
                 self.request, self.object,
                 ranking_list=partial(base_contest_ranking_list, queryset=queryset),
                 ranker=lambda users, key: ((_('???'), user) for user in users),
+                show_current_virtual=True,
             )
 
-        return get_contest_ranking_list(self.request, self.object)
+        return get_contest_ranking_list(self.request, self.object, show_current_virtual=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['has_rating'] = self.object.ratings.exists()
+        from judge.utils.pdfoid import PDF_RENDERING_ENABLED
+        context['has_pdf_render'] = PDF_RENDERING_ENABLED
         return context
+
+
+class ContestRankingCSV(ContestRanking):
+    def get_ranking_list(self):
+        # Exclude virtual participants from CSV export
+        return get_contest_ranking_list(self.request, self.object, show_current_virtual=False)
+
+    def render_to_response(self, context, **response_kwargs):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="%s.csv"' % self.object.key
+        writer = csv.writer(response)
+
+        users = context['users']
+        problems = context['problems']
+
+        header = ['User'] + [p.problem.code for p in problems] + ['Total', 'Time']
+        writer.writerow(header)
+
+        for item in users:
+            if isinstance(item, tuple):
+                 profile = item[1]
+            else:
+                 profile = item
+
+            if not hasattr(profile, 'participation'):
+                continue
+
+            p = profile.participation
+            row = [profile.username]
+
+            for problem in problems:
+                data = (p.format_data or {}).get(str(problem.id))
+                if data:
+                    row.append(data.get('points', 0))
+                else:
+                    row.append(0)
+
+            row.append(profile.points)
+            row.append(profile.cumtime)
+            writer.writerow(row)
+
+        return response
 
 
 class ContestParticipationList(LoginRequiredMixin, ContestRankingBase):
@@ -903,3 +956,125 @@ class ContestTagDetail(TitleMixin, ContestTagDetailAjax):
 
     def get_title(self):
         return _('Contest tag: %s') % self.object.name
+
+
+class ContestPDF(ContestMixin, SingleObjectMixin, View):
+    def get(self, request, *args, **kwargs):
+        from judge.utils.pdfoid import PDF_RENDERING_ENABLED, render_pdf
+        if not PDF_RENDERING_ENABLED:
+            raise Http404()
+
+        self.object = self.get_object()
+        problems = self.object.contest_problems.select_related('problem').order_by('order')
+        
+        full_html = ""
+        for cp in problems:
+            problem = cp.problem
+            # Basic markdown to HTML for problems that aren't using complex templates
+            # DMOJ usually has a more complex rendering pipeline, but for this bulk 
+            # export we'll use a simplified version or rely on the fact that 
+            # themis problems often use simple markdown/text.
+            
+            # Use the raw template from problem view
+            from django.template.loader import get_template
+            full_html += get_template('problem/raw.html').render({
+                'problem': problem,
+                'problem_name': problem.name,
+                'description': problem.description,
+                'url': request.build_absolute_uri(problem.get_absolute_url()),
+            })
+            # Add page break
+            full_html += '<div style="page-break-after: always;"></div>'
+
+        pdf_basename = f'{self.object.key}.pdf'
+        pdf_content = render_pdf(
+            html=full_html.replace('"//', '"https://').replace("'//", "'https://"),
+            title=self.object.name,
+        )
+
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename={pdf_basename}'
+        return response
+
+
+class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleObjectMixin, TemplateView):
+    model = Contest
+    slug_field = 'key'
+    slug_url_kwarg = 'contest'
+    template_name = 'contest/themis_upload.html'
+
+    def get_title(self):
+        return _('Bulk Upload - %s') % self.object.name
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+            if self.object.format_name != 'themis':
+                raise Http404()
+            if not self.object.is_in_contest(request.user):
+                 return redirect(reverse('contest_view', args=[self.object.key]))
+            return super().dispatch(request, *args, **kwargs)
+        except Exception as e:
+            if request.method == 'POST':
+                import traceback
+                return JsonResponse({'success': False, 'error': f"Dispatch Error: {str(e)}", 'trace': traceback.format_exc()})
+            raise
+
+    def get_context_data(self, **kwargs):
+        if 'contest' in kwargs:
+            del kwargs['contest']
+        context = super().get_context_data(**kwargs)
+        problems_data = {}
+        for cp in self.object.contest_problems.select_related('problem'):
+            p = cp.problem
+            problems_data[p.code.upper()] = p.code
+            problems_data[p.name.upper()] = p.code
+            problems_data[f"BAI{cp.order + 1}"] = p.code
+        languages_data = []
+        for lang in Language.objects.filter(judges__online=True).distinct():
+            languages_data.append({'id': lang.key, 'name': lang.name, 'common_name': lang.common_name})
+        context['problems_json'] = json.dumps(problems_data)
+        context['languages_json'] = json.dumps(languages_data)
+        mappings = {}
+        for m in ThemisExtensionMapping.objects.all().select_related('language'):
+            mappings[m.extension.lower()] = m.language.key
+        context['mappings_json'] = json.dumps(mappings)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        try:
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                return HttpResponseBadRequest("Invalid JSON")
+            profile = request.profile
+            participation = None
+            if profile.current_contest and profile.current_contest.contest_id == self.object.id:
+                participation = profile.current_contest
+            else:
+                participation = profile.contest_history.filter(contest=self.object).order_by('-start').first()
+            
+            if not participation:
+                return JsonResponse({'success': False, 'error': _('You are not participating in this contest.')})
+            problem_code = data.get('problem')
+            lang_key = data.get('language')
+            source_code = data.get('source')
+            if not problem_code or not lang_key or not source_code:
+                return JsonResponse({'success': False, 'error': _('Missing required fields.')})
+            try:
+                contest_problem = self.object.contest_problems.get(problem__code=problem_code)
+                problem = contest_problem.problem
+            except ContestProblem.DoesNotExist:
+                 return JsonResponse({'success': False, 'error': _('Problem not found in contest.')})
+            try:
+                language = Language.objects.get(key=lang_key)
+            except Language.DoesNotExist:
+                return JsonResponse({'success': False, 'error': _('Language not found: %s') % lang_key})
+            sub = Submission.objects.create(user=profile, problem=problem, language=language, contest_object=self.object)
+            SubmissionSource.objects.create(submission=sub, source=source_code)
+            ContestSubmission.objects.get_or_create(submission=sub, problem=contest_problem, participation=participation)
+            sub.judge()
+            return JsonResponse({'success': True, 'id': sub.id, 'status': 'Queued'})
+        except Exception as e:
+            import traceback
+            return JsonResponse({'success': False, 'error': f"Server Error: {str(e)}", 'trace': traceback.format_exc()})

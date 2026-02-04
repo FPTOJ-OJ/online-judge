@@ -234,6 +234,31 @@
         </div>
     {% endif %}
 
+    {% if contest.started or request.user.is_superuser or is_editor or is_tester %}
+        <hr>
+        <div class="contest-problems-full">
+            <h2 style="display: flex; justify-content: space-between; align-items: center;">
+                {{ _('Problem Statements') }}
+                {% if has_pdf_render %}
+                    <a href="{{ url('contest_pdf', contest.key) }}" class="button" style="font-size: 0.6em;">
+                        <i class="fa fa-file-pdf-o"></i> {{ _('Export all as PDF') }}
+                    </a>
+                {% endif %}
+            </h2>
+            {% for problem in contest_problems %}
+                <div class="problem-card" style="margin-bottom: 30px; border: 1px solid #eee; padding: 20px;">
+                    <h3>
+                        <a href="{{ url('problem_detail', problem.code) }}">{{ problem.i18n_name or problem.name }}</a>
+                        <small class="pull-right">{{ problem.points|floatformat }} {{ _('points') }}</small>
+                    </h3>
+                    <div class="content-description">
+                        {{ problem.description|markdown('problem', MATH_ENGINE)|reference|str|safe }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {% if enable_social %}
         <hr>
         <span class="social">

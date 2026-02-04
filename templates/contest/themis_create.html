@@ -1,0 +1,125 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_urls %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ form.media }}
+    <script type="text/javascript" src="{% static 'admin/js/calendar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'admin/js/admin/DateTimeShortcuts.js' %}"></script>
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='judge' %}">{% translate 'Judge' %}</a>
+&rsaquo; <a href="{% url 'admin:judge_contest_changelist' %}">{% translate 'Contests' %}</a>
+&rsaquo; {% translate 'Create Themis Contest' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <p style="padding: 10px;">
+            {% translate "Upload a zip file containing the Themis folder structure (TEST/BAI...). Problems and test cases will be generated automatically." %}
+        </p>
+
+        <form method="post" enctype="multipart/form-data" id="contest_form" novalidate>
+            {% csrf_token %}
+            <div>
+                {% if form.errors %}
+                    <p class="errornote">
+                        {% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+                    </p>
+                {% endif %}
+
+                <fieldset class="module aligned">
+                    <div class="form-row field-name{% if form.name.errors %} errors{% endif %}">
+                        {{ form.name.errors }}
+                        <div>
+                            <label class="required" for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>
+                            {{ form.name }}
+                        </div>
+                    </div>
+
+                    <div class="form-row field-start_time{% if form.start_time.errors %} errors{% endif %}">
+                        {{ form.start_time.errors }}
+                        <div>
+                            <label class="required" for="{{ form.start_time.id_for_label_0 }}">{{ form.start_time.label }}:</label>
+                            {{ form.start_time }}
+                        </div>
+                    </div>
+
+                    <div class="form-row field-end_time{% if form.end_time.errors %} errors{% endif %}">
+                        {{ form.end_time.errors }}
+                        <div>
+                            <label class="required" for="{{ form.end_time.id_for_label_0 }}">{{ form.end_time.label }}:</label>
+                            {{ form.end_time }}
+                        </div>
+                    </div>
+
+                    <div class="form-row field-access_code{% if form.access_code.errors %} errors{% endif %}">
+                        {{ form.access_code.errors }}
+                        <div>
+                            <label for="{{ form.access_code.id_for_label }}">{{ form.access_code.label }}:</label>
+                            {{ form.access_code }}
+                            <div class="help">{{ form.access_code.help_text }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row field-is_visible{% if form.is_visible.errors %} errors{% endif %}">
+                        {{ form.is_visible.errors }}
+                        <div>
+                            <label class="vCheckboxLabel" for="{{ form.is_visible.id_for_label }}">{{ form.is_visible.label }}</label>
+                            {{ form.is_visible }}
+                            <div class="help">{{ form.is_visible.help_text }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row field-zip_file{% if form.zip_file.errors %} errors{% endif %}">
+                        {{ form.zip_file.errors }}
+                        <div>
+                            <label class="required" for="{{ form.zip_file.id_for_label }}">{{ form.zip_file.label }}:</label>
+                            {{ form.zip_file }}
+                            <div class="help">{{ form.zip_file.help_text }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row field-is_infinite{% if form.is_infinite.errors %} errors{% endif %}">
+                        {{ form.is_infinite.errors }}
+                        <div>
+                            <label class="vCheckboxLabel" for="{{ form.is_infinite.id_for_label }}">{{ form.is_infinite.label }}</label>
+                            {{ form.is_infinite }}
+                            <div class="help">{{ form.is_infinite.help_text }}</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="submit-row">
+                    <input type="submit" value="{% translate 'Create Contest' %}" class="default" name="_save">
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="module">
+        <h2>{% translate "Expected Zip Structure" %}</h2>
+        <div style="padding: 10px;">
+            <pre>
+TEST/
+  BAI1/
+    TEST01/
+      BAI1.INP
+      BAI1.OUT
+    TEST02/ ...
+  BAI2/ ...
+            </pre>
+        </div>
+    </div>
+</div>
+{% endblock %}

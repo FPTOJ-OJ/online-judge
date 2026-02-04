@@ -6,7 +6,19 @@
 
 {% block body %}
     <form id="ticket-form" action="" method="POST" class="form-area">
-        {% block guideline_message %}{% endblock %}
+        {% block guideline_message %}
+            <div class="alert alert-info alert-dismissable">
+                <a class="close">x</a>
+                <b>Hướng dẫn báo lỗi</b>
+                <br><br>
+                Để giúp chúng tôi xử lý lỗi nhanh chóng, vui lòng cung cấp các thông tin sau:
+                <ul style="margin-left: 1.5em; margin-bottom: 0;">
+                    <li><b>Mô tả:</b> Lỗi xảy ra khi nào? Bạn đang cố gắng làm gì?</li>
+                    <li><b>Đường dẫn:</b> URL của trang bị lỗi (nếu có).</li>
+                    <li><b>Các bước tái hiện:</b> Làm thế nào để chúng tôi thấy lỗi này?</li>
+                </ul>
+            </div>
+        {% endblock %}
         {% csrf_token %}
         <div class="title-block{% if form.title.errors %} error{% endif %}">{{ form.title }}</div>
         {% if form.errors %}

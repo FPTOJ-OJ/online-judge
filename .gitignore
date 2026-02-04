@@ -24,3 +24,5 @@ web.log
 web.log.1
 build
 static
+node_modules
+uwsgi.ini

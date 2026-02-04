@@ -6,6 +6,10 @@
         {{ make_tab('stats', 'fa-pie-chart', url('contest_stats', contest.key), _('Statistics')) }}
     {% endif %}
 
+    {% if contest.format_name == 'themis' and contest.is_in_contest(request.user) %}
+        {{ make_tab('upload', 'fa-upload', url('contest_themis_upload', contest.key), _('Upload')) }}
+    {% endif %}
+
     {% if contest.start_time <= now or perms.judge.see_private_contest %}
         {% if contest.can_see_own_scoreboard(request.user) %}
             {{ make_tab('ranking', 'fa-bar-chart', url('contest_ranking', contest.key), _('Rankings')) }}

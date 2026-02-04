@@ -132,4 +132,12 @@
 {% block users_table %}
     {% set table_id='ranking-table' %}
     {% include "contest/ranking-table.html" %}
+    
+    {% if contest.can_see_full_scoreboard(request.user) %}
+        <div style="margin-top: 1em; text-align: right;">
+             <a href="{{ url('contest_ranking_csv', contest.key) }}" class="button">
+                <i class="fa fa-file-excel-o"></i> {{ _('Export CSV') }}
+             </a>
+        </div>
+    {% endif %}
 {% endblock %}

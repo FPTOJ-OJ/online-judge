@@ -251,6 +251,10 @@
 
 
 $(document).ready(function() {
+    $('#report-ticket-link').click(function(e) {
+        e.preventDefault();
+        window.location.href = '/tickets/new/?url=' + encodeURIComponent(window.location.href);
+    });
     $(".mention").on("click", function () {
         const username = $(this).text().trim();
         window.location.href = "/user/" + username;
@@ -337,7 +341,7 @@ $(document).ready(function() {
             <ul class="horizontal-list">
                 {% if request.user.is_authenticated %}
                 <li style="vertical-align: middle;">
-                    <a style="font-size: large" href="/problem/report/tickets/new">⚠️</a>
+                    <a style="font-size: large" href="#" id="report-ticket-link">⚠️</a>
                 </li>
                 {% endif %}
                 {% if request.user.is_authenticated %}
