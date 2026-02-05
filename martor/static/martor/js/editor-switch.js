@@ -295,7 +295,10 @@ function switchEditor(selectElement, fieldName) {
                     });
 
                     // Fix initial layout issues, especially in Django Admin
-                    setTimeout(() => editor.ui.update(), 200);
+                    setTimeout(() => {
+                        editor.ui.update();
+                        window.dispatchEvent(new Event('resize'));
+                    }, 300);
 
                     // Robust layout fix: monitor container resize
                     if (window.ResizeObserver) {

@@ -5,20 +5,21 @@
   box-sizing: border-box !important;
 }
 
+/* Remove !important from display to allow JS to hide/show correctly */
 .ck-editor {
-  display: block !important;
+  display: block;
   width: 100% !important;
   max-width: 100% !important;
   /* Prevent horizontal overflow */
-  overflow: hidden;
+  overflow: hidden !important;
   box-sizing: border-box !important;
 }
 
 /* Fix for Django Admin width issues */
-.editor-container__editor {
+.editor-container__editor, .ck-editor__main {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden;
+    overflow: hidden !important;
     box-sizing: border-box !important;
 }
 

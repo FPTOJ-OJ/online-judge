@@ -34,8 +34,7 @@
         return null;
     }
 
-    // --- CKEditor CSS Injection ---
-    // Inject CDN CSS at the top so custom themes can override it
+    // --- Style Injections ---
     const CKEDITOR_CSS_URL = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
     if (!document.querySelector(`link[href="${CKEDITOR_CSS_URL}"]`)) {
         const link = document.createElement('link');
@@ -44,6 +43,14 @@
         document.head.prepend(link);
     }
 
+    const CHOSEN_CSS_URL = '/static/libs/chosen.js/chosen.min.css';
+    if (!document.querySelector(`link[href="${CHOSEN_CSS_URL}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = CHOSEN_CSS_URL;
+        document.head.appendChild(link);
+    }
+    
     // --- Preview Logic ---
     async function fetchPreview(content) {
         try {
@@ -64,19 +71,12 @@
     }
 
     function renderPreviewInIframe(container, htmlContent) {
-        // Clear previous content
         container.innerHTML = "";
-        
         const iframe = document.createElement("iframe");
         Object.assign(iframe.style, {
-            width: "100%",
-            height: "400px",
-            border: "1px solid #ccc",
-            backgroundColor: "#fff" // Ensure white background for preview
+            width: "100%", height: "500px", border: "1px solid #ddd", borderRadius: "4px", backgroundColor: "#fff"
         });
-
         container.appendChild(iframe);
-
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
         doc.write(`
@@ -85,13 +85,17 @@
                 <head>
                     <meta charset="utf-8">
                     <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 1rem; margin: 0; line-height: 1.6; }
-                        pre { background: #f5f5f5; padding: 0.5rem; border-radius: 4px; overflow-x: auto; }
-                        img { max-width: 100%; height: auto; }
-                        blockquote { border-left: 4px solid #eee; padding-left: 1rem; margin-left: 0; color: #555; }
+                        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; margin: 0; line-height: 1.6; color: #333; }
+                        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; border: 1px solid #eee; }
+                        img { max-width: 100%; height: auto; display: block; margin: 10px 0; }
+                        blockquote { border-left: 5px solid #eee; padding-left: 20px; margin: 20px 0; color: #666; font-style: italic; }
+                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
                     </style>
-                    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"><\/script>
                     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+                    <script type="text/javascript" src="/static/mathjax_config.js"><\/script>
                 </head>
                 <body>${htmlContent}</body>
             </html>
@@ -106,39 +110,54 @@
 
         if (!container || !textarea) return;
 
-        // Auto-switch to CKEditor if content looks like HTML rendered by us
+        // Initialize Chosen for Editor Switch
+        if (editorSwitch && window.jQuery && jQuery.fn.chosen) {
+            const $switch = jQuery(editorSwitch);
+            $switch.chosen({
+                width: '180px',
+                disable_search: true
+            }).on('change', function() {
+                if (typeof switchEditor === 'function') switchEditor(this, fieldName);
+            });
+        }
+
+        // Auto-switch to CKEditor if content starts with marker
         const currentContent = textarea.value.trim();
         if (currentContent.startsWith('<htmlrender>')) {
             if (editorSwitch) {
                 editorSwitch.value = 'ckeditor';
-                if (typeof switchEditor === 'function') {
-                    switchEditor(editorSwitch, fieldName);
-                }
+                jQuery(editorSwitch).trigger('chosen:updated');
+                if (typeof switchEditor === 'function') switchEditor(editorSwitch, fieldName);
             }
         }
 
-        // Initialize Semantic UI Tabs for this specific editor
-        // We use jQuery here because Semantic UI modules depend on it
-        $(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
-            onVisible: async function(tabPath) {
-                if (tabPath === `ckeditor-preview-tab-${fieldName}`) {
-                    const previewBox = this; 
-                    const content = textarea.value.trim();
-                    
-                    if (!content) {
-                        previewBox.innerHTML = '<p class="ui ignored info message">{% trans "Nothing to preview" %}</p>';
-                        return;
-                    }
-
-                    previewBox.innerHTML = '<div class="ui active centered inline loader"></div>'; // Loading state
-                    const html = await fetchPreview(content);
-                    renderPreviewInIframe(previewBox, html);
+        const handleTabPreview = async function(tabPath, previewTabName, targetTextarea) {
+            if (tabPath === previewTabName) {
+                const previewBox = this; 
+                const content = targetTextarea.value.trim();
+                if (!content) {
+                    previewBox.innerHTML = '<p class="ui ignored info message">{% trans "Nothing to preview" %}</p>';
+                    return;
                 }
+                previewBox.innerHTML = '<div class="ui active centered inline loader" style="margin-top: 20px;"></div>';
+                const html = await fetchPreview(content);
+                renderPreviewInIframe(previewBox, html);
+            }
+        };
+
+        // CKEditor Preview Tab
+        jQuery(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
+            onVisible: function(tabPath) {
+                handleTabPreview.call(this, tabPath, `ckeditor-preview-tab-${fieldName}`, textarea);
             }
         });
-        
-        // Similar logic for Martor preview tab if needed, but Martor usually handles its own preview via its own JS.
-        // If we need to override Martor's preview, we can add logic here.
+
+        // Martor Preview Tab
+        jQuery(`#martor-container-${fieldName} .tab-martor-menu .item`).tab({
+            onVisible: function(tabPath) {
+                handleTabPreview.call(this, tabPath, `preview-tab-${fieldName}`, textarea);
+            }
+        });
     }
 
     function initEditors() {
@@ -147,27 +166,19 @@
         });
     }
 
-    // --- Main Bootstrapper ---
     async function boot() {
         try {
-            // 1. Load Markdown Parser
             const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
-            window.__markdownItInstance__ = markdownIt({
-                html: true,
-                linkify: true,
-                typographer: true
-            });
+            window.__markdownItInstance__ = markdownIt({ html: true, linkify: true, typographer: true });
 
-            // 2. Load Scripts Sequentially
             await loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js');
+            await loadScript('/static/libs/chosen.js/chosen.jquery.min.js');
             await loadScript('/static/martor/js/editor-switch.js');
             await loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js');
             await loadScript('/static/martor/js/sidebar-math.js');
 
-            // 3. Initialize Editors
             initEditors();
 
-            // 4. Watch for dynamically added editors (e.g. in Django Admin inlines)
             const observer = new MutationObserver(mutations => {
                 mutations.forEach(mutation => {
                     mutation.addedNodes.forEach(node => {
@@ -184,30 +195,23 @@
         }
     }
 
-    // Start
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
     } else {
         boot();
     }
-
 })();
 </script>
 
-{# --- Editor HTML Structure --- #}
 <div class="main-martor main-martor-{{ field_name }}" data-field-name="{{ field_name }}">
   <div class="section-martor">
     
     <!-- Editor Type Switcher -->
     <div class="ui right floated item editor-toggle">
-      <div class="ui form">
-          <div class="field">
-              <select id="editor-switch-{{ field_name }}" class="ui dropdown" onchange="switchEditor(this, '{{ field_name }}')">
-                <option value="martor">Martor (Markdown)</option>
-                <option value="ckeditor">CKEditor (HTML)</option>
-              </select>
-          </div>
-      </div>
+      <select id="editor-switch-{{ field_name }}" class="editor-switch">
+        <option value="martor">Martor (Markdown)</option>
+        <option value="ckeditor">CKEditor (HTML)</option>
+      </select>
     </div>
     <div style="clear: both;"></div>
 
@@ -215,7 +219,7 @@
     <div id="martor-container-{{ field_name }}" class="editor-container">
       <div class="ui top attached tabular pointing secondary menu tab-martor-menu">
         <a class="item active" data-tab="editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
-        <a class="item" data-tab="preview-tab-{{ field_name }}"><i class="eye icon"></i> {% trans "Preview" %}</a>
+        <a class="item" data-tab="preview-tab-{{ field_name }}"><i class="eye icon"></i>{% trans "Preview" %}</a>
         {% include "martor/toolbar.html" %}
       </div>
       
@@ -224,8 +228,6 @@
           <div class="ui text loader">{% trans "Uploading... please wait..." %}</div>
         </div>
         <div id="martor-{{ field_name }}" class="martor-field martor-field-{{ field_name }}"></div>
-        
-        {# Hidden textarea that stores the actual value #}
         {{ martor }} 
       </div>
       
@@ -252,7 +254,6 @@
       </div>
     </div>
 
-    <!-- Help Modal -->
     {% include 'martor/guide.html' %}
   </div>
 </div>

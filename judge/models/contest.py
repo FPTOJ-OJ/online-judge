@@ -68,7 +68,7 @@ class Contest(models.Model):
         (SCOREBOARD_HIDDEN, _('Hidden permanently')),
     )
     key = models.CharField(max_length=20, verbose_name=_('contest id'), unique=True,
-                           validators=[RegexValidator('^[a-z0-9]+$', _('Contest id must be ^[a-z0-9]+$'))])
+                           validators=[RegexValidator('^[a-zA-Z0-9_-]+$', _('Contest id must be ^[a-zA-Z0-9_-]+$'))])
     name = models.CharField(max_length=100, verbose_name=_('contest name'), db_index=True)
     authors = models.ManyToManyField(Profile, verbose_name=_('authors'),
                                      help_text=_('These users will be able to edit the contest.'),

@@ -166,7 +166,12 @@ DMOJ_CANONICAL = ''
 
 # Application definition
 
-INSTALLED_APPS = ()
+INSTALLED_APPS = (
+    #'snowpenguin.django.recaptcha2',
+    'turnstile',
+)
+
+DMOJ_TMP_DIR = '/tmp'
 
 try:
     import wpadmin
