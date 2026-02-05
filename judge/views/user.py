@@ -185,7 +185,8 @@ class UserAboutPage(UserPage):
         )
 
         context['submission_data'] = mark_safe(json.dumps({
-            date_counts['date_only'].isoformat(): date_counts['cnt'] for date_counts in submissions
+            date_counts['date_only'].isoformat(): date_counts['cnt']
+            for date_counts in submissions if date_counts['date_only']
         }))
         context['submission_metadata'] = mark_safe(json.dumps({
             'min_year': (

@@ -1,5 +1,6 @@
 import json
 import csv
+import re
 from calendar import Calendar, SUNDAY
 from collections import defaultdict, namedtuple
 from datetime import date, datetime, time, timedelta
@@ -34,7 +35,9 @@ from judge import event_poster as event
 from judge.comments import CommentedDetailView
 from judge.forms import ContestCloneForm, ThemisUploadForm
 from judge.models import Contest, ContestMoss, ContestParticipation, ContestProblem, ContestTag, \
-    Problem, Profile, Submission, Language, ContestSubmission, SubmissionSource, ThemisExtensionMapping
+    Problem, Profile, Submission, Language, ContestSubmission, SubmissionSource, ThemisExtensionMapping, \
+    ProblemData
+from judge.models.problem_data import IO_MODES
 from judge.tasks import run_moss
 from judge.utils.celery import redirect_to_task_status
 from judge.utils.opengraph import generate_opengraph
@@ -47,7 +50,7 @@ from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, SingleOb
 __all__ = ['ContestList', 'ContestDetail', 'ContestRanking', 'ContestJoin', 'ContestLeave', 'ContestCalendar',
            'ContestClone', 'ContestStats', 'ContestMossView', 'ContestMossDelete', 'contest_ranking_ajax',
            'ContestParticipationList', 'ContestParticipationDisqualify', 'get_contest_ranking_list',
-           'base_contest_ranking_list', 'ContestThemisUpload']
+           'base_contest_ranking_list', 'ContestThemisUpload', 'ContestQuickEdit']
 
 
 def _find_contest(request, key, private_check=True):
@@ -1025,23 +1028,66 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
             del kwargs['contest']
         context = super().get_context_data(**kwargs)
         problems_data = {}
-        for cp in self.object.contest_problems.select_related('problem'):
+        ordered_problems = []
+        for cp in self.object.contest_problems.select_related('problem').order_by('order'):
             p = cp.problem
             problems_data[p.code.upper()] = p.code
             problems_data[p.name.upper()] = p.code
             problems_data[f"BAI{cp.order + 1}"] = p.code
+            ordered_problems.append({'code': p.code, 'name': p.name})
+        
         languages_data = []
         for lang in Language.objects.filter(judges__online=True).distinct():
             languages_data.append({'id': lang.key, 'name': lang.name, 'common_name': lang.common_name})
+        
         context['problems_json'] = json.dumps(problems_data)
+        context['ordered_problems_json'] = json.dumps(ordered_problems)
         context['languages_json'] = json.dumps(languages_data)
+        # Ensure default mappings exist in DB if table is empty
+        from judge.models import ThemisExtensionMapping
+        if not ThemisExtensionMapping.objects.exists():
+            default_map = {
+                '.cpp': 'CPP17', '.cc': 'CPP17', '.c': 'C11',
+                '.py': 'PY3', '.pas': 'PAS', '.java': 'JAVA'
+            }
+            for ext, lang_key in default_map.items():
+                try:
+                    lang = Language.objects.get(key=lang_key)
+                    ThemisExtensionMapping.objects.get_or_create(extension=ext, language=lang)
+                except Language.DoesNotExist:
+                    pass
+
         mappings = {}
+        extensions = []
         for m in ThemisExtensionMapping.objects.all().select_related('language'):
             mappings[m.extension.lower()] = m.language.key
+            extensions.append(m.extension.lower())
+        
         context['mappings_json'] = json.dumps(mappings)
+        context['all_extensions'] = ','.join(extensions) or '.cpp,.py,.pas,.java,.c'
         return context
 
     def post(self, request, *args, **kwargs):
+        if 'zip_file' in request.FILES:
+            if not request.user.is_superuser and not self.object.is_editable_by(request.user):
+                return HttpResponseForbidden("Only admins can perform bulk zip upload.")
+            
+            zip_file = request.FILES['zip_file']
+            problems_map = {}
+            for cp in self.object.contest_problems.select_related('problem'):
+                p = cp.problem
+                problems_map[p.code.upper()] = p.code
+                problems_map[p.name.upper()] = p.code
+                problems_map[f"BAI{cp.order + 1}"] = p.code
+            
+            from judge.utils.themis_zip import process_themis_zip
+            data = process_themis_zip(zip_file, self.object, problems_map, request.profile)
+            return JsonResponse({
+                'success': True, 
+                'results': data['results'], 
+                'errors': data['errors']
+            })
+
         try:
             try:
                 data = json.loads(request.body)
@@ -1066,10 +1112,26 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
                 problem = contest_problem.problem
             except ContestProblem.DoesNotExist:
                  return JsonResponse({'success': False, 'error': _('Problem not found in contest.')})
+
+            # Check submission limits
+            if contest_problem.max_submissions is not None:
+                submissions_count = ContestSubmission.objects.filter(
+                    participation=participation, problem=contest_problem
+                ).count()
+                if submissions_count >= contest_problem.max_submissions:
+                    return JsonResponse({'success': False, 'error': _('Submission limit reached for problem %s.') % problem_code})
+
             try:
                 language = Language.objects.get(key=lang_key)
             except Language.DoesNotExist:
                 return JsonResponse({'success': False, 'error': _('Language not found: %s') % lang_key})
+
+            # Normalize source code for file IO if applicable
+            if hasattr(problem, 'data_files') and problem.data_files:
+                data = problem.data_files
+                if (data.io_mode == 'file' and data.input_filename and data.output_filename):
+                    source_code = normalize_filenames(source_code, data.input_filename, data.output_filename)
+
             sub = Submission.objects.create(user=profile, problem=problem, language=language, contest_object=self.object)
             SubmissionSource.objects.create(submission=sub, source=source_code)
             ContestSubmission.objects.get_or_create(submission=sub, problem=contest_problem, participation=participation)
@@ -1078,3 +1140,168 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
         except Exception as e:
             import traceback
             return JsonResponse({'success': False, 'error': f"Server Error: {str(e)}", 'trace': traceback.format_exc()})
+
+
+def normalize_filenames(code: str, input_file: str, output_file: str) -> str:
+    input_file = input_file.lower()
+    output_file = output_file.lower()
+
+    def split_filename_ext(filename: str):
+        name, sep, ext = filename.rpartition('.')
+        return (name, ext) if name else (filename, '')
+
+    input_name, input_ext = split_filename_ext(input_file)
+    output_name, output_ext = split_filename_ext(output_file)
+
+    def repl(match):
+        quote = match.group(1)
+        content = match.group(2)
+        content_lower = content.lower()
+
+        if content_lower in [input_file, output_file]:
+            return f'{quote}{content.upper()}{quote}'
+
+        if content_lower.startswith('.') and content_lower[1:] in [input_ext, output_ext]:
+            return f'{quote}{content.upper()}{quote}'
+
+        if content_lower in [input_ext, output_ext]:
+            return f'{quote}{content.upper()}{quote}'
+
+        name, ext = split_filename_ext(content_lower)
+        if name in [input_name, output_name]:
+            return f'{quote}{content.upper()}{quote}'
+
+        return match.group(0)
+
+    return re.sub(r'(["\'])([^"\']+)\1', repl, code)
+
+
+class ContestQuickEdit(ContestMixin, LoginRequiredMixin, TitleMixin, SingleObjectMixin, TemplateView):
+    template_name = 'contest/quick_edit.html'
+
+    def get_title(self):
+        return _('Quick Edit - %s') % self.object.name
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.can_edit:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        if 'contest' in kwargs:
+            del kwargs['contest']
+        context = super().get_context_data(**kwargs)
+        problems = []
+        from judge.widgets import AdminMartorWidget
+        for cp in self.object.contest_problems.select_related('problem', 'problem__data_files').order_by('order'):
+            p = cp.problem
+            p.contest_points = cp.points
+            p.contest_max_submissions = cp.max_submissions
+            field_name = f'p_{p.id}_description'
+            widget = AdminMartorWidget(attrs={'data-markdownfy-url': reverse('problem_preview')})
+            p.martor_html = widget.render(field_name, p.description, attrs={'id': f'id_{field_name}'})
+            problems.append(p)
+        context['problems'] = problems
+        context['io_modes'] = IO_MODES
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.can_edit:
+             return HttpResponseBadRequest("Unauthorized")
+        
+        data = request.POST
+        for cp in self.object.contest_problems.select_related('problem', 'problem__data_files'):
+            p = cp.problem
+            prefix = f'p_{p.id}_'
+            changed = False
+            cp_changed = False
+
+            if f'{prefix}description' in data:
+                new_desc = data[f'{prefix}description']
+                if p.description != new_desc:
+                    p.description = new_desc
+                    changed = True
+            
+            if f'{prefix}time_limit' in data:
+                try:
+                    new_tl = float(data[f'{prefix}time_limit'])
+                    if p.time_limit != new_tl:
+                        p.time_limit = new_tl
+                        changed = True
+                except ValueError:
+                    pass
+
+            if f'{prefix}memory_limit' in data:
+                try:
+                    new_ml = int(data[f'{prefix}memory_limit'])
+                    if p.memory_limit != new_ml:
+                        p.memory_limit = new_ml
+                        changed = True
+                except ValueError:
+                    pass
+
+            if f'{prefix}points' in data:
+                try:
+                    new_pts = float(data[f'{prefix}points'])
+                    if cp.points != new_pts:
+                        cp.points = new_pts
+                        cp_changed = True
+                except ValueError:
+                    pass
+
+            if f'{prefix}max_submissions' in data:
+                try:
+                    val = data[f'{prefix}max_submissions'].strip()
+                    new_ms = int(val) if val else None
+                    if cp.max_submissions != new_ms:
+                        cp.max_submissions = new_ms
+                        cp_changed = True
+                except ValueError:
+                    pass
+
+            if changed:
+                p.save()
+            if cp_changed:
+                cp.save()
+            
+            p_data, created = ProblemData.objects.get_or_create(problem=p)
+            data_changed = False
+            if f'{prefix}io_mode' in data:
+                new_io_mode = data[f'{prefix}io_mode']
+                if p_data.io_mode != new_io_mode:
+                    p_data.io_mode = new_io_mode
+                    data_changed = True
+            if f'{prefix}input_filename' in data:
+                new_input = data[f'{prefix}input_filename'].strip().upper()
+                if p_data.input_filename != new_input:
+                    p_data.input_filename = new_input
+                    data_changed = True
+            if f'{prefix}output_filename' in data:
+                new_output = data[f'{prefix}output_filename'].strip().upper()
+                if p_data.output_filename != new_output:
+                    p_data.output_filename = new_output
+                    data_changed = True
+            if data_changed or created:
+                p_data.save()
+                
+            # Regenerate init.yml to notify judge of configuration changes (e.g., File IO)
+            from judge.utils.problem_data import ProblemDataCompiler
+            from zipfile import ZipFile
+            
+            try:
+                cases = p.cases.all().order_by('order')
+                valid_files = []
+                if p_data.zipfile:
+                    try:
+                        valid_files = ZipFile(p_data.zipfile.path).namelist()
+                    except Exception:
+                        pass
+                
+                ProblemDataCompiler.generate(p, p_data, cases, valid_files)
+            except Exception:
+                pass
+            
+        return HttpResponseRedirect(request.path)
+

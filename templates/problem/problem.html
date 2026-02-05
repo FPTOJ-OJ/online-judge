@@ -100,9 +100,14 @@
 {% endblock %}
 
 {% block info_float %}
+    {% set submit_url = url('problem_submit', problem.code) %}
+    {% if request.participation and request.participation.contest.format_name == 'themis' %}
+        {% set submit_url = url('contest_themis_upload', request.participation.contest.key) %}
+    {% endif %}
+
     {% if request.user.is_authenticated and request.in_contest and submission_limit %}
         {% if submissions_left > 0 %}
-            <a href="{{ url('problem_submit', problem.code) }}" class="unselectable button full">
+            <a href="{{ submit_url }}" class="unselectable button full">
                 {{ _('Submit solution') }}
             </a>
             <div class="submissions-left">
@@ -117,7 +122,7 @@
             <div class="no-submissions-left submissions-left">{{ _('0 submissions left') }}</div>
         {% endif %}
     {% else %}
-        <a href="{{ url('problem_submit', problem.code) }}" class="unselectable button full">
+        <a href="{{ submit_url }}" class="unselectable button full">
             {{ _('Submit solution') }}
         </a>
     {% endif %}

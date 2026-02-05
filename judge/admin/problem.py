@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.forms import ModelForm
+from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import format_html
@@ -118,7 +119,9 @@ class ProblemTranslationInline(admin.StackedInline):
     has_add_permission = has_change_permission = has_delete_permission = has_permission_full_markup
 
 
-class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
+class ProblemAdmin(VersionAdmin):
+    change_list_template = 'admin/judge/problem/change_list.html'
+
     fieldsets = (
         (None, {
             'fields': (
@@ -140,14 +143,27 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     search_fields = ('code', 'name', 'authors__user__username', 'curators__user__username')
     inlines = [LanguageLimitInline, ProblemClarificationInline, ProblemSolutionInline, ProblemTranslationInline]
     list_max_show_all = 1000
+    actions = ['delete_selected_problems']
     actions_on_top = True
     actions_on_bottom = True
     list_filter = ('is_public', ProblemCreatorListFilter)
     form = ProblemForm
     date_hierarchy = 'date'
 
+    @admin.action(description=_("Delete selected problems"))
+    def delete_selected_problems(self, request, queryset):
+        # We use the original queryset which contains the IDs of selected items
+        # but ensure we are working with the correct model manager if needed.
+        # .delete() fails on distinct() querysets, so we filter by ID explicitly.
+        if queryset.query.distinct:
+             queryset = self.model.objects.filter(pk__in=queryset.values_list('pk', flat=True))
+        from django.contrib.admin.actions import delete_selected
+        return delete_selected(self, request, queryset)
+
     def get_actions(self, request):
         actions = super(ProblemAdmin, self).get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
 
         if request.user.has_perm('judge.change_public_visibility') or \
                 request.user.has_perm('judge.create_private_problem'):
@@ -199,6 +215,8 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     def make_public(self, request, queryset):
         if not request.user.has_perm('judge.change_public_visibility'):
             queryset = queryset.filter(is_organization_private=True)
+        if queryset.query.distinct:
+            queryset = self.model.objects.filter(pk__in=queryset.values_list('pk', flat=True))
         count = queryset.update(is_public=True)
         for problem_id in queryset.values_list('id', flat=True):
             self._rescore(request, problem_id)
@@ -210,6 +228,8 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     def make_private(self, request, queryset):
         if not request.user.has_perm('judge.change_public_visibility'):
             queryset = queryset.filter(is_organization_private=True)
+        if queryset.query.distinct:
+            queryset = self.model.objects.filter(pk__in=queryset.values_list('pk', flat=True))
         count = queryset.update(is_public=False)
         for problem_id in queryset.values_list('id', flat=True):
             self._rescore(request, problem_id)
@@ -223,6 +243,13 @@ class ProblemAdmin(NoBatchDeleteMixin, VersionAdmin):
     def has_change_permission(self, request, obj=None):
         if obj is None:
             return request.user.has_perm('judge.edit_own_problem')
+        return obj.is_editable_by(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_superuser or request.user.has_perm('judge.delete_problem'):
+            return True
+        if obj is None:
+            return False
         return obj.is_editable_by(request.user)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):

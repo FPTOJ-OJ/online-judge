@@ -25,9 +25,17 @@
 {% block content %}
 <div id="content-main">
     <div class="module">
-        <p style="padding: 10px;">
-            {% translate "Upload a zip file containing the Themis folder structure (TEST/BAI...). Problems and test cases will be generated automatically." %}
-        </p>
+        <div style="padding: 10px;">
+            <h3>{% translate "Instructions" %}</h3>
+            <ul style="list-style-type: disc; margin-left: 20px;">
+                <li>{% translate "Prepare a ZIP file containing your Themis contest data." %}</li>
+                <li>{% translate "The system will automatically find problem folders inside your ZIP (no strict 'TEST' folder required)." %}</li>
+                <li>{% translate "Each problem directory (e.g., 'BAI1') must contain test case directories (e.g., 'TEST01', 'TEST02')." %}</li>
+                <li>{% translate "Each test case directory must contain the input and output files (e.g., 'BAI1.INP' and 'BAI1.OUT')." %}</li>
+                <li>{% translate "Fill in the contest details below and upload your ZIP file." %}</li>
+                <li>{% translate "Click 'Create Contest' to automatically generate problems and test cases." %}</li>
+            </ul>
+        </div>
 
         <form method="post" enctype="multipart/form-data" id="contest_form" novalidate>
             {% csrf_token %}
@@ -42,7 +50,7 @@
                     <div class="form-row field-name{% if form.name.errors %} errors{% endif %}">
                         {{ form.name.errors }}
                         <div>
-                            <label class="required" for="{{ form.name.id_for_label }}">{{ form.name.label }}:</label>
+                            <label class="required" for="{{ form.name.id_for_label }}">{% translate 'Contest Name' %}:</label>
                             {{ form.name }}
                         </div>
                     </div>
@@ -50,7 +58,7 @@
                     <div class="form-row field-start_time{% if form.start_time.errors %} errors{% endif %}">
                         {{ form.start_time.errors }}
                         <div>
-                            <label class="required" for="{{ form.start_time.id_for_label_0 }}">{{ form.start_time.label }}:</label>
+                            <label class="required" for="{{ form.start_time.id_for_label_0 }}">{% translate 'Start Time' %}:</label>
                             {{ form.start_time }}
                         </div>
                     </div>
@@ -58,7 +66,7 @@
                     <div class="form-row field-end_time{% if form.end_time.errors %} errors{% endif %}">
                         {{ form.end_time.errors }}
                         <div>
-                            <label class="required" for="{{ form.end_time.id_for_label_0 }}">{{ form.end_time.label }}:</label>
+                            <label class="required" for="{{ form.end_time.id_for_label_0 }}">{% translate 'End Time' %}:</label>
                             {{ form.end_time }}
                         </div>
                     </div>
@@ -66,36 +74,45 @@
                     <div class="form-row field-access_code{% if form.access_code.errors %} errors{% endif %}">
                         {{ form.access_code.errors }}
                         <div>
-                            <label for="{{ form.access_code.id_for_label }}">{{ form.access_code.label }}:</label>
+                            <label for="{{ form.access_code.id_for_label }}">{% translate 'Access Code' %}:</label>
                             {{ form.access_code }}
-                            <div class="help">{{ form.access_code.help_text }}</div>
+                            <div class="help">{% translate 'Leave blank for no access code.' %}</div>
                         </div>
                     </div>
 
                     <div class="form-row field-is_visible{% if form.is_visible.errors %} errors{% endif %}">
                         {{ form.is_visible.errors }}
                         <div>
-                            <label class="vCheckboxLabel" for="{{ form.is_visible.id_for_label }}">{{ form.is_visible.label }}</label>
+                            <label class="vCheckboxLabel" for="{{ form.is_visible.id_for_label }}">{% translate 'Visible' %}</label>
                             {{ form.is_visible }}
-                            <div class="help">{{ form.is_visible.help_text }}</div>
+                            <div class="help">{% translate 'Check to make the contest visible to everyone.' %}</div>
                         </div>
                     </div>
 
                     <div class="form-row field-zip_file{% if form.zip_file.errors %} errors{% endif %}">
                         {{ form.zip_file.errors }}
                         <div>
-                            <label class="required" for="{{ form.zip_file.id_for_label }}">{{ form.zip_file.label }}:</label>
+                            <label class="required" for="{{ form.zip_file.id_for_label }}">{% translate 'Test Data Zip' %}:</label>
                             {{ form.zip_file }}
-                            <div class="help">{{ form.zip_file.help_text }}</div>
+                            <div class="help">{% translate 'Upload a zip file containing the problem folders.' %}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row field-full_io_mode{% if form.full_io_mode.errors %} errors{% endif %}">
+                        {{ form.full_io_mode.errors }}
+                        <div>
+                            <label class="vCheckboxLabel" for="{{ form.full_io_mode.id_for_label }}">{% translate 'Full I/O Mode' %}</label>
+                            {{ form.full_io_mode }}
+                            <div class="help">{% translate 'Automatically configure File I/O (Input: <PROBLEM>.INP, Output: <PROBLEM>.OUT)' %}</div>
                         </div>
                     </div>
 
                     <div class="form-row field-is_infinite{% if form.is_infinite.errors %} errors{% endif %}">
                         {{ form.is_infinite.errors }}
                         <div>
-                            <label class="vCheckboxLabel" for="{{ form.is_infinite.id_for_label }}">{{ form.is_infinite.label }}</label>
+                            <label class="vCheckboxLabel" for="{{ form.is_infinite.id_for_label }}">{% translate 'Infinite Time' %}</label>
                             {{ form.is_infinite }}
-                            <div class="help">{{ form.is_infinite.help_text }}</div>
+                            <div class="help">{% translate 'Check to make the contest last forever (for practice).' %}</div>
                         </div>
                     </div>
                 </fieldset>

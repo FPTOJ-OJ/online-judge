@@ -1,0 +1,13 @@
+{% extends "reversion/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    {% if not is_popup and perms.judge.delete_problem %}
+        <li>
+            <a href="#" onclick="var form = document.getElementById('changelist-form'); var inputs = form.querySelectorAll('select[name=action]'); var updated = false; for (var i = 0; i < inputs.length; i++) { inputs[i].value = 'delete_selected_problems'; updated = true; } if (!updated) { var hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = 'action'; hidden.value = 'delete_selected_problems'; form.appendChild(hidden); } form.submit(); return false;" class="deletelink">
+                {% trans "Delete Problems" %}
+            </a>
+        </li>
+    {% endif %}
+{% endblock %}

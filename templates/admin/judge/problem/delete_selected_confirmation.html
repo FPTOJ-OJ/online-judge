@@ -1,0 +1,26 @@
+{% extends "admin/delete_selected_confirmation.html" %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Find the confirmation form (it has a 'post' input with value 'yes')
+            var forms = document.getElementsByTagName('form');
+            for (var i = 0; i < forms.length; i++) {
+                var form = forms[i];
+                if (form.querySelector('input[name="post"][value="yes"]')) {
+                     var actionInput = form.querySelector('input[name="action"]');
+                     if (actionInput) {
+                         actionInput.value = "delete_selected_problems";
+                     } else {
+                         var input = document.createElement('input');
+                         input.type = 'hidden';
+                         input.name = 'action';
+                         input.value = "delete_selected_problems";
+                         form.appendChild(input);
+                     }
+                }
+            }
+        });
+    </script>
+{% endblock %}

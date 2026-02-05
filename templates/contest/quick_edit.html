@@ -1,0 +1,238 @@
+{% extends "common-content.html" %}
+
+{% block title_ruler %}{% endblock %}
+
+{% block title_row %}
+    {% set tab = 'quick_edit' %}
+    {% set title = contest.name %}
+    {% include "contest/contest-tabs.html" %}
+{% endblock %}
+
+{% block content_js_media %}
+    <script type="text/javascript" src="{{ static('admin/js/jquery.init.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/ace.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/semantic.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/mode-markdown.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/ext-language_tools.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/theme-github.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/theme-twilight.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/highlight.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/resizable.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('libs/featherlight/featherlight.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('martor/js/martor.js') }}"></script>
+    <script type="text/javascript" src="{{ static('martor-mathjax.js') }}"></script>
+{% endblock %}
+
+{% block content_media %}
+    <link href="{{ static('plugins/css/ace.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('plugins/css/semantic.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('plugins/css/resizable.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('martor/css/ckeditor.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('martor-description.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('featherlight.css') }}" type="text/css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+{% set is_dark = PREFERRED_STYLE_CSS and 'dark' in PREFERRED_STYLE_CSS %}
+<style>
+    .quick-edit-container {
+        margin-bottom: 50px;
+    }
+    .problem-edit-card {
+        background: rgba(128, 128, 128, 0.05);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        border-radius: 4px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    {% if is_dark %}
+    .problem-edit-card {
+        background: #181818;
+        border-color: #3b3b3b;
+    }
+    {% else %}
+    .problem-edit-card {
+        background: #fff;
+    }
+    {% endif %}
+    
+    .problem-edit-card h3 {
+        margin-top: 0;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        color: #0073e6;
+    }
+    
+    {% if is_dark %}
+    .problem-edit-card h3 { color: #4da3ff; }
+    {% endif %}
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid rgba(128, 128, 128, 0.3);
+        border-radius: 4px;
+        box-sizing: border-box;
+        background: rgba(128, 128, 128, 0.05);
+        color: inherit;
+    }
+    
+    {% if is_dark %}
+    .form-control { background: #111; border-color: #444; color: #eee; }
+    {% else %}
+    .form-control { background: #fff; }
+    {% endif %}
+
+    /* Martor specific adjustments */
+    .martor-field {
+        min-height: 300px;
+    }
+    /* Fix for text selection in Ace Editor */
+    .ace_editor, .ace_content, .ace_text-layer, .ace_line {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+    }
+    .io-filename-row {
+        display: flex;
+        gap: 20px;
+    }
+    .io-filename-row > div {
+        flex: 1;
+    }
+    .sticky-submit {
+        position: sticky;
+        bottom: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-top: 1px solid rgba(128, 128, 128, 0.2);
+        text-align: center;
+        z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    
+    {% if is_dark %}
+    .sticky-submit {
+        background: rgba(24, 24, 24, 0.95);
+        border-top-color: #3b3b3b;
+    }
+    {% endif %}
+</style>
+
+<div class="contest-tab-content quick-edit-container {{ 'dark-mode' if is_dark else '' }}">
+    <form method="post">
+        {% csrf_token %}
+        {% for problem in problems %}
+            <div class="problem-edit-card">
+                <h3>
+                    <a href="{{ url('problem_detail', problem.code) }}" target="_blank">
+                        <i class="fa fa-external-link"></i> {{ problem.code }} - {{ problem.name }}
+                    </a>
+                </h3>
+                
+                <div class="form-group">
+                    <label>{{ _("Problem Description") }}</label>
+                    {{ problem.martor_html | safe }}
+                </div>
+
+                <div class="io-filename-row">
+                    <div class="form-group">
+                        <label>{{ _("Time Limit (s)") }}</label>
+                        <input type="number" step="0.1" name="p_{{ problem.id }}_time_limit" value="{{ problem.time_limit }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _("Memory Limit (KB)") }}</label>
+                        <input type="number" name="p_{{ problem.id }}_memory_limit" value="{{ problem.memory_limit }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _("Points") }}</label>
+                        <input type="number" step="0.5" name="p_{{ problem.id }}_points" value="{{ problem.contest_points }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _("Max submissions") }}</label>
+                        <input type="number" name="p_{{ problem.id }}_max_submissions" value="{{ problem.contest_max_submissions or '' }}" class="form-control" placeholder="No limit">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>{{ _("I/O Mode") }}</label>
+                    {% set current_io_mode = problem.data_files.io_mode if problem.data_files else 'std' %}
+                    <select name="p_{{ problem.id }}_io_mode" class="form-control io-mode-select" data-problem-id="{{ problem.id }}">
+                        {% for mode_val, mode_name in io_modes %}
+                            <option value="{{ mode_val }}" {% if current_io_mode == mode_val %}selected{% endif %}>{{ mode_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="io-filename-row" id="io-files-{{ problem.id }}" style="display: {% if current_io_mode == 'file' %}flex{% else %}none{% endif %}; overflow: hidden; transition: all 0.3s ease;">
+                    <div class="form-group">
+                        <label>{{ _("Input Filename") }}</label>
+                        <input type="text" name="p_{{ problem.id }}_input_filename" value="{{ problem.data_files.input_filename or '' if problem.data_files else '' }}" class="form-control" placeholder="e.g. problem.in">
+                    </div>
+                    <div class="form-group">
+                        <label>{{ _("Output Filename") }}</label>
+                        <input type="text" name="p_{{ problem.id }}_output_filename" value="{{ problem.data_files.output_filename or '' if problem.data_files else '' }}" class="form-control" placeholder="e.g. problem.out">
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="sticky-submit">
+            <button type="submit" class="button primary" style="font-size: 1.2em; padding: 15px; width: 100%;">
+                <i class="fa fa-save"></i> {{ _("Save All Changes") }}
+            </button>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                <i class="fa fa-info-circle"></i> {{ _("This will update all problems in the contest and notify the judge server.") }}
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selects = document.querySelectorAll('.io-mode-select');
+        selects.forEach(select => {
+            select.addEventListener('change', function() {
+                const problemId = this.dataset.problemId;
+                const row = document.getElementById('io-files-' + problemId);
+                if (this.value === 'file') {
+                    row.style.display = 'flex';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Determine if we are in dark mode
+        const isDarkMode = {{ 'true' if is_dark else 'false' }};
+        
+        // Wait for Martor/Ace to initialize and set theme
+        setTimeout(() => {
+            if (window.ace) {
+                const editors = document.querySelectorAll('.ace_editor');
+                editors.forEach(el => {
+                    const editor = ace.edit(el);
+                    if (isDarkMode) {
+                        editor.setTheme("ace/theme/twilight");
+                    } else {
+                        editor.setTheme("ace/theme/github");
+                    }
+                });
+            }
+        }, 500);
+    });
+</script>
+{% endblock %}

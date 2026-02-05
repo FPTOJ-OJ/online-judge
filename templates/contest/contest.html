@@ -179,6 +179,26 @@
         {% endif %}
     </div>
 
+    {% if contest.format_name == 'themis' %}
+        <ul class="messages" id="themis-upload-alert" style="display: none;">
+            <li class="info alert-dismissible">
+                <a class="close" onclick="dismissThemisAlert()" style="right: 5px; top: 0; line-height: 10px;">x</a>
+                {% trans %}Please use the{% endtrans %} <strong>{% trans %}Upload{% endtrans %}</strong> {% trans %}tab to submit your solutions.{% endtrans %}
+            </li>
+        </ul>
+        <script>
+            (function() {
+                if (!localStorage.getItem('dismissed-themis-alert-{{ contest.key }}')) {
+                    document.getElementById('themis-upload-alert').style.display = 'block';
+                }
+            })();
+            function dismissThemisAlert() {
+                document.getElementById('themis-upload-alert').style.display = 'none';
+                localStorage.setItem('dismissed-themis-alert-{{ contest.key }}', 'true');
+            }
+        </script>
+    {% endif %}
+
     <div class="content-description">
         {% cache 3600 'contest_html' contest.id MATH_ENGINE %}
             {{ contest.description|markdown('contest', MATH_ENGINE)|reference|str|safe }}
@@ -186,7 +206,7 @@
     </div>
 
     {% if contest.ended or request.user.is_superuser or is_editor or is_tester or (is_spectator and contest.started) %}
-        <hr>
+        {% if contest.description %}<hr>{% endif %}
         <div class="contest-problems">
             <h2 style="margin-bottom: 0.2em"><i class="fa fa-fw fa-question-circle"></i>{{ _('Problems') }} </h2>
             <table class="table striped">
@@ -237,7 +257,7 @@
     {% if contest.started or request.user.is_superuser or is_editor or is_tester %}
         <hr>
         <div class="contest-problems-full">
-            <h2 style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5em; margin-bottom: 1em;">
                 {{ _('Problem Statements') }}
                 {% if has_pdf_render %}
                     <a href="{{ url('contest_pdf', contest.key) }}" class="button" style="font-size: 0.6em;">

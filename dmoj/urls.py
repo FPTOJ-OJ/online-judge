@@ -212,6 +212,7 @@ urlpatterns = [
         path('/leave', contests.ContestLeave.as_view(), name='contest_leave'),
         path('/pdf', contests.ContestPDF.as_view(), name='contest_pdf'),
         path('/upload', contests.ContestThemisUpload.as_view(), name='contest_themis_upload'),
+        path('/quick-edit', contests.ContestQuickEdit.as_view(), name='contest_quick_edit'),
         path('/stats', contests.ContestStats.as_view(), name='contest_stats'),
 
         path('/rank/<str:problem>/',

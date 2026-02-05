@@ -117,7 +117,38 @@ class ContestForm(ModelForm):
         }
 
 
-class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
+class ContestAdmin(SortableAdminBase, VersionAdmin):
+    def get_deleted_objects(self, objs, request):
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        
+        # Add related Themis problems to the list so they show up in "Are you sure?"
+        from django.utils.text import capfirst
+        from django.utils.html import format_html
+        from judge.models import Problem
+        
+        additional_problems = []
+        for obj in objs:
+            if obj.format_name == 'themis':
+                prefix = f"{obj.key}_".upper()
+                problems = Problem.objects.filter(code__startswith=prefix)
+                for p in problems:
+                    opts = p._meta
+                    additional_problems.append(
+                        format_html('%s: <a href="%s">%s</a>' % (
+                            capfirst(opts.verbose_name),
+                            reverse('admin:%s_%s_change' % (opts.app_label, opts.model_name), args=(p.pk,)),
+                            p
+                        ))
+                    )
+                    # Update model_count
+                    model_name = str(opts.verbose_name_plural)
+                    model_count[model_name] = model_count.get(model_name, 0) + 1
+        
+        if additional_problems:
+            deleted_objects.extend(additional_problems)
+            
+        return deleted_objects, model_count, perms_needed, protected
+
     fieldsets = (
         (None, {'fields': ('key', 'name', 'authors', 'curators', 'testers', 'tester_see_submissions',
                            'tester_see_scoreboard', 'spectators')}),
@@ -217,6 +248,21 @@ class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
         # Only rescored if we did not already do so in `save_model`
         if not self._rescored and any(formset.has_changed() for formset in formsets):
             self._rescore(form.cleaned_data['key'])
+
+    def delete_model(self, request, obj):
+        if obj.format_name == 'themis':
+            from judge.models import Problem
+            prefix = f"{obj.key}_".upper()
+            Problem.objects.filter(code__startswith=prefix).delete()
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            if obj.format_name == 'themis':
+                from judge.models import Problem
+                prefix = f"{obj.key}_".upper()
+                Problem.objects.filter(code__startswith=prefix).delete()
+        super().delete_queryset(request, queryset)
 
     def has_change_permission(self, request, obj=None):
         if not request.user.has_perm('judge.edit_own_contest'):

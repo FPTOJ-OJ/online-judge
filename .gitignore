@@ -26,3 +26,5 @@ build
 static
 node_modules
 uwsgi.ini
+static/cache
+tmp/

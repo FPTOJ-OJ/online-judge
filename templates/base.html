@@ -288,9 +288,6 @@ $(document).ready(function() {
             });
         }
     });
-
-    $('tr').has('a[href="/problem/report"]').remove();
-    $('li').has('a[href="/problem/report"]').remove();
     $('#editor-switch-body').remove();
     $('#CKEDITOR_Script').remove();
 });
@@ -433,8 +430,8 @@ $(document).ready(function() {
     <footer>
         <span id="footer-content">
             <br>
-            <a style="color: #808080" href="https://dmoj.ca">
-                {{ _('Proudly powered by **DMOJ**, Hosted by Ha Tri Kien')|markdown('default', strip_paragraphs=True) }}
+            <a style="color: #808080" href="https://github.com/FPTOJ-OJ/online-judge">
+                {{ _('Proudly powered by **DMOJ**, Forked by Ha Tri Kien')|markdown('default', strip_paragraphs=True) }}
             </a>  |
             {% if misc_config.footer %}
                 {{ misc_config.footer|safe }} |
