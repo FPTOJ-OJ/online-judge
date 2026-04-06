@@ -93,7 +93,7 @@ class JudgeList(object):
     def register(self, judge):
         with self.lock:
             # Disconnect all judges with the same name, see <https://github.com/DMOJ/online-judge/issues/828>
-            self.disconnect(judge, force=True)
+            self.disconnect(judge.name, force=True)
             self.judges.add(judge)
             self._update_min_tier()
             self._handle_free_judge(judge)
@@ -189,6 +189,7 @@ class JudgeList(object):
                     judge.submit(id, problem, language, source)
                 except Exception:
                     logger.exception('Failed to dispatch %d (%s, %s) to %s', id, problem, language, judge.name)
+                    del self.submission_map[id]
                     self.judges.discard(judge)
                     return self.judge(id, problem, language, source, judge_id, priority)
             else:

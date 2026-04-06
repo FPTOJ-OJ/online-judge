@@ -3,6 +3,7 @@ import json
 import logging
 import threading
 import time
+import gc
 from collections import deque, namedtuple
 from operator import itemgetter
 
@@ -362,19 +363,19 @@ class JudgeHandler(ZlibPacketHandler):
         status_codes = ['SC', 'AC', 'WA', 'MLE', 'TLE', 'IR', 'RTE', 'OLE']
         batches = {}  # batch number: (points, total)
 
-        for case in SubmissionTestCase.objects.filter(submission=submission):
-            time += case.time
-            if not case.batch:
-                points += case.points
-                total += case.total
+        for case in SubmissionTestCase.objects.filter(submission=submission).values('time', 'memory', 'points', 'total', 'batch', 'status'):
+            time += case['time']
+            if not case['batch']:
+                points += case['points']
+                total += case['total']
             else:
-                if case.batch in batches:
-                    batches[case.batch][0] = min(batches[case.batch][0], case.points)
-                    batches[case.batch][1] = max(batches[case.batch][1], case.total)
+                if case['batch'] in batches:
+                    batches[case['batch']][0] = min(batches[case['batch']][0], case['points'])
+                    batches[case['batch']][1] = max(batches[case['batch']][1], case['total'])
                 else:
-                    batches[case.batch] = [case.points, case.total]
-            memory = max(memory, case.memory)
-            i = status_codes.index(case.status)
+                    batches[case['batch']] = [case['points'], case['total']]
+            memory = max(memory, case['memory'])
+            i = status_codes.index(case['status'])
             if i > status:
                 status = i
 
@@ -577,6 +578,7 @@ class JudgeHandler(ZlibPacketHandler):
             self._post_update_submission(id, state='test-case')
 
         SubmissionTestCase.objects.bulk_create(bulk_test_case_updates)
+        bulk_test_case_updates.clear()
 
     def on_malformed(self, packet):
         logger.error('%s: Malformed packet: %s', self.name, packet)
@@ -592,7 +594,14 @@ class JudgeHandler(ZlibPacketHandler):
         self._update_ping()
 
     def _free_self(self, packet):
-        self.judges.on_judge_free(self, packet['submission-id'])
+        submission_id = packet['submission-id']
+        self.judges.on_judge_free(self, submission_id)
+        self.update_counter.pop(submission_id, None)
+        if self._submission_cache_id == submission_id:
+            self._submission_cache_id = None
+            self._submission_cache = {}
+        db.reset_queries()
+        gc.collect()
 
     def _ping_thread(self):
         try:
