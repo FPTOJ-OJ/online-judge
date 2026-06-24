@@ -10,8 +10,9 @@ from mptt.admin import DraggableMPTTAdmin
 from reversion.admin import VersionAdmin
 
 from judge.dblock import LockModel
-from judge.models import BlogPost, NavigationBar
+from judge.models import BlogPost, NavigationBar, SiteConfiguration
 from judge.widgets import AdminHeavySelect2MultipleWidget, AdminHeavySelect2Widget, AdminMartorWidget
+from django.shortcuts import redirect
 
 
 class NavigationBarAdmin(DraggableMPTTAdmin):
@@ -166,3 +167,26 @@ class LogEntryAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         return super().queryset(request).prefetch_related('content_type')
+
+
+class SiteConfigurationForm(ModelForm):
+    class Meta:
+        model = SiteConfiguration
+        fields = '__all__'
+        widgets = {
+            'welcome_message': AdminMartorWidget(attrs={'data-markdownfy-url': reverse_lazy('flatpage_preview')}),
+        }
+
+
+class SiteConfigurationAdmin(admin.ModelAdmin):
+    form = SiteConfigurationForm
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        obj, created = self.model.objects.get_or_create(id=1)
+        return redirect('admin:judge_siteconfiguration_change', obj.id)

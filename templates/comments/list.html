@@ -159,6 +159,16 @@
                     <div class="comment-post-wrapper">
                         <div id="comment-form-body">{{ comment_form.body }}</div>
                     </div>
+                    {% if comment_form.captcha %}
+                        <div class="comment-captcha-wrapper" style="margin-top: 15px; margin-bottom: 15px;">
+                            {{ comment_form.captcha }}
+                            {% if comment_form.captcha.errors %}
+                                <div class="ui error message" style="display: block; margin-top: 5px;">
+                                    {{ comment_form.captcha.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <hr>
                     <input style="float:right" type="submit" value="{{ _('Post!') }}" class="button">
                 </form>

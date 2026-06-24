@@ -292,6 +292,10 @@ class Contest(models.Model):
         else:
             return None
 
+    @property
+    def is_infinite(self):
+        return self.end_time and self.end_time.year >= 9999
+
     @cached_property
     def ended(self):
         return self.end_time < self._now
@@ -570,6 +574,14 @@ class ContestParticipation(models.Model):
     @property
     def ended(self):
         return self.end_time is not None and self.end_time < self._now
+
+    @property
+    def is_infinite(self):
+        if self.spectate:
+            return self.contest.is_infinite
+        if self.virtual:
+            return False if self.contest.time_limit else self.contest.is_infinite
+        return False if self.contest.time_limit else self.contest.is_infinite
 
     @property
     def time_remaining(self):

@@ -1,19 +1,32 @@
 {% set can_view, can_edit = submission_layout(submission, profile_id, request.user, completed_problem_ids, editable_problem_ids, tester_problem_ids) %}
-<div class="sub-result {{ submission.result_class }}">
+{% set hide_scores = submission.contest_object and submission.contest_object.format_config and submission.contest_object.format_config.hide_scores_from_students and not (request.user.is_staff or request.user.is_superuser) %}
+<div class="sub-result {{ submission.result_class if not hide_scores else '' }}">
     <div class="score">
-        {%- if submission.is_graded -%}
-            {%- if submission.status in ('IE', 'CE', 'AB') -%}
-                ---
+        {%- if hide_scores -%}
+            {%- if submission.is_graded -%}
+                ?
             {%- else -%}
-                {{ submission.case_points|floatformat(0) }} / {{ submission.case_total|floatformat(0) }}
+                <i class="fa fa-spinner fa-pulse grading-spinner"></i>
             {%- endif -%}
         {%- else -%}
-            <i class="fa fa-spinner fa-pulse grading-spinner"></i>
+            {%- if submission.is_graded -%}
+                {%- if submission.status in ('IE', 'CE', 'AB') -%}
+                    ---
+                {%- else -%}
+                    {{ submission.case_points|floatformat(0) }} / {{ submission.case_total|floatformat(0) }}
+                {%- endif -%}
+            {%- else -%}
+                <i class="fa fa-spinner fa-pulse grading-spinner"></i>
+            {%- endif -%}
         {%- endif -%}
     </div>
 
     <div class="state">
-        <span title="{{ submission.long_status }}" class="status">{{ submission.short_status }}</span> |
+        {%- if hide_scores -%}
+            <span class="status">{% if submission.is_graded %}{{ _('Graded') }}{% else %}{{ _('Grading') }}{% endif %}</span> |
+        {%- else -%}
+            <span title="{{ submission.long_status }}" class="status">{{ submission.short_status }}</span> |
+        {%- endif -%}
         <span class="language">{{ submission.language.short_display_name }}</span>
     </div>
 </div>
@@ -76,7 +89,7 @@
 </div>
 
 <div class="sub-usage">
-    {% if submission.status in ('QU', 'P', 'G', 'CE', 'IE', 'AB') %}
+    {% if hide_scores or submission.status in ('QU', 'P', 'G', 'CE', 'IE', 'AB') %}
         <div class="time">---</div>
         <div class="memory">---</div>
     {% else %}

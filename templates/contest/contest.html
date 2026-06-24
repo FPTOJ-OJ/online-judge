@@ -30,9 +30,17 @@
                 {{- (contest.start_time if contest.start_time >= now else contest.end_time)|utc|date('Y-m-d\TH:i:s') }}" class="date">
             {%- if contest.is_in_contest(request.user) and not request.participation.live -%}
                 {% if request.participation.spectate %}
-                    {{- _('Spectating, contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) -}}
+                    {% if contest.is_infinite %}
+                        {{- _('Spectating, contest is infinite.') -}}
+                    {% else %}
+                        {{- _('Spectating, contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) -}}
+                    {% endif %}
                 {% elif request.participation.end_time %}
-                    {{- _('Participating virtually, %(countdown)s remaining.', countdown=as_countdown(request.participation.time_remaining)) -}}
+                    {% if request.participation.is_infinite %}
+                        {{- _('Participating virtually, infinite time remaining.') -}}
+                    {% else %}
+                        {{- _('Participating virtually, %(countdown)s remaining.', countdown=as_countdown(request.participation.time_remaining)) -}}
+                    {% endif %}
                 {% else %}
                     {{- _('Participating virtually.') -}}
                 {% endif %}
@@ -44,12 +52,24 @@
                 {% else %}
                     {%- if has_joined -%}
                         {% if live_participation.ended %}
-                            {{- _('Your time is up! Contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) -}}
+                            {% if contest.is_infinite %}
+                                {{- _('Your time is up! Contest is infinite.') -}}
+                            {% else %}
+                                {{- _('Your time is up! Contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) -}}
+                            {% endif %}
                         {% else %}
-                            {{- _('You have %(countdown)s remaining.', countdown=as_countdown(live_participation.time_remaining)) -}}
+                            {% if live_participation.is_infinite %}
+                                {{- _('You have infinite time remaining.') -}}
+                            {% else %}
+                                {{- _('You have %(countdown)s remaining.', countdown=as_countdown(live_participation.time_remaining)) -}}
+                            {% endif %}
                         {% endif %}
                     {%- else -%}
-                        {{ _('Contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) }}
+                        {% if contest.is_infinite %}
+                            {{ _('Contest is infinite.') }}
+                        {% else %}
+                            {{ _('Contest ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) }}
+                        {% endif %}
                     {%- endif -%}
                 {% endif %}
             {%- endif -%}
@@ -61,8 +81,12 @@
                     {% set time_limit=contest.time_limit|timedelta('localized-no-seconds') %}
                     {{ _('%(time_limit)s window between %(start_time)s and %(end_time)s', start_time=bold(start_time), end_time=bold(end_time), time_limit=bold(time_limit)) }}
                 {% else %}
-                    {% set length=contest.contest_window_length|timedelta('localized-no-seconds') %}
-                    {{ _('%(length)s long starting on %(start_time)s', start_time=bold(start_time), length=bold(length)) }}
+                    {% if contest.is_infinite %}
+                        {{ _('Infinite duration starting on %(start_time)s', start_time=bold(start_time)) }}
+                    {% else %}
+                        {% set length=contest.contest_window_length|timedelta('localized-no-seconds') %}
+                        {{ _('%(length)s long starting on %(start_time)s', start_time=bold(start_time), length=bold(length)) }}
+                    {% endif %}
                 {% endif %}
             {% endwith %}
         </div>

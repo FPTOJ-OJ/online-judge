@@ -171,6 +171,10 @@ if (!Date.now) {
 
 function count_down(label) {
     var initial = parseInt(label.attr('data-secs'));
+    if (isNaN(initial) || initial > 315360000) {
+        label.text(gettext('Infinite'));
+        return;
+    }
     var start = Date.now();
 
     function format(num) {

@@ -115,6 +115,24 @@
                             <div class="help">{% translate 'Check to make the contest last forever (for practice).' %}</div>
                         </div>
                     </div>
+
+                    <div class="form-row field-one_submission_only{% if form.one_submission_only.errors %} errors{% endif %}">
+                        {{ form.one_submission_only.errors }}
+                        <div>
+                            <label class="vCheckboxLabel" for="{{ form.one_submission_only.id_for_label }}">{% translate 'One-time Submission Only' %}</label>
+                            {{ form.one_submission_only }}
+                            <div class="help">{% translate 'If checked, each student can only perform bulk upload once.' %}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row field-hide_scores_from_students{% if form.hide_scores_from_students.errors %} errors{% endif %}">
+                        {{ form.hide_scores_from_students.errors }}
+                        <div>
+                            <label class="vCheckboxLabel" for="{{ form.hide_scores_from_students.id_for_label }}">{% translate 'Hide Scores from Students' %}</label>
+                            {{ form.hide_scores_from_students }}
+                            <div class="help">{% translate 'If checked, students will not see their scores or testcase feedback (real exam mode).' %}</div>
+                        </div>
+                    </div>
                 </fieldset>
 
                 <div class="submit-row">

@@ -1093,7 +1093,21 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
                 data = json.loads(request.body)
             except json.JSONDecodeError:
                 return HttpResponseBadRequest("Invalid JSON")
+            
             profile = request.profile
+            username = data.get('username')
+            is_admin_upload = request.user.is_superuser or self.object.is_editable_by(request.user)
+            user_not_found = False
+            if username and is_admin_upload:
+                from judge.models import Profile
+                target_profile = Profile.objects.filter(user__username=username).first()
+                if not target_profile:
+                    target_profile = Profile.objects.filter(display_name=username).first()
+                if target_profile:
+                    profile = target_profile
+                else:
+                    user_not_found = True
+
             participation = None
             if profile.current_contest and profile.current_contest.contest_id == self.object.id:
                 participation = profile.current_contest
@@ -1101,7 +1115,23 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
                 participation = profile.contest_history.filter(contest=self.object).order_by('-start').first()
             
             if not participation:
-                return JsonResponse({'success': False, 'error': _('You are not participating in this contest.')})
+                if is_admin_upload:
+                    from judge.models import ContestParticipation
+                    participation = ContestParticipation.objects.create(
+                        contest=self.object,
+                        user=profile,
+                    )
+                else:
+                    return JsonResponse({'success': False, 'error': _('You are not participating in this contest.')})
+
+            # Check one submission only limit for students
+            if not is_admin_upload and self.object.format_config and self.object.format_config.get('one_submission_only'):
+                oldest_sub = Submission.objects.filter(user=request.profile, contest_object=self.object).order_by('date').first()
+                if oldest_sub:
+                    from django.utils import timezone
+                    if (timezone.now() - oldest_sub.date).total_seconds() > 120:
+                        return JsonResponse({'success': False, 'error': _('You can only submit once in this contest.')})
+            
             problem_code = data.get('problem')
             lang_key = data.get('language')
             source_code = data.get('source')
@@ -1128,15 +1158,21 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
 
             # Normalize source code for file IO if applicable
             if hasattr(problem, 'data_files') and problem.data_files:
-                data = problem.data_files
-                if (data.io_mode == 'file' and data.input_filename and data.output_filename):
-                    source_code = normalize_filenames(source_code, data.input_filename, data.output_filename)
+                data_files = problem.data_files
+                if (data_files.io_mode == 'file' and data_files.input_filename and data_files.output_filename):
+                    source_code = normalize_filenames(source_code, data_files.input_filename, data_files.output_filename)
 
             sub = Submission.objects.create(user=profile, problem=problem, language=language, contest_object=self.object)
             SubmissionSource.objects.create(submission=sub, source=source_code)
             ContestSubmission.objects.get_or_create(submission=sub, problem=contest_problem, participation=participation)
             sub.judge()
-            return JsonResponse({'success': True, 'id': sub.id, 'status': 'Queued'})
+            return JsonResponse({
+                'success': True,
+                'id': sub.id,
+                'status': 'Queued',
+                'user_not_found': user_not_found,
+                'submitted_as': profile.user.username
+            })
         except Exception as e:
             import traceback
             return JsonResponse({'success': False, 'error': f"Server Error: {str(e)}", 'trace': traceback.format_exc()})

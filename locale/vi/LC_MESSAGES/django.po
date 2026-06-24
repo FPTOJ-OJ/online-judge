@@ -6227,3 +6227,24 @@ msgstr "Hồ sơ Admin"
 msgid "Check all"
 msgstr "Chọn tất cả"
 
+msgid "Infinite"
+msgstr "Vô hạn"
+
+msgid "Spectating, contest is infinite."
+msgstr "Đang quan sát, kỳ thi là vô hạn."
+
+msgid "Participating virtually, infinite time remaining."
+msgstr "Đang thi ảo, thời gian còn lại là vô hạn."
+
+msgid "Your time is up! Contest is infinite."
+msgstr "Hết giờ làm bài! Kỳ thi là vô hạn."
+
+msgid "You have infinite time remaining."
+msgstr "Bạn có vô hạn thời gian còn lại."
+
+msgid "Contest is infinite."
+msgstr "Kỳ thi là vô hạn."
+
+msgid "Infinite duration starting on %(start_time)s"
+msgstr "Thời gian vô hạn bắt đầu từ %(start_time)s"
+

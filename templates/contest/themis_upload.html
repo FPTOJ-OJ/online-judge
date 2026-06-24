@@ -149,6 +149,7 @@
     const availableLanguages = {{ languages_json|safe }}; 
     const globalMappings = {{ mappings_json|safe }}; 
     const STORAGE_KEY = 'themis_bulk_results_{{ contest.key }}';
+    const hideScoresFromStudents = {% if contest.format_config and contest.format_config.hide_scores_from_students and not (request.user.is_staff or request.user.is_superuser) %}true{% else %}false{% endif %};
 
     function init() {
         {% if request.user.is_staff %}
@@ -244,13 +245,21 @@
                 
                 if (isGraded) {
                     const status = resultDiv.classList.contains('AC') ? 'success' : 'error';
-                    cell.innerHTML = `<a href="/submission/${id}" target="_blank" class="status-${status}">${score}</a>`;
+                    if (hideScoresFromStudents) {
+                        cell.innerHTML = `<span class="status-success">Submitted</span>`;
+                    } else {
+                        cell.innerHTML = `<a href="/submission/${id}" target="_blank" class="status-${status}">${score}</a>`;
+                    }
                     updateTotalScore(cell.parentElement);
                     return true;
                 } else {
                     const progressDiv = tempDiv.querySelector('.sub-testcase');
                     const progress = progressDiv ? ` (${progressDiv.innerText.trim()})` : '';
-                    cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${score}${progress}</span>`;
+                    if (hideScoresFromStudents) {
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>Processing${progress}</span>`;
+                    } else {
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${score}${progress}</span>`;
+                    }
                     updateTotalScore(cell.parentElement);
                 }
             }
@@ -259,6 +268,10 @@
     }
 
     function updateTotalScore(row) {
+        if (hideScoresFromStudents) {
+            row.querySelector('.total-col').innerText = '-';
+            return;
+        }
         let total = 0;
         row.querySelectorAll('.score-cell').forEach(cell => {
             const scoreText = cell.innerText.split('(')[0].trim();
@@ -268,11 +281,11 @@
         row.querySelector('.total-col').innerText = total.toFixed(1).replace(/\.0$/, '');
     }
 
-    async function submitSolution(probCode, langId, source) {
+    async function submitSolution(probCode, langId, source, username) {
         const response = await fetch(window.location.href, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: JSON.stringify({ problem: probCode, language: langId, source: source })
+            body: JSON.stringify({ problem: probCode, language: langId, source: source, username: username || null })
         });
         return await response.json();
     }
@@ -319,9 +332,13 @@
                         for (const prob of orderedProblems) {
                             const data = userProbs[prob.code];
                             if (data) {
-                                log(`Submitting [${prob.code}]...`);
-                                const sub = await submitSolution(prob.code, data.lang, data.source);
+                                const sub = await submitSolution(prob.code, data.lang, data.source, user);
                                 if (sub.success) {
+                                    if (sub.user_not_found) {
+                                        log(`!! Student [${user}] not found in database. Submitted under admin [${sub.submitted_as}] instead.`);
+                                    } else {
+                                        log(`Submitting [${prob.code}] for student [${user}]...`);
+                                    }
                                     history[user][prob.code] = sub.id;
                                     const cell = document.querySelector(`tr[data-username="${CSS.escape(user)}"] td[data-problem="${CSS.escape(prob.code)}"]`);
                                     listenToSubmission(sub.id, cell);

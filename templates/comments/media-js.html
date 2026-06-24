@@ -36,6 +36,30 @@
                     $reply_form.find('form.comment-submit-form input#id_parent').val(parent);
                     rename_martor_widget($reply_form, 'body', reply_id);
                     ace.edit('martor-' + reply_id).setValue('');
+
+                    // Re-render Turnstile captcha if exists
+                    if (window.turnstile) {
+                        var $captcha = $reply_form.find('.cf-turnstile');
+                        if ($captcha.length) {
+                            $captcha.empty();
+                            $captcha.removeAttr('data-turnstile-cid');
+                            var sitekey = $captcha.attr('data-sitekey');
+                            turnstile.render($captcha[0], {
+                                sitekey: sitekey
+                            });
+                        }
+                    }
+                    // Re-render Google reCAPTCHA if exists
+                    if (window.grecaptcha) {
+                        var $recaptcha = $reply_form.find('.g-recaptcha');
+                        if ($recaptcha.length) {
+                            $recaptcha.empty();
+                            var sitekey = $recaptcha.attr('data-sitekey');
+                            grecaptcha.render($recaptcha[0], {
+                                sitekey: sitekey
+                            });
+                        }
+                    }
                 }
                 $comment_reply.fadeIn();
 

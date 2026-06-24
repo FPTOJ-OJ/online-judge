@@ -45,6 +45,10 @@ class ThemisCreateForm(forms.Form):
                                      help_text=_('Check to make the contest last forever (for practice).'))
     full_io_mode = forms.BooleanField(label=_('Full I/O Mode'), required=False, initial=False,
                                       help_text=_('Automatically configure File I/O (Input: <PROBLEM>.INP, Output: <PROBLEM>.OUT)'))
+    one_submission_only = forms.BooleanField(label=_('One-time Submission Only'), required=False, initial=False,
+                                            help_text=_('If checked, each student can only perform bulk upload once.'))
+    hide_scores_from_students = forms.BooleanField(label=_('Hide Scores from Students'), required=False, initial=False,
+                                                  help_text=_('If checked, students will not see their scores or testcase feedback (real exam mode).'))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -86,6 +90,9 @@ class ThemisCreateView(PermissionRequiredMixin, TitleMixin, FormView):
         access_code = form.cleaned_data.get('access_code', '')
         is_visible = form.cleaned_data['is_visible']
         
+        one_submission_only = form.cleaned_data.get('one_submission_only', False)
+        hide_scores_from_students = form.cleaned_data.get('hide_scores_from_students', False)
+
         # 1. Create Contest
         key = 'th' +  uuid.uuid4().hex[:6]
         contest = Contest.objects.create(
@@ -96,6 +103,10 @@ class ThemisCreateView(PermissionRequiredMixin, TitleMixin, FormView):
             format_name='themis',
             is_visible=is_visible,
             access_code=access_code,
+            format_config={
+                'one_submission_only': one_submission_only,
+                'hide_scores_from_students': hide_scores_from_students,
+            }
         )
         contest.authors.add(self.request.profile)
         
@@ -120,8 +131,8 @@ class ThemisCreateView(PermissionRequiredMixin, TitleMixin, FormView):
                     d_path = os.path.join(root, d)
                     if os.path.isdir(d_path):
                         # Check for input/output files in this subdirectory
-                        inps = [f for f in os.listdir(d_path) if f.lower().endswith('.inp')]
-                        outs = [f for f in os.listdir(d_path) if f.lower().endswith('.out')]
+                        inps = [f for f in os.listdir(d_path) if f.lower().endswith(('.inp', '.in'))]
+                        outs = [f for f in os.listdir(d_path) if f.lower().endswith(('.out', '.ans'))]
                         if inps and outs:
                             has_test_subdirs = True
                             valid_subdirs.append(d)
@@ -256,8 +267,8 @@ class ThemisCreateView(PermissionRequiredMixin, TitleMixin, FormView):
                 case_order = 0
                 for cd in case_dirs:
                     cd_path = os.path.join(prob_path, cd)
-                    inps = glob.glob(os.path.join(cd_path, '*.[iI][nN][pP]'))
-                    outs = glob.glob(os.path.join(cd_path, '*.[oO][uU][tT]'))
+                    inps = glob.glob(os.path.join(cd_path, '*.[iI][nN][pP]')) + glob.glob(os.path.join(cd_path, '*.[iI][nN]'))
+                    outs = glob.glob(os.path.join(cd_path, '*.[oO][uU][tT]')) + glob.glob(os.path.join(cd_path, '*.[aA][nN][sS]'))
                     
                     if inps and outs:
                          inp_rel = os.path.join(cd, os.path.basename(inps[0]))

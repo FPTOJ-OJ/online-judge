@@ -5,28 +5,41 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        {% if misc_config.meta_keywords %}
-            <meta name="keywords" content="{{ misc_config.meta_keywords }}">
+        {% if site_config and site_config.meta_keywords %}
+            {% set meta_keys = site_config.meta_keywords %}
+        {% else %}
+            {% set meta_keys = misc_config.meta_keywords %}
         {% endif %}
+        {% if meta_keys %}<meta name="keywords" content="{{ meta_keys }}">{% endif %}
+
         {% if request.path == '/' %}
-            {% if misc_config.meta_description %}
-                <meta name="description" content="{{ misc_config.meta_description }}">
+            {% if site_config and site_config.meta_description %}
+                {% set meta_desc = site_config.meta_description %}
+            {% else %}
+                {% set meta_desc = misc_config.meta_description %}
             {% endif %}
         {% else %}
             {% if problem is defined and description %}
                 {% set raw_text = description | markdown(problem.markdown_style, MATH_ENGINE) | striptags %}
-                <meta name="description" content="{{ raw_text | truncatewords(30) }}">
+                {% set meta_desc = raw_text | truncatewords(30) %}
             {% else %}
-                <meta name="description" content="Trang bài tập trực tuyến FPTOJ – nơi luyện tập và thi đấu thuật toán.">
+                {% set meta_desc = site_config.welcome_message | striptags | truncatewords(30) if (site_config and site_config.welcome_message) else "Trang bài tập trực tuyến " ~ SITE_NAME ~ " – nơi luyện tập và thi đấu thuật toán." %}
             {% endif %}
         {% endif %}
+        {% if meta_desc %}<meta name="description" content="{{ meta_desc }}">{% endif %}
 
-        <meta name="author" content="Ha Tri Kien">
+        <meta name="author" content="{{ SITE_NAME }}">
         
         <!-- Open Graph / Facebook / Zalo / Discord -->
         <meta property="og:title" content="{{ title }} - {{ SITE_LONG_NAME }}">
-        <meta property="og:description" content="{{ misc_config.meta_description }}">
-        <meta property="og:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
+        <meta property="og:description" content="{{ meta_desc }}">
+        {% if site_config and site_config.logo %}
+            <meta property="og:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}{{ site_config.logo.url }}">
+            <meta name="twitter:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}{{ site_config.logo.url }}">
+        {% else %}
+            <meta property="og:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
+            <meta name="twitter:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
+        {% endif %}
         <meta property="og:image:width" content="1200">
         <meta property="og:image:height" content="630">
         <meta property="og:type" content="website">
@@ -34,12 +47,11 @@
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ title }} - {{ SITE_LONG_NAME }}">
-        <meta name="twitter:description" content="{{ misc_config.meta_description }}">
-        <meta name="twitter:image" content="{{ DMOJ_SCHEME }}://{{ site.domain }}/static/preview.png">
+        <meta name="twitter:description" content="{{ meta_desc }}">
     
         <!-- Microsoft & Windows -->
         <meta name="application-name" content="{{ SITE_LONG_NAME }}">
-        <meta name="msapplication-tooltip" content="{{ misc_config.meta_description }}">
+        <meta name="msapplication-tooltip" content="{{ meta_desc }}">
         <meta name="msapplication-starturl" content="{{ DMOJ_SCHEME }}://{{ site.domain }}">
     
         <!-- Progressive Web App (PWA) -->
@@ -47,19 +59,36 @@
         <link rel="manifest" href="/manifest.json">
         </script>
         <!-- Favicons-->
-        <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
-        <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
-        <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
-        <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
-        <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
-        <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
-        <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
-        <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
-        <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
-        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
-        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+        {% if site_config and site_config.favicon %}
+            <link rel="apple-touch-icon" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="57x57" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="60x60" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="72x72" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="76x76" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="114x114" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="120x120" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="144x144" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="152x152" href="{{ site_config.favicon.url }}">
+            <link rel="apple-touch-icon" sizes="180x180" href="{{ site_config.favicon.url }}">
+            <link rel="icon" type="image/png" href="{{ site_config.favicon.url }}" sizes="32x32">
+            <link rel="icon" type="image/png" href="{{ site_config.favicon.url }}" sizes="192x192">
+            <link rel="icon" type="image/png" href="{{ site_config.favicon.url }}" sizes="96x96">
+            <link rel="icon" type="image/png" href="{{ site_config.favicon.url }}" sizes="16x16">
+        {% else %}
+            <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+            <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+            <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+            <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+            <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+            <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+            <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+            <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+            <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+            <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+            <link rel="icon" type="image/png" href="/android-chrome-192x192.png" sizes="192x192">
+            <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+            <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+        {% endif %}
         <link rel="manifest" href="/manifest.json">
         <meta name="msapplication-TileColor" content="#FFBB33">
         <meta name="msapplication-TileImage" content="/mstile-144x144.png">
@@ -442,6 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <ul class="dropdown-menu" style="width: 150px">
                         {% if request.user.is_staff or request.user.is_superuser %}
                         <li><a href="{{ url('admin:index') }}">{{ _('Admin') }}</a></li>
+                        <li><a href="{{ url('admin:judge_siteconfiguration_changelist') }}">{{ _('Site Config') }}</a></li>
                         {% endif %}
                         <li><a href="{{ url('user_edit_profile') }}">{{ _('Edit profile') }}</a></li>
                         {% if request.user.is_impersonate %}
@@ -520,7 +550,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <span id="footer-content">
             <br>
             <a style="color: #808080" href="https://github.com/FPTOJ-OJ/online-judge">
-                {{ _('Proudly powered by **DMOJ**, Forked by Ha Tri Kien')|markdown('default', strip_paragraphs=True) }}
+                {{ _('Proudly powered by **DMOJ**, Forked by FPTOJ Team')|markdown('default', strip_paragraphs=True) }}
             </a>  |
             {% if misc_config.footer %}
                 {{ misc_config.footer|safe }} |

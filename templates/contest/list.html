@@ -161,7 +161,9 @@
                         {{ contest_head(contest) }}
                         {% if contest.start_time %}
                         <br>
-                        {% if contest.time_limit %}
+                        {% if participation.is_infinite %}
+                        <span class="time">{{ _('Infinite') }}</span>
+                        {% elif contest.time_limit %}
                         <span class="time">{{ _('Window ends in %(countdown)s',
                             countdown=as_countdown(participation.time_remaining)) }}</span>
                         {% elif contest.time_before_end %}
@@ -204,7 +206,9 @@
                         {{ contest_head(contest) }}
                         {% if contest.start_time %}
                         <br>
-                        {% if contest.time_before_end %}
+                        {% if contest.is_infinite %}
+                        <span class="time">{{ _('Infinite') }}</span>
+                        {% elif contest.time_before_end %}
                         <span class="time">{{ _('Ends in %(countdown)s',
                             countdown=as_countdown(contest.time_before_end)) }}</span>
                         {% endif %}

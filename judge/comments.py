@@ -23,7 +23,12 @@ from judge.models import Comment, CommentLock
 from judge.widgets import MartorWidget
 
 
+from turnstile.fields import TurnstileField
+
+
 class CommentForm(ModelForm):
+    captcha = TurnstileField()
+
     class Meta:
         model = Comment
         fields = ['body', 'parent']
@@ -37,6 +42,8 @@ class CommentForm(ModelForm):
         self.request = request
         super(CommentForm, self).__init__(*args, **kwargs)
         self.fields['body'].widget.attrs.update({'placeholder': _('Comment body')})
+        if not getattr(settings, 'TURNSTILE_SITEKEY', None) or not getattr(settings, 'TURNSTILE_SECRET', None):
+            self.fields.pop('captcha', None)
 
     def clean(self):
         if self.request is not None and self.request.user.is_authenticated:

@@ -83,7 +83,14 @@ class ContestProblemInline(SortableInlineAdminMixin, admin.TabularInline):
                            reverse('admin:judge_contest_rejudge', args=(obj.contest.id, obj.id)), _('Rejudge'))
 
 
+from django import forms
+
 class ContestForm(ModelForm):
+    is_infinite = forms.BooleanField(label=_('Infinite'), required=False, help_text=_('Check to make the contest last forever.'))
+    is_lock_infinite = forms.BooleanField(label=_('Infinite Lock'), required=False, help_text=_('Check to make the contest lock date infinite (will be set to 9999-12-31).'))
+    one_submission_only = forms.BooleanField(label=_('One-time Submission Only'), required=False, help_text=_('Check to allow only one ZIP/bulk upload per student (Themis Style).'))
+    hide_scores_from_students = forms.BooleanField(label=_('Hide Scores from Students'), required=False, help_text=_('Check to hide scores and details from students, behaving like a real exam (Themis Style).'))
+
     def __init__(self, *args, **kwargs):
         super(ContestForm, self).__init__(*args, **kwargs)
         if 'rate_exclude' in self.fields:
@@ -94,9 +101,55 @@ class ContestForm(ModelForm):
                 self.fields['rate_exclude'].queryset = Profile.objects.none()
         self.fields['banned_users'].widget.can_add_related = False
         self.fields['view_contest_scoreboard'].widget.can_add_related = False
+        if 'end_time' in self.fields:
+            self.fields['end_time'].required = False
+            self.fields['end_time'].help_text = _('Leave blank for infinite contest (will be set to 9999-12-31).')
+        if 'locked_after' in self.fields:
+            self.fields['locked_after'].required = False
+            self.fields['locked_after'].help_text = _('Leave blank or check infinite to never lock.')
+        
+        if self.instance and self.instance.pk:
+            if self.instance.end_time and self.instance.end_time.year >= 9999:
+                self.fields['is_infinite'].initial = True
+            if self.instance.locked_after and self.instance.locked_after.year >= 9999:
+                self.fields['is_lock_infinite'].initial = True
+            config = self.instance.format_config or {}
+            self.fields['one_submission_only'].initial = config.get('one_submission_only', False)
+            self.fields['hide_scores_from_students'].initial = config.get('hide_scores_from_students', False)
+
+    def clean_end_time(self):
+        end_time = self.cleaned_data.get('end_time')
+        if not end_time:
+            import datetime
+            return timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+        return end_time
+
+    def clean_locked_after(self):
+        locked_after = self.cleaned_data.get('locked_after')
+        if not locked_after and self.cleaned_data.get('is_lock_infinite'):
+            import datetime
+            return timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+        return locked_after
 
     def clean(self):
         cleaned_data = super(ContestForm, self).clean()
+        if cleaned_data.get('is_infinite'):
+            import datetime
+            cleaned_data['end_time'] = timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+        if cleaned_data.get('is_lock_infinite'):
+            import datetime
+            cleaned_data['locked_after'] = timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+        
+        # Merge themis format settings into format_config
+        one_sub = cleaned_data.get('one_submission_only', False)
+        hide_scores = cleaned_data.get('hide_scores_from_students', False)
+        
+        format_config = cleaned_data.get('format_config') or {}
+        if isinstance(format_config, dict):
+            format_config['one_submission_only'] = one_sub
+            format_config['hide_scores_from_students'] = hide_scores
+            cleaned_data['format_config'] = format_config
+            
         cleaned_data['banned_users'].filter(current_contest__contest=self.instance).update(current_contest=None)
 
     class Meta:
@@ -153,11 +206,11 @@ class ContestAdmin(SortableAdminBase, VersionAdmin):
         (None, {'fields': ('key', 'name', 'authors', 'curators', 'testers', 'tester_see_submissions',
                            'tester_see_scoreboard', 'spectators')}),
         (_('Settings'), {'fields': ('is_visible', 'use_clarifications', 'hide_problem_tags', 'hide_problem_authors',
-                                    'show_short_display', 'run_pretests_only', 'locked_after', 'scoreboard_visibility',
+                                    'show_short_display', 'run_pretests_only', 'locked_after', 'is_lock_infinite', 'scoreboard_visibility',
                                     'points_precision')}),
-        (_('Scheduling'), {'fields': ('start_time', 'end_time', 'time_limit')}),
+        (_('Scheduling'), {'fields': ('start_time', 'end_time', 'is_infinite', 'time_limit')}),
         (_('Details'), {'fields': ('description', 'og_image', 'logo_override_image', 'tags', 'summary')}),
-        (_('Format'), {'fields': ('format_name', 'format_config', 'problem_label_script')}),
+        (_('Format'), {'fields': ('format_name', 'one_submission_only', 'hide_scores_from_students', 'format_config', 'problem_label_script')}),
         (_('Rating'), {'fields': ('is_rated', 'rate_all', 'rating_floor', 'rating_ceiling', 'rate_exclude')}),
         (_('Access'), {'fields': ('access_code', 'private_contestants', 'organizations', 'classes',
                                   'join_organizations', 'view_contest_scoreboard', 'view_contest_submissions')}),
@@ -205,7 +258,7 @@ class ContestAdmin(SortableAdminBase, VersionAdmin):
         if not request.user.has_perm('judge.contest_rating'):
             readonly += ['is_rated', 'rate_all', 'rate_exclude']
         if not request.user.has_perm('judge.lock_contest'):
-            readonly += ['locked_after']
+            readonly += ['locked_after', 'is_lock_infinite']
         if not request.user.has_perm('judge.contest_access_code'):
             readonly += ['access_code']
         if not request.user.has_perm('judge.create_private_contest'):

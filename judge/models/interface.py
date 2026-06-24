@@ -10,7 +10,29 @@ from mptt.models import MPTTModel
 
 from judge.models.profile import Profile
 
-__all__ = ['MiscConfig', 'validate_regex', 'NavigationBar', 'BlogPost']
+__all__ = ['MiscConfig', 'validate_regex', 'NavigationBar', 'BlogPost', 'SiteConfiguration']
+
+
+class SiteConfiguration(models.Model):
+    site_name = models.CharField(max_length=100, default='DMOJ: Modern Online Judge', verbose_name=_('Site Name'))
+    site_short_name = models.CharField(max_length=20, default='DMOJ', verbose_name=_('Site Short Name'))
+    logo = models.ImageField(upload_to='site_logo/', null=True, blank=True, verbose_name=_('Logo Image'))
+    favicon = models.FileField(upload_to='site_favicon/', null=True, blank=True, verbose_name=_('Favicon'))
+    welcome_message = models.TextField(blank=True, default='', verbose_name=_('Welcome Message (Markdown)'))
+    meta_description = models.TextField(blank=True, default='', verbose_name=_('Meta Description'))
+    meta_keywords = models.CharField(max_length=255, blank=True, default='', verbose_name=_('Meta Keywords'))
+
+    class Meta:
+        verbose_name = _('Site Configuration')
+        verbose_name_plural = _('Site Configurations')
+
+    def __str__(self):
+        return str(_("Site Configuration"))
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(id=1)
+        return obj
 
 
 class MiscConfig(models.Model):

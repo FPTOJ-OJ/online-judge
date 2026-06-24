@@ -20,11 +20,10 @@ sass_processed
 __pycache__
 dmojsite/
 userdata
-web.log
-web.log.1
+*.log
+*.log.1
 build
-static
 node_modules
 uwsgi.ini
-static/cache
 tmp/
+static

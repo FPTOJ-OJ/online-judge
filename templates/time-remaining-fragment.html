@@ -1,1 +1,5 @@
+{% if countdown and countdown.total_seconds() > 315360000 %}
+<span class="time-remaining-infinite">{{ _('Infinite') }}</span>
+{% else %}
 <span data-secs="{{ countdown|seconds }}" class="time-remaining">{{ countdown|timedelta("localized") }}</span>
+{% endif %}

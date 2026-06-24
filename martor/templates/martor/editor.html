@@ -50,6 +50,15 @@
         link.href = CHOSEN_CSS_URL;
         document.head.appendChild(link);
     }
+
+    if (!document.getElementById('editor-switch-styles')) {
+        const style = document.createElement('style');
+        style.id = 'editor-switch-styles';
+        style.textContent = `
+            .editor-toggle { margin-top: 15px; margin-bottom: 10px; }
+        `;
+        document.head.appendChild(style);
+    }
     
     // --- Preview Logic ---
     async function fetchPreview(content) {
@@ -173,6 +182,7 @@
 
             await loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js');
             await loadScript('/static/libs/chosen.js/chosen.jquery.min.js');
+            await loadScript('https://unpkg.com/turndown/dist/turndown.js');
             await loadScript('/static/martor/js/editor-switch.js');
             await loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js');
             await loadScript('/static/martor/js/sidebar-math.js');

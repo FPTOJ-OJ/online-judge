@@ -76,9 +76,14 @@ def misc_config(request):
 
 
 def site_name(request):
-    return {'SITE_NAME': settings.SITE_NAME,
-            'SITE_LONG_NAME': settings.SITE_LONG_NAME,
-            'SITE_ADMIN_EMAIL': settings.SITE_ADMIN_EMAIL}
+    from judge.models import SiteConfiguration
+    config = SiteConfiguration.get_solo()
+    return {
+        'SITE_NAME': config.site_short_name or settings.SITE_NAME,
+        'SITE_LONG_NAME': config.site_name or settings.SITE_LONG_NAME,
+        'SITE_ADMIN_EMAIL': settings.SITE_ADMIN_EMAIL,
+        'site_config': config,
+    }
 
 
 def site_theme(request):

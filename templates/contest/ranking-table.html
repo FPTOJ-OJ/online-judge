@@ -71,10 +71,18 @@
 
 {% block before_point %}
     {% for cell in user.problem_cells %}
-        {{ cell }}
+        {% if contest.format_config and contest.format_config.hide_scores_from_students and not (request.user.is_staff or request.user.is_superuser) %}
+            <td>?</td>
+        {% else %}
+            {{ cell }}
+        {% endif %}
     {% endfor %}
 {% endblock %}
 
 {% block point %}
-    {{ user.result_cell }}
+    {% if contest.format_config and contest.format_config.hide_scores_from_students and not (request.user.is_staff or request.user.is_superuser) %}
+        <td class="user-points">?</td>
+    {% else %}
+        {{ user.result_cell }}
+    {% endif %}
 {% endblock %}

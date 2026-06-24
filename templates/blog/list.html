@@ -124,7 +124,11 @@
                                     <a href="{{ url('contest_view', contest.key) }}">{{ contest.name }}</a>
                                 </div>
                                 <div class="time">
-                                    {{ _('Ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) }}
+                                    {% if contest.is_infinite %}
+                                        {{ _('Infinite') }}
+                                    {% else %}
+                                        {{ _('Ends in %(countdown)s.', countdown=as_countdown(contest.time_before_end)) }}
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}
