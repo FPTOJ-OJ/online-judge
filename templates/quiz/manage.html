@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    
+    <!-- Management Header -->
+    <div class="quiz-header-card">
+        <div>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">Teacher Panel</span>
+            <h1>Quản lý câu hỏi trắc nghiệm</h1>
+            <p>Tạo mới, chỉnh sửa hoặc xóa các câu hỏi luyện tập tốt nghiệp THPT.</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="{{ url('quiz_question_add') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
+                <i class="fa fa-plus"></i> Thêm câu hỏi mới
+            </a>
+            <a href="{{ url('quiz_bulk_import') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
+                <i class="fa fa-upload"></i> Import hàng loạt (JSON)
+            </a>
+            <a href="{{ url('quiz_home') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px; background-color: transparent; border-color: rgba(255,255,255,0.15);">
+                Trang Luyện Tập
+            </a>
+        </div>
+    </div>
+
+    <!-- Questions Table / Grid -->
+    <div class="quiz-q-card" style="padding: 24px;">
+        <h3 style="font-size: 1.1rem; margin: 0 0 16px 0; color: #ffffff; border-bottom: 1px solid var(--quiz-border); padding-bottom: 12px;">
+            Danh sách câu hỏi bạn quản lý ({{ questions|length }} câu)
+        </h3>
+
+        {% if questions %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
+                            <th style="padding: 12px 8px; width: 60px;">ID</th>
+                            <th style="padding: 12px 8px; width: 140px;">Loại câu</th>
+                            <th style="padding: 12px 8px; width: 120px;">Độ khó</th>
+                            <th style="padding: 12px 8px;">Nội dung tóm tắt</th>
+                            <th style="padding: 12px 8px; width: 160px;">Nguồn / Đề</th>
+                            <th style="padding: 12px 8px; width: 150px; text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q in questions %}
+                            <tr style="border-bottom: 1px solid var(--quiz-border); transition: background 0.2s;">
+                                <td style="padding: 12px 8px; font-weight: 700; color: var(--quiz-primary);">#{{ q.id }}</td>
+                                <td style="padding: 12px 8px;">
+                                    <span class="quiz-q-tag type" style="padding: 2px 6px; font-size: 0.7rem;">{{ q.get_type_display() }}</span>
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <span class="quiz-q-tag difficulty" style="padding: 2px 6px; font-size: 0.7rem;">{{ q.get_difficulty_display() }}</span>
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--quiz-text); max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ q.content|striptags|truncate(80) }}
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--quiz-text-muted);">
+                                    {% if q.source %}{{ q.source.name }}{% else %}-{% endif %}
+                                </td>
+                                <td style="padding: 12px 8px; text-align: center;">
+                                    <div style="display: flex; gap: 8px; justify-content: center;">
+                                        <a href="{{ url('quiz_question_edit', question_id=q.id) }}" class="quiz-session-btn" style="padding: 4px 10px; font-size: 0.8rem; text-decoration: none;">
+                                            Sửa
+                                        </a>
+                                        <form method="post" action="{{ url('quiz_question_delete', question_id=q.id) }}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="quiz-session-btn" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--quiz-danger); color: var(--quiz-danger);">
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--quiz-text-muted);">
+                Chưa có câu hỏi nào. Click nút <b>Thêm câu hỏi mới</b> để bắt đầu.
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "ckeditor5": "^48.3.0",
     "qu": "^0.1.0",
     "simplesets": "^1.2.0",
     "ws": "^8.18.1"

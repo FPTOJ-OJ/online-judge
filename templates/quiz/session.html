@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    
+    <!-- Gameplay Session Header -->
+    <div class="quiz-session-header">
+        <div>
+            <button type="button" class="quiz-session-btn" onclick="endSession()" style="border-color: var(--quiz-danger); color: var(--quiz-danger);">
+                <i class="fa fa-arrow-left"></i> Kết thúc phiên
+            </button>
+        </div>
+        
+        <div class="quiz-session-tools">
+            <button type="button" class="quiz-session-btn" onclick="toggleScratchpad()">
+                <i class="fa fa-pencil"></i> Giấy nháp
+            </button>
+            <button type="button" class="quiz-session-btn" onclick="applyHighlight()">
+                <i class="fa fa-pencil-square-o"></i> Highlight
+            </button>
+            <button type="button" class="quiz-session-btn" onclick="clearHighlights()" style="font-size: 0.8rem; padding: 4px 8px;">
+                Xóa highlight
+            </button>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <span class="quiz-score-badge">Điểm: <span id="score-val">{{ score }}</span> / {{ total_questions }}</span>
+            <span class="quiz-q-tag source">Câu {{ current_number }} của {{ total_questions }}</span>
+        </div>
+    </div>
+
+    <!-- Active Question Board -->
+    <div class="quiz-q-card" style="padding: 32px; min-height: 350px;">
+        
+        <div class="quiz-q-tags" style="margin-bottom: 20px;">
+            <span class="quiz-q-tag type">{{ question.get_type_display() }}</span>
+            <span class="quiz-q-tag difficulty">{{ question.get_difficulty_display() }}</span>
+            {% if question.source %}
+                <span class="quiz-q-tag source">{{ question.source.name }}</span>
+            {% endif %}
+            {% for t in question.tags.all() %}
+                <span class="quiz-q-tag source" style="color: var(--quiz-info); border-color: rgba(0, 229, 255, 0.2);">
+                    #{{ t.name }}
+                </span>
+            {% endfor %}
+        </div>
+
+        <div class="quiz-q-body" id="question-text-content">
+            {{ question.content|markdown('problem') }}
+        </div>
+
+        <form id="submit-answer-form" method="post">
+            {% csrf_token %}
+            {% if question.type == 'choice' %}
+                <!-- Multiple Choice -->
+                <div class="quiz-options-list">
+                    {% for opt in options %}
+                        <div class="quiz-option-card {% if is_answered and user_answer == opt.label %}selected{% endif %}" 
+                             id="opt-card-{{ opt.label }}" 
+                             onclick="selectOption('{{ opt.label }}')">
+                            
+                            <span class="quiz-option-label">{{ opt.label }}</span>
+                            <div class="quiz-option-content">{{ opt.content|markdown('problem') }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="answer" id="selected-answer-input" value="{{ user_answer or '' }}">
+            {% else %}
+                <!-- True/False Set -->
+                <div class="quiz-tf-list">
+                    {% for opt in options %}
+                        <div class="quiz-tf-row" id="tf-row-{{ opt.label }}">
+                            <div class="quiz-tf-statement">
+                                <span class="quiz-tf-label">{{ opt.label }}</span>
+                                <span class="quiz-tf-text">{{ opt.content|markdown('problem') }}</span>
+                            </div>
+                            
+                            <div class="quiz-tf-buttons">
+                                <button type="button" 
+                                        class="quiz-tf-btn true-btn {% if is_answered and user_answer and user_answer[opt.label] == True %}active{% endif %}" 
+                                        id="tf-btn-{{ opt.label }}-true" 
+                                        onclick="selectTF('{{ opt.label }}', true)">
+                                    Đúng
+                                </button>
+                                <button type="button" 
+                                        class="quiz-tf-btn false-btn {% if is_answered and user_answer and user_answer[opt.label] == False %}active{% endif %}" 
+                                        id="tf-btn-{{ opt.label }}-false" 
+                                        onclick="selectTF('{{ opt.label }}', false)">
+                                    Sai
+                                </button>
+                            </div>
+                            <input type="hidden" name="tf_{{ opt.label }}" id="tf-input-{{ opt.label }}" value="{% if is_answered and user_answer %}{{ user_answer[opt.label]|string|lower }}{% endif %}">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </form>
+
+        <!-- Dynamic Answer Evaluation Feedback Panel -->
+        <div class="quiz-feedback-panel" id="feedback-panel" style="display: none;">
+            <div class="quiz-feedback-title" id="feedback-title">
+                <!-- Will be filled by JS -->
+            </div>
+            <div class="quiz-explanation-body" id="explanation-body">
+                <!-- Will be filled by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Gameplay Session Navigation Controls -->
+    <div class="quiz-session-controls">
+        <div>
+            <button class="quiz-session-btn" onclick="prevQuestion()" {% if current_number == 1 %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                <i class="fa fa-chevron-left"></i> Câu trước
+            </button>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button class="quiz-session-btn" id="skip-btn" onclick="skipQuestion()">
+                Bỏ qua câu hỏi <i class="fa fa-chevron-right"></i>
+            </button>
+            <button class="quiz-btn-primary" id="check-btn" onclick="checkAnswer()" style="padding: 10px 24px; font-size: 1rem; box-shadow: none;">
+                Kiểm tra
+            </button>
+            <button class="quiz-btn-primary" id="next-btn" onclick="nextQuestion()" style="padding: 10px 24px; font-size: 1rem; box-shadow: none; display: none; background-color: var(--quiz-accent);">
+                Tiếp tục <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scratchpad Modal Overlay -->
+<div id="quiz-scratchpad-modal">
+    <div class="scratchpad-header">
+        <h3 style="color: #ffffff; margin: 0; font-size: 1.1rem;"><i class="fa fa-pencil"></i> Bảng nháp & Vẽ tự do</h3>
+        <div class="scratchpad-tools">
+            <button class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 6px 12px; font-size: 0.8rem;">
+                Xóa bảng
+            </button>
+            <button class="quiz-session-btn" onclick="toggleScratchpad()" style="padding: 6px 12px; font-size: 0.8rem; background: var(--quiz-danger); color: #fff;">
+                Đóng nháp
+            </button>
+        </div>
+    </div>
+    <div class="scratchpad-body">
+        <canvas id="scratchpad-canvas"></canvas>
+    </div>
+</div>
+
+<script>
+    var isAnswered = ('{{ is_answered|lower }}' === 'true');
+    var questionType = '{{ question.type }}';
+    var isLastQuestion = {% if current_number == total_questions %}true{% else %}false{% endif %};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof hljs !== 'undefined') {
+            // Format code blocks
+            document.querySelectorAll("pre code").forEach(function(codeBlock) {
+                if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
+                    hljs.highlightElement(codeBlock);
+                }
+                var lang = "Code";
+                codeBlock.classList.forEach(function(cls) {
+                    if (cls.startsWith("language-")) {
+                        lang = cls.replace("language-", "").toUpperCase();
+                    } else if (cls.startsWith("lang-")) {
+                        lang = cls.replace("lang-", "").toUpperCase();
+                    }
+                });
+                if (lang === "CPP") lang = "C++";
+                
+                var pre = codeBlock.parentNode;
+                var wrapper = document.createElement("div");
+                wrapper.className = "quiz-code-wrapper";
+                
+                var header = document.createElement("div");
+                header.className = "quiz-code-header";
+                header.innerText = lang;
+                
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+                
+                var codeLines = codeBlock.innerHTML.split("\n");
+                if (codeLines.length > 0 && codeLines[codeLines.length - 1].trim() === "") {
+                    codeLines.pop();
+                }
+                
+                var lineNumbersHtml = "";
+                for (var i = 1; i <= codeLines.length; i++) {
+                    lineNumbersHtml += `<div>${i}</div>`;
+                }
+                
+                var lineContainer = document.createElement("div");
+                lineContainer.className = "quiz-code-lines";
+                lineContainer.innerHTML = lineNumbersHtml;
+                
+                pre.insertBefore(lineContainer, codeBlock);
+                pre.style.display = "flex";
+                pre.style.gap = "12px";
+                pre.style.margin = "0";
+                pre.style.padding = "12px";
+                pre.style.backgroundColor = "#18181b";
+                pre.style.overflowX = "auto";
+            });
+        }
+    });
+
+    // Highlight text logic
+    function applyHighlight() {
+        var userSelection = window.getSelection();
+        if (userSelection.rangeCount > 0) {
+            var range = userSelection.getRangeAt(0);
+            var selectedText = range.toString().strip;
+            if (selectedText !== '') {
+                var span = document.createElement('span');
+                span.className = 'quiz-highlighted';
+                span.appendChild(range.extractContents());
+                range.insertNode(span);
+                userSelection.removeAllRanges();
+            }
+        }
+    }
+
+    function clearHighlights() {
+        var highlights = document.querySelectorAll('.quiz-highlighted');
+        highlights.forEach(function(span) {
+            var parent = span.parentNode;
+            while (span.firstChild) {
+                parent.insertBefore(span.firstChild, span);
+            }
+            parent.removeChild(span);
+        });
+    }
+
+    // Scratchpad canvas logic
+    var canvas = document.getElementById('scratchpad-canvas');
+    var ctx = canvas.getContext('2d');
+    var drawing = false;
+
+    function resizeCanvas() {
+        var container = canvas.parentNode;
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        ctx.strokeStyle = '#ffd60a';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+    }
+
+    function toggleScratchpad() {
+        var modal = document.getElementById('quiz-scratchpad-modal');
+        if (modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
+            setTimeout(resizeCanvas, 50);
+        }
+    }
+
+    function clearScratchpad() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    canvas.addEventListener('mousedown', function(e) {
+        drawing = true;
+        ctx.beginPath();
+        var rect = canvas.getBoundingClientRect();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('mousemove', function(e) {
+        if (!drawing) return;
+        var rect = canvas.getBoundingClientRect();
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', function() {
+        drawing = false;
+    });
+
+    canvas.addEventListener('mouseleave', function() {
+        drawing = false;
+    });
+
+    // Touch support for canvas
+    canvas.addEventListener('touchstart', function(e) {
+        drawing = true;
+        ctx.beginPath();
+        var rect = canvas.getBoundingClientRect();
+        var touch = e.touches[0];
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('touchmove', function(e) {
+        if (!drawing) return;
+        var rect = canvas.getBoundingClientRect();
+        var touch = e.touches[0];
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+        e.preventDefault();
+    });
+
+    canvas.addEventListener('touchend', function() {
+        drawing = false;
+    });
+
+    // Option selections logic
+    function selectOption(label) {
+        if (isAnswered) return;
+        
+        // Remove selection from all cards
+        document.querySelectorAll('.quiz-option-card').forEach(function(card) {
+            card.classList.remove('selected');
+        });
+        
+        // Select this option
+        var selectedCard = document.getElementById('opt-card-' + label);
+        selectedCard.classList.add('selected');
+        document.getElementById('selected-answer-input').value = label;
+    }
+
+    function selectTF(label, value) {
+        if (isAnswered) return;
+
+        // Toggle buttons active state
+        var trueBtn = document.getElementById('tf-btn-' + label + '-true');
+        var falseBtn = document.getElementById('tf-btn-' + label + '-false');
+        
+        if (value) {
+            trueBtn.classList.add('active');
+            falseBtn.classList.remove('active');
+        } else {
+            falseBtn.classList.add('active');
+            trueBtn.classList.remove('active');
+        }
+
+        document.getElementById('tf-input-' + label).value = value ? 'true' : 'false';
+    }
+
+    // Session controls backend actions
+    function sendSessionAction(actionData, callback) {
+        var formData = new FormData();
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        for (var key in actionData) {
+            formData.append(key, actionData[key]);
+        }
+
+        fetch('{{ url("quiz_session_action", session_id=session.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (callback) callback(data);
+        });
+    }
+
+    function checkAnswer() {
+        if (isAnswered) return;
+
+        var form = document.getElementById('submit-answer-form');
+        var formData = new FormData(form);
+        formData.append('action', 'submit');
+
+        fetch('{{ url("quiz_session_action", session_id=session.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            isAnswered = true;
+            document.getElementById('check-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'inline-flex';
+            document.getElementById('skip-btn').style.display = 'none';
+
+            // Show feedback
+            var feedbackPanel = document.getElementById('feedback-panel');
+            var feedbackTitle = document.getElementById('feedback-title');
+            var explanationBody = document.getElementById('explanation-body');
+            
+            feedbackPanel.style.display = 'block';
+            explanationBody.innerHTML = data.explanation;
+
+            if (questionType === 'choice') {
+                var selected = document.getElementById('selected-answer-input').value;
+                var correctLabel = data.correct_answers[0];
+
+                document.querySelectorAll('.quiz-option-card').forEach(function(card) {
+                    card.style.cursor = 'default';
+                });
+
+                if (data.correct) {
+                    feedbackTitle.className = 'quiz-feedback-title success';
+                    feedbackTitle.innerHTML = '<i class="fa fa-check-circle"></i> ĐÚNG RỒI!';
+                    document.getElementById('opt-card-' + selected).classList.add('eval-correct');
+                } else {
+                    feedbackTitle.className = 'quiz-feedback-title danger';
+                    feedbackTitle.innerHTML = '<i class="fa fa-times-circle"></i> SAI RỒI!';
+                    if (selected) {
+                        document.getElementById('opt-card-' + selected).classList.add('eval-incorrect');
+                    }
+                    document.getElementById('opt-card-' + correctLabel).classList.add('eval-correct');
+                }
+
+                // Increment score val if correct
+                if (data.correct) {
+                    var scoreVal = parseFloat(document.getElementById('score-val').innerText);
+                    document.getElementById('score-val').innerText = scoreVal + 1;
+                }
+
+            } else {
+                // True/False Set
+                var correctCount = data.correct_count;
+                var scoreDelta = 0.0;
+                if (correctCount === 1) scoreDelta = 0.1;
+                else if (correctCount === 2) scoreDelta = 0.25;
+                else if (correctCount === 3) scoreDelta = 0.5;
+                else if (correctCount === 4) scoreDelta = 1.0;
+
+                feedbackTitle.className = correctCount === 4 ? 'quiz-feedback-title success' : 'quiz-feedback-title danger';
+                feedbackTitle.innerHTML = `<i class="fa fa-info-circle"></i> Đúng ${correctCount}/4 ý. Cộng +${scoreDelta} điểm.`;
+
+                // Highlight correct/incorrect rows
+                for (var key in data.correct_details) {
+                    var isCorrect = data.correct_details[key];
+                    var row = document.getElementById('tf-row-' + key);
+                    
+                    if (isCorrect) {
+                        row.classList.add('eval-correct-statement');
+                    } else {
+                        row.classList.add('eval-incorrect-statement');
+                    }
+
+                    // Style options
+                    var correctVal = data.correct_answers[key];
+                    var trueBtn = document.getElementById('tf-btn-' + key + '-true');
+                    var falseBtn = document.getElementById('tf-btn-' + key + '-false');
+
+                    trueBtn.style.cursor = 'default';
+                    falseBtn.style.cursor = 'default';
+
+                    if (correctVal) {
+                        trueBtn.classList.add('eval-selected');
+                    } else {
+                        falseBtn.classList.add('eval-selected');
+                    }
+                }
+
+                // Update score val
+                var scoreVal = parseFloat(document.getElementById('score-val').innerText);
+                document.getElementById('score-val').innerText = (scoreVal + scoreDelta).toFixed(2);
+            }
+        });
+    }
+
+    function skipQuestion() {
+        if (isLastQuestion) {
+            Swal.fire({
+                text: 'Bạn đang ở câu hỏi cuối cùng. Nhấn OK để bỏ qua và hoàn thành bài luyện tập.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeSkip();
+                }
+            });
+        } else {
+            executeSkip();
+        }
+    }
+    
+    function executeSkip() {
+        sendSessionAction({action: 'skip'}, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function prevQuestion() {
+        sendSessionAction({action: 'prev'}, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function nextQuestion() {
+        if (isLastQuestion) {
+            Swal.fire({
+                text: 'Bạn đã hoàn thành câu hỏi cuối cùng. Nhấn OK để xem kết quả chi tiết.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeNext();
+                }
+            });
+        } else {
+            executeNext();
+        }
+    }
+    
+    function executeNext() {
+        sendSessionAction({action: 'next'}, function(data) {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+
+    function endSession() {
+        Swal.fire({
+            text: 'Bạn có chắc chắn muốn kết thúc phiên luyện tập hiện tại?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Kết thúc',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                sendSessionAction({action: 'end'}, function(data) {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block bodyend %}
+    {% include "mathjax-load.html" %}
+{% endblock %}

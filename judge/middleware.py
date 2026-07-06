@@ -178,3 +178,17 @@ class MiscConfigMiddleware:
         domain = get_current_site(request).domain
         request.misc_config = MiscConfigDict(language=request.LANGUAGE_CODE, domain=domain)
         return self.get_response(request)
+
+
+class QuizFeatureMiddleware(object):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.path_info.startswith('/quiz/'):
+            from judge.models import SiteConfiguration
+            config = SiteConfiguration.get_solo()
+            if not config.quiz_enabled:
+                from django.http import Http404
+                raise Http404("Quiz/Exam features are currently disabled by the site administrator.")
+        return self.get_response(request)

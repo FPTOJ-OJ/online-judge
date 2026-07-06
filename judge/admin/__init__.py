@@ -46,3 +46,6 @@ admin.site.register(Ticket, TicketAdmin)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(SiteConfiguration, SiteConfigurationAdmin)
+
+import judge.admin.quiz
+

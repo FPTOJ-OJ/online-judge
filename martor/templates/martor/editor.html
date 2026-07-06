@@ -1,4 +1,10 @@
 {% load i18n %}
+<style>
+    /* Ẩn select editor switch gốc từ đầu để tránh 2 dropdown */
+    select.editor-switch {
+        display: none !important;
+    }
+</style>
 
 {# --- Initialization Script --- #}
 <script id="CKEDITOR_Script">
@@ -35,7 +41,7 @@
     }
 
     // --- Style Injections ---
-    const CKEDITOR_CSS_URL = 'https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.css';
+    const CKEDITOR_CSS_URL = '/static/martor/css/ckeditor5.css';
     if (!document.querySelector(`link[href="${CKEDITOR_CSS_URL}"]`)) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -56,9 +62,68 @@
         style.id = 'editor-switch-styles';
         style.textContent = `
             .editor-toggle { margin-top: 15px; margin-bottom: 10px; }
+            
+            /* Ẩn select editor switch gốc để tránh hiển thị 2 dropdown */
+            select.editor-switch {
+                display: none !important;
+            }
+            
+            /* Đồng bộ theme tối cho Martor Editor khi ở Dark Mode của Jazzmin */
+            body.dark-mode .main-martor {
+                background-color: #1a1a2e !important;
+                border: 1px solid #30363d !important;
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .section-martor {
+                background-color: #1a1a2e !important;
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .section-martor .ui.menu,
+            body.dark-mode .section-martor .segment {
+                background: #161b22 !important;
+                border-color: #30363d !important;
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .section-martor .ui.menu .item {
+                color: #8b949e !important;
+            }
+            body.dark-mode .section-martor .ui.menu .item i.icon {
+                color: #8b949e !important;
+                opacity: 0.8;
+            }
+            body.dark-mode .section-martor .ui.menu .item:hover {
+                background: #21262d !important;
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .section-martor .ui.menu .item:hover i.icon {
+                color: #c9d1d9 !important;
+                opacity: 1;
+            }
+            body.dark-mode .section-martor .ui.menu .active.item {
+                background: #21262d !important;
+                color: #c9d1d9 !important;
+                border-color: #30363d !important;
+            }
+            body.dark-mode .section-martor .ui.menu .active.item i.icon {
+                color: #c9d1d9 !important;
+            }
+            
+            /* Sửa màu toolbar icons của Martor trong Dark Mode */
+            body.dark-mode .martor-toolbar {
+                background-color: #161b22 !important;
+                border-bottom: 1px solid #30363d !important;
+            }
+            body.dark-mode .martor-toolbar a {
+                color: #8b949e !important;
+            }
+            body.dark-mode .martor-toolbar a:hover {
+                color: #c9d1d9 !important;
+                background-color: #21262d !important;
+            }
         `;
         document.head.appendChild(style);
     }
+
     
     // --- Preview Logic ---
     async function fetchPreview(content) {
@@ -180,14 +245,26 @@
             const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
             window.__markdownItInstance__ = markdownIt({ html: true, linkify: true, typographer: true });
 
-            await loadScript('https://cdn.ckeditor.com/ckeditor5/46.1.1/ckeditor5.umd.js');
-            await loadScript('/static/libs/chosen.js/chosen.jquery.min.js');
+            await loadScript('/static/martor/js/ckeditor5.umd.js?v=2');
+            await loadScript('/static/libs/chosen.js/chosen.jquery.min.js?v=2');
             await loadScript('https://unpkg.com/turndown/dist/turndown.js');
-            await loadScript('/static/martor/js/editor-switch.js');
-            await loadScript('https://unpkg.com/mathlive@0.107.0/mathlive.min.js');
-            await loadScript('/static/martor/js/sidebar-math.js');
+            await loadScript('/static/martor/js/editor-switch.js?v=' + Date.now());
+            await loadScript('/static/martor/js/sidebar-math.js?v=2');
 
             initEditors();
+
+            // Intercept default Martor preview to isolate it inside an iframe
+            if (window.jQuery) {
+                jQuery(document).on('martor:preview', function(event, $currentTab) {
+                    if ($currentTab && $currentTab.length) {
+                        const container = $currentTab[0];
+                        if (container && !$currentTab.find('iframe').length) {
+                            const htmlContent = container.innerHTML;
+                            renderPreviewInIframe(container, htmlContent);
+                        }
+                    }
+                });
+            }
 
             const observer = new MutationObserver(mutations => {
                 mutations.forEach(mutation => {
@@ -218,7 +295,7 @@
     
     <!-- Editor Type Switcher -->
     <div class="ui right floated item editor-toggle">
-      <select id="editor-switch-{{ field_name }}" class="editor-switch">
+      <select id="editor-switch-{{ field_name }}" class="editor-switch" style="display: none !important;">
         <option value="martor">Martor (Markdown)</option>
         <option value="ckeditor">CKEditor (HTML)</option>
       </select>

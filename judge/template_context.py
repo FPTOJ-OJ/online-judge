@@ -88,12 +88,16 @@ def site_name(request):
 
 def site_theme(request):
     # Middleware populating `profile` may not have loaded at this point if we're called from an error context.
-    if hasattr(request.user, 'profile'):
-        site_theme = request.profile.site_theme
-        preferred_css = settings.DMOJ_THEME_CSS.get(site_theme)
-    else:
-        site_theme = 'auto'
-        preferred_css = None
+    site_theme = 'auto'
+    if hasattr(request.user, 'profile') and request.user.profile:
+        site_theme = request.user.profile.site_theme
+        
+    # Ưu tiên lấy theme từ cookie để hỗ trợ đổi nhanh và hỗ trợ khách vãng lai
+    cookie_theme = request.COOKIES.get('site_theme')
+    if cookie_theme in ('light', 'dark', 'auto'):
+        site_theme = cookie_theme
+
+    preferred_css = settings.DMOJ_THEME_CSS.get(site_theme)
     return {
         'DARK_STYLE_CSS': settings.DMOJ_THEME_CSS['dark'],
         'LIGHT_STYLE_CSS': settings.DMOJ_THEME_CSS['light'],

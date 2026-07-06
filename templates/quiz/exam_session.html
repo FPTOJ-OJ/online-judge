@@ -1,0 +1,742 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    <!-- Header portal -->
+    <div class="quiz-session-header">
+        <div class="header-actions">
+            <button type="button" class="quiz-session-btn" onclick="exitExam()" style="border-color: #ef4444; color: #ef4444;">
+                <i class="fa fa-arrow-left"></i> Thoát
+            </button>
+            <div class="view-mode-tabs">
+                <div class="view-mode-tab active" id="mode-tab-single" onclick="setViewMode('single')">Từng câu</div>
+                <div class="view-mode-tab" id="mode-tab-list" onclick="setViewMode('list')">Danh sách</div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button type="button" class="quiz-session-btn" id="nav-btn-prev" onclick="jumpPrevQuestion()">
+                <i class="fa fa-chevron-left"></i> Câu trước
+            </button>
+            <button type="button" class="quiz-session-btn" id="nav-btn-next" onclick="jumpNextQuestion()">
+                Câu sau <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="orient-toggles">
+            <div class="orient-toggle {% if selected_orientation == 'KHMT' %}active{% endif %}" id="btn-toggle-khmt" onclick="changeOrientation('KHMT')">Chọn KHMT</div>
+            <div class="orient-toggle {% if selected_orientation == 'THUD' %}active{% endif %}" id="btn-toggle-thud" onclick="changeOrientation('THUD')">Chọn THUD</div>
+        </div>
+
+        <div class="header-actions">
+            <div class="timer-badge">
+                <i class="fa fa-clock-o"></i>
+                <span id="timer-display">{{ time_left_str }}</span>
+            </div>
+            
+            <div class="tools-dropdown">
+                <button type="button" class="quiz-session-btn" id="btn-tools-trigger" onclick="toggleToolsMenu()">
+                    <i class="fa fa-wrench"></i> Công cụ <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="tools-menu" id="tools-dropdown-menu">
+                    <div class="tools-item" onclick="openScratchpad()"><i class="fa fa-pencil"></i> Giấy nháp</div>
+                    <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">Vẽ lên đề</span></div>
+                    <div class="tools-item" onclick="applyHighlightText()"><i class="fa fa-font"></i> Highlight</div>
+                    <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> Xóa highlight</div>
+                </div>
+            </div>
+
+            <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="background: #10b981; color: #ffffff;">
+                <i class="fa fa-paper-plane"></i> Nộp bài
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="quiz-layout">
+        <!-- Left: Questions -->
+        <div class="questions-container view-single" id="questions-viewport">
+            
+            <!-- PART I -->
+            {% for q in part1 %}
+                <div class="question-card" id="q-card-{{ q.index }}" data-qid="{{ q.id }}" data-index="{{ q.index }}" data-type="{{ q.type }}" data-orientation="{{ q.orientation }}">
+                    <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
+                    <div>
+                        <div class="quiz-q-tags">
+                            <span class="quiz-q-tag type">TRẮC NGHIỆM</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: #2563eb; border-color: #2563eb;">PHẦN I - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
+                            {% if q.orientation != 'Common' %}
+                                <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="quiz-q-body text-content-body">
+                            {{ q.content|markdown('problem') }}
+                        </div>
+                        
+                        <div class="quiz-options-list">
+                            {% for opt in q.options %}
+                                <div class="quiz-option-card {% if q.user_answer == opt.label %}selected{% endif %}" 
+                                     data-label="{{ opt.label }}" 
+                                     onclick="selectChoice(this, '{{ q.id }}', '{{ opt.label }}')">
+                                    <span class="quiz-option-label">{{ opt.label }}</span>
+                                    <div class="quiz-option-content">{{ opt.content|markdown('problem') }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- PART II -->
+            {% for q in part2 %}
+                <div class="question-card" id="q-card-{{ q.index }}" data-qid="{{ q.id }}" data-index="{{ q.index }}" data-type="{{ q.type }}" data-orientation="{{ q.orientation }}">
+                    <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
+                    <div>
+                        <div class="quiz-q-tags">
+                            <span class="quiz-q-tag type">ĐÚNG / SAI</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: #ec4899; border-color: #ec4899;">PHẦN II - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
+                            {% if q.orientation != 'Common' %}
+                                <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="quiz-q-body text-content-body">
+                            {{ q.content|markdown('problem') }}
+                        </div>
+                        
+                        <div class="quiz-tf-list">
+                            {% for opt in q.options %}
+                                <div class="quiz-tf-row" data-label="{{ opt.label }}">
+                                    <div class="quiz-tf-statement">
+                                        <span class="quiz-tf-label">{{ opt.label }})</span>
+                                        <div class="quiz-tf-text">{{ opt.content|markdown('problem') }}</div>
+                                    </div>
+                                    <div class="quiz-tf-buttons">
+                                        <button type="button" class="quiz-tf-btn true-btn {% if q.user_answer and q.user_answer[opt.label] == True %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', true)">Đúng</button>
+                                        <button type="button" class="quiz-tf-btn false-btn {% if q.user_answer and q.user_answer[opt.label] == False %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', false)">Sai</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="quiz-right-pane">
+            <div class="sidebar-card">
+                <h3>Danh sách câu hỏi</h3>
+                <div class="part-tabs">
+                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">PHẦN I</div>
+                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">PHẦN II</div>
+                </div>
+                
+                <!-- Part I Grid -->
+                <div class="questions-grid" id="grid-part-1">
+                    {% for q in part1 %}
+                        <button type="button" class="q-grid-btn {% if q.is_answered %}answered{% endif %}" id="grid-btn-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}" onclick="jumpToQuestion(this.dataset.index)">
+                            {{ q.index }}
+                        </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Part II Grid -->
+                <div class="questions-grid" id="grid-part-2" style="display: none;">
+                    {% for q in part2 %}
+                        <button type="button" class="q-grid-btn {% if q.is_answered %}answered{% endif %}" id="grid-btn-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}" onclick="jumpToQuestion(this.dataset.index)">
+                            {{ q.index }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
+                <h4 style="font-size: 0.85rem; color: #9ca3af; margin: 0 0 10px 0; text-transform: uppercase;">Chú thích</h4>
+                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: #9ca3af;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 3px;"></span>
+                        <span>Đã trả lời</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 3px;"></span>
+                        <span>Chưa trả lời</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,214,10,0.02); border: 1px dashed rgba(255,214,10,0.2); border-radius: 12px; padding: 20px; margin-top: 16px;">
+                <h4 style="font-size: 0.85rem; color: #ffd60a; margin: 0 0 10px 0; text-transform: uppercase;"><i class="fa fa-info-circle"></i> Công cụ hỗ trợ học tập</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; color: #e4e4e7; line-height: 1.4;">
+                    <div>
+                        <strong style="color: #ffffff;"><i class="fa fa-pencil"></i> Giấy nháp:</strong> Click menu <em>Công cụ</em> &gt; <em>Giấy nháp</em> để mở bảng vẽ nháp tự do.
+                    </div>
+                    <div>
+                        <strong style="color: #ffffff;"><i class="fa fa-paint-brush"></i> Vẽ trực tiếp:</strong> Chọn <em>Vẽ lên đề</em> để vẽ nháp bằng chuột hoặc cảm ứng ngay trên nội dung câu hỏi.
+                    </div>
+                    <div>
+                        <strong style="color: #ffffff;"><i class="fa fa-font"></i> Đánh dấu (Highlight):</strong> Bôi đen bất kỳ đoạn chữ nào trong câu hỏi, sau đó chọn <em>Highlight</em> để lưu chú thích.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scratchpad Modal overlay -->
+<div id="quiz-scratchpad-modal">
+    <div class="scratchpad-header">
+        <h3 style="color: #ffffff; margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> Bảng nháp & Vẽ tự do</h3>
+        <div style="display: flex; gap: 8px;">
+            <button class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa bảng</button>
+            <button class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: #ef4444; border-color: #ef4444; color: #fff;">Đóng</button>
+        </div>
+    </div>
+    <div class="scratchpad-body">
+        <canvas id="scratchpad-canvas"></canvas>
+    </div>
+</div>
+
+<script>
+    var totalQuestions = parseInt('{{ part1|length + part2|length }}');
+    var currentIndex = 1;
+    var viewMode = 'single'; // single or list
+    var activeOrientation = '{{ selected_orientation }}'; // KHMT or THUD
+    var timeLeft = parseInt('{{ time_left_seconds }}');
+    var tickCounter = 0;
+
+    // Timer logic
+    var timerInterval = setInterval(function() {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            autoSubmitExam();
+            return;
+        }
+        timeLeft--;
+        tickCounter++;
+
+        // Update display
+        var minutes = Math.floor(timeLeft / 60);
+        var seconds = timeLeft % 60;
+        document.getElementById('timer-display').innerText = 
+            (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+        // Persist time left to server every 15 seconds
+        if (tickCounter % 15 === 0) {
+            persistTimeLeft();
+        }
+    }, 1000);
+
+    function persistTimeLeft() {
+        var formData = new FormData();
+        formData.append('action', 'tick_timer');
+        formData.append('time_left', timeLeft);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    // View logic
+    function setViewMode(mode) {
+        viewMode = mode;
+        document.getElementById('mode-tab-single').classList.toggle('active', mode === 'single');
+        document.getElementById('mode-tab-list').classList.toggle('active', mode === 'list');
+        
+        var vp = document.getElementById('questions-viewport');
+        if (mode === 'single') {
+            vp.className = 'questions-container view-single';
+        } else {
+            vp.className = 'questions-container view-list';
+        }
+        updateActiveQuestionUI();
+    }
+
+    function showPartGrid(part) {
+        document.getElementById('part-tab-1').classList.toggle('active', part === 1);
+        document.getElementById('part-tab-2').classList.toggle('active', part === 2);
+        
+        document.getElementById('grid-part-1').style.display = (part === 1) ? 'grid' : 'none';
+        document.getElementById('grid-part-2').style.display = (part === 2) ? 'grid' : 'none';
+    }
+
+    function updateActiveQuestionUI() {
+        // Remove active class from cards
+        document.querySelectorAll('.question-card').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.q-grid-btn').forEach(b => b.classList.remove('active'));
+
+        // Enable/Disable navigation buttons
+        document.getElementById('nav-btn-prev').disabled = (currentIndex === 1 && viewMode === 'single');
+        document.getElementById('nav-btn-next').disabled = (currentIndex === totalQuestions && viewMode === 'single');
+
+        if (viewMode === 'single') {
+            // Find active question card
+            var activeCard = document.getElementById('q-card-' + currentIndex);
+            if (activeCard) {
+                activeCard.classList.add('active');
+                
+                // Show/hide based on orientation
+                var qOrient = activeCard.getAttribute('data-orientation');
+                if (qOrient !== 'Common' && qOrient !== activeOrientation) {
+                    // Automatically jump next/prev if it's inactive? No, just keep active, card styling handles it.
+                }
+            }
+        }
+        
+        // Highlight in sidebar grid
+        var gridBtn = document.getElementById('grid-btn-' + currentIndex);
+        if (gridBtn) {
+            gridBtn.classList.add('active');
+            
+            // Switch grid tabs if needed
+            if (currentIndex > 24) {
+                showPartGrid(2);
+            } else {
+                showPartGrid(1);
+            }
+        }
+    }
+
+    function jumpToQuestion(index) {
+        var gridBtn = document.getElementById('grid-btn-' + index);
+        if (gridBtn.classList.contains('orientation-disabled')) {
+            return; // Can't jump to other orientation's questions
+        }
+        
+        currentIndex = index;
+        updateActiveQuestionUI();
+        
+        if (viewMode === 'list') {
+            var target = document.getElementById('q-card-' + index);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    function jumpPrevQuestion() {
+        // Find previous eligible question
+        var idx = currentIndex - 1;
+        while (idx >= 1) {
+            var gridBtn = document.getElementById('grid-btn-' + idx);
+            if (gridBtn && !gridBtn.classList.contains('orientation-disabled')) {
+                currentIndex = idx;
+                updateActiveQuestionUI();
+                break;
+            }
+            idx--;
+        }
+    }
+
+    function jumpNextQuestion() {
+        // Find next eligible question
+        var idx = currentIndex + 1;
+        while (idx <= totalQuestions) {
+            var gridBtn = document.getElementById('grid-btn-' + idx);
+            if (gridBtn && !gridBtn.classList.contains('orientation-disabled')) {
+                currentIndex = idx;
+                updateActiveQuestionUI();
+                break;
+            }
+            idx++;
+        }
+    }
+
+    // Orientation Logic
+    function changeOrientation(orient) {
+        activeOrientation = orient;
+        document.getElementById('btn-toggle-khmt').classList.toggle('active', orient === 'KHMT');
+        document.getElementById('btn-toggle-thud').classList.toggle('active', orient === 'THUD');
+
+        // Apply visual classes to cards and sidebar
+        document.querySelectorAll('.question-card').forEach(card => {
+            var qOrient = card.getAttribute('data-orientation');
+            if (qOrient !== 'Common') {
+                if (qOrient !== orient) {
+                    card.classList.add('orientation-inactive');
+                } else {
+                    card.classList.remove('orientation-inactive');
+                }
+            }
+        });
+
+        document.querySelectorAll('.q-grid-btn').forEach(btn => {
+            var qOrient = btn.getAttribute('data-orientation');
+            if (qOrient !== 'Common') {
+                if (qOrient !== orient) {
+                    btn.classList.add('orientation-disabled');
+                } else {
+                    btn.classList.remove('orientation-disabled');
+                }
+            }
+        });
+
+        // Persist to server
+        var formData = new FormData();
+        formData.append('action', 'change_orientation');
+        formData.append('orientation', orient);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        });
+
+        updateActiveQuestionUI();
+    }
+
+    // Question Selection logic
+    function selectChoice(el, qid, label) {
+        var card = el.closest('.question-card');
+        if (card.classList.contains('orientation-inactive')) return;
+
+        // Visual select
+        card.querySelectorAll('.quiz-option-card').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+
+        // Update sidebar grid
+        var qIdx = card.getAttribute('data-index');
+        document.getElementById('grid-btn-' + qIdx).classList.add('answered');
+
+        // AJAX POST to save answer
+        var formData = new FormData();
+        formData.append('action', 'save_answer');
+        formData.append('qid', qid);
+        formData.append('q_type', 'choice');
+        formData.append('answer', label);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    function selectTF(btn, qid, label, val) {
+        var card = btn.closest('.question-card');
+        if (card.classList.contains('orientation-inactive')) return;
+
+        var row = btn.closest('.quiz-tf-row');
+        row.querySelectorAll('.quiz-tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Check if all subquestions are answered in this card to mark as answered in grid
+        setTimeout(function() {
+            var allAnswered = true;
+            card.querySelectorAll('.quiz-tf-row').forEach(r => {
+                if (r.querySelectorAll('.quiz-tf-btn.active').length === 0) {
+                    allAnswered = false;
+                }
+            });
+            var qIdx = card.getAttribute('data-index');
+            if (allAnswered) {
+                document.getElementById('grid-btn-' + qIdx).classList.add('answered');
+            }
+        }, 10);
+
+        // AJAX POST to save T/F subanswer
+        var formData = new FormData();
+        formData.append('action', 'save_answer');
+        formData.append('qid', qid);
+        formData.append('q_type', 'tf');
+        formData.append('tf_' + label, val ? 'true' : 'false');
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    // Submit / Exit logic
+    function exitExam() {
+        Swal.fire({
+            title: 'Thoát luyện thi?',
+            text: 'Tiến độ làm bài sẽ được lưu lại, nhưng thời gian thi vẫn sẽ tiếp tục chạy nếu bạn không nộp bài.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Thoát ra',
+            cancelButtonText: 'Làm tiếp'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/quiz/exams/';
+            }
+        });
+    }
+
+    function submitExam() {
+        Swal.fire({
+            title: 'Nộp bài thi?',
+            text: 'Bạn có chắc chắn muốn nộp bài thi để xem kết quả đánh giá?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Nộp bài',
+            cancelButtonText: 'Làm tiếp'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performSubmission();
+            }
+        });
+    }
+
+    function autoSubmitExam() {
+        Swal.fire({
+            title: 'Hết giờ làm bài!',
+            text: 'Hệ thống đang tự động nộp bài thi của bạn.',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            timer: 2000
+        }).then(() => {
+            performSubmission();
+        });
+    }
+
+    function performSubmission() {
+        var formData = new FormData();
+        formData.append('action', 'submit_exam');
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                Swal.fire('Lỗi', 'Có lỗi xảy ra khi nộp bài.', 'error');
+            }
+        });
+    }
+
+    // Tools Dropdown
+    function toggleToolsMenu() {
+        document.getElementById('tools-dropdown-menu').classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.tools-dropdown')) {
+            document.getElementById('tools-dropdown-menu').classList.remove('show');
+        }
+    });
+
+    // Highlighting logic
+    function applyHighlightText() {
+        var userSelection = window.getSelection();
+        if (userSelection.rangeCount > 0) {
+            var range = userSelection.getRangeAt(0);
+            var span = document.createElement("span");
+            span.className = "quiz-highlighted";
+            
+            // Check if selection is within text question body
+            var container = range.commonAncestorContainer;
+            if (container.nodeType === 3) container = container.parentNode;
+            
+            if (container.closest('.text-content-body')) {
+                try {
+                    range.surroundContents(span);
+                } catch(e) {
+                    Swal.fire('Chú ý', 'Hãy chọn văn bản liền mạch trong câu hỏi để highlight.', 'info');
+                }
+            } else {
+                Swal.fire('Chú ý', 'Hãy chọn chữ trong nội dung câu hỏi để highlight.', 'info');
+            }
+        } else {
+            Swal.fire('Chú ý', 'Vui lòng bôi đen văn bản trước khi highlight.', 'info');
+        }
+        window.getSelection().removeAllRanges();
+    }
+
+    function clearHighlightsText() {
+        document.querySelectorAll('.quiz-highlighted').forEach(el => {
+            var parent = el.parentNode;
+            while(el.firstChild) {
+                parent.insertBefore(el.firstChild, el);
+            }
+            parent.removeChild(el);
+        });
+    }
+
+    // Scratchpad canvas logic
+    var canvas = document.getElementById('scratchpad-canvas');
+    var ctx = canvas.getContext('2d');
+    var isDrawing = false;
+    var lastX = 0;
+    var lastY = 0;
+
+    function openScratchpad() {
+        document.getElementById('quiz-scratchpad-modal').style.display = 'flex';
+        // Resize canvas to parent container size
+        var body = canvas.parentNode;
+        canvas.width = body.clientWidth;
+        canvas.height = body.clientHeight;
+        
+        ctx.strokeStyle = '#000000';
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 3;
+    }
+
+    function closeScratchpad() {
+        document.getElementById('quiz-scratchpad-modal').style.display = 'none';
+    }
+
+    function clearScratchpad() {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        var rect = canvas.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+
+    canvas.addEventListener('mousedown', function(e) {
+        isDrawing = true;
+        var rect = canvas.getBoundingClientRect();
+        lastX = e.clientX - rect.left;
+        lastY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    // Support touch
+    canvas.addEventListener('touchstart', function(e) {
+        isDrawing = true;
+        var rect = canvas.getBoundingClientRect();
+        var t = e.touches[0];
+        lastX = t.clientX - rect.left;
+        lastY = t.clientY - rect.top;
+    });
+    canvas.addEventListener('touchmove', function(e) {
+        if (!isDrawing) return;
+        var rect = canvas.getBoundingClientRect();
+        var t = e.touches[0];
+        var x = t.clientX - rect.left;
+        var y = t.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        
+        lastX = x;
+        lastY = y;
+        e.preventDefault();
+    });
+    canvas.addEventListener('touchend', () => isDrawing = false);
+
+    // Toggle transparent canvas overlays for direct drawing on question
+    var drawOnQuestionActive = false;
+    var overlayCanvasListeners = {};
+
+    function toggleDrawingOnQuestion() {
+        drawOnQuestionActive = !drawOnQuestionActive;
+        document.getElementById('draw-mode-label').innerText = drawOnQuestionActive ? 'Tắt vẽ lên đề' : 'Vẽ lên đề';
+        document.getElementById('btn-tools-trigger').classList.toggle('active', drawOnQuestionActive);
+
+        document.querySelectorAll('.drawing-canvas-overlay').forEach(overlay => {
+            if (drawOnQuestionActive) {
+                overlay.classList.add('active');
+                initOverlayCanvas(overlay);
+            } else {
+                overlay.classList.remove('active');
+            }
+        });
+    }
+
+    function initOverlayCanvas(overlay) {
+        var card = overlay.parentNode;
+        overlay.width = card.clientWidth;
+        overlay.height = card.clientHeight;
+
+        var octx = overlay.getContext('2d');
+        octx.strokeStyle = '#ff3366';
+        octx.lineJoin = 'round';
+        octx.lineCap = 'round';
+        octx.lineWidth = 2.5;
+
+        var drawing = false;
+        var oLastX = 0;
+        var oLastY = 0;
+
+        // Prevent duplication of listeners
+        if (overlayCanvasListeners[overlay.id]) {
+            overlay.removeEventListener('mousedown', overlayCanvasListeners[overlay.id].md);
+            overlay.removeEventListener('mousemove', overlayCanvasListeners[overlay.id].mm);
+            overlay.removeEventListener('mouseup', overlayCanvasListeners[overlay.id].mu);
+        }
+
+        function oDraw(e) {
+            if (!drawing) return;
+            var rect = overlay.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            octx.beginPath();
+            octx.moveTo(oLastX, oLastY);
+            octx.lineTo(x, y);
+            octx.stroke();
+            oLastX = x;
+            oLastY = y;
+        }
+
+        var md = function(e) {
+            drawing = true;
+            var rect = overlay.getBoundingClientRect();
+            oLastX = e.clientX - rect.left;
+            oLastY = e.clientY - rect.top;
+        };
+        var mm = oDraw;
+        var mu = () => drawing = false;
+
+        overlayCanvasListeners[overlay.id] = { md: md, mm: mm, mu: mu };
+
+        overlay.addEventListener('mousedown', md);
+        overlay.addEventListener('mousemove', mm);
+        overlay.addEventListener('mouseup', mu);
+        overlay.addEventListener('mouseout', mu);
+    }
+
+    // Initialization
+    document.addEventListener("DOMContentLoaded", function() {
+        changeOrientation(activeOrientation);
+        updateActiveQuestionUI();
+        
+        if (typeof hljs !== 'undefined') {
+            document.querySelectorAll("pre code").forEach(function(codeBlock) {
+                if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
+                    hljs.highlightElement(codeBlock);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block bodyend %}
+    {% include "mathjax-load.html" %}
+{% endblock %}

@@ -1,0 +1,179 @@
+.ck-editor__editable_inline {
+  min-height: 500px;
+  /* Ensure it takes full width of the parent and respects padding/border */
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Remove !important from display to allow JS to hide/show correctly */
+.ck-editor {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  /* Prevent horizontal overflow */
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix for Django Admin width issues */
+.editor-container__editor, .ck-editor__main {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+#pdf-iframe {
+    width: 793px;
+    height: 1122px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+
+/* --- CKEditor 5 Theme Overrides --- */
+
+:root {
+    /* Light Mode Defaults */
+    --ck-custom-bg: #ffffff;
+    --ck-custom-text: #222222;
+    --ck-custom-border: #ccced1;
+    --ck-custom-toolbar-bg: #fbfcff;
+    --ck-custom-toolbar-border: #ccced1;
+    --ck-custom-focus-ring: #2977ff;
+}
+
+/* Dark Mode Overrides 
+   Matching resources/vars-dark.scss
+   Triggered by explicit site theme classes
+*/
+[data-theme="dark"],
+.dark-mode,
+[data-theme="dark"] .ck-editor,
+.dark-mode .ck-editor {
+    --ck-custom-bg: #181818;
+    --ck-custom-text: #eeeeee;
+    --ck-custom-border: #3b3b3b;
+    --ck-custom-toolbar-bg: #222222;
+    --ck-custom-toolbar-border: #3b3b3b;
+    --ck-custom-focus-ring: #005bb5;
+}
+
+/* Apply dark mode based on OS preference ONLY if we are not in the admin 
+   and not explicitly forcing light mode. 
+*/
+@media (prefers-color-scheme: dark) {
+    body:not(.change-form):not(.app-judge):not(.grp-change-form):not([data-theme="light"]) {
+        --ck-custom-bg: #181818;
+        --ck-custom-text: #eeeeee;
+        --ck-custom-border: #3b3b3b;
+        --ck-custom-toolbar-bg: #222222;
+        --ck-custom-toolbar-border: #3b3b3b;
+        --ck-custom-focus-ring: #005bb5;
+    }
+}
+
+/* Apply variables to CKEditor */
+.ck-editor, .ck.ck-editor {
+    --ck-color-base-background: var(--ck-custom-bg);
+    --ck-color-base-foreground: var(--ck-custom-toolbar-bg);
+    --ck-color-base-border: var(--ck-custom-border);
+    --ck-color-base-action: var(--ck-custom-focus-ring);
+    --ck-color-focus-border: var(--ck-custom-focus-ring);
+
+    --ck-color-text: var(--ck-custom-text);
+    
+    --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.2);
+    --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.1);
+
+    --ck-color-button-default-background: transparent;
+    --ck-color-button-default-hover-background: rgba(128, 128, 128, 0.1);
+    --ck-color-button-default-active-background: rgba(128, 128, 128, 0.2);
+    --ck-color-button-default-active-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    --ck-color-button-default-disabled-background: transparent;
+
+    --ck-color-button-on-background: rgba(128, 128, 128, 0.2);
+    --ck-color-button-on-hover-background: rgba(128, 128, 128, 0.3);
+    --ck-color-button-on-active-background: rgba(128, 128, 128, 0.4);
+    --ck-color-button-on-active-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    --ck-color-button-on-disabled-background: transparent;
+
+    --ck-color-button-action-background: var(--ck-custom-focus-ring);
+    --ck-color-button-action-hover-background: var(--ck-custom-focus-ring);
+    --ck-color-button-action-text: #ffffff;
+
+    --ck-color-toolbar-background: var(--ck-custom-toolbar-bg);
+    --ck-color-toolbar-border: var(--ck-custom-toolbar-border);
+
+    --ck-color-dropdown-panel-background: var(--ck-custom-toolbar-bg);
+    --ck-color-dropdown-panel-border: var(--ck-custom-border);
+
+    --ck-color-input-background: var(--ck-custom-bg);
+    --ck-color-input-border: var(--ck-custom-border);
+    --ck-color-input-text: var(--ck-custom-text);
+    --ck-color-input-disabled-background: rgba(128, 128, 128, 0.1);
+    --ck-color-input-disabled-border: rgba(128, 128, 128, 0.3);
+    --ck-color-input-disabled-text: rgba(128, 128, 128, 0.5);
+
+    --ck-color-list-background: var(--ck-custom-bg);
+    --ck-color-list-button-hover-background: rgba(128, 128, 128, 0.1);
+    --ck-color-list-button-on-background: var(--ck-custom-focus-ring);
+    --ck-color-list-button-on-text: #ffffff;
+    --ck-color-list-button-on-background-focus: var(--ck-custom-focus-ring);
+}
+
+/* Ensure the editable area gets the right colors and resets */
+.ck.ck-editor__editable_inline {
+    background-color: var(--ck-custom-bg) !important;
+    color: var(--ck-custom-text) !important;
+    border-color: var(--ck-custom-border) !important;
+    
+    /* Reset styles to prevent admin leakage */
+    font-family: Helvetica, Arial, sans-serif !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+}
+
+/* Links inside editor */
+.ck.ck-editor__editable_inline a {
+    color: var(--ck-custom-focus-ring) !important;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Restore list styles that might be reset by site CSS */
+.ck-content ul,
+.ck-editor__editable ul {
+    list-style-type: disc !important;
+    list-style-position: outside !important;
+    margin: 0 0 0 1.25rem !important;
+    padding-left: 0 !important;
+}
+
+.ck-content ol,
+.ck-editor__editable ol {
+    list-style-type: decimal !important;
+    margin: 0 0 0 1.25rem !important;
+    padding-left: 0 !important;
+}
+
+.ck-content li,
+.ck-editor__editable li {
+    margin: 0.25rem 0 !important;
+    color: inherit;
+}
+
+.ck-content ul ul,
+.ck-content ol ol,
+.ck-editor__editable ul ul,
+.ck-editor__editable ol ol {
+    margin-left: 1rem !important;
+}
+
+/* Headings within editor */
+.ck-content h1, .ck-editor__editable h1 { font-size: 1.6em; margin: .5em 0; color: inherit; line-height: 1.2; font-weight: bold; }
+.ck-content h2, .ck-editor__editable h2 { font-size: 1.4em; margin: .45em 0; color: inherit; line-height: 1.2; font-weight: bold; }
+.ck-content h3, .ck-editor__editable h3 { font-size: 1.2em; margin: .4em 0; color: inherit; line-height: 1.2; font-weight: bold; }
+.ck-content p, .ck-editor__editable p { margin: .35em 0; color: inherit; }

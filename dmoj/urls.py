@@ -13,7 +13,7 @@ from judge.feed import AtomBlogFeed, AtomCommentFeed, AtomProblemFeed, BlogFeed,
 from judge.sitemap import sitemaps
 from judge.views import TitledTemplateView, api, blog, comment, contests, language, license, mailgun, organization, \
     preview, problem, problem_manage, ranked_submission, register, stats, status, submission, tasks, ticket, \
-    two_factor, user, widgets
+    two_factor, user, widgets, quiz as quiz_views
 from judge.views.problem_data import ProblemDataView, ProblemSubmissionDiff, \
     problem_data_file, problem_init_view
 from judge.views.themis_creation import ThemisCreateView
@@ -24,6 +24,7 @@ from judge.views.select2 import AssigneeSelect2View, ClassSelect2View, CommentSe
 from judge.views.problem_data import add_single_test_case
 from judge.views.widgets import martor_image_uploader
 from martor.views import markdown_search_user
+from judge.views.admin_images import admin_manage_images
 
 admin.autodiscover()
 
@@ -97,10 +98,26 @@ urlpatterns = [
     path('problem/<str:problem>/data/add_test_case/', add_single_test_case, name='add_single_test_case'),
     path('', blog.PostList.as_view(template_name='home.html', title=_('Home')), kwargs={'page': 1}, name='home'),
     path('500/', exception),
+    path('admin/manage-images/', admin_manage_images, name='admin_manage_images'),
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('accounts/', include(register_patterns)),
     path('', include('social_django.urls')),
+
+    path('quiz/', quiz_views.QuizHomeView.as_view(), name='quiz_home'),
+    path('quiz/exams/', quiz_views.QuizExamsListView.as_view(), name='quiz_exams_list'),
+    path('quiz/exams/<int:exam_id>/start/', quiz_views.QuizStartExamView.as_view(), name='quiz_start_exam'),
+    path('quiz/exams/session/<int:session_id>/', quiz_views.QuizExamSessionView.as_view(), name='quiz_exam_session'),
+    path('quiz/exams/session/<int:session_id>/action/', quiz_views.QuizExamActionView.as_view(), name='quiz_exam_action'),
+    path('quiz/exams/session/<int:session_id>/review/', quiz_views.QuizExamReviewView.as_view(), name='quiz_exam_review'),
+    path('quiz/session/<int:session_id>/', quiz_views.QuizSessionDetailView.as_view(), name='quiz_session_detail'),
+    path('quiz/session/<int:session_id>/action/', quiz_views.QuizSessionActionView.as_view(), name='quiz_session_action'),
+    path('quiz/session/<int:session_id>/review/', quiz_views.QuizSessionReviewView.as_view(), name='quiz_session_review'),
+    path('quiz/manage/', quiz_views.QuizManageDashboardView.as_view(), name='quiz_manage_dashboard'),
+    path('quiz/manage/add/', quiz_views.QuizQuestionCreateEditView.as_view(), name='quiz_question_add'),
+    path('quiz/manage/import/', quiz_views.QuizBulkImportView.as_view(), name='quiz_bulk_import'),
+    path('quiz/manage/edit/<int:question_id>/', quiz_views.QuizQuestionCreateEditView.as_view(), name='quiz_question_edit'),
+    path('quiz/manage/delete/<int:question_id>/', quiz_views.QuizQuestionDeleteView.as_view(), name='quiz_question_delete'),
 
     path('problems/', problem.ProblemList.as_view(), name='problem_list'),
     path('problems/random/', problem.RandomProblem.as_view(), name='problem_random'),
@@ -166,6 +183,7 @@ urlpatterns = [
 
     path('user', user.UserAboutPage.as_view(), name='user_page'),
     path('edit/profile/', user.edit_profile, name='user_edit_profile'),
+    path('edit/theme/', user.set_theme, name='user_set_theme'),
     path('data/prepare/', user.UserPrepareData.as_view(), name='user_prepare_data'),
     path('data/download/', user.UserDownloadData.as_view(), name='user_download_data'),
     path('user/<str:user>', include([

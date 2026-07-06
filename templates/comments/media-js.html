@@ -75,10 +75,20 @@
             function update_math($comment) {
                 if ('MathJax' in window) {
                     var $body = $comment.find('.comment-body');
-                    MathJax.typesetPromise([$body[0]]).then(function () {
+                    if (typeof MathJax.typesetPromise === 'function') {
+                        MathJax.typesetPromise([$body[0]]).then(function () {
+                            $body.find('.tex-image').hide();
+                            $body.find('.tex-text').show();
+                        });
+                    } else if (MathJax.Hub && typeof MathJax.Hub.Queue === 'function') {
+                        MathJax.Hub.Queue(["Typeset", MathJax.Hub, $body[0]], function () {
+                            $body.find('.tex-image').hide();
+                            $body.find('.tex-text').show();
+                        });
+                    } else {
                         $body.find('.tex-image').hide();
                         $body.find('.tex-text').show();
-                    });
+                    }
                 }
             }
 

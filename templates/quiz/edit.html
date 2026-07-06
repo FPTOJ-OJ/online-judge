@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ static('plugins/css/ace.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('plugins/css/semantic.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('plugins/css/resizable.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('martor-description.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ static('featherlight.css') }}" type="text/css" rel="stylesheet">
+    {{ media.css }}
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container" style="max-width: 800px;">
+    
+    <div class="quiz-header-card" style="margin-bottom: 24px;">
+        <div>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">
+                {% if question %}Sửa câu hỏi #{{ question.id }}{% else %}Tạo câu hỏi mới{% endif %}
+            </span>
+            <h1>{% if question %}Chỉnh sửa câu hỏi{% else %}Thêm câu hỏi trắc nghiệm{% endif %}</h1>
+            <p>Nhập nội dung câu hỏi, tùy chọn đáp án và lời giải chi tiết bên dưới.</p>
+        </div>
+        <div>
+            <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none;">
+                Quay lại bảng quản lý
+            </a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div style="background: rgba(255, 23, 68, 0.1); border: 1px solid var(--quiz-danger); color: var(--quiz-danger); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="quiz-q-card" style="padding: 32px;">
+        <form method="post" id="question-edit-form">
+            {% csrf_token %}
+
+            <!-- Question Body Markdown -->
+            <div class="quiz-form-group">
+                <label for="id_content">Nội dung câu hỏi (Hỗ trợ Markdown & LaTeX)</label>
+                {{ content_html|safe }}
+            </div>
+
+            <!-- Grid: Type, Difficulty, Source -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="quiz-form-group">
+                    <label for="type-select">Loại câu hỏi</label>
+                    <select id="type-select" name="type" class="quiz-select" onchange="toggleOptionForms(this.value)">
+                        <option value="choice" {% if question and question.type == 'choice' %}selected{% endif %}>Trắc nghiệm A/B/C/D</option>
+                        <option value="tf" {% if question and question.type == 'tf' %}selected{% endif %}>Chùm Đúng/Sai (4 ý độc lập)</option>
+                    </select>
+                </div>
+
+                <div class="quiz-form-group">
+                    <label for="difficulty-select">Độ khó</label>
+                    <select id="difficulty-select" name="difficulty" class="quiz-select">
+                        {% for code, label in difficulty_choices %}
+                            <option value="{{ code }}" {% if question and question.difficulty == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="quiz-form-group">
+                    <label for="source-select">Đề thi / Nguồn gốc</label>
+                    <select id="source-select" name="source" class="quiz-select" style="margin-bottom: 8px;">
+                        <option value="">-- Chọn đề thi đã lưu --</option>
+                        {% for src in sources %}
+                            <option value="{{ src.id }}" {% if question and question.source_id == src.id %}selected{% endif %}>{{ src.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="source_new" class="quiz-input" placeholder="Hoặc nhập tên đề thi mới...">
+                </div>
+
+                <div class="quiz-form-group">
+                    <label for="tags-input">Chủ đề (Nhập phân cách bằng dấu phẩy)</label>
+                    <input type="text" id="tags-input" class="quiz-input" placeholder="Ví dụ: HTML/CSS, Trí tuệ nhân tạo, Mạng máy tính" style="margin-bottom: 8px;">
+                    <div style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-bottom: 8px;">Hoặc chọn từ danh sách:</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 100px; overflow-y: auto; padding: 6px; border: 1px solid var(--quiz-border); border-radius: 6px; background: #13121a;">
+                        {% for tag in tags %}
+                            <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 2px 6px; background: var(--quiz-card-bg); border-radius: 4px; border: 1px solid var(--quiz-border); cursor: pointer; font-size: 0.8rem;">
+                                <input type="checkbox" name="tags" value="{{ tag.id }}" {% if question and tag in question.tags.all() %}checked{% endif %}> {{ tag.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Section: Standard Choices A/B/C/D Form -->
+            <div id="choice-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01);">
+                <h4 style="color: #ffffff; margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-list"></i> Các tùy chọn đáp án (Trắc nghiệm A/B/C/D)</h4>
+                
+                {% set choice_options = {'A': '', 'B': '', 'C': '', 'D': ''} %}
+                {% set correct_choice = 'A' %}
+                
+                {% if question and question.type == 'choice' %}
+                    {% for opt in options %}
+                        {% if opt.label in ['A', 'B', 'C', 'D'] %}
+                            {% set _ = choice_options.update({opt.label: opt.content}) %}
+                            {% if opt.is_correct %}
+                                {% set correct_choice = opt.label %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% for label in ['A', 'B', 'C', 'D'] %}
+                    <div class="quiz-form-group" style="display: grid; grid-template-columns: 40px 1fr 100px; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--quiz-primary);">{{ label }}</span>
+                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="Nội dung đáp án {{ label }}" value="{{ choice_options[label] }}">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-size: 0.85rem;">
+                            <input type="radio" name="correct_choice" value="{{ label }}" {% if correct_choice == label %}checked{% endif %}> Đúng
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Dynamic Section: True/False statements Form -->
+            <div id="tf-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01); display: none;">
+                <h4 style="color: #ffffff; margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-check-square-o"></i> Chùm câu hỏi Đúng/Sai (4 ý phát biểu)</h4>
+                
+                {% set tf_contents = {'a': '', 'b': '', 'c': '', 'd': ''} %}
+                {% set tf_corrects = {'a': True, 'b': True, 'c': True, 'd': True} %}
+                
+                {% if question and question.type == 'tf' %}
+                    {% for opt in options %}
+                        {% if opt.label in ['a', 'b', 'c', 'd'] %}
+                            {% set _ = tf_contents.update({opt.label: opt.content}) %}
+                            {% set _ = tf_corrects.update({opt.label: opt.is_correct}) %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% for label in ['a', 'b', 'c', 'd'] %}
+                    <div class="quiz-form-group" style="display: grid; grid-template-columns: 40px 1fr 160px; gap: 12px; align-items: center; margin-bottom: 16px;">
+                        <span style="font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--quiz-accent);">{{ label }}</span>
+                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="Phát biểu {{ label }}..." value="{{ tf_contents[label] }}">
+                        <div style="display: flex; gap: 8px;">
+                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.8rem; cursor: pointer;">
+                                <input type="radio" name="correct_tf_{{ label }}" value="true" {% if tf_corrects[label] == True %}checked{% endif %}> Đúng
+                            </label>
+                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.8rem; cursor: pointer;">
+                                <input type="radio" name="correct_tf_{{ label }}" value="false" {% if tf_corrects[label] == False %}checked{% endif %}> Sai
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Explanation / Solutions -->
+            <div class="quiz-form-group">
+                <label for="id_explanation">Lời giải chi tiết / Hướng dẫn giải (Hỗ trợ Markdown & LaTeX)</label>
+                {{ explanation_html|safe }}
+            </div>
+
+            <!-- Form buttons -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--quiz-border); padding-top: 20px;">
+                <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none;">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="quiz-btn-primary" style="padding: 10px 24px; font-size: 1rem; box-shadow: none;">
+                    Lưu câu hỏi <i class="fa fa-save"></i>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+    function toggleOptionForms(type) {
+        var choiceSec = document.getElementById('choice-options-section');
+        var tfSec = document.getElementById('tf-options-section');
+        
+        if (type === 'choice') {
+            choiceSec.style.display = 'block';
+            tfSec.style.display = 'none';
+        } else {
+            choiceSec.style.display = 'none';
+            tfSec.style.display = 'block';
+        }
+    }
+
+    // Initialize toggle state on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        var currentType = document.getElementById('type-select').value;
+        toggleOptionForms(currentType);
+
+        // Handler to dynamically append comma-separated tags to select checks
+        var tagsInput = document.getElementById('tags-input');
+        tagsInput.addEventListener('keydown', function(e) {
+            if (e.key === ',' || e.key === 'Enter') {
+                e.preventDefault();
+                var val = tagsInput.value.trim();
+                if (val !== '') {
+                    // Create checkbox dynamically
+                    var container = tagsInput.nextElementSibling.nextElementSibling;
+                    var label = document.createElement('label');
+                    label.style = 'display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 2px 6px; background: var(--quiz-card-bg); border-radius: 4px; border: 1px solid var(--quiz-border); cursor: pointer; font-size: 0.8rem;';
+                    
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'tags';
+                    checkbox.value = val;
+                    checkbox.checked = true;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(' ' + val));
+                    container.appendChild(label);
+                    
+                    tagsInput.value = '';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block bodyend %}
+    <script type="text/javascript" src="{{ static('plugins/js/ace.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/semantic.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/mode-markdown.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/ext-language_tools.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/theme-github.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/theme-twilight.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/highlight.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('plugins/js/resizable.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static('libs/featherlight/featherlight.min.js') }}"></script>
+    {{ media.js }}
+    <script type="text/javascript" src="{{ static('martor-mathjax.js') }}"></script>
+{% endblock %}

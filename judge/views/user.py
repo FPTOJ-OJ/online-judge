@@ -447,11 +447,47 @@ class UserList(QueryStringSortMixin, InfinitePaginationMixin, DiggPaginatorMixin
 
     def get_context_data(self, **kwargs):
         context = super(UserList, self).get_context_data(**kwargs)
-        context['users'] = ranker(
+        users = list(ranker(
             context['users'],
             key=attrgetter('performance_points', 'problem_count'),
             rank=self.paginate_by * (context['page_obj'].number - 1),
-        )
+        ))
+        
+        user_ids = [p.user_id for rank, p in users if p.user_id]
+        if user_ids:
+            from judge.models.quiz import QuizSession
+            sessions = QuizSession.objects.filter(
+                user_id__in=user_ids,
+                completed=True,
+                answers__has_key='__meta__'
+            )
+            
+            user_exam_scores = {}
+            for sess in sessions:
+                uid = sess.user_id
+                meta = sess.answers.get('__meta__', {})
+                source_id = meta.get('source_id')
+                if not source_id:
+                    continue
+                if uid not in user_exam_scores:
+                    user_exam_scores[uid] = {}
+                current_best = user_exam_scores[uid].get(source_id, 0.0)
+                user_exam_scores[uid][source_id] = max(current_best, sess.score)
+                
+            for rank, p in users:
+                uid = p.user_id
+                if uid in user_exam_scores:
+                    p.quiz_exams_completed = len(user_exam_scores[uid])
+                    p.quiz_points = sum(user_exam_scores[uid].values())
+                else:
+                    p.quiz_exams_completed = 0
+                    p.quiz_points = 0.0
+        else:
+            for rank, p in users:
+                p.quiz_exams_completed = 0
+                p.quiz_points = 0.0
+
+        context['users'] = users
         context['first_page_href'] = '.'
         context.update(self.get_sort_context())
         context.update(self.get_sort_paginate_context())
@@ -628,3 +664,23 @@ class EmailChangeActivateView(LoginRequiredMixin, View):
                 _('Email successfully changed'),
                 _('The email attached to your account has been changed to %s.') % to_email,
             )
+
+
+@login_required
+@require_POST
+def set_theme(request):
+    """Endpoint nhanh để đổi theme sáng/tối từ navbar toggle button."""
+    try:
+        data = json.loads(request.body)
+        theme = data.get('theme', 'light')
+    except (json.JSONDecodeError, AttributeError):
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+
+    valid_themes = ('light', 'dark', 'auto')
+    if theme not in valid_themes:
+        return JsonResponse({'error': 'Invalid theme'}, status=400)
+
+    profile = request.profile
+    profile.site_theme = theme
+    profile.save(update_fields=['site_theme'])
+    return JsonResponse({'success': True, 'theme': theme})

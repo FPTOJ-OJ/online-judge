@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <style>
+        .quiz-review-card-skipped {
+            border-left: 5px solid #e4e4e7;
+        }
+        .quiz-review-card-correct {
+            border-left: 5px solid #10b981;
+        }
+        .quiz-review-card-incorrect {
+            border-left: 5px solid #ef4444;
+        }
+        .quiz-opt-correct {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10b981;
+        }
+        .quiz-opt-selected-incorrect {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+        }
+        .quiz-opt-normal {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+        }
+        .quiz-label-correct {
+            background-color: #10b981;
+        }
+        .quiz-label-incorrect {
+            background-color: #ef4444;
+        }
+        .quiz-label-normal {
+            background-color: #3f3f46;
+        }
+        .quiz-row-correct {
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        .quiz-row-incorrect {
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+    </style>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container" style="max-width: 800px;">
+    
+    <div class="quiz-header-card" style="margin-bottom: 24px; text-align: center;">
+        <h1 class="quiz-title">Kết Quả Luyện Tập</h1>
+        <p class="quiz-subtitle">Phiên làm bài #{{ session.id }} thực hiện lúc {{ session.created_at.strftime('%H:%M - %d/%m/%Y') }}</p>
+        
+        <div style="display: flex; justify-content: center; gap: 24px; margin-top: 20px;">
+            <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
+                <div style="font-size: 0.85rem; color: #a1a1aa;">Tổng Điểm</div>
+                <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">{{ "%.2f"|format(session.score) }}</div>
+            </div>
+            <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
+                <div style="font-size: 0.85rem; color: #a1a1aa;">Trạng Thái</div>
+                <div style="font-size: 1.1rem; font-weight: 600; color: #10b981; margin-top: 8px;">Đã hoàn thành</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <a href="{{ url('quiz_home') }}" class="quiz-btn-primary" style="display: inline-block; text-decoration: none;">
+                <i class="fa fa-home"></i> Quay lại Trang chủ
+            </a>
+        </div>
+    </div>
+
+    <!-- Review questions list -->
+    {% for item in review_data %}
+        <div class="quiz-q-card {% if item.is_skipped %}quiz-review-card-skipped{% elif item.is_correct %}quiz-review-card-correct{% else %}quiz-review-card-incorrect{% endif %}">
+            
+            <div class="quiz-q-meta">
+                <span class="quiz-q-type">
+                    {% if item.question.type == 'choice' %}Trắc nghiệm A/B/C/D{% else %}Đúng/Sai{% endif %}
+                </span>
+                <span class="quiz-q-diff quiz-diff-{{ item.question.difficulty }}">
+                    {{ item.question.get_difficulty_display() }}
+                </span>
+                {% if item.question.source %}
+                    <span style="color: #a1a1aa; font-size: 0.85rem;">
+                        <i class="fa fa-folder-open"></i> {{ item.question.source.name }}
+                    </span>
+                {% endif %}
+                <span style="margin-left: auto; font-weight: 600;">
+                    Câu {{ item.index }} / {{ review_data|length }}
+                </span>
+            </div>
+
+            <div class="quiz-q-body">
+                {{ item.question.content|markdown('problem') }}
+            </div>
+
+            <!-- Option details -->
+            <div class="quiz-options-list" style="margin-top: 16px;">
+                {% if item.question.type == 'choice' %}
+                    <!-- Multiple choice rendering -->
+                    {% for opt in item.options %}
+                        {% set is_selected = (item.user_answer == opt.label) %}
+                        <div class="{% if opt.is_correct %}quiz-opt-correct{% elif is_selected %}quiz-opt-selected-incorrect{% else %}quiz-opt-normal{% endif %}"
+                             style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+                            
+                            <span class="{% if opt.is_correct %}quiz-label-correct{% elif is_selected %}quiz-label-incorrect{% else %}quiz-label-normal{% endif %}"
+                                  style="color: white; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; flex-shrink: 0;">
+                                {{ opt.label }}
+                            </span>
+                            
+                            <div style="flex: 1;">
+                                {{ opt.content|markdown('problem') }}
+                            </div>
+
+                            {% if opt.is_correct %}
+                                <span style="color: #10b981; font-weight: bold;"><i class="fa fa-check"></i> Đáp án đúng</span>
+                            {% elif is_selected %}
+                                <span style="color: #ef4444; font-weight: bold;"><i class="fa fa-times"></i> Bạn chọn sai</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    {% if item.is_skipped %}
+                        <p style="color: #e4e4e7; font-style: italic; margin-top: 8px;"><i class="fa fa-info-circle"></i> Bạn đã bỏ qua câu hỏi này.</p>
+                    {% endif %}
+
+                {% else %}
+                    <!-- True/False statements rendering -->
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #3f3f46; text-align: left;">
+                                <th style="padding: 8px; color: #a1a1aa;">Ý</th>
+                                <th style="padding: 8px; color: #a1a1aa;">Nội dung phát biểu</th>
+                                <th style="padding: 8px; color: #a1a1aa; text-align: center; width: 100px;">Đáp án</th>
+                                <th style="padding: 8px; color: #a1a1aa; text-align: center; width: 150px;">Bạn trả lời</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opt in item.options %}
+                                {% set correct_val = opt.is_correct %}
+                                {% set user_val = item.user_answer.get(opt.label) if item.user_answer else None %}
+                                {% set is_statement_correct = (user_val == correct_val) %}
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);"
+                                    class="{% if user_val is not none %}{% if is_statement_correct %}quiz-row-correct{% else %}quiz-row-incorrect{% endif %}{% endif %}">
+                                    <td style="padding: 12px 8px; font-weight: bold;">{{ opt.label|upper }}</td>
+                                    <td style="padding: 12px 8px;">{{ opt.content|markdown('problem') }}</td>
+                                    <td style="padding: 12px 8px; text-align: center;">
+                                        <span class="quiz-badge {% if correct_val %}quiz-badge-success{% else %}quiz-badge-danger{% endif %}" style="display: inline-block; min-width: 60px;">
+                                            {% if correct_val %}Đúng{% else %}Sai{% endif %}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px 8px; text-align: center;">
+                                        {% if user_val is none or item.is_skipped %}
+                                            <span style="color: #a1a1aa; font-style: italic;">Chưa trả lời</span>
+                                        {% else %}
+                                            <span class="quiz-badge {% if user_val %}quiz-badge-success{% else %}quiz-badge-danger{% endif %}" style="display: inline-block; min-width: 60px;">
+                                                {% if user_val %}Đúng{% else %}Sai{% endif %}
+                                            </span>
+                                            <span style="margin-left: 6px; color: {% if is_statement_correct %}#10b981{% else %}#ef4444{% endif %};">
+                                                {% if is_statement_correct %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <p style="margin-top: 12px; font-size: 0.9rem; color: #a1a1aa;">
+                        <i class="fa fa-calculator"></i> Điểm thành phần: <strong>Đúng {{ item.correct_count }} / 4 ý</strong> 
+                        (Nhận được <strong>{% if item.correct_count == 4 %}1.0{% elif item.correct_count == 3 %}0.5{% elif item.correct_count == 2 %}0.25{% elif item.correct_count == 1 %}0.1{% else %}0.0{% endif %} điểm</strong>).
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Explanation section -->
+            {% if item.question.explanation %}
+                <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 16px; margin-top: 16px; border: 1px dashed #3f3f46;">
+                    <h5 style="margin: 0 0 8px 0; color: #60a5fa; font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> Lời giải chi tiết:</h5>
+                    <div style="font-size: 0.9rem; color: #e4e4e7;">
+                        {{ item.question.explanation|markdown('problem') }}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block bodyend %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof hljs !== 'undefined') {
+            // Format code blocks
+            document.querySelectorAll("pre code").forEach(function(codeBlock) {
+                if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
+                    hljs.highlightElement(codeBlock);
+                }
+                var lang = "Code";
+                codeBlock.classList.forEach(function(cls) {
+                    if (cls.startsWith("language-")) {
+                        lang = cls.replace("language-", "").toUpperCase();
+                    } else if (cls.startsWith("lang-")) {
+                        lang = cls.replace("lang-", "").toUpperCase();
+                    }
+                });
+                if (lang === "CPP") lang = "C++";
+                
+                var pre = codeBlock.parentNode;
+                var wrapper = document.createElement("div");
+                wrapper.className = "quiz-code-wrapper";
+                
+                var header = document.createElement("div");
+                header.className = "quiz-code-header";
+                header.innerText = lang;
+                
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+                
+                var codeLines = codeBlock.innerHTML.split("\n");
+                if (codeLines.length > 0 && codeLines[codeLines.length - 1].trim() === "") {
+                    codeLines.pop();
+                }
+                
+                var lineNumbersHtml = "";
+                for (var i = 1; i <= codeLines.length; i++) {
+                    lineNumbersHtml += `<div>${i}</div>`;
+                }
+                
+                var lineContainer = document.createElement("div");
+                lineContainer.className = "quiz-code-lines";
+                lineContainer.innerHTML = lineNumbersHtml;
+                
+                pre.insertBefore(lineContainer, codeBlock);
+                pre.style.display = "flex";
+                pre.style.gap = "12px";
+                pre.style.margin = "0";
+                pre.style.padding = "12px";
+                pre.style.backgroundColor = "#18181b";
+                pre.style.overflowX = "auto";
+            });
+        }
+    });
+</script>
+{% include "mathjax-load.html" %}
+{% endblock %}

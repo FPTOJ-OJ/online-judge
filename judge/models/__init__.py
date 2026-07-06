@@ -14,6 +14,8 @@ from judge.models.profile import Class, Organization, OrganizationRequest, Profi
 from judge.models.runtime import Judge, Language, RuntimeVersion
 from judge.models.submission import SUBMISSION_RESULT, Submission, SubmissionSource, SubmissionTestCase
 from judge.models.ticket import Ticket, TicketMessage
+from judge.models.quiz import QuizTag, QuizSource, QuizQuestion, QuizOption, QuizSession
+
 
 revisions.register(Profile, exclude=['points', 'last_access', 'ip', 'rating'])
 revisions.register(Problem, follow=['language_limits'])

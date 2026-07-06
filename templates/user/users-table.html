@@ -23,8 +23,24 @@
         {{ _('Problems') }}
         {%- if sort_links %}{{ sort_order.problem_count }}</a>{% endif %}
     </th>
+    {% if site_config.quiz_enabled %}
+        <th class="exams" style="text-align: center;">
+            Đề đã làm
+        </th>
+        <th class="exam-points" style="text-align: center;">
+            Điểm thi thử
+        </th>
+    {% endif %}
 {% endblock %}
 
 {% block after_point %}
     <td>{{ user.problem_count }}</td>
+    {% if site_config.quiz_enabled %}
+        <td style="text-align: center; font-weight: bold; color: #ffd60a;">
+            {{ user.quiz_exams_completed or 0 }}
+        </td>
+        <td style="text-align: center; font-weight: bold; color: #10b981;">
+            {{ (user.quiz_points|floatformat(1)) or "0.0" }}
+        </td>
+    {% endif %}
 {% endblock %}

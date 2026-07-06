@@ -1,10 +1,20 @@
 jQuery(function ($) {
     $(document).on('martor:preview', function (e, $content) {
         function update_math() {
-            MathJax.typesetPromise([$content[0]]).then(function () {
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                window.MathJax.typesetPromise([$content[0]]).then(function () {
+                    $content.find('.tex-image').hide();
+                    $content.find('.tex-text').show();
+                });
+            } else if (window.MathJax && window.MathJax.Hub && typeof window.MathJax.Hub.Queue === 'function') {
+                window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, $content[0]], function () {
+                    $content.find('.tex-image').hide();
+                    $content.find('.tex-text').show();
+                });
+            } else {
                 $content.find('.tex-image').hide();
                 $content.find('.tex-text').show();
-            });
+            }
         }
 
         var $jax = $content.find('.require-mathjax-support');

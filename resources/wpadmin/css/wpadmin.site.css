@@ -43,3 +43,931 @@
         max-width: unset;
     }
 }
+
+/* Custom overrides for DMOJ Admin Panel to improve contrast and readability */
+
+/* Light Mode Overrides */
+body {
+    background-color: #eaeded !important; /* Slightly darker body background to provide contrast with white modules */
+}
+
+#content .module {
+    border: 1px solid #d1d5db !important; /* Gray-300 border */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#content .module h2, 
+#content .module caption, 
+#content .inline-group h2 {
+    background: #f3f4f6 !important; /* Gray-100 */
+    color: #1f2937 !important; /* Gray-800 */
+    border-bottom: 1px solid #d1d5db !important;
+    font-weight: 600;
+}
+
+#content table {
+    border: 1px solid #d1d5db !important;
+}
+
+#content table thead th {
+    background: #f9fafb !important; /* Gray-50 */
+    color: #374151 !important; /* Gray-700 */
+    border-bottom: 2px solid #e5e7eb !important;
+    font-weight: 600;
+}
+
+#content table tbody tr.row1 {
+    background-color: #f9fafb !important;
+}
+
+#content table tbody tr.row2 {
+    background-color: #ffffff !important;
+}
+
+#content .form-row {
+    border-bottom: 1px solid #e5e7eb !important; /* Gray-200 */
+}
+
+#content textarea,
+#content input[type="text"],
+#content input[type="password"],
+#content input[type="email"],
+#content input[type="number"],
+#content input[type="search"],
+#content input[type="tel"],
+#content input[type="url"],
+#content input[type="file"],
+#content select {
+    border: 1px solid #c8d2db !important;
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+    border-radius: 4px;
+    padding: 6px 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+#content textarea:focus,
+#content input[type="text"]:focus,
+#content input[type="password"]:focus,
+#content input[type="email"]:focus,
+#content input[type="number"]:focus,
+#content input[type="search"]:focus,
+#content input[type="tel"]:focus,
+#content input[type="url"]:focus,
+#content input[type="file"]:focus,
+#content select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    outline: none !important;
+}
+
+/* Dark Mode Overrides (if prefers-color-scheme matches dark or user forces dark mode) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Base Colors */
+        --body-bg: #111827 !important; /* Dark Gray-900 */
+        --body-fg: #f3f4f6 !important; /* Light Gray-100 */
+        --border-color: #374151 !important; /* Gray-700 */
+        --hairline-color: #374151 !important;
+        --darkened-bg: #1f2937 !important; /* Gray-800 */
+        --selected-bg: #374151 !important; /* Gray-700 */
+        --body-quiet-color: #9ca3af !important; /* Gray-400 */
+        --body-loud-color: #ffffff !important;
+
+        /* Primary / Secondary colors (for header, breadcrumbs, highlights) */
+        --primary: #1f2937 !important; /* Gray-800 instead of #79aec8 light blue */
+        --primary-fg: #ffffff !important;
+        --secondary: #111827 !important; /* Gray-900 */
+        --accent: #3b82f6 !important; /* Blue-500 */
+
+        /* Header block */
+        --header-bg: #111827 !important;
+        --header-color: #f3f4f6 !important;
+        --header-link-color: #60a5fa !important;
+
+        /* Breadcrumbs */
+        --breadcrumbs-bg: #1f2937 !important; /* Gray-800 instead of light blue */
+        --breadcrumbs-fg: #9ca3af !important;
+        --breadcrumbs-link-fg: #60a5fa !important;
+
+        /* Links */
+        --link-fg: #60a5fa !important;
+        --link-hover-color: #93c5fd !important;
+        --link-selected-fg: #93c5fd !important;
+
+        /* Buttons */
+        --button-bg: #374151 !important;
+        --button-hover-bg: #4b5563 !important;
+        --button-fg: #ffffff !important;
+        
+        --default-button-bg: #3b82f6 !important;
+        --default-button-hover-bg: #2563eb !important;
+    }
+
+    body, body.login {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+    }
+
+    #content .module {
+        background-color: #1f2937 !important; /* Gray-800 */
+        border: 1px solid #374151 !important;
+    }
+
+    #content .module h2, 
+    #content .module caption, 
+    #content .inline-group h2 {
+        background: #374151 !important; /* Gray-700 */
+        color: #f9fafb !important;
+        border-bottom: 1px solid #4b5563 !important;
+    }
+
+    #content table {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+    }
+
+    #content table thead th {
+        background: #374151 !important;
+        color: #f3f4f6 !important;
+        border-bottom: 2px solid #4b5563 !important;
+    }
+
+    #content table tbody tr.row1 {
+        background-color: #1f2937 !important;
+    }
+
+    #content table tbody tr.row2 {
+        background-color: #111827 !important;
+    }
+
+    #content .form-row {
+        border-bottom: 1px solid #374151 !important;
+    }
+
+    #content textarea,
+    #content input[type="text"],
+    #content input[type="password"],
+    #content input[type="email"],
+    #content input[type="number"],
+    #content input[type="search"],
+    #content input[type="tel"],
+    #content input[type="url"],
+    #content input[type="file"],
+    #content select {
+        border: 1px solid #4b5563 !important;
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+    }
+
+    #content textarea:focus,
+    #content input[type="text"]:focus,
+    #content input[type="password"]:focus,
+    #content input[type="email"]:focus,
+    #content input[type="number"]:focus,
+    #content input[type="search"]:focus,
+    #content input[type="tel"]:focus,
+    #content input[type="url"]:focus,
+    #content input[type="file"]:focus,
+    #content select:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    }
+
+    /* Text link colors in dark mode */
+    #content a {
+        color: #60a5fa !important; /* Light blue */
+    }
+
+    #content a:hover {
+        color: #93c5fd !important;
+    }
+
+    .help, p.help, .timezonewarning {
+        color: #9ca3af !important;
+    }
+
+    /* 1. Select2 Selection Boxes & Dropdowns */
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+        background-color: #111827 !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #f3f4f6 !important;
+    }
+    .select2-dropdown {
+        background-color: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-results__option {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #9ca3af !important;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        color: #ef4444 !important;
+    }
+    #content input.select2-search__field {
+        background-color: transparent !important;
+        color: #f3f4f6 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        background-color: #111827 !important;
+        border: 1px solid #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+
+    /* 2. Ace Code/Text Editor */
+    .ace_editor {
+        background-color: #1f2937 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+    }
+    .ace_gutter {
+        background-color: #111827 !important;
+        color: #9ca3af !important;
+        border-right: 1px solid #374151 !important;
+    }
+    .ace_scroller, .ace_content {
+        background-color: #1f2937 !important;
+    }
+    .ace_cursor {
+        color: #f3f4f6 !important;
+    }
+    .ace_marker-layer .ace_active-line {
+        background-color: #374151 !important;
+    }
+    .ace_keyword {
+        color: #f87171 !important;
+    }
+    .ace_string {
+        color: #34d399 !important;
+    }
+    .ace_numeric {
+        color: #60a5fa !important;
+    }
+    .ace_comment {
+        color: #9ca3af !important;
+    }
+
+    /* 3. Markdown / Martor Editor Toolbar */
+    .martor-toolbar {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        border-bottom: none !important;
+    }
+    .martor-toolbar .ui.button {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+    }
+    .martor-toolbar .ui.button:hover {
+        background-color: #374151 !important;
+    }
+    .martor-preview {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #374151 !important;
+    }
+
+    /* 4. Search and Action Buttons */
+    #changelist-form input[type="submit"],
+    #changelist-form button,
+    .actions button,
+    .actions input[type="submit"],
+    #content input[type="submit"],
+    #content input[type="button"],
+    #content button {
+        background-color: #1f2937 !important;
+        border: 1px solid #4b5563 !important;
+        color: #f3f4f6 !important;
+        padding: 5px 12px !important;
+        border-radius: 4px !important;
+        font-weight: 500 !important;
+    }
+    #changelist-form input[type="submit"]:hover,
+    #changelist-form button:hover,
+    .actions button:hover,
+    #content input[type="submit"]:hover,
+    #content button:hover {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+        border-color: #6b7280 !important;
+    }
+    .actions .action-counter {
+        color: #9ca3af !important;
+    }
+    .actions select {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+        border: 1px solid #4b5563 !important;
+    }
+
+    /* 5. Filter Panel Details */
+    #changelist-filter {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+    }
+    #changelist-filter h2 {
+        background: #374151 !important;
+        color: #f9fafb !important;
+        border-bottom: 1px solid #4b5563 !important;
+    }
+    #changelist-filter ul {
+        background-color: transparent !important;
+    }
+    #changelist-filter li {
+        color: #9ca3af !important;
+    }
+    #changelist-filter li a {
+        color: #60a5fa !important;
+    }
+    #changelist-filter li a:hover {
+        color: #93c5fd !important;
+    }
+    #changelist-filter li.selected a {
+        color: #ffffff !important;
+        font-weight: bold;
+    }
+
+    /* 6. Paginator Box */
+    .paginator {
+        background-color: #1f2937 !important;
+        border-top: 1px solid #374151 !important;
+        color: #9ca3af !important;
+    }
+    .paginator a, .paginator .this-page {
+        background-color: #111827 !important;
+        border: 1px solid #4b5563 !important;
+        color: #f3f4f6 !important;
+        padding: 4px 8px !important;
+        margin: 0 2px !important;
+        border-radius: 4px !important;
+        display: inline-block !important;
+    }
+    .paginator a:hover {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+    }
+    .paginator .this-page {
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        color: #ffffff !important;
+        font-weight: bold !important;
+    }
+
+    /* 7. List Tool Buttons & Object Tools */
+    .list-tools a,
+    .list-tools a.add-new,
+    .list-tools a.recoverlink,
+    .object-tools a,
+    .object-tools a.addlink,
+    .object-tools a.viewsitelink {
+        background-color: #1f2937 !important;
+        border: 1px solid #4b5563 !important;
+        color: #f3f4f6 !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        display: inline-block !important;
+    }
+    .list-tools a:hover,
+    .object-tools a:hover {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+        border-color: #6b7280 !important;
+    }
+
+    /* 8. Date and Time Popup Pickers */
+    .calendarbox, .clockbox {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #f3f4f6 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    }
+    .calendarbox h2, .clockbox h2 {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+        margin: 0 !important;
+        padding: 6px 10px !important;
+    }
+    .calendar table {
+        background-color: #1f2937 !important;
+        margin: 0 !important;
+    }
+    .calendar th {
+        background-color: #111827 !important;
+        color: #9ca3af !important;
+        border-bottom: 1px solid #374151 !important;
+    }
+    .calendar td {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .calendar td a {
+        color: #f3f4f6 !important;
+    }
+    .calendar td a:hover {
+        background-color: #374151 !important;
+    }
+    .calendar td.today {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+    .calendar-shortcuts {
+        background-color: #111827 !important;
+        border-top: 1px solid #374151 !important;
+        color: #9ca3af !important;
+        padding: 5px !important;
+    }
+    .calendar-shortcuts a {
+        color: #60a5fa !important;
+    }
+    .calendar-cancel, .clockbox .calendar-cancel {
+        background-color: #374151 !important;
+        border-top: 1px solid #4b5563 !important;
+        padding: 5px !important;
+    }
+    .calendar-cancel a, .clockbox .calendar-cancel a {
+        color: #ef4444 !important;
+        font-weight: bold !important;
+    }
+    .clockbox ul {
+        background-color: #1f2937 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .clockbox li a {
+        color: #f3f4f6 !important;
+        padding: 4px 10px !important;
+        display: block !important;
+    }
+    .clockbox li a:hover {
+        background-color: #374151 !important;
+    }
+
+    /* 9. Breadcrumbs Bar */
+    .breadcrumbs {
+        background-color: #1f2937 !important;
+        border-bottom: 1px solid #374151 !important;
+        color: #9ca3af !important;
+        padding: 10px 16px !important;
+    }
+    .breadcrumbs a {
+        color: #60a5fa !important;
+    }
+    .breadcrumbs a:hover {
+        color: #93c5fd !important;
+    }
+
+    /* 10. Message Banners */
+    ul.messagelist li {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #f3f4f6 !important;
+        padding: 10px 15px !important;
+        margin-bottom: 10px !important;
+        border-radius: 4px !important;
+        list-style-type: none !important;
+    }
+    ul.messagelist li.success {
+        border-left: 4px solid #10b981 !important;
+    }
+    ul.messagelist li.warning {
+        border-left: 4px solid #f59e0b !important;
+    }
+    ul.messagelist li.error {
+        border-left: 4px solid #ef4444 !important;
+    }
+
+    /* Additional UI Fixes for wpadmin specific selectors */
+    #header, #adminbar, #adminbarwrap, #adminmenuwrap, #adminmenuback {
+        border-color: #374151 !important;
+    }
+    
+    /* Left column layout background fix */
+    #left-column, #left-column-trigger {
+        background-color: #111827 !important;
+        border-right: 1px solid #374151 !important;
+    }
+
+    /* Heading text colors inside content area */
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6,
+    #content-related h3,
+    #content-related h4,
+    .module h2,
+    .inline-group h2,
+    .inline-group h3 {
+        color: #f3f4f6 !important;
+    }
+
+    /* Table text and cells high specificity overrides */
+    #content table,
+    #content table tbody td,
+    #content table tbody th,
+    #content table tbody th a,
+    #content table thead th,
+    #content table thead th div,
+    #content table thead th div a,
+    #content table thead th div span,
+    #content table thead th a,
+    #content table thead th span {
+        color: #f3f4f6 !important;
+    }
+
+    /* CKEditor Editable Area Text Elements Custom Dark Colors */
+    #content .ck-editor__editable p,
+    #content .ck-editor__editable span,
+    #content .ck-editor__editable li,
+    #content .ck-editor__editable a,
+    #content .ck-editor__editable h1,
+    #content .ck-editor__editable h2,
+    #content .ck-editor__editable h3,
+    #content .ck-editor__editable h4,
+    #content .ck-editor__editable h5,
+    #content .ck-editor__editable h6 {
+        color: #f3f4f6 !important;
+    }
+
+    /* Help text, labels & descriptions */
+    .description, .help, p.help, .timezonewarning {
+        color: #9ca3af !important;
+    }
+    #content .form-row label {
+        color: #f3f4f6 !important;
+    }
+    #content .form-row label.required {
+        color: #f3f4f6 !important;
+        font-weight: bold;
+    }
+    /* Inline groups add-row buttons */
+    .inline-group div.add-row,
+    .inline-group .tabular tr.add-row td {
+        background-color: #111827 !important;
+        border: 1px solid #374151 !important;
+    }
+    .inline-group div.add-row a {
+        color: #60a5fa !important;
+    }
+    .inline-group div.add-row a:hover {
+        color: #93c5fd !important;
+    }
+
+    /* 11. Select2 overrides specifically for .select2-container--dmoj theme */
+    .select2-container--dmoj .select2-selection--single,
+    .select2-container--dmoj .select2-selection--multiple {
+        background-color: #111827 !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-container--dmoj .select2-selection__rendered {
+        color: #f3f4f6 !important;
+    }
+    .select2-container--dmoj .select2-selection--multiple .select2-selection__choice {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+    .select2-container--dmoj .select2-selection__choice__remove {
+        color: #9ca3af !important;
+    }
+    .select2-container--dmoj .select2-selection__choice__remove:hover {
+        color: #ef4444 !important;
+    }
+
+    /* 12. Related Widget Link Icons (Plus, Pencil, Eye, etc.) Inversion for Dark Theme */
+    .add-related,
+    .change-related,
+    .delete-related,
+    .view-related,
+    .addlink,
+    .changelink,
+    .deletelink,
+    .viewlink,
+    .related-widget-wrapper-link img {
+        filter: invert(0.85) !important;
+    }
+    
+    /* 13. CKEditor 5 Dark Theme Overrides */
+    .ck-reset_all,
+    .ck.ck-editor__main>.ck-editor__editable,
+    .ck.ck-toolbar,
+    .ck.ck-button {
+        --ck-color-base-background: #111827 !important;
+        --ck-color-base-border: #374151 !important;
+        --ck-color-base-text: #f3f4f6 !important;
+        --ck-color-border: #374151 !important;
+        --ck-color-toolbar-background: #1f2937 !important;
+        --ck-color-toolbar-border: #374151 !important;
+        --ck-color-text: #f3f4f6 !important;
+        --ck-color-editor-base-text: #f3f4f6 !important;
+        --ck-color-widget-blurred-border: #374151 !important;
+        --ck-color-widget-hover-border: #3b82f6 !important;
+        --ck-color-widget-selected-border: #3b82f6 !important;
+        --ck-color-button-default-background: transparent !important;
+        --ck-color-button-default-hover-background: #374151 !important;
+        --ck-color-button-default-active-background: #374151 !important;
+        --ck-color-button-on-background: #374151 !important;
+        --ck-color-button-on-hover-background: #4b5563 !important;
+        --ck-color-dropdown-panel-background: #1f2937 !important;
+        --ck-color-dropdown-panel-border: #374151 !important;
+        --ck-color-input-background: #111827 !important;
+        --ck-color-input-border: #374151 !important;
+        --ck-color-input-text: #f3f4f6 !important;
+        --ck-color-list-background: #1f2937 !important;
+        --ck-color-list-button-hover-background: #374151 !important;
+        --ck-color-panel-background: #1f2937 !important;
+        --ck-color-panel-border: #374151 !important;
+    }
+    
+    .ck.ck-editor__editable_inline {
+        background: #111827 !important;
+        color: #f3f4f6 !important;
+        border-color: #374151 !important;
+    }
+    
+    .ck.ck-button, .ck.ck-button *, .ck-icon, .ck-icon * {
+        color: #f3f4f6 !important;
+        fill: currentColor !important;
+    }
+    .ck.ck-button:hover, .ck.ck-button:active {
+        background: #374151 !important;
+    }
+
+    /* 14. Chosen Dropdown Selector Dark Mode Overrides */
+    .chosen-container-single .chosen-single {
+        background: #111827 !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+        box-shadow: none !important;
+    }
+    .chosen-container-single .chosen-single span {
+        color: #f3f4f6 !important;
+    }
+    .chosen-container .chosen-drop {
+        background: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .chosen-container .chosen-results {
+        color: #f3f4f6 !important;
+        background: #1f2937 !important;
+    }
+    .chosen-container .chosen-results li.active-result {
+        color: #f3f4f6 !important;
+    }
+    .chosen-container .chosen-results li.highlighted {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+
+    /* 15. Martor (Markdown) Editor Dark Mode Overrides */
+    .main-martor {
+        background-color: #111827 !important;
+        border: 1px solid #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .section-martor {
+        background-color: #111827 !important;
+        color: #f3f4f6 !important;
+    }
+    .section-martor .ui.menu,
+    .section-martor .segment {
+        background: #1f2937 !important;
+        border-color: #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .section-martor .ui.menu .item {
+        color: #9ca3af !important;
+    }
+    .section-martor .ui.menu .item i.icon {
+        color: #9ca3af !important;
+        opacity: 0.8;
+    }
+    .section-martor .ui.menu .item:hover {
+        background: #374151 !important;
+        color: #f3f4f6 !important;
+    }
+    .section-martor .ui.menu .item:hover i.icon {
+        color: #f3f4f6 !important;
+        opacity: 1;
+    }
+    .section-martor .ui.menu .active.item {
+        background: #374151 !important;
+        color: #f3f4f6 !important;
+        border-color: #4b5563 !important;
+    }
+    .section-martor .ui.menu .active.item i.icon {
+        color: #f3f4f6 !important;
+    }
+    .martor-toolbar {
+        background-color: #1f2937 !important;
+        border-bottom: 1px solid #374151 !important;
+    }
+    .martor-toolbar a {
+        color: #9ca3af !important;
+    }
+    .martor-toolbar a:hover {
+        color: #f3f4f6 !important;
+        background-color: #374151 !important;
+    }
+
+    /* 16. Dashboard Table Custom Row Colors */
+    body.dashboard #content .module table tr {
+        background-color: transparent !important;
+    }
+    body.dashboard #content .module table tr:nth-child(odd) {
+        background-color: #111827 !important;
+    }
+    body.dashboard #content .module table tr:nth-child(even) {
+        background-color: #1f2937 !important;
+    }
+    body.dashboard #content .module table tr th,
+    body.dashboard #content .module table tr td {
+        border-color: #374151 !important;
+    }
+
+    /* 17. Bottombar Button Layout Alignment and Icon Fixes */
+    #bottombar input[type="submit"],
+    #bottombar button[type="submit"],
+    #bottombar a.button,
+    #bottombar a.deletelink {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: normal !important;
+    }
+    #bottombar button[type="submit"] i,
+    #bottombar a.button i,
+    #bottombar button[type="submit"] .fa,
+    #bottombar a.button .fa,
+    #bottombar a.deletelink i,
+    #bottombar a.deletelink .fa {
+        margin-right: 6px !important;
+        margin-top: 0 !important;
+        vertical-align: middle !important;
+        display: inline-block !important;
+    }
+
+    /* 18. Related Datetime Widget Labels (Date:, Time:) */
+    #content .datetime {
+        color: #f3f4f6 !important;
+    }
+    #content .datetime a,
+    #content .datetime span {
+        color: #60a5fa !important;
+    }
+
+    /* 19. Bottombar Delete Button Style Override */
+    #bottombar .deletelink,
+    #bottombar a.deletelink,
+    #bottombar button.deletelink {
+        background-color: #ef4444 !important; /* Red-500 */
+        color: #ffffff !important;
+        border: 1px solid #dc2626 !important;
+        padding: 0 15px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 5px !important;
+        float: left !important;
+        box-sizing: border-box !important;
+    }
+    #bottombar .deletelink:hover,
+    #bottombar a.deletelink:hover,
+    #bottombar button.deletelink:hover {
+        background-color: #dc2626 !important; /* Red-600 */
+        border-color: #b91c1c !important;
+        color: #ffffff !important;
+    }
+
+    /* 20. Bottombar Help/Markdown Guide Button Style Override */
+    #bottombar > a {
+        background-color: #374151 !important; /* Gray-700 */
+        color: #ffffff !important;
+        border: 1px solid #4b5563 !important;
+        padding: 0 12px !important;
+        border-radius: 4px !important;
+        font-weight: 600 !important;
+        height: 30px !important;
+        margin-top: 5px !important;
+        margin-left: 5px !important;
+        float: left !important;
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+    }
+    #bottombar > a:hover {
+        background-color: #4b5563 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+    }
+
+    /* 21. Featherlight Modal Dark Theme Overrides */
+    .featherlight .featherlight-content {
+        background-color: #1f2937 !important; /* Dark Gray-800 */
+        border: 1px solid #374151 !important;
+        color: #f3f4f6 !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+    }
+    .featherlight .featherlight-close-icon {
+        background: #374151 !important;
+        color: #f3f4f6 !important;
+        border-radius: 4px !important;
+    }
+    
+    /* Markdown Guide inside Modal */
+    .featherlight-content h1,
+    .featherlight-content h2,
+    .featherlight-content h3,
+    .featherlight-content h4,
+    .featherlight-content h5,
+    .featherlight-content h6,
+    .featherlight-content p,
+    .featherlight-content span,
+    .featherlight-content div {
+        color: #f3f4f6 !important;
+    }
+    .featherlight-content a {
+        color: #60a5fa !important;
+    }
+    .featherlight-content a:hover {
+        color: #93c5fd !important;
+    }
+    .featherlight-content table {
+        border-color: #374151 !important;
+    }
+    .featherlight-content table thead th {
+        background-color: #374151 !important;
+        color: #f3f4f6 !important;
+        border-bottom: 2px solid #4b5563 !important;
+    }
+    .featherlight-content table tbody td {
+        color: #f3f4f6 !important;
+        border-bottom: 1px solid #374151 !important;
+        background-color: #1f2937 !important;
+    }
+    .featherlight-content table tbody tr:nth-child(even) td {
+        background-color: #111827 !important;
+    }
+
+    /* 22. Selected and Hovered table rows in Dark Mode */
+    #content table tbody tr:hover,
+    #content table tbody tr:hover td,
+    #content table tbody tr:hover th {
+        background-color: #374151 !important; /* Gray-700 instead of #fcfcfc white */
+        color: #f3f4f6 !important;
+    }
+    #content table tbody tr.selected,
+    #content table tbody tr.selected td,
+    #content table tbody tr.selected th {
+        background-color: #1e3a8a !important; /* Dark Blue instead of #ffc yellow */
+        color: #f3f4f6 !important;
+    }
+    #content table tbody tr.selected a,
+    #content table tbody tr:hover a {
+        color: #60a5fa !important;
+    }
+
+    /* 23. Martor Toolbar Button Hover Styling overrides */
+    .martor-toolbar a:hover,
+    .martor-toolbar button:hover,
+    .martor-toolbar .item:hover,
+    .martor-toolbar .button:hover,
+    .martor-toolbar a:hover i,
+    .martor-toolbar button:hover i,
+    .martor-toolbar .item:hover i {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        opacity: 1 !important;
+    }
+}

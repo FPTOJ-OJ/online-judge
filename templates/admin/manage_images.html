@@ -1,0 +1,469 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+    .gallery-container {
+        padding: 20px 0;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .image-card {
+        background-color: var(--darkened-bg, #fff);
+        border: 1px solid var(--border-color, #e5e5e5);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .image-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .image-preview-box {
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f3f4f6;
+        border-bottom: 1px solid var(--border-color, #e5e5e5);
+        overflow: hidden;
+        position: relative;
+    }
+    .image-preview-box img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .image-info {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .image-name {
+        font-size: 13px;
+        font-weight: 600;
+        word-break: break-all;
+        margin-bottom: 5px;
+        color: var(--body-fg, #333);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 36px;
+    }
+    .image-meta {
+        font-size: 11px;
+        color: var(--body-quiet-color, #666);
+        margin-bottom: 10px;
+    }
+    .card-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-action {
+        flex: 1;
+        padding: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        border: 1px solid transparent;
+        transition: background 0.15s;
+    }
+    .btn-copy {
+        background-color: #3b82f6;
+        color: #fff !important;
+    }
+    .btn-copy:hover {
+        background-color: #2563eb;
+    }
+    .btn-delete {
+        background-color: #ef4444;
+        color: #fff !important;
+    }
+    .btn-delete:hover {
+        background-color: #dc2626;
+    }
+    .gallery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color, #e5e5e5);
+        padding-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .gallery-header h1 {
+        margin: 0 !important;
+    }
+    
+    /* Search & Filter Form Styling */
+    .filter-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .filter-form input[type="text"] {
+        padding: 6px 12px;
+        border: 1px solid var(--border-color, #374151);
+        border-radius: 4px;
+        background-color: var(--body-bg, #111827);
+        color: var(--body-fg, #f3f4f6);
+        min-width: 200px;
+    }
+    .filter-form select {
+        padding: 6px 10px;
+        border: 1px solid var(--border-color, #374151);
+        border-radius: 4px;
+        background-color: var(--body-bg, #111827);
+        color: var(--body-fg, #f3f4f6);
+        cursor: pointer;
+    }
+    .btn-filter {
+        background-color: #3b82f6;
+        color: #fff !important;
+        border: none;
+        padding: 6px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.15s;
+    }
+    .btn-filter:hover {
+        background-color: #2563eb;
+    }
+    .btn-clear {
+        background-color: #374151;
+        color: #fff !important;
+        border: 1px solid #4b5563;
+        padding: 5px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        box-sizing: border-box;
+    }
+    .btn-clear:hover {
+        background-color: #4b5563;
+    }
+
+    .gallery-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid var(--border-color, #e5e5e5);
+    }
+    .gallery-pagination a, .gallery-pagination span {
+        padding: 6px 12px;
+        border: 1px solid var(--border-color, #e5e5e5);
+        border-radius: 4px;
+        color: var(--body-fg, #333);
+        background-color: var(--body-bg, #fff);
+        text-decoration: none;
+    }
+    .gallery-pagination a:hover {
+        background-color: var(--darkened-bg, #f8f8f8);
+    }
+    .gallery-pagination span.current {
+        background-color: #3b82f6;
+        color: #fff;
+        border-color: #3b82f6;
+    }
+
+    /* PDF and other files styling */
+    .image-preview-box.pdf-box object {
+        pointer-events: none;
+    }
+    .pdf-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(17, 24, 39, 0.7) !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .image-preview-box.pdf-box:hover .pdf-overlay {
+        opacity: 1;
+    }
+    .fallback-pdf-icon, .fallback-file-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background-color: #1f2937 !important;
+    }
+    .fallback-pdf-icon i, .fallback-file-icon i {
+        margin-bottom: 8px;
+    }
+
+    /* Lightbox Zoom Style */
+    .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        padding-top: 50px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(11, 15, 23, 0.95);
+    }
+    .lightbox-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        animation-name: zoom;
+        animation-duration: 0.2s;
+    }
+    @keyframes zoom {
+        from {transform:scale(0.95); opacity: 0} 
+        to {transform:scale(1); opacity: 1}
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+        user-select: none;
+    }
+    .lightbox-close:hover,
+    .lightbox-close:focus {
+        color: #bbb;
+        text-decoration: none;
+    }
+    .lightbox-caption {
+        margin: auto;
+        display: block;
+        width: 80%;
+        max-width: 700px;
+        text-align: center;
+        color: #ccc;
+        padding: 15px 0;
+        font-size: 14px;
+        font-weight: 600;
+        word-break: break-all;
+    }
+</style>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div class="gallery-container">
+    <div class="gallery-header">
+        <h1>{% trans "Manage Uploaded Images" %}</h1>
+        <form method="GET" class="filter-form" id="filter-form">
+            <input type="text" name="search" placeholder="{% trans 'Search filenames...' %}" value="{{ search_query }}">
+            
+            <select name="ext" onchange="document.getElementById('filter-form').submit()">
+                <option value="">{% trans "All Extensions" %}</option>
+                {% for ext in extensions %}
+                    <option value="{{ ext }}" {% if selected_ext == ext %}selected{% endif %}>{{ ext|upper }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="sort" onchange="document.getElementById('filter-form').submit()">
+                <option value="mtime_desc" {% if selected_sort == "mtime_desc" %}selected{% endif %}>{% trans "Date: Newest" %}</option>
+                <option value="mtime_asc" {% if selected_sort == "mtime_asc" %}selected{% endif %}>{% trans "Date: Oldest" %}</option>
+                <option value="size_desc" {% if selected_sort == "size_desc" %}selected{% endif %}>{% trans "Size: Largest" %}</option>
+                <option value="size_asc" {% if selected_sort == "size_asc" %}selected{% endif %}>{% trans "Size: Smallest" %}</option>
+                <option value="name_asc" {% if selected_sort == "name_asc" %}selected{% endif %}>{% trans "Name: A-Z" %}</option>
+            </select>
+            
+            <button type="submit" class="btn-filter">{% trans "Filter" %}</button>
+            {% if search_query or selected_ext or selected_sort != "mtime_desc" %}
+                <a href="?" class="btn-clear">{% trans "Clear" %}</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if files %}
+        <span class="quiet" style="display: block; margin-bottom: 10px;">{{ total_files }} {% trans "files found" %}</span>
+        <div class="gallery-grid">
+            {% for file in files %}
+                <div class="image-card" id="card-{{ file.name|slugify }}">
+                    {% if file.type == 'image' %}
+                        <div class="image-preview-box" onclick="openLightbox('{{ file.url }}', '{{ file.name }}')" style="cursor: zoom-in;" title="{% trans 'Click to zoom' %}">
+                            <img src="{{ file.url }}" alt="{{ file.name }}" loading="lazy">
+                        </div>
+                    {% elif file.type == 'pdf' %}
+                        <div class="image-preview-box pdf-box" onclick="window.open('{{ file.url }}', '_blank')" style="cursor: pointer;" title="{% trans 'Click to view PDF' %}">
+                            <object data="{{ file.url }}#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" width="100%" height="100%">
+                                <div class="fallback-pdf-icon">
+                                    <i class="fa fa-file-pdf-o" style="font-size: 40px; color: #ef4444;"></i>
+                                    <span style="font-size: 11px; color: #9ca3af;">PDF Document</span>
+                                </div>
+                            </object>
+                            <div class="pdf-overlay">
+                                <i class="fa fa-search-plus" style="font-size: 24px; color: #fff;"></i>
+                                <span style="font-size: 11px; margin-top: 4px; color: #fff; font-weight: 600;">{% trans "Click to View" %}</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="image-preview-box file-box">
+                            <div class="fallback-file-icon">
+                                <i class="fa fa-file-o" style="font-size: 40px; color: #9ca3af;"></i>
+                                <span style="font-size: 11px; color: #f3f4f6; font-weight: 600;">.{{ file.ext }} {% trans "File" %}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="image-info">
+                        <div>
+                            <div class="image-name" title="{{ file.name }}">{{ file.name }}</div>
+                            <div class="image-meta">{{ file.size }}</div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-action btn-copy" onclick="copyMarkdown('{{ file.url }}', '{{ file.type }}', '{{ file.name }}', this)">
+                                {% trans "Copy Markdown" %}
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteImage('{{ file.name }}')">
+                                {% trans "Delete" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if total_pages > 1 %}
+            <div class="gallery-pagination">
+                {% if has_prev %}
+                    <a href="?page={{ prev_page }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_ext %}&ext={{ selected_ext }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{% trans "Previous" %}</a>
+                {% endif %}
+                <span class="current">{{ page }} / {{ total_pages }}</span>
+                {% if has_next %}
+                    <a href="?page={{ next_page }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_ext %}&ext={{ selected_ext }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{% trans "Next" %}</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="quiet">{% trans "No files uploaded yet." %}</p>
+    {% endif %}
+</div>
+
+<!-- Lightbox Zoom Modal -->
+<div id="lightbox-modal" class="lightbox">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <img class="lightbox-content" id="lightbox-img" alt="Zoomed view">
+    <div id="lightbox-caption" class="lightbox-caption"></div>
+</div>
+
+<script>
+    function copyMarkdown(url, type, name, btn) {
+        let markdown = '';
+        if (type === 'image') {
+            markdown = `![](${window.location.origin}${url})`;
+        } else {
+            markdown = `[${name}](${window.location.origin}${url})`;
+        }
+        navigator.clipboard.writeText(markdown).then(() => {
+            const oldText = btn.innerText;
+            btn.innerText = "{% trans 'Copied!' %}";
+            btn.style.backgroundColor = "#10b981";
+            setTimeout(() => {
+                btn.innerText = oldText;
+                btn.style.backgroundColor = "";
+            }, 1500);
+        }).catch(err => {
+            alert('Failed to copy link: ' + err);
+        });
+    }
+
+    function deleteImage(filename) {
+        if (!confirm("{% trans 'Are you sure you want to delete this file?' %}")) {
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append("filename", filename);
+        formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+        
+        fetch("", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                const slugified = filename.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+                // Remove card from UI
+                const card = document.getElementById("card-" + slugified);
+                if (card) {
+                    card.style.opacity = "0";
+                    setTimeout(() => card.remove(), 300);
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert("Delete failed: " + data.message);
+            }
+        })
+        .catch(err => {
+            alert("Error: " + err);
+        });
+    }
+
+    function openLightbox(url, name) {
+        const modal = document.getElementById("lightbox-modal");
+        const img = document.getElementById("lightbox-img");
+        const caption = document.getElementById("lightbox-caption");
+        
+        modal.style.display = "block";
+        img.src = url;
+        caption.innerText = name;
+    }
+
+    function closeLightbox() {
+        const modal = document.getElementById("lightbox-modal");
+        modal.style.display = "none";
+    }
+
+    // Close lightbox on clicking outside the image
+    document.getElementById("lightbox-modal").addEventListener("click", function(e) {
+        if (e.target === this) {
+            closeLightbox();
+        }
+    });
+
+    // Close on escape key
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            closeLightbox();
+        }
+    });
+</script>
+{% endblock %}

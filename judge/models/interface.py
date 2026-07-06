@@ -21,6 +21,7 @@ class SiteConfiguration(models.Model):
     welcome_message = models.TextField(blank=True, default='', verbose_name=_('Welcome Message (Markdown)'))
     meta_description = models.TextField(blank=True, default='', verbose_name=_('Meta Description'))
     meta_keywords = models.CharField(max_length=255, blank=True, default='', verbose_name=_('Meta Keywords'))
+    quiz_enabled = models.BooleanField(default=True, verbose_name=_('Enable Quiz/Exam Features'))
 
     class Meta:
         verbose_name = _('Site Configuration')

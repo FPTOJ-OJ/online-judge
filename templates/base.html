@@ -57,7 +57,6 @@
         <!-- Progressive Web App (PWA) -->
         <meta name="theme-color" content="#ffffff">
         <link rel="manifest" href="/manifest.json">
-        </script>
         <!-- Favicons-->
         {% if site_config and site_config.favicon %}
             <link rel="apple-touch-icon" href="{{ site_config.favicon.url }}">
@@ -450,10 +449,117 @@ document.addEventListener("DOMContentLoaded", function () {
                     {% endwith %}
                 </li>
             {% endfor %}
+            {% if site_config.quiz_enabled %}
+            <li>
+                <a href="#" class="nav-quiz{% if request.path.startswith('/quiz') %} active{% endif %}">
+                    Luyện THPT <div class="nav-expand">&gt;</div>
+                </a>
+                <ul>
+                    <li><a href="{{ url('quiz_home') }}">Luyện tập</a></li>
+                    <li><a href="{{ url('quiz_exams_list') }}">Đề thi</a></li>
+                </ul>
+            </li>
+            {% endif %}
         </ul>
 
         <span id="user-links">
             <ul class="horizontal-list">
+                <li id="quick-settings-container" style="vertical-align: middle; padding: 0 6px; position: relative;">
+                    <button id="quick-settings-toggle" title="Cài đặt nhanh (Theme & Language)" style="
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 18px;
+                        color: #fff;
+                        padding: 0 4px;
+                        line-height: 44px;
+                        height: 44px;
+                        display: inline-flex;
+                        align-items: center;
+                        opacity: 0.85;
+                        transition: opacity 0.15s;
+                    ">
+                        <i class="fa fa-cog"></i>
+                    </button>
+                    <!-- Panel Quick Settings -->
+                    <div id="quick-settings-panel" style="
+                        display: none;
+                        position: absolute;
+                        right: 0;
+                        top: 48px;
+                        width: 240px;
+                        background: #252525;
+                        border: 1px solid #3c3c3c;
+                        border-radius: 8px;
+                        box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+                        padding: 14px;
+                        z-index: 9999;
+                        color: #e0e0e0;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                        text-align: left;
+                    ">
+                        <!-- Theme Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <span style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">Giao diện (Theme)</span>
+                            <div style="display: flex; background: #151515; border-radius: 6px; padding: 2px; border: 1px solid #2d2d2d;">
+                                <button id="theme-btn-light" title="Giao diện Sáng" style="
+                                    background: none;
+                                    border: none;
+                                    color: #888;
+                                    padding: 4px 10px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-size: 13px;
+                                    transition: background 0.15s, color 0.15s;
+                                    display: inline-flex;
+                                    align-items: center;
+                                ">☀️</button>
+                                <button id="theme-btn-dark" title="Giao diện Tối" style="
+                                    background: none;
+                                    border: none;
+                                    color: #888;
+                                    padding: 4px 10px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-size: 13px;
+                                    transition: background 0.15s, color 0.15s;
+                                    display: inline-flex;
+                                    align-items: center;
+                                ">🌙</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Language Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">Ngôn ngữ (Language)</span>
+                            <div style="display: flex; background: #151515; border-radius: 6px; padding: 2px; border: 1px solid #2d2d2d;">
+                                <button id="lang-btn-vi" title="Tiếng Việt" style="
+                                    background: none;
+                                    border: none;
+                                    color: #888;
+                                    padding: 4px 10px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    font-size: 11.5px;
+                                    transition: background 0.15s, color 0.15s;
+                                ">VI</button>
+                                <button id="lang-btn-en" title="English" style="
+                                    background: none;
+                                    border: none;
+                                    color: #888;
+                                    padding: 4px 10px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-weight: 600;
+                                    font-size: 11.5px;
+                                    transition: background 0.15s, color 0.15s;
+                                ">EN</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
                 {% if request.user.is_authenticated %}
                 <li style="vertical-align: middle;">
                     <a style="font-size: large" href="#" id="report-ticket-link">⚠️</a>
@@ -569,5 +675,142 @@ document.addEventListener("DOMContentLoaded", function () {
         </span>
     </footer>
 </div>
+<script>
+// Cài đặt nhanh - Quick Settings (Theme & Language)
+(function() {
+    var container = document.getElementById('quick-settings-container');
+    var toggleBtn = document.getElementById('quick-settings-toggle');
+    var panel = document.getElementById('quick-settings-panel');
+    if (!toggleBtn || !panel || !container) return;
+
+    var hideTimeout = null;
+
+    // Hover vào container -> Hiện panel
+    container.addEventListener('mouseenter', function() {
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        panel.style.display = 'block';
+    });
+
+    // Rời khỏi container -> Ẩn panel sau 200ms
+    container.addEventListener('mouseleave', function() {
+        hideTimeout = setTimeout(function() {
+            panel.style.display = 'none';
+        }, 200);
+    });
+
+    // Vẫn giữ click để toggle độc lập nếu cần
+    toggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var isVisible = panel.style.display === 'block';
+        panel.style.display = isVisible ? 'none' : 'block';
+    });
+
+
+    // --- Quản lý Theme ---
+    var currentTheme = "{{ SITE_THEME_NAME }}";
+    var lightBtn = document.getElementById('theme-btn-light');
+    var darkBtn = document.getElementById('theme-btn-dark');
+
+    function highlightTheme(theme) {
+        if (theme === 'dark') {
+            darkBtn.style.background = '#333';
+            darkBtn.style.color = '#fff';
+            lightBtn.style.background = 'none';
+            lightBtn.style.color = '#888';
+        } else {
+            lightBtn.style.background = '#333';
+            lightBtn.style.color = '#fff';
+            darkBtn.style.background = 'none';
+            darkBtn.style.color = '#888';
+        }
+    }
+
+    highlightTheme(currentTheme);
+
+    function changeTheme(theme) {
+        // Ghi theme vào cookie
+        document.cookie = "site_theme=" + theme + "; path=/; max-age=" + (365*24*60*60);
+        
+        // Nếu đã đăng nhập, cập nhật profile DB
+        {% if request.user.is_authenticated %}
+        var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        fetch('/edit/theme/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ theme: theme })
+        }).then(function() {
+            window.location.reload();
+        }).catch(function() {
+            window.location.reload();
+        });
+        {% else %}
+        window.location.reload();
+        {% endif %}
+    }
+
+    lightBtn.addEventListener('click', function() { changeTheme('light'); });
+    darkBtn.addEventListener('click', function() { changeTheme('dark'); });
+
+    // --- Quản lý Ngôn ngữ ---
+    var currentLang = "{{ LANGUAGE_CODE }}".toLowerCase();
+    var viBtn = document.getElementById('lang-btn-vi');
+    var enBtn = document.getElementById('lang-btn-en');
+
+    function highlightLang(lang) {
+        if (lang.indexOf('vi') !== -1) {
+            viBtn.style.background = '#333';
+            viBtn.style.color = '#fff';
+            enBtn.style.background = 'none';
+            enBtn.style.color = '#888';
+        } else {
+            enBtn.style.background = '#333';
+            enBtn.style.color = '#fff';
+            viBtn.style.background = 'none';
+            viBtn.style.color = '#888';
+        }
+    }
+
+    highlightLang(currentLang);
+
+    function changeLanguage(langCode) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url('set_language') }}";
+        
+        var csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        
+        var nextInput = document.createElement('input');
+        nextInput.type = 'hidden';
+        nextInput.name = 'next';
+        nextInput.value = window.location.pathname + window.location.search;
+        
+        var langInput = document.createElement('input');
+        langInput.type = 'hidden';
+        langInput.name = 'language';
+        langInput.value = langCode;
+        
+        form.appendChild(csrfInput);
+        form.appendChild(nextInput);
+        form.appendChild(langInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    viBtn.addEventListener('click', function() { changeLanguage('vi'); });
+    enBtn.addEventListener('click', function() { changeLanguage('en'); });
+})();
+</script>
+
 </body>
 </html>
