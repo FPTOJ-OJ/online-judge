@@ -11,12 +11,12 @@
     <!-- Header -->
     <div class="quiz-session-header">
         <div>
-            <a href="{{ url('quiz_exams_list') }}" class="quiz-session-btn" style="border-color: #9ca3af; color: #9ca3af;">
+            <a href="{{ url('quiz_exams_list') }}" class="quiz-session-btn" style="border-color: var(--quiz-text-muted); color: var(--quiz-text-muted);">
                 <i class="fa fa-arrow-left"></i> Thoát
             </a>
         </div>
         
-        <div style="font-size: 1rem; font-weight: bold; color: #ffd60a;">
+        <div class="review-mode-title">
             CHẾ ĐỘ XEM LẠI: DANH SÁCH CÂU HỎI
         </div>
 
@@ -40,8 +40,8 @@
     <!-- Summary Banner Card (Image 4) -->
     <div class="summary-banner-card">
         <div class="summary-score-info">
-            <div style="font-size: 0.8rem; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Kết quả làm bài</div>
-            <h2 style="font-size: 1.6rem; color: #ffffff; margin: 4px 0 6px 0;">{{ meta.source_name }}</h2>
+            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">Kết quả làm bài</div>
+            <h2 style="font-size: 1.6rem; margin: 4px 0 6px 0;">{{ meta.source_name }}</h2>
             <div class="summary-score-details">
                 {{ review_part1|length }} câu trắc nghiệm &bull; 
                 {{ review_part2|length }} câu đúng/sai làm đủ &bull; 
@@ -52,8 +52,8 @@
 
         <div style="display: flex; align-items: center; gap: 32px;">
             <div style="text-align: center;">
-                <div class="summary-score-value">{{ "%.1f"|format(session.score) }}/10.0</div>
-                <div style="font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; margin-top: 4px; font-weight: bold; letter-spacing: 0.5px;">Điểm của bạn</div>
+                <div class="summary-score-value {% if session.score >= 5.0 %}score-pass{% else %}score-fail{% endif %}">{{ "%.1f"|format(session.score) }}/10.0</div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; margin-top: 4px; font-weight: bold; letter-spacing: 0.5px;">Điểm của bạn</div>
             </div>
             
             <form method="post" action="{{ url('quiz_start_exam', meta.source_id) }}">
@@ -73,7 +73,7 @@
             <i class="fa fa-sticky-note-o" style="font-size: 1.2rem;"></i>
             <span><b>GHI CHÚ LẦN LÀM NÀY:</b> Ghi chú sẽ được lưu trữ để giúp bạn xem lại sau này.</span>
         </div>
-        <button type="button" class="quiz-session-btn" onclick="addNote()" style="border-color: #ffd60a; color: #ffd60a;">Thêm ghi chú</button>
+        <button type="button" class="quiz-session-btn" onclick="addNote()" style="border-color: var(--quiz-primary); color: var(--quiz-primary);">Thêm ghi chú</button>
     </div>
 
     <!-- Main Content -->
@@ -87,19 +87,19 @@
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">TRẮC NGHIỆM</span>
-                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: #2563eb; border-color: #2563eb;">PHẦN I - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">PHẦN I - CÂU {{ q.index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.question.get_difficulty_display() }}</span>
                             {% if q.orientation != 'Common' %}
                                 <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
                             {% endif %}
                             {% if q.is_graded %}
                                 {% if q.is_correct %}
-                                    <span class="quiz-q-tag type" style="background: rgba(16,185,129,0.15); color: #10b981; border-color: #10b981;"><i class="fa fa-check"></i> ĐÚNG</span>
+                                    <span class="quiz-q-tag type" style="background: rgba(16,185,129,0.15); color: var(--quiz-success); border-color: var(--quiz-success);"><i class="fa fa-check"></i> ĐÚNG</span>
                                 {% else %}
-                                    <span class="quiz-q-tag type" style="background: rgba(239,68,68,0.15); color: #ef4444; border-color: #ef4444;"><i class="fa fa-times"></i> SAI</span>
+                                    <span class="quiz-q-tag type" style="background: rgba(239,68,68,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger);"><i class="fa fa-times"></i> SAI</span>
                                 {% endif %}
                             {% else %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: #9ca3af; border-color: rgba(255,255,255,0.1);">KHÔNG TÍNH ĐIỂM</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">KHÔNG TÍNH ĐIỂM</span>
                             {% endif %}
                         </div>
 
@@ -125,7 +125,7 @@
                         
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 style="color: #ffd60a; margin: 0 0 8px 0; font-size: 0.95rem;">Lời giải chi tiết:</h4>
+                                <h4 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">Lời giải chi tiết:</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}
@@ -139,15 +139,15 @@
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">ĐÚNG / SAI</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: #ec4899; border-color: #ec4899;">PHẦN II - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">PHẦN II - CÂU {{ q.index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.question.get_difficulty_display() }}</span>
                             {% if q.orientation != 'Common' %}
                                 <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
                             {% endif %}
                             {% if q.is_graded %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,214,10,0.1); color: #ffd60a; border-color: rgba(255,214,10,0.3);">Đúng: {{ q.correct_count }}/4 ý</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,214,10,0.1); color: var(--quiz-primary); border-color: rgba(255,214,10,0.3);">Đúng: {{ q.correct_count }}/4 ý</span>
                             {% else %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: #9ca3af; border-color: rgba(255,255,255,0.1);">KHÔNG TÍNH ĐIỂM</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">KHÔNG TÍNH ĐIỂM</span>
                             {% endif %}
                         </div>
 
@@ -185,7 +185,7 @@
 
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 style="color: #ffd60a; margin: 0 0 8px 0; font-size: 0.95rem;">Lời giải chi tiết:</h4>
+                                <h4 class="quiz-explanation-title">Lời giải chi tiết:</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}
@@ -239,19 +239,19 @@
                 </div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
-                <h4 style="font-size: 0.85rem; color: #9ca3af; margin: 0 0 10px 0; text-transform: uppercase;">Chú thích</h4>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: #9ca3af;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 3px;"></span>
+            <div class="quiz-legend-card">
+                <h4>Chú thích</h4>
+                <div class="legend-content">
+                    <div class="legend-item">
+                        <span class="legend-swatch correct"></span>
                         <span>Đúng trọn vẹn</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 3px;"></span>
+                    <div class="legend-item">
+                        <span class="legend-swatch incorrect"></span>
                         <span>Sai / Chưa đầy đủ</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 14px; height: 14px; opacity: 0.25; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 3px;"></span>
+                    <div class="legend-item disabled">
+                        <span class="legend-swatch disabled"></span>
                         <span>Phần riêng không chấm</span>
                     </div>
                 </div>
@@ -293,6 +293,9 @@
             } else {
                 showPartGrid(1);
             }
+        }
+        if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+            MathJax.typesetPromise();
         }
     }
 
@@ -360,13 +363,65 @@
         }
         updateActiveQuestionUI();
         
+    function wrapQuestionCodeBlocks() {
         if (typeof hljs !== 'undefined') {
             document.querySelectorAll("pre code").forEach(function(codeBlock) {
+                if (codeBlock.parentNode.classList.contains('quiz-code-lines') || codeBlock.parentNode.parentNode.classList.contains('quiz-code-wrapper')) {
+                    return; // Already wrapped
+                }
                 if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
                     hljs.highlightElement(codeBlock);
                 }
+                var lang = "CODE";
+                codeBlock.classList.forEach(function(cls) {
+                    if (cls.startsWith("language-")) {
+                        lang = cls.replace("language-", "").toUpperCase();
+                    } else if (cls.startsWith("lang-")) {
+                        lang = cls.replace("lang-", "").toUpperCase();
+                    } else if (cls !== "hljs" && cls !== "nohighlight" && !cls.startsWith("hljs-")) {
+                        lang = cls.toUpperCase();
+                    }
+                });
+                if (lang === "CPP") lang = "C++";
+                
+                var pre = codeBlock.parentNode;
+                var wrapper = document.createElement("div");
+                wrapper.className = "quiz-code-wrapper";
+                
+                var header = document.createElement("div");
+                header.className = "quiz-code-header";
+                header.innerText = lang;
+                
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+                
+                var codeLines = codeBlock.innerHTML.split("\n");
+                if (codeLines.length > 0 && codeLines[codeLines.length - 1].trim() === "") {
+                    codeLines.pop();
+                }
+                
+                var lineNumbersHtml = "";
+                for (var i = 1; i <= codeLines.length; i++) {
+                    lineNumbersHtml += `<div>${i}</div>`;
+                }
+                
+                var lineContainer = document.createElement("div");
+                lineContainer.className = "quiz-code-lines";
+                lineContainer.innerHTML = lineNumbersHtml;
+                
+                pre.insertBefore(lineContainer, codeBlock);
+                pre.style.display = "flex";
+                pre.style.gap = "12px";
+                pre.style.margin = "0";
+                pre.style.padding = "12px";
+                pre.style.backgroundColor = ""; // Dynamic background color
+                pre.style.overflowX = "auto";
             });
         }
+    }
+
+    wrapQuestionCodeBlocks();
     });
 </script>
 {% endblock %}

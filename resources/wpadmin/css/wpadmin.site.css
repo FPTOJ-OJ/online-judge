@@ -46,84 +46,7 @@
 
 /* Custom overrides for DMOJ Admin Panel to improve contrast and readability */
 
-/* Light Mode Overrides */
-body {
-    background-color: #eaeded !important; /* Slightly darker body background to provide contrast with white modules */
-}
-
-#content .module {
-    border: 1px solid #d1d5db !important; /* Gray-300 border */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-#content .module h2, 
-#content .module caption, 
-#content .inline-group h2 {
-    background: #f3f4f6 !important; /* Gray-100 */
-    color: #1f2937 !important; /* Gray-800 */
-    border-bottom: 1px solid #d1d5db !important;
-    font-weight: 600;
-}
-
-#content table {
-    border: 1px solid #d1d5db !important;
-}
-
-#content table thead th {
-    background: #f9fafb !important; /* Gray-50 */
-    color: #374151 !important; /* Gray-700 */
-    border-bottom: 2px solid #e5e7eb !important;
-    font-weight: 600;
-}
-
-#content table tbody tr.row1 {
-    background-color: #f9fafb !important;
-}
-
-#content table tbody tr.row2 {
-    background-color: #ffffff !important;
-}
-
-#content .form-row {
-    border-bottom: 1px solid #e5e7eb !important; /* Gray-200 */
-}
-
-#content textarea,
-#content input[type="text"],
-#content input[type="password"],
-#content input[type="email"],
-#content input[type="number"],
-#content input[type="search"],
-#content input[type="tel"],
-#content input[type="url"],
-#content input[type="file"],
-#content select {
-    border: 1px solid #c8d2db !important;
-    background-color: #ffffff !important;
-    color: #1f2937 !important;
-    border-radius: 4px;
-    padding: 6px 10px;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-#content textarea:focus,
-#content input[type="text"]:focus,
-#content input[type="password"]:focus,
-#content input[type="email"]:focus,
-#content input[type="number"]:focus,
-#content input[type="search"]:focus,
-#content input[type="tel"]:focus,
-#content input[type="url"]:focus,
-#content input[type="file"]:focus,
-#content select:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
-    outline: none !important;
-}
-
-/* Dark Mode Overrides (if prefers-color-scheme matches dark or user forces dark mode) */
-@media (prefers-color-scheme: dark) {
-    :root {
+:root {
         /* Base Colors */
         --body-bg: #111827 !important; /* Dark Gray-900 */
         --body-fg: #f3f4f6 !important; /* Light Gray-100 */
@@ -970,4 +893,76 @@ body {
         fill: #ffffff !important;
         opacity: 1 !important;
     }
+
+/* Custom Spacing, Alignment, & Color Polish Overrides (Antigravity Fixes) */
+
+/* 1. Spacing and margin fixes (Dính lề) */
+#content {
+    padding: 24px 32px !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+}
+
+#content h1 {
+    font-size: 20px !important;
+    margin-bottom: 15px !important;
+}
+
+#content h2 {
+    font-size: 15px !important;
+}
+
+/* Indent Recent Actions sidebar list items */
+#recent-actions-module ul.actionlist,
+.dashboard #content-related .module ul.actionlist,
+ul.actionlist {
+    padding-left: 24px !important;
+    margin-left: 0 !important;
+}
+#recent-actions-module ul.actionlist li,
+.dashboard #content-related .module ul.actionlist li,
+ul.actionlist li {
+    margin-bottom: 8px !important;
+    list-style-type: square !important;
+    padding-left: 4px !important;
+}
+
+/* 2. Remove weird white scroll fade-out gradient inside Ace editor */
+.ace_fade-out {
+    display: none !important;
+}
+
+/* 3. Universal input text color protection for Midnight Dark Theme (Applied globally) */
+#content input, 
+#content select, 
+#content textarea,
+#content table input,
+#content table select,
+#content table textarea,
+#content table tbody tr td input {
+    color: #f3f4f6 !important;
+    background-color: #111827 !important;
+    border: 1px solid #4b5563 !important;
+}
+
+/* 4. Martor editor dark background consistency & bottom white bar fix (Applied globally) */
+.section-martor .segment,
+.section-martor .attached,
+.django-ace-editor,
+.django-ace-widget,
+.django-ace-widget > div {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #f3f4f6 !important;
+}
+.section-martor .ui.tabular.menu,
+.section-martor .ui.tabular.menu .item {
+    background-color: #111827 !important;
+    border-color: #374151 !important;
+    color: #f3f4f6 !important;
+}
+.section-martor .ui.tabular.menu .active.item {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #ffffff !important;
 }

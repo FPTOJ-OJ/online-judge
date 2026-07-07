@@ -65,7 +65,7 @@
         <!-- Left content pane: list of questions matching filters -->
         <div class="quiz-left-pane">
             <div id="questions-list-container">
-                <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: #ffffff;">
+                <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: var(--quiz-text);">
                     Tìm thấy <span style="color: var(--quiz-success); font-weight: 700;">{{ total_matching }}</span> câu hỏi phù hợp
                 </h2>
                 <p style="color: var(--quiz-text-muted); margin: 0 0 20px 0; font-size: 0.95rem;">
@@ -98,7 +98,7 @@
                         </button>
 
                         <div class="quiz-answer-details" id="ans-details-{{ q.id }}">
-                            <h4 style="font-size: 1rem; margin: 0 0 12px 0; color: #ffffff;">Đáp án đúng:</h4>
+                            <h4 style="font-size: 1rem; margin: 0 0 12px 0; color: var(--quiz-text);">Đáp án đúng:</h4>
                             
                             {% if q.type == 'choice' %}
                                 <div class="quiz-options-list">
@@ -143,7 +143,7 @@
             </div>
 
             <div id="exams-list-container" style="display: none;">
-                <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: #ffffff;">
+                <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: var(--quiz-text);">
                     Tìm thấy <span style="color: var(--quiz-success); font-weight: 700;">{{ matching_sources|length }}</span> đề thi phù hợp
                 </h2>
                 <p style="color: var(--quiz-text-muted); margin: 0 0 20px 0; font-size: 0.95rem;">
@@ -163,7 +163,7 @@
                                     </span>
                                 {% endif %}
                             </div>
-                            <h3 style="color: #ffffff; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold;">{{ exam.name }}</h3>
+                            <h3 style="color: var(--quiz-text); margin: 0 0 10px 0; font-size: 1.25rem; font-weight: bold;">{{ exam.name }}</h3>
                             <p style="color: var(--quiz-text-muted); font-size: 0.95rem; line-height: 1.5; margin: 0 0 16px 0;">
                                 {{ exam.snippet }}
                                 <br>
@@ -255,7 +255,7 @@
                     
                     <div class="quiz-form-group" style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="only-incorrect-checkbox" name="only_incorrect" value="true" {% if only_incorrect %}checked{% endif %} onchange="this.form.submit()" style="width: 18px; height: 18px; cursor: pointer;">
-                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: #ffffff;">Luyện câu từng làm sai</label>
+                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: var(--quiz-text);">Luyện câu từng làm sai</label>
                     </div>
 
                     {% if search_query %}
@@ -302,14 +302,14 @@
                                 <div class="quiz-progress-header">
                                     <span class="quiz-progress-title">Luyện tập #{{ s.id }}</span>
                                     {% if s.completed %}
-                                        <span class="quiz-q-tag source" style="background-color: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; margin: 0; font-size: 0.75rem;">HOÀN THÀNH</span>
+                                        <span class="quiz-q-tag source" style="background-color: rgba(16, 185, 129, 0.15); color: var(--quiz-success); border: 1px solid var(--quiz-success); margin: 0; font-size: 0.75rem;">HOÀN THÀNH</span>
                                     {% else %}
-                                        <span class="quiz-q-tag source" style="background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid #3b82f6; margin: 0; font-size: 0.75rem;">ĐANG LÀM</span>
+                                        <span class="quiz-q-tag source" style="background-color: rgba(59, 130, 246, 0.15); color: var(--quiz-info); border: 1px solid var(--quiz-info); margin: 0; font-size: 0.75rem;">ĐANG LÀM</span>
                                     {% endif %}
                                 </div>
                                 
                                 <div class="quiz-progress-bar-bg">
-                                    <div class="quiz-progress-bar-fill" style="width: {{ percent }}%; {% if s.completed %}background-color: #10b981;{% endif %}"></div>
+                                    <div class="quiz-progress-bar-fill" style="width: {{ percent }}%; {% if s.completed %}background-color: var(--quiz-success);{% endif %}"></div>
                                 </div>
                                 
                                 <div class="quiz-progress-stats">
@@ -321,15 +321,15 @@
                                 
                                 <div class="quiz-progress-actions">
                                     {% if s.completed %}
-                                        <a href="{{ url('quiz_session_review', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: #10b981; color: #10b981;">
+                                        <a href="{{ url('quiz_session_review', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: var(--quiz-success); color: var(--quiz-success);">
                                             Xem lại
                                         </a>
                                     {% else %}
-                                        <a href="{{ url('quiz_session_detail', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: #3b82f6; color: #3b82f6;">
+                                        <a href="{{ url('quiz_session_detail', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: var(--quiz-info); color: var(--quiz-info);">
                                             Làm tiếp
                                         </a>
                                     {% endif %}
-                                    <button type="button" class="quiz-session-btn" onclick="deleteSession({{ s.id }})" style="border-color: #ef4444; color: #ef4444; padding: 4px 8px; font-size: 0.75rem;">
+                                    <button type="button" class="quiz-session-btn" onclick="deleteSession({{ s.id }})" style="border-color: var(--quiz-danger); color: var(--quiz-danger); padding: 4px 8px; font-size: 0.75rem;">
                                         Xóa
                                     </button>
                                 </div>
@@ -350,12 +350,14 @@
                 if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
                     hljs.highlightElement(codeBlock);
                 }
-                var lang = "Code";
+                var lang = "CODE";
                 codeBlock.classList.forEach(function(cls) {
                     if (cls.startsWith("language-")) {
                         lang = cls.replace("language-", "").toUpperCase();
                     } else if (cls.startsWith("lang-")) {
                         lang = cls.replace("lang-", "").toUpperCase();
+                    } else if (cls !== "hljs" && cls !== "nohighlight" && !cls.startsWith("hljs-")) {
+                        lang = cls.toUpperCase();
                     }
                 });
                 if (lang === "CPP") lang = "C++";
@@ -391,7 +393,7 @@
                 pre.style.gap = "12px";
                 pre.style.margin = "0";
                 pre.style.padding = "12px";
-                pre.style.backgroundColor = "#18181b";
+                pre.style.backgroundColor = "";
                 pre.style.overflowX = "auto";
             });
         }
@@ -568,70 +570,70 @@
 
 <!-- Modal: Chọn thông số cho đề thi -->
 <div id="exam-start-modal" class="quiz-modal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
-    <div class="quiz-modal-content" style="background-color: #1a1924; border: 1px solid var(--quiz-border); width: 90%; max-width: 750px; border-radius: 12px; padding: 24px; color: #ffffff; box-shadow: 0 8px 32px rgba(0,0,0,0.5); position: relative;">
+    <div class="quiz-modal-content" style="background-color: var(--quiz-card-bg); border: 1px solid var(--quiz-border); width: 90%; max-width: 750px; border-radius: 12px; padding: 24px; color: var(--quiz-text); box-shadow: 0 8px 32px rgba(0,0,0,0.5); position: relative;">
         
-        <span onclick="closeStartModal()" style="position: absolute; right: 20px; top: 20px; color: var(--quiz-text-muted); font-size: 24px; font-weight: bold; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--quiz-text-muted)'">&times;</span>
+        <button type="button" class="modal-close-btn" onclick="closeStartModal()">×</button>
         
         <div style="font-size: 0.8rem; color: var(--quiz-primary); text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">Thiết lập trước khi làm bài</div>
-        <h2 style="font-size: 1.6rem; margin: 0 0 20px 0; color: #ffffff;" id="modal-exam-title">CHỌN THÔNG SỐ CHO ĐỀ THI</h2>
+        <h2 style="font-size: 1.6rem; margin: 0 0 20px 0; color: var(--quiz-text);" id="modal-exam-title">CHỌN THÔNG SỐ CHO ĐỀ THI</h2>
         <p style="color: var(--quiz-text-muted); font-size: 0.9rem; margin-top: -15px; margin-bottom: 20px;">Bạn có thể đặt thời gian làm bài và chọn định hướng chấm phần riêng trước khi vào đề.</p>
         
         <form id="modal-start-form" method="post" action="">
             {% csrf_token %}
             
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="modal-info-box" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div style="font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase;">Đề đang chọn</div>
-                    <h3 style="margin: 4px 0; font-size: 1.2rem; color: #ffffff;" id="modal-exam-card-title">Tên Đề Thi</h3>
+                    <h3 style="margin: 4px 0; font-size: 1.2rem; color: var(--quiz-text);" id="modal-exam-card-title">Tên Đề Thi</h3>
                     <div class="quiz-q-tags" style="margin-top: 8px;" id="modal-exam-tags">
                         <!-- Filled by JS -->
                     </div>
                 </div>
                 <div style="display: flex; gap: 12px;">
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 8px 16px; text-align: center;">
-                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">SỐ CÂU</div>
-                        <div style="font-size: 1.2rem; font-weight: bold;" id="modal-exam-qcount">30</div>
+                    <div class="modal-summary-stat">
+                        <div class="stat-label">SỐ CÂU</div>
+                        <div class="stat-value" id="modal-exam-qcount">30</div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 8px 16px; text-align: center;">
-                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">MẶC ĐỊNH</div>
-                        <div style="font-size: 1.2rem; font-weight: bold;">45 phút</div>
+                    <div class="modal-summary-stat">
+                        <div class="stat-label">MẶC ĐỊNH</div>
+                        <div class="stat-value">45 phút</div>
                     </div>
                 </div>
             </div>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
                 <div>
-                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: #ffffff;">Chọn thời gian</h4>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">Chọn thời gian</h4>
                     <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">Dùng mặc định, preset nhanh hoặc tự nhập.</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                        <div class="time-preset-option active" onclick="selectTimePreset(this, 45)" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;">
+                        <div class="time-preset-option active" onclick="selectTimePreset(this, 45)">
                             <div style="font-weight: bold; font-size: 0.95rem;">Mặc định</div>
                             <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Theo đề (45 phút)</div>
                         </div>
-                        <div class="time-preset-option" onclick="selectTimePreset(this, 45)" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;">
+                        <div class="time-preset-option" onclick="selectTimePreset(this, 45)">
                             <div style="font-weight: bold; font-size: 0.95rem;">45 phút</div>
                             <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Nhanh, tốc độ</div>
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-                        <div class="time-preset-option" onclick="selectTimePreset(this, 60)" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;">
+                        <div class="time-preset-option" onclick="selectTimePreset(this, 60)">
                             <div style="font-weight: bold; font-size: 0.95rem;">60 phút</div>
                             <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Thời lượng phổ biến</div>
                         </div>
-                        <div class="time-preset-option" onclick="selectTimePreset(this, 90)" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;">
+                        <div class="time-preset-option" onclick="selectTimePreset(this, 90)">
                             <div style="font-weight: bold; font-size: 0.95rem;">90 phút</div>
                             <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Thoải mái hơn</div>
                         </div>
                     </div>
                     
-                    <div class="time-preset-option custom-time-option" onclick="selectTimePreset(this, 'custom')" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;">
+                    <div class="time-preset-option custom-time-option" onclick="selectTimePreset(this, 'custom')" style="display: flex; align-items: center; justify-content: space-between;">
                         <div>
                             <div style="font-weight: bold; font-size: 0.95rem;">Tự nhập</div>
                             <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Chọn số phút riêng theo ý bạn.</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="number" id="custom-minutes-input" value="45" min="5" max="180" style="background: #111; border: 1px solid var(--quiz-border); border-radius: 4px; color: #fff; width: 60px; padding: 4px 8px; text-align: center;" onclick="event.stopPropagation()" oninput="updateCustomTime(this.value)">
+                            <input type="number" id="custom-minutes-input" value="45" min="5" max="180" style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); width: 60px; padding: 4px 8px; text-align: center;" onclick="event.stopPropagation()" oninput="updateCustomTime(this.value)">
                             <span style="font-size: 0.85rem; color: var(--quiz-text-muted);">phút</span>
                         </div>
                     </div>
@@ -640,22 +642,22 @@
                 </div>
                 
                 <div>
-                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: #ffffff;">Chọn định hướng</h4>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">Chọn định hướng</h4>
                     <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">Ưu tiên chấm theo lựa chọn này.</p>
                     
-                    <div class="orientation-option active" onclick="selectOrientation('KHMT')" id="orient-option-khmt" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px;">
+                    <div class="orientation-option active" onclick="selectOrientation('KHMT')" id="orient-option-khmt" style="margin-bottom: 12px;">
                         <div style="font-weight: bold; font-size: 0.95rem;">Khoa học máy tính</div>
                         <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Ưu tiên phần riêng KHMT.</div>
                     </div>
-                    <div class="orientation-option" onclick="selectOrientation('THUD')" id="orient-option-thud" style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s; margin-bottom: 24px;">
+                    <div class="orientation-option" onclick="selectOrientation('THUD')" id="orient-option-thud" style="margin-bottom: 24px;">
                         <div style="font-weight: bold; font-size: 0.95rem;">Tin học ứng dụng</div>
                         <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Ưu tiên phần riêng THUD.</div>
                     </div>
                     
                     <input type="hidden" name="orientation" id="modal-orientation-input" value="KHMT">
                     
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px;">
-                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); text-transform: uppercase; margin-bottom: 6px;">Tóm tắt cấu hình</div>
+                    <div class="modal-config-summary">
+                        <div class="summary-label">Tóm tắt cấu hình</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                             <span class="quiz-q-tag type" id="summary-tag-time" style="margin: 0;">45 phút</span>
                             <span class="quiz-q-tag source" id="summary-tag-orient" style="margin: 0; border-color: var(--quiz-success); color: var(--quiz-success);">KHMT</span>
@@ -666,15 +668,15 @@
             
             <div style="border-top: 1px solid var(--quiz-border); padding-top: 16px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleModalHistory()">
-                    <h4 style="font-size: 0.95rem; margin: 0; color: #ffffff;"><i class="fa fa-history"></i> Lịch sử làm bài đề này</h4>
+                    <h4 style="font-size: 0.95rem; margin: 0; color: var(--quiz-text);"><i class="fa fa-history"></i> Lịch sử làm bài đề này</h4>
                     <span id="modal-history-count" style="background: var(--quiz-primary); color: #000; font-weight: bold; border-radius: 12px; padding: 2px 8px; font-size: 0.75rem;">0 lần</span>
                 </div>
-                <div id="modal-history-list" style="display: none; margin-top: 12px; max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 6px; border: 1px solid var(--quiz-border); padding: 8px;">
+                <div id="modal-history-list" class="modal-history-list" style="display: none;">
                 </div>
             </div>
             
             <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--quiz-border); padding-top: 16px;">
-                <button type="button" class="quiz-session-btn" onclick="closeStartModal()" style="margin: 0;">Đóng</button>
+                <button type="button" class="quiz-session-btn" onclick="closeStartModal()" style="margin: 0; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #ffffff !important;">Đóng</button>
                 <button type="submit" class="quiz-btn-primary" style="margin: 0; padding: 10px 24px;"><i class="fa fa-play"></i> Bắt đầu làm bài</button>
             </div>
         </form>

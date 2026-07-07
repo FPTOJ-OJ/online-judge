@@ -22,6 +22,8 @@ jobs:
         cp .ci.settings.py dmoj/local_settings.py
     - name: Start MySQL
       run: sudo systemctl start mysql.service
+    - name: Compile JavaScript i18n
+      run: python manage.py compilejsi18n
     - name: Run unit tests
       run: coverage run --source=. manage.py test judge
     - name: Generate coverage report

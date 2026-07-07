@@ -16,7 +16,7 @@
     </div>
 
     {% if error %}
-        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid var(--quiz-danger); color: var(--quiz-danger); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
             <strong>Lỗi:</strong> {{ error }}
             {% if error_logs %}
                 <ul style="margin: 8px 0 0 20px; padding: 0;">
@@ -32,16 +32,16 @@
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             
-            <div class="quiz-form-group" style="margin-bottom: 24px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); padding-bottom: 16px;">
+            <div class="quiz-form-group" style="margin-bottom: 24px; border-bottom: 1px dashed var(--quiz-border); padding-bottom: 16px;">
                 <label class="quiz-form-label" for="json_file"><i class="fa fa-file-code-o"></i> Tải lên tệp tin JSON (Tùy chọn):</label>
                 <input type="file" id="json_file" name="json_file" accept=".json" class="quiz-select" style="padding: 8px; width: 100%;">
-                <p style="font-size: 0.8rem; color: #a1a1aa; margin-top: 6px;">Chọn tệp tin `.json` chứa danh sách câu hỏi của bạn để tải lên trực tiếp.</p>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">Chọn tệp tin `.json` chứa danh sách câu hỏi của bạn để tải lên trực tiếp.</p>
             </div>
             
             <div class="quiz-form-group">
                 <label class="quiz-form-label" for="json_data"><i class="fa fa-code"></i> Hoặc dán dữ liệu JSON:</label>
                 <textarea id="json_data" name="json_data" rows="10" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder="Dán mã JSON tại đây...">{{ json_data or '' }}</textarea>
-                <p style="font-size: 0.8rem; color: #a1a1aa; margin-top: 6px;">Dán mảng JSON chứa danh sách câu hỏi nếu bạn không tải lên tệp tin.</p>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">Dán mảng JSON chứa danh sách câu hỏi nếu bạn không tải lên tệp tin.</p>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 24px;">
@@ -57,8 +57,8 @@
 
     <!-- Template Example -->
     <div class="quiz-q-card" style="margin-top: 24px;">
-        <h3 style="font-size: 1.1rem; color: #ffffff; margin: 0 0 12px 0;">Mẫu cấu trúc JSON hợp lệ:</h3>
-        <pre style="background-color: #18181b; color: #e4e4e7; padding: 16px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin: 0;">[
+        <h3 style="font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 12px 0;">Mẫu cấu trúc JSON hợp lệ:</h3>
+        <pre style="background-color: var(--quiz-card-bg); color: var(--quiz-text-muted); padding: 16px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin: 0;">[
   {
     "content": "Giao thức TCP thuộc tầng nào trong mô hình TCP/IP?",
     "type": "choice",
@@ -91,28 +91,28 @@
 
     <!-- Documentation helper -->
     <div class="quiz-q-card" style="margin-top: 24px; border: 1px solid rgba(255, 214, 10, 0.2); background: rgba(255, 214, 10, 0.02); padding: 24px;">
-        <h3 style="font-size: 1.25rem; color: #ffd60a; margin: 0 0 16px 0;"><i class="fa fa-book"></i> Hướng dẫn định dạng & import đề thi</h3>
-        <div style="font-size: 0.92rem; line-height: 1.6; color: #e4e4e7;">
+        <h3 style="font-size: 1.25rem; color: var(--quiz-primary); margin: 0 0 16px 0;"><i class="fa fa-book"></i> Hướng dẫn định dạng & import đề thi</h3>
+        <div style="font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text-muted);">
             <p>Để import một đề thi hoàn chỉnh (ví dụ cấu trúc 30 câu bao gồm trắc nghiệm & Đúng/Sai), hãy chuẩn bị mảng dữ liệu JSON có cấu trúc như sau:</p>
             
-            <h4 style="color: #ffffff; margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> Quy tắc trường thông tin:</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> Quy tắc trường thông tin:</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
                 <li><strong>"content"</strong>: Nội dung câu hỏi chính (hỗ trợ Markdown và LaTeX toán học bằng cặp kí tự <code>$ ... $</code> hoặc <code>$$ ... $$</code>).</li>
                 <li><strong>"type"</strong>: Nhận giá trị <code>"choice"</code> (Trắc nghiệm 4 lựa chọn) hoặc <code>"tf"</code> (Đúng / Sai).</li>
                 <li><strong>"difficulty"</strong>: Độ khó câu hỏi: <code>"easy"</code> (Dễ), <code>"medium"</code> (Trung bình), <code>"hard"</code> (Khó).</li>
                 <li><strong>"explanation"</strong>: Lời giải chi tiết sau khi nộp bài (Hỗ trợ Markdown).</li>
                 <li><strong>"source"</strong>: Tên của nguồn đề thi (ví dụ: <code>"Đề thi tốt nghiệp THPT 2025"</code>). 
-                    <br><span style="color: #ffd60a; font-weight: bold;">*Mẹo: Ghi cùng một tên "source" cho cả 30 câu hỏi sẽ giúp hệ thống nhóm toàn bộ câu hỏi này lại thành một đề thi trọn vẹn và hiển thị trong Kho đề thi!</span>
+                    <br><span style="color: var(--quiz-primary); font-weight: bold;">*Mẹo: Ghi cùng một tên "source" cho cả 30 câu hỏi sẽ giúp hệ thống nhóm toàn bộ câu hỏi này lại thành một đề thi trọn vẹn và hiển thị trong Kho đề thi!</span>
                 </li>
             </ul>
 
-            <h4 style="color: #ffffff; margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> Cách cấu hình options cho từng loại câu hỏi:</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> Cách cấu hình options cho từng loại câu hỏi:</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
                 <li><strong>Trắc nghiệm (Choice)</strong>: Mảng <code>"options"</code> gồm đúng 4 lựa chọn với nhãn <code>A, B, C, D</code>. Xác định duy nhất 1 phương án có <code>"is_correct": true</code>.</li>
                 <li><strong>Đúng/Sai (TF)</strong>: Mảng <code>"options"</code> gồm 4 ý phát biểu với nhãn <code>a, b, c, d</code>. Đặt <code>"is_correct": true</code> nếu ý đó đúng và <code>false</code> nếu ý đó sai.</li>
             </ul>
 
-            <h4 style="color: #ffffff; margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> Định hướng phân môn (Phần riêng KHMT / THUD):</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> Định hướng phân môn (Phần riêng KHMT / THUD):</h4>
             <p style="margin: 0 0 8px 0;">Trong kỳ thi tốt nghiệp THPT, đề thi có phần riêng dành cho Khoa học máy tính (KHMT) và Tin học ứng dụng (THUD). Để gắn nhãn cho câu hỏi thuộc phần riêng:</p>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
                 <li>Thêm nhãn <code>"khmt"</code> hoặc <code>"KHMT"</code> vào mảng <code>"tags"</code> để hệ thống nhận diện là câu hỏi riêng KHMT (ví dụ: <code>"tags": ["khmt", "Thuật toán"]</code>).</li>

@@ -74,10 +74,13 @@ class QuizHomeView(View):
             if not first_q:
                 continue
             first_q_content = first_q.content
-            clean_snippet = re.sub(r'!\[.*?\]\(.*?\)', '', first_q_content)
+            clean_snippet = re.sub(r'```.*?```', '', first_q_content, flags=re.DOTALL)
+            clean_snippet = re.sub(r'`[^`\n]+`', '', clean_snippet)
+            clean_snippet = re.sub(r'!\[.*?\]\(.*?\)', '', clean_snippet)
             clean_snippet = re.sub(r'\[.*?\]\(.*?\)', '', clean_snippet)
             clean_snippet = re.sub(r'#+\s+', '', clean_snippet)
             clean_snippet = clean_snippet.replace('\n', ' ').strip()
+            clean_snippet = re.sub(r'\s+', ' ', clean_snippet)
             snippet = clean_snippet[:150] + "..." if len(clean_snippet) > 150 else clean_snippet
             
             # Year
@@ -840,10 +843,13 @@ class QuizExamsListView(View):
             if not first_q:
                 continue
             first_q_content = first_q.content
-            clean_snippet = re.sub(r'!\[.*?\]\(.*?\)', '', first_q_content)
+            clean_snippet = re.sub(r'```.*?```', '', first_q_content, flags=re.DOTALL)
+            clean_snippet = re.sub(r'`[^`\n]+`', '', clean_snippet)
+            clean_snippet = re.sub(r'!\[.*?\]\(.*?\)', '', clean_snippet)
             clean_snippet = re.sub(r'\[.*?\]\(.*?\)', '', clean_snippet)
             clean_snippet = re.sub(r'#+\s+', '', clean_snippet)
             clean_snippet = clean_snippet.replace('\n', ' ').strip()
+            clean_snippet = re.sub(r'\s+', ' ', clean_snippet)
             snippet = clean_snippet[:150] + "..." if len(clean_snippet) > 150 else clean_snippet
             
             # Year

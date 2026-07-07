@@ -6,34 +6,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <style>
         .quiz-review-card-skipped {
-            border-left: 5px solid #e4e4e7;
+            border-left: 5px solid var(--quiz-text-muted);
         }
         .quiz-review-card-correct {
-            border-left: 5px solid #10b981;
+            border-left: 5px solid var(--quiz-success);
         }
         .quiz-review-card-incorrect {
-            border-left: 5px solid #ef4444;
+            border-left: 5px solid var(--quiz-danger);
         }
         .quiz-opt-correct {
             background-color: rgba(16, 185, 129, 0.1);
-            border: 1px solid #10b981;
+            border: 1px solid var(--quiz-success);
         }
         .quiz-opt-selected-incorrect {
             background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid #ef4444;
+            border: 1px solid var(--quiz-danger);
         }
         .quiz-opt-normal {
             background-color: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
         }
         .quiz-label-correct {
-            background-color: #10b981;
+            background-color: var(--quiz-success);
         }
         .quiz-label-incorrect {
-            background-color: #ef4444;
+            background-color: var(--quiz-danger);
         }
         .quiz-label-normal {
-            background-color: #3f3f46;
+            background-color: var(--quiz-border);
         }
         .quiz-row-correct {
             background-color: rgba(16, 185, 129, 0.05);
@@ -56,12 +56,12 @@
         
         <div style="display: flex; justify-content: center; gap: 24px; margin-top: 20px;">
             <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
-                <div style="font-size: 0.85rem; color: #a1a1aa;">Tổng Điểm</div>
-                <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">{{ "%.2f"|format(session.score) }}</div>
+                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">Tổng Điểm</div>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--quiz-info);">{{ "%.2f"|format(session.score) }}</div>
             </div>
             <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
-                <div style="font-size: 0.85rem; color: #a1a1aa;">Trạng Thái</div>
-                <div style="font-size: 1.1rem; font-weight: 600; color: #10b981; margin-top: 8px;">Đã hoàn thành</div>
+                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">Trạng Thái</div>
+                <div style="font-size: 1.1rem; font-weight: 600; color: var(--quiz-success); margin-top: 8px;">Đã hoàn thành</div>
             </div>
         </div>
 
@@ -84,7 +84,7 @@
                     {{ item.question.get_difficulty_display() }}
                 </span>
                 {% if item.question.source %}
-                    <span style="color: #a1a1aa; font-size: 0.85rem;">
+                    <span style="color: var(--quiz-text-muted); font-size: 0.85rem;">
                         <i class="fa fa-folder-open"></i> {{ item.question.source.name }}
                     </span>
                 {% endif %}
@@ -116,26 +116,26 @@
                             </div>
 
                             {% if opt.is_correct %}
-                                <span style="color: #10b981; font-weight: bold;"><i class="fa fa-check"></i> Đáp án đúng</span>
+                                <span style="color: var(--quiz-success); font-weight: bold;"><i class="fa fa-check"></i> Đáp án đúng</span>
                             {% elif is_selected %}
-                                <span style="color: #ef4444; font-weight: bold;"><i class="fa fa-times"></i> Bạn chọn sai</span>
+                                <span style="color: var(--quiz-danger); font-weight: bold;"><i class="fa fa-times"></i> Bạn chọn sai</span>
                             {% endif %}
                         </div>
                     {% endfor %}
 
                     {% if item.is_skipped %}
-                        <p style="color: #e4e4e7; font-style: italic; margin-top: 8px;"><i class="fa fa-info-circle"></i> Bạn đã bỏ qua câu hỏi này.</p>
+                        <p style="color: var(--quiz-text-muted); font-style: italic; margin-top: 8px;"><i class="fa fa-info-circle"></i> Bạn đã bỏ qua câu hỏi này.</p>
                     {% endif %}
 
                 {% else %}
                     <!-- True/False statements rendering -->
                     <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
                         <thead>
-                            <tr style="border-bottom: 1px solid #3f3f46; text-align: left;">
-                                <th style="padding: 8px; color: #a1a1aa;">Ý</th>
-                                <th style="padding: 8px; color: #a1a1aa;">Nội dung phát biểu</th>
-                                <th style="padding: 8px; color: #a1a1aa; text-align: center; width: 100px;">Đáp án</th>
-                                <th style="padding: 8px; color: #a1a1aa; text-align: center; width: 150px;">Bạn trả lời</th>
+                            <tr style="border-bottom: 1px solid var(--quiz-border); text-align: left;">
+                                <th style="padding: 8px; color: var(--quiz-text-muted);">Ý</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted);">Nội dung phát biểu</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 100px;">Đáp án</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 150px;">Bạn trả lời</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,12 +154,12 @@
                                     </td>
                                     <td style="padding: 12px 8px; text-align: center;">
                                         {% if user_val is none or item.is_skipped %}
-                                            <span style="color: #a1a1aa; font-style: italic;">Chưa trả lời</span>
+                                            <span style="color: var(--quiz-text-muted); font-style: italic;">Chưa trả lời</span>
                                         {% else %}
                                             <span class="quiz-badge {% if user_val %}quiz-badge-success{% else %}quiz-badge-danger{% endif %}" style="display: inline-block; min-width: 60px;">
                                                 {% if user_val %}Đúng{% else %}Sai{% endif %}
                                             </span>
-                                            <span style="margin-left: 6px; color: {% if is_statement_correct %}#10b981{% else %}#ef4444{% endif %};">
+                                            <span style="margin-left: 6px; color: {% if is_statement_correct %}var(--quiz-success){% else %}var(--quiz-danger){% endif %};">
                                                 {% if is_statement_correct %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
                                             </span>
                                         {% endif %}
@@ -169,7 +169,7 @@
                         </tbody>
                     </table>
 
-                    <p style="margin-top: 12px; font-size: 0.9rem; color: #a1a1aa;">
+                    <p style="margin-top: 12px; font-size: 0.9rem; color: var(--quiz-text-muted);">
                         <i class="fa fa-calculator"></i> Điểm thành phần: <strong>Đúng {{ item.correct_count }} / 4 ý</strong> 
                         (Nhận được <strong>{% if item.correct_count == 4 %}1.0{% elif item.correct_count == 3 %}0.5{% elif item.correct_count == 2 %}0.25{% elif item.correct_count == 1 %}0.1{% else %}0.0{% endif %} điểm</strong>).
                     </p>
@@ -178,9 +178,9 @@
 
             <!-- Explanation section -->
             {% if item.question.explanation %}
-                <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 16px; margin-top: 16px; border: 1px dashed #3f3f46;">
-                    <h5 style="margin: 0 0 8px 0; color: #60a5fa; font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> Lời giải chi tiết:</h5>
-                    <div style="font-size: 0.9rem; color: #e4e4e7;">
+                <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 16px; margin-top: 16px; border: 1px dashed var(--quiz-border);">
+                    <h5 style="margin: 0 0 8px 0; color: var(--quiz-info); font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> Lời giải chi tiết:</h5>
+                    <div style="font-size: 0.9rem; color: var(--quiz-text-muted);">
                         {{ item.question.explanation|markdown('problem') }}
                     </div>
                 </div>
@@ -200,12 +200,14 @@
                 if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
                     hljs.highlightElement(codeBlock);
                 }
-                var lang = "Code";
+                var lang = "CODE";
                 codeBlock.classList.forEach(function(cls) {
                     if (cls.startsWith("language-")) {
                         lang = cls.replace("language-", "").toUpperCase();
                     } else if (cls.startsWith("lang-")) {
                         lang = cls.replace("lang-", "").toUpperCase();
+                    } else if (cls !== "hljs" && cls !== "nohighlight" && !cls.startsWith("hljs-")) {
+                        lang = cls.toUpperCase();
                     }
                 });
                 if (lang === "CPP") lang = "C++";
@@ -241,7 +243,7 @@
                 pre.style.gap = "12px";
                 pre.style.margin = "0";
                 pre.style.padding = "12px";
-                pre.style.backgroundColor = "#18181b";
+                pre.style.backgroundColor = "";
                 pre.style.overflowX = "auto";
             });
         }

@@ -9,7 +9,7 @@
     <!-- Header portal -->
     <div class="quiz-session-header">
         <div class="header-actions">
-            <button type="button" class="quiz-session-btn" onclick="exitExam()" style="border-color: #ef4444; color: #ef4444;">
+            <button type="button" class="quiz-session-btn" onclick="exitExam()" style="border-color: var(--quiz-danger); color: var(--quiz-danger);">
                 <i class="fa fa-arrow-left"></i> Thoát
             </button>
             <div class="view-mode-tabs">
@@ -45,12 +45,13 @@
                 <div class="tools-menu" id="tools-dropdown-menu">
                     <div class="tools-item" onclick="openScratchpad()"><i class="fa fa-pencil"></i> Giấy nháp</div>
                     <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">Vẽ lên đề</span></div>
-                    <div class="tools-item" onclick="applyHighlightText()"><i class="fa fa-font"></i> Highlight</div>
+                    <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> Highlight</div>
                     <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> Xóa highlight</div>
+                    <div class="tools-item" onclick="clearDrawingOnCurrentQuestion()"><i class="fa fa-trash-o"></i> Xóa vẽ trên đề</div>
                 </div>
             </div>
 
-            <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="background: #10b981; color: #ffffff;">
+            <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="background: var(--quiz-success); color: #ffffff;">
                 <i class="fa fa-paper-plane"></i> Nộp bài
             </button>
         </div>
@@ -68,7 +69,7 @@
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">TRẮC NGHIỆM</span>
-                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: #2563eb; border-color: #2563eb;">PHẦN I - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">PHẦN I - CÂU {{ q.index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
                                 <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
@@ -99,7 +100,7 @@
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">ĐÚNG / SAI</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: #ec4899; border-color: #ec4899;">PHẦN II - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">PHẦN II - CÂU {{ q.index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
                                 <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
@@ -157,31 +158,31 @@
                 </div>
             </div>
             
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px;">
-                <h4 style="font-size: 0.85rem; color: #9ca3af; margin: 0 0 10px 0; text-transform: uppercase;">Chú thích</h4>
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: #9ca3af;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 3px;"></span>
+            <div class="quiz-legend-card">
+                <h4>Chú thích</h4>
+                <div class="legend-content">
+                    <div class="legend-item">
+                        <span class="legend-swatch correct"></span>
                         <span>Đã trả lời</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 14px; height: 14px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 3px;"></span>
+                    <div class="legend-item">
+                        <span class="legend-swatch unanswered"></span>
                         <span>Chưa trả lời</span>
                     </div>
                 </div>
             </div>
             
-            <div style="background: rgba(255,214,10,0.02); border: 1px dashed rgba(255,214,10,0.2); border-radius: 12px; padding: 20px; margin-top: 16px;">
-                <h4 style="font-size: 0.85rem; color: #ffd60a; margin: 0 0 10px 0; text-transform: uppercase;"><i class="fa fa-info-circle"></i> Công cụ hỗ trợ học tập</h4>
-                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; color: #e4e4e7; line-height: 1.4;">
+            <div class="learning-help-card">
+                <h4><i class="fa fa-info-circle"></i> Công cụ hỗ trợ học tập</h4>
+                <div class="help-content">
                     <div>
-                        <strong style="color: #ffffff;"><i class="fa fa-pencil"></i> Giấy nháp:</strong> Click menu <em>Công cụ</em> &gt; <em>Giấy nháp</em> để mở bảng vẽ nháp tự do.
+                        <strong><i class="fa fa-pencil"></i> Giấy nháp:</strong> Click menu <em>Công cụ</em> &gt; <em>Giấy nháp</em> để mở bảng vẽ nháp tự do.
                     </div>
                     <div>
-                        <strong style="color: #ffffff;"><i class="fa fa-paint-brush"></i> Vẽ trực tiếp:</strong> Chọn <em>Vẽ lên đề</em> để vẽ nháp bằng chuột hoặc cảm ứng ngay trên nội dung câu hỏi.
+                        <strong><i class="fa fa-paint-brush"></i> Vẽ trực tiếp:</strong> Chọn <em>Vẽ lên đề</em> để vẽ nháp bằng chuột hoặc cảm ứng ngay trên nội dung câu hỏi.
                     </div>
                     <div>
-                        <strong style="color: #ffffff;"><i class="fa fa-font"></i> Đánh dấu (Highlight):</strong> Bôi đen bất kỳ đoạn chữ nào trong câu hỏi, sau đó chọn <em>Highlight</em> để lưu chú thích.
+                        <strong><i class="fa fa-font"></i> Đánh dấu (Highlight):</strong> Bôi đen bất kỳ đoạn chữ nào trong câu hỏi, sau đó chọn <em>Highlight</em> để lưu chú thích.
                     </div>
                 </div>
             </div>
@@ -190,16 +191,33 @@
 </div>
 
 <!-- Scratchpad Modal overlay -->
-<div id="quiz-scratchpad-modal">
-    <div class="scratchpad-header">
-        <h3 style="color: #ffffff; margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> Bảng nháp & Vẽ tự do</h3>
-        <div style="display: flex; gap: 8px;">
-            <button class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa bảng</button>
-            <button class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: #ef4444; border-color: #ef4444; color: #fff;">Đóng</button>
+<div id="quiz-scratchpad-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 750px; height: 500px; background: var(--quiz-card-bg); border: 2px solid var(--quiz-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 10000; flex-direction: column; overflow: hidden; font-family: 'Outfit', sans-serif;">
+    <div class="scratchpad-header" style="background: var(--quiz-card-bg); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--quiz-border);">
+        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> Bảng nháp học sinh</h3>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" class="quiz-session-btn" id="scratchpad-tool-pen" onclick="setScratchpadTool('pen')" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-info) !important; border-color: var(--quiz-info) !important; color: #fff !important;">
+                <i class="fa fa-pencil"></i> Bút vẽ
+            </button>
+            <button type="button" class="quiz-session-btn" id="scratchpad-tool-eraser" onclick="setScratchpadTool('eraser')" style="padding: 4px 10px; font-size: 0.75rem; background: transparent; border-color: var(--quiz-border); color: var(--quiz-text-muted);">
+                <i class="fa fa-eraser"></i> Tẩy xóa
+            </button>
+            <span style="width: 1px; height: 16px; background: var(--quiz-border); margin: 0 4px;"></span>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa bảng vẽ</button>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpadText()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa ghi chú</button>
+            <button type="button" class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important;">Đóng</button>
         </div>
     </div>
-    <div class="scratchpad-body">
-        <canvas id="scratchpad-canvas"></canvas>
+    <div class="scratchpad-body" style="display: flex; gap: 16px; padding: 16px; height: calc(100% - 50px); box-sizing: border-box; background: var(--quiz-card-bg);">
+        <div style="flex: 1.3; display: flex; flex-direction: column; height: 100%;">
+            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Bảng vẽ nháp:</div>
+            <div id="scratchpad-canvas-container" style="flex: 1; position: relative; background: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid var(--quiz-border);">
+                <canvas id="scratchpad-canvas" style="position: absolute; top: 0; left: 0; cursor: crosshair;"></canvas>
+            </div>
+        </div>
+        <div style="flex: 0.8; display: flex; flex-direction: column; height: 100%;">
+            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Văn bản ghi chú:</div>
+            <textarea id="scratchpad-text" placeholder="Nhập ghi chú hoặc tính nháp bằng bàn phím tại đây..." style="flex: 1; resize: none; border-radius: 6px; padding: 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); color: var(--quiz-text-muted); font-family: inherit; font-size: 0.9rem; line-height: 1.5; outline: none; box-sizing: border-box;"></textarea>
+        </div>
     </div>
 </div>
 
@@ -301,6 +319,9 @@
             } else {
                 showPartGrid(1);
             }
+        }
+        if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+            MathJax.typesetPromise();
         }
     }
 
@@ -461,7 +482,7 @@
             text: 'Tiến độ làm bài sẽ được lưu lại, nhưng thời gian thi vẫn sẽ tiếp tục chạy nếu bạn không nộp bài.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
+            confirmButtonColor: 'var(--quiz-danger)',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Thoát ra',
             cancelButtonText: 'Làm tiếp'
@@ -478,7 +499,7 @@
             text: 'Bạn có chắc chắn muốn nộp bài thi để xem kết quả đánh giá?',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: 'var(--quiz-success)',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Nộp bài',
             cancelButtonText: 'Làm tiếp'
@@ -533,30 +554,51 @@
     });
 
     // Highlighting logic
-    function applyHighlightText() {
+    var isHighlightModeActive = false;
+
+    function toggleHighlightMode() {
+        isHighlightModeActive = !isHighlightModeActive;
+        var btn = document.getElementById('highlight-toggle-btn');
+        if (isHighlightModeActive) {
+            btn.style.background = 'rgba(239, 68, 68, 0.1)';
+            btn.style.borderColor = 'var(--quiz-danger)';
+            btn.style.color = 'var(--quiz-danger)';
+            btn.innerHTML = '<i class="fa fa-font"></i> Tắt Highlight';
+        } else {
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+            btn.innerHTML = '<i class="fa fa-font"></i> Highlight';
+        }
+    }
+
+    // Auto highlight selection listener
+    document.addEventListener('mouseup', function() {
+        if (!isHighlightModeActive) return;
         var userSelection = window.getSelection();
         if (userSelection.rangeCount > 0) {
             var range = userSelection.getRangeAt(0);
-            var span = document.createElement("span");
-            span.className = "quiz-highlighted";
+            var selectedText = userSelection.toString().trim();
+            if (selectedText.length === 0) return;
             
-            // Check if selection is within text question body
             var container = range.commonAncestorContainer;
             if (container.nodeType === 3) container = container.parentNode;
             
             if (container.closest('.text-content-body')) {
+                var span = document.createElement("span");
+                span.className = "quiz-highlighted";
                 try {
                     range.surroundContents(span);
                 } catch(e) {
-                    Swal.fire('Chú ý', 'Hãy chọn văn bản liền mạch trong câu hỏi để highlight.', 'info');
+                    // Fail silently for overlapping selections
                 }
-            } else {
-                Swal.fire('Chú ý', 'Hãy chọn chữ trong nội dung câu hỏi để highlight.', 'info');
+                userSelection.removeAllRanges();
             }
-        } else {
-            Swal.fire('Chú ý', 'Vui lòng bôi đen văn bản trước khi highlight.', 'info');
         }
-        window.getSelection().removeAllRanges();
+    });
+
+    function applyHighlightText() {
+        toggleHighlightMode();
     }
 
     function clearHighlightsText() {
@@ -569,24 +611,72 @@
         });
     }
 
+    // Clear drawings on a single question card canvas overlay
+    function clearDrawingOnCurrentQuestion() {
+        var activeCard = document.getElementById('q-card-' + currentIndex);
+        if (activeCard) {
+            var overlay = activeCard.querySelector('.drawing-canvas-overlay');
+            if (overlay) {
+                var octx = overlay.getContext('2d');
+                octx.clearRect(0, 0, overlay.width, overlay.height);
+            }
+        }
+    }
+
     // Scratchpad canvas logic
     var canvas = document.getElementById('scratchpad-canvas');
     var ctx = canvas.getContext('2d');
     var isDrawing = false;
     var lastX = 0;
     var lastY = 0;
+    var scratchpadTool = 'pen'; // pen or eraser
 
     function openScratchpad() {
         document.getElementById('quiz-scratchpad-modal').style.display = 'flex';
-        // Resize canvas to parent container size
-        var body = canvas.parentNode;
-        canvas.width = body.clientWidth;
-        canvas.height = body.clientHeight;
+        var container = document.getElementById('scratchpad-canvas-container');
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
         
-        ctx.strokeStyle = '#000000';
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        ctx.lineWidth = 3;
+        
+        // Fill canvas with white background so paint is clean and eraser works
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        setScratchpadTool(scratchpadTool);
+    }
+
+    function setScratchpadTool(tool) {
+        scratchpadTool = tool;
+        var btnPen = document.getElementById('scratchpad-tool-pen');
+        var btnEraser = document.getElementById('scratchpad-tool-eraser');
+        
+        if (tool === 'pen') {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            if (btnPen && btnEraser) {
+                btnPen.style.setProperty('background', 'var(--quiz-info)', 'important');
+                btnPen.style.setProperty('border-color', 'var(--quiz-info)', 'important');
+                btnPen.style.setProperty('color', '#fff', 'important');
+                btnEraser.style.background = 'transparent';
+                btnEraser.style.borderColor = 'var(--quiz-border)';
+                btnEraser.style.color = 'var(--quiz-text-muted)';
+            }
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.strokeStyle = '#ffffff'; // White color acts as eraser on white canvas
+            ctx.lineWidth = 15;
+            if (btnPen && btnEraser) {
+                btnEraser.style.setProperty('background', 'var(--quiz-info)', 'important');
+                btnEraser.style.setProperty('border-color', 'var(--quiz-info)', 'important');
+                btnEraser.style.setProperty('color', '#fff', 'important');
+                btnPen.style.background = 'transparent';
+                btnPen.style.borderColor = 'var(--quiz-border)';
+                btnPen.style.color = 'var(--quiz-text-muted)';
+            }
+        }
     }
 
     function closeScratchpad() {
@@ -596,6 +686,11 @@
     function clearScratchpad() {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function clearScratchpadText() {
+        var textarea = document.getElementById('scratchpad-text');
+        if (textarea) textarea.value = '';
     }
 
     function draw(e) {
@@ -721,18 +816,69 @@
         overlay.addEventListener('mouseout', mu);
     }
 
+    function wrapQuestionCodeBlocks() {
+        if (typeof hljs !== 'undefined') {
+            document.querySelectorAll("pre code").forEach(function(codeBlock) {
+                if (codeBlock.parentNode.classList.contains('quiz-code-lines') || codeBlock.parentNode.parentNode.classList.contains('quiz-code-wrapper')) {
+                    return; // Already wrapped
+                }
+                if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
+                    hljs.highlightElement(codeBlock);
+                }
+                var lang = "CODE";
+                codeBlock.classList.forEach(function(cls) {
+                    if (cls.startsWith("language-")) {
+                        lang = cls.replace("language-", "").toUpperCase();
+                    } else if (cls.startsWith("lang-")) {
+                        lang = cls.replace("lang-", "").toUpperCase();
+                    } else if (cls !== "hljs" && cls !== "nohighlight" && !cls.startsWith("hljs-")) {
+                        lang = cls.toUpperCase();
+                    }
+                });
+                if (lang === "CPP") lang = "C++";
+                
+                var pre = codeBlock.parentNode;
+                var wrapper = document.createElement("div");
+                wrapper.className = "quiz-code-wrapper";
+                
+                var header = document.createElement("div");
+                header.className = "quiz-code-header";
+                header.innerText = lang;
+                
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(header);
+                wrapper.appendChild(pre);
+                
+                var codeLines = codeBlock.innerHTML.split("\n");
+                if (codeLines.length > 0 && codeLines[codeLines.length - 1].trim() === "") {
+                    codeLines.pop();
+                }
+                
+                var lineNumbersHtml = "";
+                for (var i = 1; i <= codeLines.length; i++) {
+                    lineNumbersHtml += `<div>${i}</div>`;
+                }
+                
+                var lineContainer = document.createElement("div");
+                lineContainer.className = "quiz-code-lines";
+                lineContainer.innerHTML = lineNumbersHtml;
+                
+                pre.insertBefore(lineContainer, codeBlock);
+                pre.style.display = "flex";
+                pre.style.gap = "12px";
+                pre.style.margin = "0";
+                pre.style.padding = "12px";
+                pre.style.backgroundColor = ""; // Dynamic background color
+                pre.style.overflowX = "auto";
+            });
+        }
+    }
+
     // Initialization
     document.addEventListener("DOMContentLoaded", function() {
         changeOrientation(activeOrientation);
         updateActiveQuestionUI();
-        
-        if (typeof hljs !== 'undefined') {
-            document.querySelectorAll("pre code").forEach(function(codeBlock) {
-                if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
-                    hljs.highlightElement(codeBlock);
-                }
-            });
-        }
+        wrapQuestionCodeBlocks();
     });
 </script>
 {% endblock %}

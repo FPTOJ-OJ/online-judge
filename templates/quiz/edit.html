@@ -83,7 +83,7 @@
                     <label for="tags-input">Chủ đề (Nhập phân cách bằng dấu phẩy)</label>
                     <input type="text" id="tags-input" class="quiz-input" placeholder="Ví dụ: HTML/CSS, Trí tuệ nhân tạo, Mạng máy tính" style="margin-bottom: 8px;">
                     <div style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-bottom: 8px;">Hoặc chọn từ danh sách:</div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 100px; overflow-y: auto; padding: 6px; border: 1px solid var(--quiz-border); border-radius: 6px; background: #13121a;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 100px; overflow-y: auto; padding: 6px; border: 1px solid var(--quiz-border); border-radius: 6px; background: var(--quiz-card-bg);">
                         {% for tag in tags %}
                             <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 2px 6px; background: var(--quiz-card-bg); border-radius: 4px; border: 1px solid var(--quiz-border); cursor: pointer; font-size: 0.8rem;">
                                 <input type="checkbox" name="tags" value="{{ tag.id }}" {% if question and tag in question.tags.all() %}checked{% endif %}> {{ tag.name }}
@@ -95,7 +95,7 @@
 
             <!-- Dynamic Section: Standard Choices A/B/C/D Form -->
             <div id="choice-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01);">
-                <h4 style="color: #ffffff; margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-list"></i> Các tùy chọn đáp án (Trắc nghiệm A/B/C/D)</h4>
+                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-list"></i> Các tùy chọn đáp án (Trắc nghiệm A/B/C/D)</h4>
                 
                 {% set choice_options = {'A': '', 'B': '', 'C': '', 'D': ''} %}
                 {% set correct_choice = 'A' %}
@@ -124,7 +124,7 @@
 
             <!-- Dynamic Section: True/False statements Form -->
             <div id="tf-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01); display: none;">
-                <h4 style="color: #ffffff; margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-check-square-o"></i> Chùm câu hỏi Đúng/Sai (4 ý phát biểu)</h4>
+                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-check-square-o"></i> Chùm câu hỏi Đúng/Sai (4 ý phát biểu)</h4>
                 
                 {% set tf_contents = {'a': '', 'b': '', 'c': '', 'd': ''} %}
                 {% set tf_corrects = {'a': True, 'b': True, 'c': True, 'd': True} %}

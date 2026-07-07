@@ -142,7 +142,7 @@
 <!-- Scratchpad Modal Overlay -->
 <div id="quiz-scratchpad-modal">
     <div class="scratchpad-header">
-        <h3 style="color: #ffffff; margin: 0; font-size: 1.1rem;"><i class="fa fa-pencil"></i> Bảng nháp & Vẽ tự do</h3>
+        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.1rem;"><i class="fa fa-pencil"></i> Bảng nháp & Vẽ tự do</h3>
         <div class="scratchpad-tools">
             <button class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 6px 12px; font-size: 0.8rem;">
                 Xóa bảng
@@ -169,12 +169,14 @@
                 if (!codeBlock.classList.contains('hljs') && !codeBlock.querySelector('span')) {
                     hljs.highlightElement(codeBlock);
                 }
-                var lang = "Code";
+                var lang = "CODE";
                 codeBlock.classList.forEach(function(cls) {
                     if (cls.startsWith("language-")) {
                         lang = cls.replace("language-", "").toUpperCase();
                     } else if (cls.startsWith("lang-")) {
                         lang = cls.replace("lang-", "").toUpperCase();
+                    } else if (cls !== "hljs" && cls !== "nohighlight" && !cls.startsWith("hljs-")) {
+                        lang = cls.toUpperCase();
                     }
                 });
                 if (lang === "CPP") lang = "C++";
@@ -210,7 +212,7 @@
                 pre.style.gap = "12px";
                 pre.style.margin = "0";
                 pre.style.padding = "12px";
-                pre.style.backgroundColor = "#18181b";
+                pre.style.backgroundColor = "";
                 pre.style.overflowX = "auto";
             });
         }

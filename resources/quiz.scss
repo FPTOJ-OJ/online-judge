@@ -1,6 +1,18 @@
 @use "sass:color";
 @use "vars" as *;
 
+:root {
+    --quiz-border: #{$color_primary25};
+    --quiz-text-muted: #{$color_primary50};
+    --quiz-text: #{$color_primary100};
+    --quiz-primary: #{$color_link50};
+    --quiz-accent: #e91e9e;
+    --quiz-success: #{$color_success100};
+    --quiz-danger: #{$color_danger100};
+    --quiz-info: #00bcd4;
+    --quiz-card-bg: #{$color_primary5};
+}
+
 .quiz-container {
     margin: 0 auto;
     padding: 20px 0;
@@ -9,7 +21,7 @@
 
 .quiz-header-card {
     background: $color_primary5;
-    border: 1px solid $color_primary25;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     padding: 24px;
     margin-bottom: 24px;
@@ -73,7 +85,7 @@
 
 .quiz-q-card {
     background: $color_primary5;
-    border: 1px solid $color_primary25;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     padding: 24px;
     position: relative;
@@ -99,13 +111,13 @@
     &.type {
         background: rgba($color_link50, 0.1);
         color: $color_link50;
-        border-color: rgba($color_link50, 0.2);
+        border-color: rgba($color_link50, 0.45);
     }
     
     &.difficulty {
         background: rgba($color_warning100, 0.1);
         color: $color_warning100;
-        border-color: rgba($color_warning100, 0.2);
+        border-color: rgba($color_warning100, 0.45);
     }
 }
 
@@ -125,18 +137,18 @@
 }
 
 .quiz-answer-toggle-btn {
-    background: transparent;
-    border: 1px solid $color_primary25;
+    background: transparent !important;
+    border: 1px solid $color_primary33 !important;
     border-radius: 4px;
-    color: $color_primary66;
+    color: $color_primary66 !important;
     padding: 6px 12px;
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: bold;
     
     &:hover {
-        border-color: $color_primary50;
-        color: $color_primary100;
+        border-color: $color_primary50 !important;
+        color: $color_primary100 !important;
     }
 }
 
@@ -154,7 +166,7 @@
 /* Sidebar Components */
 .quiz-sidebar-card {
     background: $color_primary5;
-    border: 1px solid $color_primary25;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
@@ -164,6 +176,7 @@
         margin: 0 0 16px 0;
         border-left: 3px solid $color_link50;
         padding-left: 10px;
+        border-radius: 0 !important;
     }
 }
 
@@ -240,10 +253,10 @@
 }
 
 .quiz-session-btn {
-    background: transparent;
-    border: 1px solid $color_primary25;
+    background: transparent !important;
+    border: 1px solid $color_primary33 !important;
     border-radius: 4px;
-    color: $color_primary90;
+    color: $color_primary90 !important;
     padding: 6px 12px;
     cursor: pointer;
     font-size: 0.85rem;
@@ -253,7 +266,7 @@
     gap: 6px;
     
     &:hover {
-        background: $color_primary10;
+        background: $color_primary10 !important;
     }
 }
 
@@ -401,37 +414,37 @@
 }
 
 .quiz-tf-btn {
-    background: transparent;
-    border: 1px solid $color_primary25;
+    background: transparent !important;
+    border: 1px solid $color_primary33 !important;
     border-radius: 4px;
-    color: $color_primary66;
+    color: $color_primary66 !important;
     font-weight: bold;
     padding: 6px 16px;
     cursor: pointer;
     user-select: none;
     
     &.true-btn:hover, &.true-btn.active {
-        border-color: $color_success100;
-        color: $color_success100;
-        background: rgba($color_success100, 0.05);
+        border-color: $color_success100 !important;
+        color: $color_success100 !important;
+        background: rgba($color_success100, 0.05) !important;
     }
     
     &.true-btn.active.eval-selected {
-        background: $color_success100;
-        color: #fff;
-        border-color: $color_success100;
+        background: $color_success100 !important;
+        color: #fff !important;
+        border-color: $color_success100 !important;
     }
     
     &.false-btn:hover, &.false-btn.active {
-        border-color: $color_danger100;
-        color: $color_danger100;
-        background: rgba($color_danger100, 0.05);
+        border-color: $color_danger100 !important;
+        color: $color_danger100 !important;
+        background: rgba($color_danger100, 0.05) !important;
     }
     
     &.false-btn.active.eval-selected {
-        background: $color_danger100;
-        color: #fff;
-        border-color: $color_danger100;
+        background: $color_danger100 !important;
+        color: #fff !important;
+        border-color: $color_danger100 !important;
     }
 }
 
@@ -540,10 +553,10 @@
 
 /* Secondary Button Style */
 .quiz-btn-secondary {
-    background-color: $color_primary25;
-    color: $color_primary100;
+    background-color: $color_primary25 !important;
+    color: $color_primary100 !important;
     font-weight: bold;
-    border: 1px solid transparent;
+    border: 1px solid transparent !important;
     border-radius: 4px;
     padding: 10px 20px;
     cursor: pointer;
@@ -555,42 +568,49 @@
     font-size: 0.95rem;
     
     &:hover {
-        background-color: color.adjust($color_primary25, $lightness: 8%);
-        border-color: $color_primary50;
+        background-color: color.adjust($color_primary25, $lightness: 8%) !important;
+        border-color: $color_primary50 !important;
     }
 }
 
 /* Syntax Highlight Code Wrappers */
 .quiz-code-wrapper {
-    background-color: #18181b;
-    border: 1px solid $color_primary25;
+    background-color: $color_primary5;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     margin: 16px 0;
     overflow: hidden;
 }
 .quiz-code-header {
     background-color: rgba($color_primary25, 0.5);
-    color: $color_primary90;
+    color: $color_primary100;
     padding: 6px 16px;
     font-size: 0.8rem;
     font-weight: 600;
-    border-bottom: 1px solid $color_primary25;
+    border-bottom: 1px solid $color_primary33;
     text-transform: uppercase;
     font-family: 'Outfit', sans-serif;
 }
 .quiz-code-lines {
-    color: $color_primary25;
+    background-color: transparent;
+    color: $color_primary50;
     text-align: right;
     user-select: none;
     font-family: monospace;
     font-size: 0.85rem;
-    border-right: 1px solid $color_primary10;
+    border-right: 1px solid $color_primary25;
     padding-right: 12px;
+}
+.quiz-code-wrapper pre {
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 12px 16px !important;
 }
 .quiz-code-wrapper pre code {
     font-family: monospace;
     font-size: 0.85rem;
-    color: $color_primary90;
+    color: $color_primary100;
     white-space: pre;
     padding: 0 !important;
     margin: 0;
@@ -671,7 +691,7 @@
 
 .exam-card {
     background: $color_primary5;
-    border: 1px solid $color_primary25;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     padding: 24px;
     display: flex;
@@ -763,6 +783,77 @@
     }
 }
 
+/* Modal inner info panels - theme-adaptive */
+.modal-info-box {
+    background: $color_primary10;
+    border: 1px solid $color_primary33;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.modal-summary-stat {
+    background: $color_primary10;
+    border: 1px solid $color_primary25;
+    border-radius: 6px;
+    padding: 8px 16px;
+    text-align: center;
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: $color_primary50;
+        text-transform: uppercase;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: $color_primary100;
+    }
+}
+
+.modal-config-summary {
+    background: $color_primary10;
+    border: 1px solid $color_primary25;
+    border-radius: 8px;
+    padding: 12px;
+    
+    .summary-label {
+        font-size: 0.75rem;
+        color: $color_primary50;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+}
+
+.modal-history-list {
+    background: $color_primary5;
+    border: 1px solid $color_primary25;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 12px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.modal-close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    color: $color_primary50;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    line-height: 1;
+    
+    &:hover {
+        color: $color_primary100;
+    }
+}
+
 /* Doing Exam UI */
 .questions-container.view-single {
     .question-card {
@@ -817,9 +908,9 @@
 }
 
 .q-grid-btn {
-    background: $color_primary0;
-    border: 1px solid $color_primary25;
-    color: $color_primary90;
+    background: $color_primary0 !important;
+    border: 1px solid $color_primary33 !important;
+    color: $color_primary90 !important;
     border-radius: 6px;
     height: 38px;
     display: flex;
@@ -832,31 +923,53 @@
     outline: none;
     
     &:hover:not(.orientation-disabled) {
-        border-color: $color_primary50;
-        color: $color_primary100;
+        border-color: $color_primary50 !important;
+        color: $color_primary100 !important;
     }
     
     &.active {
-        border-color: $color_link50;
-        color: $color_link50;
-        box-shadow: 0 0 6px rgba($color_link50, 0.2);
+        border-color: $color_link50 !important;
+        color: $color_link50 !important;
+        box-shadow: 0 0 6px rgba($color_link50, 0.2) !important;
     }
     
     &.answered {
-        background: rgba($color_success100, 0.1);
-        border-color: $color_success100;
-        color: $color_success100;
+        background: rgba($color_success100, 0.1) !important;
+        border-color: $color_success100 !important;
+        color: $color_success100 !important;
         
         &.active {
-            border-color: $color_link50;
-            color: $color_link50;
+            border-color: $color_link50 !important;
+            color: $color_link50 !important;
+        }
+    }
+
+    &.correct {
+        background: rgba($color_success100, 0.15) !important;
+        border-color: $color_success100 !important;
+        color: $color_success100 !important;
+        
+        &.active {
+            border-color: $color_link50 !important;
+            box-shadow: 0 0 6px rgba($color_link50, 0.3) !important;
+        }
+    }
+    
+    &.incorrect {
+        background: rgba($color_danger100, 0.15) !important;
+        border-color: $color_danger100 !important;
+        color: $color_danger100 !important;
+        
+        &.active {
+            border-color: $color_link50 !important;
+            box-shadow: 0 0 6px rgba($color_link50, 0.3) !important;
         }
     }
     
     &.orientation-disabled {
-        opacity: 0.25;
-        cursor: not-allowed;
-        pointer-events: none;
+        opacity: 0.25 !important;
+        cursor: not-allowed !important;
+        pointer-events: none !important;
     }
 }
 
@@ -1016,7 +1129,7 @@
 
 .filter-panel {
     background: $color_primary5;
-    border: 1px solid $color_primary25;
+    border: 1px solid $color_primary33;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 30px;
@@ -1066,11 +1179,17 @@
 
 .quick-info-box {
     background: rgba($color_link50, 0.05);
-    border: 1px dashed rgba($color_link50, 0.2);
+    border: 1.5px dashed rgba($color_link50, 0.45);
     border-radius: 6px;
     padding: 10px 16px;
     font-size: 0.85rem;
     color: $color_link50;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-actions {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1100,9 +1219,9 @@
 }
 
 .filter-btn {
-    background: $color_primary0;
-    border: 1px solid $color_primary25;
-    color: $color_primary90;
+    background: $color_primary0 !important;
+    border: 1px solid $color_primary33 !important;
+    color: $color_primary90 !important;
     border-radius: 4px;
     padding: 6px 12px;
     font-size: 0.85rem;
@@ -1111,16 +1230,25 @@
     outline: none;
     
     &:hover {
-        border-color: $color_primary50;
-        color: $color_primary100;
+        border-color: $color_primary50 !important;
+        color: $color_primary100 !important;
     }
     
     &.active {
-        background: rgba($color_link50, 0.08);
-        border-color: $color_link50;
-        color: $color_link50;
+        background: rgba($color_link50, 0.08) !important;
+        border-color: $color_link50 !important;
+        color: $color_link50 !important;
         font-weight: bold;
     }
+}
+
+.exam-highlight-label {
+    font-size: 0.75rem;
+    color: $color_warning100;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-top: 6px;
 }
 
 .exam-title {
@@ -1387,4 +1515,192 @@
     color: $color_primary66;
     line-height: 1.45;
 }
+
+/* Session Summary Page Styles */
+.quiz-summary-card {
+    text-align: center;
+    padding: 48px 32px;
+    background: $color_primary5;
+    border: 1px solid $color_primary33;
+    border-radius: 8px;
+}
+.quiz-summary-title {
+    font-size: 2rem;
+    color: $color_primary100;
+    margin: 0 0 12px 0;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+}
+.quiz-summary-subtitle {
+    color: $color_primary66;
+    font-size: 1.05rem;
+    margin: 0 0 32px 0;
+}
+.quiz-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+    text-align: left;
+}
+.quiz-summary-box {
+    background: $color_primary10;
+    border: 1px solid $color_primary25;
+    padding: 16px;
+    border-radius: 8px;
+    
+    .label {
+        display: block;
+        font-size: 0.8rem;
+        color: $color_primary66;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    .value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: $color_primary100;
+    }
+    
+    &.score-box {
+        border-color: $color_success100;
+        .label {
+            color: $color_success100;
+        }
+        .value {
+            color: $color_success100;
+        }
+    }
+}
+
+/* Learning Help Card styles */
+.learning-help-card {
+    background: rgba($color_warning100, 0.05);
+    border: 1px dashed rgba($color_warning100, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    
+    h4 {
+        font-size: 0.85rem;
+        color: $color_warning100;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+    }
+    
+    .help-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 0.82rem;
+        color: $color_primary66;
+        line-height: 1.4;
+        
+        strong {
+            color: $color_primary100;
+        }
+    }
+}
+
+/* Legend Card styles to prevent sticking (dính) and faint colors */
+.quiz-legend-card {
+    background: $color_primary5;
+    border: 1px solid $color_primary33;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-sizing: border-box;
+    
+    h4 {
+        font-size: 0.85rem;
+        color: $color_primary100;
+        margin: 0 0 12px 0;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+    }
+    
+    .legend-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px; /* increased gap to prevent sticking */
+        font-size: 0.82rem;
+        color: $color_primary66;
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-swatch {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            box-sizing: border-box;
+            
+            &.correct {
+                background: rgba($color_success100, 0.15);
+                border: 1.5px solid $color_success100;
+            }
+            
+            &.incorrect {
+                background: rgba($color_danger100, 0.15);
+                border: 1.5px solid $color_danger100;
+            }
+            
+            &.disabled {
+                opacity: 0.25;
+                background: rgba($color_primary100, 0.05);
+                border: 1.5px solid $color_primary33;
+            }
+            
+            &.unanswered {
+                background: rgba($color_primary100, 0.02);
+                border: 1.5px solid $color_primary33;
+            }
+        }
+    }
+}
+
+/* Graded Score Value modifiers */
+.summary-score-value {
+    &.score-pass {
+        color: $color_success100 !important;
+    }
+    &.score-fail {
+        color: $color_danger100 !important;
+    }
+}
+
+/* High Contrast Title Accent Class to prevent too yellow warning colors */
+.review-mode-title {
+    font-size: 1rem;
+    font-weight: bold;
+    color: $color_warning100 !important;
+}
+
+.quiz-explanation-title {
+    color: $color_warning100 !important;
+    margin: 0 0 8px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+}
+
+.quiz-legend-card {
+    .legend-content {
+        .legend-item.disabled {
+            opacity: 0.6 !important;
+        }
+    }
+}
+
+
+
+
 

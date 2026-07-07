@@ -88,7 +88,7 @@ def site_name(request):
 
 def site_theme(request):
     # Middleware populating `profile` may not have loaded at this point if we're called from an error context.
-    site_theme = 'auto'
+    site_theme = 'dark'
     if hasattr(request.user, 'profile') and request.user.profile:
         site_theme = request.user.profile.site_theme
         

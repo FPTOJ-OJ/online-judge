@@ -10,35 +10,35 @@
 {% block body %}
 <div class="quiz-container" style="max-width: 600px; padding: 40px 20px;">
     
-    <div class="quiz-q-card" style="text-align: center; padding: 48px 32px;">
-        <div style="font-size: 4rem; color: var(--quiz-primary); margin-bottom: 24px;">
+    <div class="quiz-summary-card">
+        <div style="font-size: 4rem; color: var(--quiz-success); margin-bottom: 24px;">
             <i class="fa fa-trophy"></i>
         </div>
         
-        <h1 style="font-size: 2rem; color: #ffffff; margin: 0 0 12px 0; font-weight: 700;">
+        <h1 class="quiz-summary-title">
             Hoàn thành luyện tập!
         </h1>
-        <p style="color: var(--quiz-text-muted); font-size: 1.05rem; margin: 0 0 32px 0;">
+        <p class="quiz-summary-subtitle">
             Bạn đã hoàn thành phiên luyện tập trắc nghiệm THPT.
         </p>
 
         <!-- Stats Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; text-align: left;">
-            <div style="background: #13121a; border: 1px solid var(--quiz-border); padding: 16px; border-radius: 8px;">
-                <span style="display: block; font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Tổng số câu</span>
-                <span style="font-size: 1.6rem; font-weight: 700; color: #ffffff;">{{ total_questions }}</span>
+        <div class="quiz-summary-grid">
+            <div class="quiz-summary-box">
+                <span class="label">Tổng số câu</span>
+                <span class="value">{{ total_questions }}</span>
             </div>
-            <div style="background: #13121a; border: 1px solid var(--quiz-border); padding: 16px; border-radius: 8px;">
-                <span style="display: block; font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Đã trả lời</span>
-                <span style="font-size: 1.6rem; font-weight: 700; color: #ffffff;">{{ answered_questions }}</span>
+            <div class="quiz-summary-box">
+                <span class="label">Đã trả lời</span>
+                <span class="value">{{ answered_questions }}</span>
             </div>
-            <div style="background: #13121a; border: 1px solid var(--quiz-border); padding: 16px; border-radius: 8px;">
-                <span style="display: block; font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Bỏ qua / Chưa làm</span>
-                <span style="font-size: 1.6rem; font-weight: 700; color: #ffffff;">{{ skipped_questions }}</span>
+            <div class="quiz-summary-box">
+                <span class="label">Bỏ qua / Chưa làm</span>
+                <span class="value">{{ skipped_questions }}</span>
             </div>
-            <div style="background: #13121a; border: 1px solid var(--quiz-border); padding: 16px; border-radius: 8px; border-color: var(--quiz-success);">
-                <span style="display: block; font-size: 0.8rem; color: var(--quiz-success); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Tổng điểm đạt được</span>
-                <span style="font-size: 1.6rem; font-weight: 700; color: var(--quiz-success);">{{ score }}</span>
+            <div class="quiz-summary-box score-box">
+                <span class="label">Tổng điểm đạt được</span>
+                <span class="value">{{ score }}</span>
             </div>
         </div>
 

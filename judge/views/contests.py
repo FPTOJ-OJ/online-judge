@@ -15,8 +15,8 @@ from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.db import IntegrityError
 from django.db.models import BooleanField, Case, Count, F, FloatField, IntegerField, Max, Min, Q, Sum, Value, When
 from django.db.models.expressions import CombinedExpression, Exists, OuterRef
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import date as date_filter
 from django.urls import reverse
 from django.utils import timezone
@@ -1044,7 +1044,6 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
         context['ordered_problems_json'] = json.dumps(ordered_problems)
         context['languages_json'] = json.dumps(languages_data)
         # Ensure default mappings exist in DB if table is empty
-        from judge.models import ThemisExtensionMapping
         if not ThemisExtensionMapping.objects.exists():
             default_map = {
                 '.cpp': 'CPP17', '.cc': 'CPP17', '.c': 'C11',

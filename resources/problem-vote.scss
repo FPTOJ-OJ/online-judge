@@ -1,3 +1,5 @@
+@use "vars" as *;
+
 .problem-vote-container {
     margin: 1em;
     min-width: 25em;
@@ -7,7 +9,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid $color_primary50;
 }
 
 .problem-vote-form-title {
