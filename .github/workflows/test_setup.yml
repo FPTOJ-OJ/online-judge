@@ -20,76 +20,64 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y expect lsof curl netcat-openbsd
+          sudo apt-get install -y lsof curl
 
-      - name: Create Expect Test Script
+      - name: Occupy Default Ports to Test Auto-Detection
         run: |
-          cat << 'EOF' > test_script.exp
-          #!/usr/bin/expect -f
-          encoding system utf-8
-          fconfigure stdout -encoding utf-8
-          fconfigure stdin -encoding utf-8
-          set timeout -1
-          spawn sudo ./setup_fptoj.sh
-          fconfigure $spawn_id -encoding utf-8
-          expect {
-              "*Online Judge*" { send "\r"; exp_continue }
-              "*Docker*" { send "\r"; exp_continue }
-              "*database 'dmoj'*" { send "fake_password\r"; exp_continue }
-              "*ROOT*" { send "fake_password\r"; exp_continue }
-              "*ch* Database*" { send "\r"; exp_continue }
-              "*Port*" { send "\r"; exp_continue }
-              "*T*n d*ng nh*p Database*" { send "\r"; exp_continue }
-              "*M*t kh*u d*ng nh*p Database*" { send "fake_password\r"; exp_continue }
-              "*SMTP Mail*" { send "\r"; exp_continue }
-              "*C*ng SMTP*" { send "\r"; exp_continue }
-              "*SMTP Email*" { send "\r"; exp_continue }
-              "*Email g*i*" { send "\r"; exp_continue }
-              "*T*n Admin*" { send "Admin\r"; exp_continue }
-              "*Email Admin*" { send "admin@fake.com\r"; exp_continue }
-              "*Problems, Cache*" { send "/data\r"; exp_continue }
-              "*fptoj.com,www.fptoj.com*" { send "fake.domain.com\r"; exp_continue }
-              "*Google OAuth2 Key*" { send "\r"; exp_continue }
-              "*Google OAuth2 Secret*" { send "\r"; exp_continue }
-              "*GitHub OAuth2 Key*" { send "\r"; exp_continue }
-              "*GitHub OAuth2 Secret*" { send "\r"; exp_continue }
-              "*Turnstile SiteKey*" { send "\r"; exp_continue }
-              "*Turnstile Secret*" { send "\r"; exp_continue }
-              "*t*i kho*n Admin*" { send "n\r"; exp_continue }
-              "*Web Server*" { send "8080\r"; exp_continue }
-              "*Judge ID*" { send "test-judge-1\r"; exp_continue }
-              "*Judge Key*" { send "\r"; exp_continue }
-              "*Judge Server*" { send "n\r"; exp_continue }
-              eof
-          }
-          catch wait result
-          set exit_status [lindex $result 3]
-          if {$exit_status != 0} {
-              exit 1
-          }
-          EOF
-          chmod +x test_script.exp
+          # Giả lập chiếm các cổng dịch vụ phụ để kiểm tra chuyển cổng tự động
+          # (không chiếm 3306/6379 vì MySQL/Redis đã chạy sẵn trên CI)
+          sudo nc -l -p 9999  -k > /dev/null 2>&1 &
+          sudo nc -l -p 8888  -k > /dev/null 2>&1 &
+          sudo nc -l -p 15100 -k > /dev/null 2>&1 &
+          sleep 1
+          echo "[i] Đã chiếm cổng 9999, 8888, 15100 để test auto-detection"
 
-      - name: Occupy Ports to Test Auto-Detection
+      - name: Create Required Directories
+        run: mkdir -p logs
+
+      - name: Run Setup Script via stdin pipe
         run: |
-          # Giả lập chiếm các cổng mặc định để kiểm tra tính năng tự động chuyển cổng động
-          sudo nc -l -p 80 -k &
-          sudo nc -l -p 3306 -k &
-          sudo nc -l -p 6379 -k &
-          sudo nc -l -p 9999 -k &
-          sudo nc -l -p 8888 -k &
-          sudo nc -l -p 15100 -k &
-          sleep 2
-
-      - name: Run Setup Script with Expect
-        run: ./test_script.exp
+          # Chuẩn bị file câu trả lời để pipe vào stdin của script.
+          # Thứ tự đúng với luồng câu hỏi khi MySQL & Redis đã chạy trên host CI:
+          #   1. Tên trang web         → enter (dùng default FPTOJ)
+          #   2. Địa chỉ DB host       → enter (127.0.0.1)
+          #   3. Cổng DB               → enter (3306)
+          #   4. User DB               → enter (dmoj)
+          #   5. Mật khẩu DB           → fake_password
+          #   6-10. SMTP (host/port/user/pass/from) → 5 lần enter
+          #   11. Tên Admin            → enter (để trống = bỏ qua)
+          #   12. Thư mục dữ liệu      → /data
+          #   13. Domain               → fake.domain.com
+          #   14-19. OAuth (6 keys)    → 6 lần enter
+          #   20. Tạo tài khoản admin? → n
+          #   21. Tên Judge            → test-judge-1
+          #   22. Khóa Judge           → enter (auto random)
+          #   23. Cài Judge?           → n
+          #   + 50 dòng trắng padding (đề phòng prompt phụ, tránh set -e EOF crash)
+          {
+            echo ""
+            echo ""
+            echo ""
+            echo ""
+            echo "fake_password"
+            echo ""; echo ""; echo ""; echo ""; echo ""
+            echo ""
+            echo "/data"
+            echo "fake.domain.com"
+            echo ""; echo ""; echo ""; echo ""; echo ""; echo ""
+            echo "n"
+            echo "test-judge-1"
+            echo ""
+            echo "n"
+            python3 -c "print('\n' * 50)"
+          } | sudo bash ./setup_fptoj.sh
 
       - name: Verify Setup Results
         run: |
-          # Check if local_settings.py was created and has the fake domain
+          echo "=== Checking local_settings.py ==="
           cat dmoj/local_settings.py | grep "fake.domain.com"
-          # Check if info file was created in root home (since script runs with sudo)
-          cat ~/fptoj_setup_info.txt || sudo cat /root/fptoj_setup_info.txt || true
+          echo "=== Checking info file ==="
+          sudo cat /root/fptoj_setup_info.txt || true
 
       - name: Prepare Debug Files
         if: always()

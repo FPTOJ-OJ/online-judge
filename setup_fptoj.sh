@@ -99,19 +99,24 @@ parse_setting() {
   local key="$1"
   local default_val="$2"
   if [ -f "$SITE_DIR/dmoj/local_settings.py" ]; then
-    python3 -c "
-import re
+    PARSE_KEY="$key" PARSE_FILE="$SITE_DIR/dmoj/local_settings.py" PARSE_DEFAULT="$default_val" \
+      python3 - <<'PYEOF' 2>/dev/null
+import re, os
+key = os.environ['PARSE_KEY']
+fpath = os.environ['PARSE_FILE']
+default = os.environ['PARSE_DEFAULT']
 try:
-    with open('$SITE_DIR/dmoj/local_settings.py') as f:
+    with open(fpath) as f:
         content = f.read()
-    val = re.search(r'^\s*$key\s*=\s*[\"'](.*?)[\"']', content, re.MULTILINE)
+    pattern = r'^\s*' + re.escape(key) + r'\s*=\s*["\x27](.*?)["\x27]'
+    val = re.search(pattern, content, re.MULTILINE)
     if val:
         print(val.group(1))
         exit(0)
 except Exception:
     pass
-print('$default_val')
-" 2>/dev/null
+print(default)
+PYEOF
   else
     echo "$default_val"
   fi
@@ -121,21 +126,26 @@ parse_db_setting() {
   local key="$1"
   local default_val="$2"
   if [ -f "$SITE_DIR/dmoj/local_settings.py" ]; then
-    python3 -c "
-import re
+    PARSE_KEY="$key" PARSE_FILE="$SITE_DIR/dmoj/local_settings.py" PARSE_DEFAULT="$default_val" \
+      python3 - <<'PYEOF' 2>/dev/null
+import re, os
+key = os.environ['PARSE_KEY']
+fpath = os.environ['PARSE_FILE']
+default = os.environ['PARSE_DEFAULT']
 try:
-    with open('$SITE_DIR/dmoj/local_settings.py') as f:
+    with open(fpath) as f:
         content = f.read()
     db_block = re.search(r'DATABASES\s*=\s*\{.*?\}', content, re.DOTALL)
     if db_block:
-        val = re.search(r'[\"']$key[\"']\s*:\s*[\"'](.*?)[\"']', db_block.group(0))
+        pattern = r'["\x27]' + re.escape(key) + r'["\x27]\s*:\s*["\x27](.*?)["\x27]'
+        val = re.search(pattern, db_block.group(0))
         if val:
             print(val.group(1))
             exit(0)
 except Exception:
     pass
 print('$default_val')
-" 2>/dev/null
+PYEOF
   else
     echo "$default_val"
   fi
