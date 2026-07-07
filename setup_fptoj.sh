@@ -85,6 +85,15 @@ if systemctl is-active supervisor >/dev/null 2>&1; then
   supervisor_on_host=true
 fi
 
+# Hàm tìm port trống
+find_free_port() {
+  local port=$1
+  while lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; do
+    port=$((port + 1))
+  done
+  echo $port
+}
+
 # 4. TRÌNH PHÂN TÍCH CẤU HÌNH CŨ (ĐỌC DEFAULTS TỪ LOCAL_SETTINGS.PY NẾU CÓ)
 parse_setting() {
   local key="$1"
@@ -186,6 +195,8 @@ if [ "$use_docker_mysql" = "true" ]; then
 else
   read -p "[?] Địa chỉ máy chủ Database (Host IP) [$OLD_DB_HOST]: " db_host
   db_host=${db_host:-$OLD_DB_HOST}
+  read -p "[?] Cổng Database (Port) [3306]: " db_port
+  db_port=${db_port:-3306}
   read -p "[?] Tên Cơ sở dữ liệu [$OLD_DB_NAME]: " db_name
   db_name=${db_name:-$OLD_DB_NAME}
   read -p "[?] Tên đăng nhập Database [$OLD_DB_USER]: " db_user
@@ -199,14 +210,74 @@ echo ""
 echo "[i] Thiết lập Email SMTP (Để trống nếu không dùng - cấu hình lại sau ở Admin)"
 read -p "[?] Địa chỉ máy chủ SMTP Mail [$OLD_EMAIL_HOST]: " email_host
 email_host=${email_host:-$OLD_EMAIL_HOST}
-read -p "[?] Cổng SMTP (thường là 587 hoặc 465) [$OLD_EMAIL_PORT]: " email_port
-email_port=${email_port:-$OLD_EMAIL_PORT}
-read -p "[?] Tên đăng nhập SMTP Email [$OLD_EMAIL_USER]: " email_user
-email_user=${email_user:-$OLD_EMAIL_USER}
-read -p "[?] Mật khẩu SMTP Email [$OLD_EMAIL_PASS]: " email_pass
-email_pass=${email_pass:-$OLD_EMAIL_PASS}
-read -p "[?] Email gửi đi hiển thị (From Email) [$OLD_EMAIL_FROM]: " email_from
-email_from=${email_from:-$OLD_EMAIL_FROM}
+if [ -n "$email_host" ]; then
+    read -p "[?] Cổng SMTP (thường là 587 hoặc 465) [$OLD_EMAIL_PORT]: " email_port
+    email_port=${email_port:-$OLD_EMAIL_PORT}
+    read -p "[?] Tên đăng nhập SMTP Email [$OLD_EMAIL_USER]: " email_user
+    email_user=${email_user:-$OLD_EMAIL_USER}
+    read -p "[?] Mật khẩu SMTP Email [$OLD_EMAIL_PASS]: " email_pass
+    email_pass=${email_pass:-$OLD_EMAIL_PASS}
+    read -p "[?] Email gửi đi hiển thị (From Email) [$OLD_EMAIL_FROM]: " email_from
+    email_from=${email_from:-$OLD_EMAIL_FROM}
+fi
+
+echo ""
+echo "[i] Thiết lập Tài khoản Admin Mặc định"
+read -p "[?] Tên Admin (Để trống nếu không dùng) []: " admin_name
+if [ -n "$admin_name" ]; then
+    read -p "[?] Email Admin []: " admin_email
+fi
+
+echo ""
+echo "[i] Thiết lập Thư mục Dữ liệu (Data Directory)"
+read -p "[?] Thư mục chứa dữ liệu tĩnh (Problems, Cache) [/data]: " data_dir
+data_dir=${data_dir:-/data}
+
+# Tạo các thư mục dữ liệu cần thiết trước để tránh Docker tạo với quyền root
+mkdir -p "$data_dir"
+mkdir -p "$data_dir/problems" "$data_dir/pdfcache" "$data_dir/datacache" "$data_dir/mysql"
+chmod -R 775 "$data_dir"
+chown -R $REAL_USER:$REAL_USER "$data_dir"
+
+# Kiểm tra và tự động cấu hình các cổng kết nối tránh trùng lặp
+echo ""
+echo "=== KIỂM TRA VÀ TỰ ĐỘNG CẤU HÌNH CỔNG KẾT NỐI ==="
+
+db_port=${db_port:-3306}
+if [ "$use_docker_mysql" = "true" ]; then
+  db_port=$(find_free_port 3306)
+  if [ "$db_port" != "3306" ]; then
+    echo "[!] Port 3306 đã bị chiếm. Tự động chuyển cổng Docker MySQL sang $db_port."
+  fi
+fi
+
+redis_port=6379
+if [ "$use_docker_redis" = "true" ]; then
+  redis_port=$(find_free_port 6379)
+  if [ "$redis_port" != "6379" ]; then
+    echo "[!] Port 6379 đã bị chiếm. Tự động chuyển cổng Docker Redis sang $redis_port."
+  fi
+elif [ "$redis_on_host" = "true" ]; then
+  read -p "[?] Port của Redis đang chạy trên Host [6379]: " redis_port
+  redis_port=${redis_port:-6379}
+fi
+
+judge_port=$(find_free_port 9999)
+if [ "$judge_port" != "9999" ]; then
+  echo "[!] Port 9999 (Máy chấm) đã bị chiếm. Tự động chuyển sang cổng $judge_port."
+fi
+
+pdf_port=$(find_free_port 8888)
+if [ "$pdf_port" != "8888" ]; then
+  echo "[!] Port 8888 (PDF Service) đã bị chiếm. Tự động chuyển sang cổng $pdf_port."
+fi
+
+wsevent_get_port=$(find_free_port 15100)
+wsevent_post_port=$(find_free_port $((wsevent_get_port + 1)))
+wsevent_http_port=$(find_free_port $((wsevent_post_port + 1)))
+if [ "$wsevent_get_port" != "15100" ] || [ "$wsevent_post_port" != "15101" ] || [ "$wsevent_http_port" != "15102" ]; then
+  echo "[!] Một trong các cổng Websocket (15100, 15101, 15102) bị chiếm. Đổi sang: GET=$wsevent_get_port, POST=$wsevent_post_port, HTTP=$wsevent_http_port."
+fi
 
 # 6. CÀI ĐẶT CÁC THƯ VIỆN HỆ THỐNG
 echo ""
@@ -249,7 +320,8 @@ if [ "$use_docker_mysql" = "true" ]; then
     docker run -d \
       --name fptoj-mysql \
       --restart always \
-      -p 127.0.0.1:3306:3306 \
+      -p 127.0.0.1:$db_port:3306 \
+      -v "$data_dir/mysql":/var/lib/mysql \
       -e MYSQL_ROOT_PASSWORD="$db_root_pass" \
       -e MYSQL_DATABASE="$db_name" \
       -e MYSQL_USER="$db_user" \
@@ -272,7 +344,7 @@ if [ "$use_docker_redis" = "true" ]; then
     docker run -d \
       --name fptoj-redis \
       --restart always \
-      -p 127.0.0.1:6379:6379 \
+      -p 127.0.0.1:$redis_port:6379 \
       redis:7-alpine
   fi
 fi
@@ -319,6 +391,33 @@ echo "=== 3. CẤU HÌNH DMOJ LOCAL_SETTINGS.PY ==="
 formatted_hosts=$(echo "$allowed_hosts" | sed "s/,/','/g" | sed "s/^/['/" | sed "s/$/']/")
 first_host=$(echo "$allowed_hosts" | cut -d',' -f1)
 
+# Xử lý Email Config
+if [ -n "$email_host" ]; then
+    email_config="
+# Cấu hình SMTP Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = '$email_host'
+EMAIL_PORT = $email_port
+EMAIL_HOST_USER = '$email_user'
+EMAIL_HOST_PASSWORD = '$email_pass'
+DEFAULT_FROM_EMAIL = '$email_from'
+SERVER_EMAIL = '$email_user'
+"
+else
+    email_config=""
+fi
+
+if [ -n "$admin_name" ]; then
+    admin_config="
+ADMINS = (
+    ('$admin_name', '$admin_email'),
+)
+"
+else
+    admin_config=""
+fi
+
 cat << EOF > "$SITE_DIR/dmoj/local_settings.py"
 # Sinh tự động bởi setup_fptoj.sh vào $(date)
 import datetime
@@ -345,6 +444,7 @@ DATABASES = {
         'USER': '$db_user',
         'PASSWORD': '$db_pass',
         'HOST': '$db_host',
+        'PORT': '$db_port',
         'OPTIONS': {
             'charset': 'utf8mb4',
             'sql_mode': 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',
@@ -369,42 +469,32 @@ STATICFILES_FINDERS += ('compressor.finders.CompressorFinder',)
 
 DMOJ_TMP_DIR = '/tmp'
 
-# Cấu hình SMTP Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-EMAIL_HOST = '$email_host'
-EMAIL_PORT = $email_port
-EMAIL_HOST_USER = '$email_user'
-EMAIL_HOST_PASSWORD = '$email_pass'
-DEFAULT_FROM_EMAIL = '$email_from'
+$email_config
 
-ADMINS = (
-    ('HaTriKien', 'trikien1234no@gmail.com'),
-)
-SERVER_EMAIL = '$email_user'
+$admin_config
 
 STATIC_ROOT = '$SITE_DIR/static'
 STATIC_URL = '/static/'
 
 SITE_NAME = '$site_name'
-SITE_LONG_NAME = '$site_name: FPT Online Judge'
-SITE_ADMIN_EMAIL = 'kienpc872009@gmail.com'
+SITE_LONG_NAME = '${site_name}: FPT Online Judge'
+SITE_ADMIN_EMAIL = '$admin_email'
 TERMS_OF_SERVICE_URL = '/about/tos/'
 
 # Cấu hình máy chấm kết nối
-BRIDGED_JUDGE_ADDRESS = [('0.0.0.0', 9999)]
-DMOJ_PROBLEM_DATA_ROOT = "/data/problems"
+BRIDGED_JUDGE_ADDRESS = [('0.0.0.0', $judge_port)]
+DMOJ_PROBLEM_DATA_ROOT = "$data_dir/problems"
 
 # Event Server
 EVENT_DAEMON_USE = True
-EVENT_DAEMON_POST = 'ws://127.0.0.1:15101/'
+EVENT_DAEMON_POST = 'ws://127.0.0.1:$wsevent_post_port/'
 EVENT_DAEMON_GET = 'ws://$first_host/event/'
 EVENT_DAEMON_GET_SSL = 'wss://$first_host/event/'
 EVENT_DAEMON_POLL = '/channels/'
 
 # Celery Broker
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://localhost:$redis_port/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:$redis_port/0'
 
 ACE_URL = '//cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/'
 JQUERY_JS = '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
@@ -416,12 +506,12 @@ TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_M
 DMOJ_HTTPS = 2
 
 # Xuất PDF độc quyền
-DMOJ_PDF_PDFOID_URL = 'http://localhost:8888'
-DMOJ_PDF_PROBLEM_CACHE = '/data/pdfcache'
+DMOJ_PDF_PDFOID_URL = 'http://localhost:$pdf_port'
+DMOJ_PDF_PROBLEM_CACHE = '$data_dir/pdfcache'
 DMOJ_PDF_PROBLEM_INTERNAL = '/pdfcache'
 
 DMOJ_USER_DATA_DOWNLOAD = True
-DMOJ_USER_DATA_CACHE = '/data/datacache'
+DMOJ_USER_DATA_CACHE = '$data_dir/datacache'
 DMOJ_USER_DATA_INTERNAL = '/datacache'
 
 LOGGING = {
@@ -504,10 +594,7 @@ cheaper-step = 1
 workers = $UWSGI_WORKERS
 EOF
 
-# Tạo các thư mục dữ liệu cần thiết
-mkdir -p /data/problems /data/pdfcache /data/datacache
-chmod -R 775 /data
-chown -R $REAL_USER:$REAL_USER /data
+# Thư mục dữ liệu đã được tạo trước ở bước trên
 
 # 11. DỊCH GIAO DIỆN VÀ BIÊN DỊCH ASSETS
 echo ""
@@ -519,6 +606,21 @@ git submodule update
 # Cài đặt thư viện Nodejs phục vụ websocket
 if [ -f "$SITE_DIR/package.json" ]; then
   npm install
+  
+  # Tạo file cấu hình websocket động
+  echo "[i] Tạo cấu hình websocket động..."
+  cat << EOF > "$SITE_DIR/websocket/config.js"
+module.exports = {
+    get_host: '127.0.0.1',
+    get_port: $wsevent_get_port,
+    post_host: '127.0.0.1',
+    post_port: $wsevent_post_port,
+    http_host: '127.0.0.1',
+    http_port: $wsevent_http_port,
+    long_poll_timeout: 29000,
+};
+EOF
+  chown $REAL_USER:$REAL_USER "$SITE_DIR/websocket/config.js"
 fi
 
 # Biên dịch css/Sass
@@ -623,7 +725,7 @@ if [ -d "$PDF_DIR" ]; then
   cat << EOF > "$PDF_DIR/uwsgi.ini"
 [uwsgi]
 module = wsgi:app
-http = 127.0.0.1:8888
+http = 127.0.0.1:$pdf_port
 processes = 2
 threads = 1
 enable-threads = false
@@ -706,17 +808,17 @@ server {
 
     location /pdfcache {
         internal;
-        root /data;
+        root $data_dir;
     }
 
     location /datacache {
         internal;
-        root /data;
+        root $data_dir;
     }
 
     # Bật kết nối sự kiện Realtime Event
     location /event/ {
-        proxy_pass http://127.0.0.1:15101/;
+        proxy_pass http://127.0.0.1:$wsevent_get_port/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -725,7 +827,7 @@ server {
 
     location /channels/ {
         proxy_read_timeout          120;
-        proxy_pass http://127.0.0.1:15102;
+        proxy_pass http://127.0.0.1:$wsevent_http_port;
     }
 }
 EOF
@@ -760,12 +862,71 @@ if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
 
   if [ -n "$judge_key" ]; then
     # Viết cấu hình judge.yml
-    mkdir -p /data/problems
-    cat << EOF > /data/problems/judge.yml
+    mkdir -p "$data_dir/problems"
+    cat << EOF > "$data_dir/problems/judge.yml"
 id: $judge_id
 key: "$judge_key"
 problem_storage_globs:
   - /problems/*
+
+runtime:
+  as_x64: /usr/bin/x86_64-linux-gnu-as
+  as_x86: /usr/bin/as
+  awk: /usr/bin/mawk
+  cargo: /home/judge/.cargo/bin/cargo
+  cat: /usr/bin/cat
+  chicken-csc: /usr/bin/chicken-csc
+  clang: /usr/bin/clang
+  clang++: /usr/bin/clang++
+  dmd: /opt/dlang/linux/bin64/dmd
+  fpc: /usr/bin/fpc
+  fpc-themis: /usr/bin/fpc
+  fsharpc: /usr/bin/fsharpc
+  g++: /usr/bin/g++
+  g++-themis: /usr/bin/g++
+  g++11: /usr/bin/g++
+  g++14: /usr/bin/g++
+  g++17: /usr/bin/g++
+  g++20: /usr/bin/g++
+  gcc: /usr/bin/gcc
+  gcc11: /usr/bin/gcc
+  ghc: /usr/bin/ghc
+  go: /usr/bin/go
+  java: /usr/lib/jvm/java-22-openjdk-amd64/bin/java
+  java8: /usr/lib/jvm/java-8-openjdk-amd64/bin/java
+  javac: /usr/lib/jvm/java-22-openjdk-amd64/bin/javac
+  javac8: /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
+  ld_x64: /usr/bin/x86_64-linux-gnu-ld
+  ld_x86: /usr/bin/ld
+  llc: /usr/bin/llc
+  mono: /usr/bin/mono
+  mono-csc: /usr/bin/mono-csc
+  mono-vbnc: /usr/bin/vbnc
+  nasm: /usr/bin/nasm
+  ocamlfind: /home/judge/.opam/dmoj/bin/ocamlfind
+  opt: /usr/bin/opt
+  perl: /usr/bin/perl
+  pypy: /opt/pypy2/bin/pypy
+  pypy3: /opt/pypy3/bin/pypy3
+  python: /usr/bin/python2.7
+  python3: /usr/bin/python3
+  racket: /usr/bin/racket
+  raco: /usr/bin/raco
+  ruby: /usr/bin/ruby
+  scala_args:
+  - -Xbootclasspath/a:/usr/share/scala-2.11/lib/hawtjni-runtime.jar:/usr/share/scala-2.11/lib/jansi.jar:/usr/share/scala-2.11/lib/jline.jar:/usr/share/scala-2.11/lib/scala-actors.jar:/usr/share/scala-2.11/lib/scala-compiler.jar:/usr/share/scala-2.11/lib/scala-library.jar:/usr/share/scala-2.11/lib/scala-parser-combinators.jar:/usr/share/scala-2.11/lib/scala-reflect.jar:/usr/share/scala-2.11/lib/scala-xml.jar:/usr/share/scala-2.11/lib/scalap.jar
+  - -classpath
+  - '""'
+  - -Dscala.boot.class.path=/usr/share/scala-2.11/lib/hawtjni-runtime.jar:/usr/share/scala-2.11/lib/jansi.jar:/usr/share/scala-2.11/lib/jline.jar:/usr/share/scala-2.11/lib/scala-actors.jar:/usr/share/scala-2.11/lib/scala-compiler.jar:/usr/share/scala-2.11/lib/scala-library.jar:/usr/share/scala-2.11/lib/scala-parser-combinators.jar:/usr/share/scala-2.11/lib/scala-reflect.jar:/usr/share/scala-2.11/lib/scala-xml.jar:/usr/share/scala-2.11/lib/scalap.jar
+  - -Dscala.home=/usr/share/scala-2.11
+  - -Dscala.usejavacp=true
+  - -Denv.emacs=
+  - scala.tools.nsc.MainGenericRunner
+  scala_vm: /usr/lib/jvm/java-22-openjdk-amd64/bin/java
+  scalac: /usr/bin/scalac
+  sed: /usr/bin/sed
+  v8dmoj: /usr/bin/v8dmoj
+  crt_x86_in_lib32: true
 EOF
     
     # Build judge-tier1 container nếu chưa có
@@ -779,13 +940,13 @@ EOF
       docker rm -f fptoj-judge >/dev/null 2>&1 || true
       docker run \
         --name fptoj-judge \
-        -v /data/problems:/problems \
+        -v "$data_dir/problems":/problems \
         --cap-add=SYS_PTRACE \
         --network host \
         -d \
         --restart=always \
         dmoj/judge-tier1:latest \
-        run -p 9999 -c /problems/judge.yml \
+        run -p $judge_port -c /problems/judge.yml \
         127.0.0.1 "$judge_id" "$judge_key"
         
       echo "[✓] Máy chấm '$judge_id' đã được khởi chạy trong Docker!"
@@ -801,6 +962,14 @@ fi
 echo ""
 echo "=== 10. KHỞI ĐỘNG LẠI DỊCH VỤ HỆ THỐNG ==="
 systemctl daemon-reload
+
+# Touch và phân quyền log trong /tmp trước khi Supervisor chạy
+# để tránh lỗi không thể ghi log vì lỗi Permission
+for logfile in site.stdout.log site.stderr.log bridge.stdout.log bridge.stderr.log wsevent.stdout.log wsevent.stderr.log celery.stdout.log celery.stderr.log html-to-pdf-flask_log.log html-to-pdf-flask.log; do
+    touch "/tmp/$logfile"
+    chown $REAL_USER:$REAL_USER "/tmp/$logfile"
+    chmod 666 "/tmp/$logfile"
+done
 
 # Khởi động lại Supervisor
 if [ "$supervisor_on_host" = "true" ]; then
@@ -869,6 +1038,6 @@ echo "  * Giao diện site: http://localhost:$nginx_port hoặc địa chỉ IP 
 echo "  * FILE THÔNG TIN CÀI ĐẶT (QUAN TRỌNG): $SETUP_INFO_FILE"
 echo "  * Trạng thái dịch vụ nền (Supervisor):"
 supervisorctl status
-echo "  * Dịch vụ PDF độc quyền: chạy trên http://127.0.0.1:8888"
-echo "  * Dữ liệu đề bài lưu tại: /data/problems"
+echo "  * Dịch vụ PDF độc quyền: chạy trên http://127.0.0.1:$pdf_port"
+echo "  * Dữ liệu đề bài lưu tại: $data_dir/problems"
 echo "=============================================================================="

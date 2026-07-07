@@ -37,6 +37,9 @@ jobs:
               "Tên đăng nhập SMTP Email" { send "\r"; exp_continue }
               "Mật khẩu SMTP Email" { send "\r"; exp_continue }
               "Email gửi đi hiển thị" { send "\r"; exp_continue }
+              "Tên Admin" { send "Admin\r"; exp_continue }
+              "Email Admin" { send "admin@fake.com\r"; exp_continue }
+              "Thư mục chứa dữ liệu tĩnh" { send "/data\r"; exp_continue }
               "Tên miền hoặc IP truy cập" { send "fake.domain.com\r"; exp_continue }
               "Google OAuth2 Key:" { send "\r"; exp_continue }
               "Google OAuth2 Secret:" { send "\r"; exp_continue }
@@ -68,3 +71,15 @@ jobs:
           cat dmoj/local_settings.py | grep "fake.domain.com"
           # Check if info file was created in root home (since script runs with sudo)
           cat ~/fptoj_setup_info.txt || sudo cat /root/fptoj_setup_info.txt || true
+
+      - name: Zip Debug Artifacts
+        if: always()
+        run: |
+          sudo zip -r debug_artifacts.zip dmoj/local_settings.py uwsgi.ini /etc/nginx/sites-available/fptoj /root/fptoj_setup_info.txt || true
+
+      - name: Upload Debug Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: setup-debug-logs
+          path: debug_artifacts.zip
