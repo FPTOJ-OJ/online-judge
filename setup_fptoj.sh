@@ -529,7 +529,7 @@ LOGGING = {
         'bridge': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'web.log',
+            'filename': '$SITE_DIR/logs/web.log',
             'maxBytes': 10 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'file',
@@ -664,6 +664,10 @@ stopsignal=QUIT
 stdout_logfile=$SITE_DIR/logs/site.stdout.log
 stderr_logfile=$SITE_DIR/logs/site.stderr.log
 autorestart=true
+stdout_logfile_maxbytes=10MB
+stderr_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_backups=5
 EOF
 
 # Bridge service
@@ -677,6 +681,10 @@ group=$REAL_USER
 stdout_logfile=$SITE_DIR/logs/bridge.stdout.log
 stderr_logfile=$SITE_DIR/logs/bridge.stderr.log
 autorestart=true
+stdout_logfile_maxbytes=10MB
+stderr_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_backups=5
 EOF
 
 # WS event daemon
@@ -689,6 +697,10 @@ group=$REAL_USER
 stdout_logfile=$SITE_DIR/logs/wsevent.stdout.log
 stderr_logfile=$SITE_DIR/logs/wsevent.stderr.log
 autorestart=true
+stdout_logfile_maxbytes=10MB
+stderr_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_backups=5
 EOF
 
 # Celery worker
@@ -701,6 +713,10 @@ group=$REAL_USER
 stdout_logfile=$SITE_DIR/logs/celery.stdout.log
 stderr_logfile=$SITE_DIR/logs/celery.stderr.log
 autorestart=true
+stdout_logfile_maxbytes=10MB
+stderr_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_backups=5
 EOF
 
 echo "[✓] Đã ghi các file cấu hình Supervisor (site, bridged, wsevent, celery)."
@@ -753,6 +769,10 @@ autorestart=true
 stopasgroup=true
 killasgroup=true
 environment=BASE_PATH="$SITE_DIR"
+stdout_logfile_maxbytes=10MB
+stderr_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_backups=5
 EOF
 
   echo "[✓] Thiết lập dịch vụ html-to-pdf-flask thành công."
@@ -976,6 +996,9 @@ for logfile in site.stdout.log site.stderr.log bridge.stdout.log bridge.stderr.l
     chown $REAL_USER:$REAL_USER "$SITE_DIR/logs/$logfile"
     chmod 666 "$SITE_DIR/logs/$logfile"
 done
+
+# Đảm bảo bàn giao lại toàn bộ quyền sở hữu thư mục cho REAL_USER
+chown -R $REAL_USER:$REAL_USER "$SITE_DIR"
 
 # Khởi động lại Supervisor
 if [ "$supervisor_on_host" = "true" ]; then

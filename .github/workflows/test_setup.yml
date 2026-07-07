@@ -72,14 +72,19 @@ jobs:
           # Check if info file was created in root home (since script runs with sudo)
           cat ~/fptoj_setup_info.txt || sudo cat /root/fptoj_setup_info.txt || true
 
-      - name: Zip Debug Artifacts
+      - name: Prepare Debug Files
         if: always()
         run: |
-          sudo zip -r debug_artifacts.zip dmoj/local_settings.py uwsgi.ini /etc/nginx/sites-available/fptoj /root/fptoj_setup_info.txt logs || true
+          mkdir -p debug_files
+          cp dmoj/local_settings.py debug_files/ || true
+          cp uwsgi.ini debug_files/ || true
+          sudo cp /etc/nginx/sites-available/fptoj debug_files/ || true
+          sudo cp /root/fptoj_setup_info.txt debug_files/ || true
+          sudo cp -r logs debug_files/ || true
 
       - name: Upload Debug Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: setup-debug-logs
-          path: debug_artifacts.zip
+          path: debug_files
