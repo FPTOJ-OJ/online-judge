@@ -75,7 +75,7 @@ jobs:
       - name: Zip Debug Artifacts
         if: always()
         run: |
-          sudo zip -r debug_artifacts.zip dmoj/local_settings.py uwsgi.ini /etc/nginx/sites-available/fptoj /root/fptoj_setup_info.txt || true
+          sudo zip -r debug_artifacts.zip dmoj/local_settings.py uwsgi.ini /etc/nginx/sites-available/fptoj /root/fptoj_setup_info.txt logs || true
 
       - name: Upload Debug Artifacts
         if: always()

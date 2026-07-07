@@ -557,8 +557,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '$google_oauth_secret'
 SOCIAL_AUTH_GITHUB_SECURE_KEY = '$github_oauth_key'
 SOCIAL_AUTH_GITHUB_SECURE_SECRET = '$github_oauth_secret'
 
-TURNSTILE_SITEKEY = '$turnstile_sitekey'
-TURNSTILE_SECRET = '$turnstile_secret'
+TURNSTILE_SITEKEY = '$turnstile_sitekey' or None
+TURNSTILE_SECRET = '$turnstile_secret' or None
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 LOGIN_URL = '/accounts/login/'
 EOF
@@ -648,6 +648,12 @@ fi
 echo ""
 echo "=== 6. CẤU HÌNH DỊCH VỤ NỀN SUPERVISOR ==="
 mkdir -p /etc/supervisor/conf.d
+mkdir -p "$SITE_DIR/logs"
+chown -R $REAL_USER:$REAL_USER "$SITE_DIR/logs"
+chmod -R 775 "$SITE_DIR/logs"
+
+# Lấy đường dẫn NodeJS động để cấu hình wsevent
+NODE_PATH_BIN=$(command -v node || echo "/usr/bin/node")
 
 # Web site service
 cat << EOF > /etc/supervisor/conf.d/site.conf
@@ -655,8 +661,8 @@ cat << EOF > /etc/supervisor/conf.d/site.conf
 command=$SITE_DIR/dmojsite/bin/uwsgi --ini uwsgi.ini
 directory=$SITE_DIR
 stopsignal=QUIT
-stdout_logfile=/tmp/site.stdout.log
-stderr_logfile=/tmp/site.stderr.log
+stdout_logfile=$SITE_DIR/logs/site.stdout.log
+stderr_logfile=$SITE_DIR/logs/site.stderr.log
 autorestart=true
 EOF
 
@@ -668,20 +674,20 @@ directory=$SITE_DIR
 stopsignal=INT
 user=$REAL_USER
 group=$REAL_USER
-stdout_logfile=/tmp/bridge.stdout.log
-stderr_logfile=/tmp/bridge.stderr.log
+stdout_logfile=$SITE_DIR/logs/bridge.stdout.log
+stderr_logfile=$SITE_DIR/logs/bridge.stderr.log
 autorestart=true
 EOF
 
 # WS event daemon
 cat << EOF > /etc/supervisor/conf.d/wsevent.conf
 [program:wsevent]
-command=/usr/bin/node $SITE_DIR/websocket/daemon.js
+command=$NODE_PATH_BIN $SITE_DIR/websocket/daemon.js
 environment=NODE_PATH="$SITE_DIR/node_modules"
 user=$REAL_USER
 group=$REAL_USER
-stdout_logfile=/tmp/wsevent.stdout.log
-stderr_logfile=/tmp/wsevent.stderr.log
+stdout_logfile=$SITE_DIR/logs/wsevent.stdout.log
+stderr_logfile=$SITE_DIR/logs/wsevent.stderr.log
 autorestart=true
 EOF
 
@@ -692,8 +698,8 @@ command=$SITE_DIR/dmojsite/bin/celery -A dmoj_celery worker --concurrency=$CELER
 directory=$SITE_DIR
 user=$REAL_USER
 group=$REAL_USER
-stdout_logfile=/tmp/celery.stdout.log
-stderr_logfile=/tmp/celery.stderr.log
+stdout_logfile=$SITE_DIR/logs/celery.stdout.log
+stderr_logfile=$SITE_DIR/logs/celery.stderr.log
 autorestart=true
 EOF
 
@@ -741,8 +747,8 @@ EOF
 command=$PDF_DIR/env/bin/uwsgi --ini uwsgi.ini
 directory=$PDF_DIR
 stopsignal=QUIT
-stdout_logfile=/tmp/html-to-pdf-flask_log.log
-stderr_logfile=/tmp/html-to-pdf-flask.log
+stdout_logfile=$SITE_DIR/logs/html-to-pdf-flask_log.log
+stderr_logfile=$SITE_DIR/logs/html-to-pdf-flask.log
 autorestart=true
 stopasgroup=true
 killasgroup=true
@@ -963,12 +969,12 @@ echo ""
 echo "=== 10. KHỞI ĐỘNG LẠI DỊCH VỤ HỆ THỐNG ==="
 systemctl daemon-reload
 
-# Touch và phân quyền log trong /tmp trước khi Supervisor chạy
+# Touch và phân quyền log trong thư mục logs trước khi Supervisor chạy
 # để tránh lỗi không thể ghi log vì lỗi Permission
 for logfile in site.stdout.log site.stderr.log bridge.stdout.log bridge.stderr.log wsevent.stdout.log wsevent.stderr.log celery.stdout.log celery.stderr.log html-to-pdf-flask_log.log html-to-pdf-flask.log; do
-    touch "/tmp/$logfile"
-    chown $REAL_USER:$REAL_USER "/tmp/$logfile"
-    chmod 666 "/tmp/$logfile"
+    touch "$SITE_DIR/logs/$logfile"
+    chown $REAL_USER:$REAL_USER "$SITE_DIR/logs/$logfile"
+    chmod 666 "$SITE_DIR/logs/$logfile"
 done
 
 # Khởi động lại Supervisor
