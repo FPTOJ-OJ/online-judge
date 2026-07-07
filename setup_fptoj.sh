@@ -366,7 +366,7 @@ fi
 source "$SITE_DIR/dmojsite/bin/activate"
 pip install --upgrade pip
 pip install -r "$SITE_DIR/requirements.txt"
-pip install mysqlclient uwsgi pymysql
+pip install mysqlclient uwsgi pymysql redis
 
 # Tạo symbolic link hoặc mock cho pymysql
 # (Trường hợp không compile được mysqlclient trên các nền tảng đặc biệt)
@@ -1074,4 +1074,5 @@ echo "  * Trạng thái dịch vụ nền (Supervisor):"
 supervisorctl status
 echo "  * Dịch vụ PDF độc quyền: chạy trên http://127.0.0.1:$pdf_port"
 echo "  * Dữ liệu đề bài lưu tại: $data_dir/problems"
+echo "  * Truy cập nhanh MySQL Docker: chạy ./mysql_cli.sh"
 echo "=============================================================================="

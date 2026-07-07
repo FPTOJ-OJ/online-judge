@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y expect lsof curl
+          sudo apt-get install -y expect lsof curl netcat-openbsd
 
       - name: Create Expect Test Script
         run: |
@@ -61,6 +61,17 @@ jobs:
           }
           EOF
           chmod +x test_script.exp
+
+      - name: Occupy Ports to Test Auto-Detection
+        run: |
+          # Giả lập chiếm các cổng mặc định để kiểm tra tính năng tự động chuyển cổng động
+          sudo nc -l -p 80 -k &
+          sudo nc -l -p 3306 -k &
+          sudo nc -l -p 6379 -k &
+          sudo nc -l -p 9999 -k &
+          sudo nc -l -p 8888 -k &
+          sudo nc -l -p 15100 -k &
+          sleep 2
 
       - name: Run Setup Script with Expect
         run: ./test_script.exp
