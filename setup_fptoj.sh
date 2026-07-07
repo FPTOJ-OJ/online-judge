@@ -626,7 +626,7 @@ fi
 # Biên dịch css/Sass
 ./make_style.sh
 python manage.py collectstatic --no-input
-python manage.py compilemessages
+python manage.py compilemessages -i dmojsite
 python manage.py compilejsi18n
 
 # 12. KHỞI TẠO CSDL VÀ NAP DỮ LIỆU
