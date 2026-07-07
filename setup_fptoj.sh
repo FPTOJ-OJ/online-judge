@@ -239,6 +239,11 @@ mkdir -p "$data_dir/problems" "$data_dir/pdfcache" "$data_dir/datacache" "$data_
 chmod -R 775 "$data_dir"
 chown -R $REAL_USER:$REAL_USER "$data_dir"
 
+# Tạo thư mục logs sớm cho dự án tránh lỗi Django FileHandler
+mkdir -p "$SITE_DIR/logs"
+chown -R $REAL_USER:$REAL_USER "$SITE_DIR/logs"
+chmod -R 775 "$SITE_DIR/logs"
+
 # Kiểm tra và tự động cấu hình các cổng kết nối tránh trùng lặp
 echo ""
 echo "=== KIỂM TRA VÀ TỰ ĐỘNG CẤU HÌNH CỔNG KẾT NỐI ==="
