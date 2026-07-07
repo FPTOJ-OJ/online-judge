@@ -26,32 +26,40 @@ jobs:
         run: |
           cat << 'EOF' > test_script.exp
           #!/usr/bin/expect -f
+          encoding system utf-8
+          fconfigure stdout -encoding utf-8
+          fconfigure stdin -encoding utf-8
           set timeout -1
           spawn sudo ./setup_fptoj.sh
+          fconfigure $spawn_id -encoding utf-8
           expect {
-              "Tên trang web Online Judge của bạn" { send "\r"; exp_continue }
-              "Bạn có muốn tự động tạo bằng Docker" { send "\r"; exp_continue }
-              "Đặt mật khẩu" { send "fake_password\r"; exp_continue }
-              "Địa chỉ máy chủ SMTP Mail" { send "\r"; exp_continue }
-              "Cổng SMTP" { send "\r"; exp_continue }
-              "Tên đăng nhập SMTP Email" { send "\r"; exp_continue }
-              "Mật khẩu SMTP Email" { send "\r"; exp_continue }
-              "Email gửi đi hiển thị" { send "\r"; exp_continue }
-              "Tên Admin" { send "Admin\r"; exp_continue }
-              "Email Admin" { send "admin@fake.com\r"; exp_continue }
-              "Thư mục chứa dữ liệu tĩnh" { send "/data\r"; exp_continue }
-              "Tên miền hoặc IP truy cập" { send "fake.domain.com\r"; exp_continue }
-              "Google OAuth2 Key:" { send "\r"; exp_continue }
-              "Google OAuth2 Secret:" { send "\r"; exp_continue }
-              "GitHub OAuth2 Key:" { send "\r"; exp_continue }
-              "GitHub OAuth2 Secret:" { send "\r"; exp_continue }
-              "Cloudflare Turnstile SiteKey:" { send "\r"; exp_continue }
-              "Cloudflare Turnstile Secret:" { send "\r"; exp_continue }
-              "Bạn có muốn tạo một tài khoản Admin mới" { send "n\r"; exp_continue }
-              "Vui lòng nhập port khác cho Web Server" { send "8080\r"; exp_continue }
-              "Tên định danh máy chấm" { send "test-judge-1\r"; exp_continue }
-              "Khóa xác thực bí mật máy chấm" { send "\r"; exp_continue }
-              "Bạn có muốn cài đặt và chạy máy chấm" { send "n\r"; exp_continue }
+              "*Online Judge*" { send "\r"; exp_continue }
+              "*Docker*" { send "\r"; exp_continue }
+              "*database 'dmoj'*" { send "fake_password\r"; exp_continue }
+              "*ROOT*" { send "fake_password\r"; exp_continue }
+              "*ch* Database*" { send "\r"; exp_continue }
+              "*Port*" { send "\r"; exp_continue }
+              "*T*n d*ng nh*p Database*" { send "\r"; exp_continue }
+              "*M*t kh*u d*ng nh*p Database*" { send "fake_password\r"; exp_continue }
+              "*SMTP Mail*" { send "\r"; exp_continue }
+              "*C*ng SMTP*" { send "\r"; exp_continue }
+              "*SMTP Email*" { send "\r"; exp_continue }
+              "*Email g*i*" { send "\r"; exp_continue }
+              "*T*n Admin*" { send "Admin\r"; exp_continue }
+              "*Email Admin*" { send "admin@fake.com\r"; exp_continue }
+              "*Problems, Cache*" { send "/data\r"; exp_continue }
+              "*fptoj.com,www.fptoj.com*" { send "fake.domain.com\r"; exp_continue }
+              "*Google OAuth2 Key*" { send "\r"; exp_continue }
+              "*Google OAuth2 Secret*" { send "\r"; exp_continue }
+              "*GitHub OAuth2 Key*" { send "\r"; exp_continue }
+              "*GitHub OAuth2 Secret*" { send "\r"; exp_continue }
+              "*Turnstile SiteKey*" { send "\r"; exp_continue }
+              "*Turnstile Secret*" { send "\r"; exp_continue }
+              "*t*i kho*n Admin*" { send "n\r"; exp_continue }
+              "*Web Server*" { send "8080\r"; exp_continue }
+              "*Judge ID*" { send "test-judge-1\r"; exp_continue }
+              "*Judge Key*" { send "\r"; exp_continue }
+              "*Judge Server*" { send "n\r"; exp_continue }
               eof
           }
           catch wait result
