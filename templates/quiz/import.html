@@ -11,13 +11,13 @@
 <div class="quiz-container" style="max-width: 800px;">
     
     <div class="quiz-header-card" style="margin-bottom: 24px;">
-        <h1 class="quiz-title"><i class="fa fa-upload"></i> Import câu hỏi hàng loạt</h1>
-        <p class="quiz-subtitle">Sử dụng tệp hoặc dán mã JSON cấu trúc câu hỏi để import nhanh nhiều câu hỏi cùng lúc.</p>
+        <h1 class="quiz-title"><i class="fa fa-upload"></i> {{ _('Bulk Import Questions') }}</h1>
+        <p class="quiz-subtitle">{{ _('Use a file or paste JSON data to quickly import multiple questions at once.') }}</p>
     </div>
 
     {% if error %}
         <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid var(--quiz-danger); color: var(--quiz-danger); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-            <strong>Lỗi:</strong> {{ error }}
+            <strong>{{ _('Error:') }}</strong> {{ error }}
             {% if error_logs %}
                 <ul style="margin: 8px 0 0 20px; padding: 0;">
                     {% for log in error_logs %}
@@ -33,23 +33,23 @@
             {% csrf_token %}
             
             <div class="quiz-form-group" style="margin-bottom: 24px; border-bottom: 1px dashed var(--quiz-border); padding-bottom: 16px;">
-                <label class="quiz-form-label" for="json_file"><i class="fa fa-file-code-o"></i> Tải lên tệp tin JSON (Tùy chọn):</label>
+                <label class="quiz-form-label" for="json_file"><i class="fa fa-file-code-o"></i> {{ _('Upload JSON file (Optional):') }}</label>
                 <input type="file" id="json_file" name="json_file" accept=".json" class="quiz-select" style="padding: 8px; width: 100%;">
-                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">Chọn tệp tin `.json` chứa danh sách câu hỏi của bạn để tải lên trực tiếp.</p>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Select a `.json` file containing your question list to upload directly.') }}</p>
             </div>
             
             <div class="quiz-form-group">
-                <label class="quiz-form-label" for="json_data"><i class="fa fa-code"></i> Hoặc dán dữ liệu JSON:</label>
-                <textarea id="json_data" name="json_data" rows="10" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder="Dán mã JSON tại đây...">{{ json_data or '' }}</textarea>
-                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">Dán mảng JSON chứa danh sách câu hỏi nếu bạn không tải lên tệp tin.</p>
+                <label class="quiz-form-label" for="json_data"><i class="fa fa-code"></i> {{ _('Or paste JSON data:') }}</label>
+                <textarea id="json_data" name="json_data" rows="10" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder='{{ _("Paste JSON data here...") }}'>{{ json_data or '' }}</textarea>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Paste a JSON array of questions if you do not upload a file.') }}</p>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 24px;">
                 <button type="submit" class="quiz-btn-primary" style="flex: 1;">
-                    <i class="fa fa-save"></i> Thực hiện Import
+                    <i class="fa fa-save"></i> {{ _('Execute Import') }}
                 </button>
                 <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-btn-secondary" style="text-align: center; text-decoration: none; line-height: 2.2;">
-                    Quay lại
+                    {{ _('Go back') }}
                 </a>
             </div>
         </form>
@@ -57,7 +57,7 @@
 
     <!-- Template Example -->
     <div class="quiz-q-card" style="margin-top: 24px;">
-        <h3 style="font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 12px 0;">Mẫu cấu trúc JSON hợp lệ:</h3>
+        <h3 style="font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 12px 0;">{{ _('Valid JSON structure example:') }}</h3>
         <pre style="background-color: var(--quiz-card-bg); color: var(--quiz-text-muted); padding: 16px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin: 0;">[
   {
     "content": "Giao thức TCP thuộc tầng nào trong mô hình TCP/IP?",
@@ -91,33 +91,33 @@
 
     <!-- Documentation helper -->
     <div class="quiz-q-card" style="margin-top: 24px; border: 1px solid rgba(255, 214, 10, 0.2); background: rgba(255, 214, 10, 0.02); padding: 24px;">
-        <h3 style="font-size: 1.25rem; color: var(--quiz-primary); margin: 0 0 16px 0;"><i class="fa fa-book"></i> Hướng dẫn định dạng & import đề thi</h3>
+        <h3 style="font-size: 1.25rem; color: var(--quiz-primary); margin: 0 0 16px 0;"><i class="fa fa-book"></i> {{ _('Formatting & import guide') }}</h3>
         <div style="font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text-muted);">
-            <p>Để import một đề thi hoàn chỉnh (ví dụ cấu trúc 30 câu bao gồm trắc nghiệm & Đúng/Sai), hãy chuẩn bị mảng dữ liệu JSON có cấu trúc như sau:</p>
+            <p>{{ _('To import a complete exam (e.g., a 30-question structure including multiple choice and True/False), prepare a JSON data array with the following structure:') }}</p>
             
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> Quy tắc trường thông tin:</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> {{ _('Field rules:') }}</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li><strong>"content"</strong>: Nội dung câu hỏi chính (hỗ trợ Markdown và LaTeX toán học bằng cặp kí tự <code>$ ... $</code> hoặc <code>$$ ... $$</code>).</li>
-                <li><strong>"type"</strong>: Nhận giá trị <code>"choice"</code> (Trắc nghiệm 4 lựa chọn) hoặc <code>"tf"</code> (Đúng / Sai).</li>
-                <li><strong>"difficulty"</strong>: Độ khó câu hỏi: <code>"easy"</code> (Dễ), <code>"medium"</code> (Trung bình), <code>"hard"</code> (Khó).</li>
-                <li><strong>"explanation"</strong>: Lời giải chi tiết sau khi nộp bài (Hỗ trợ Markdown).</li>
-                <li><strong>"source"</strong>: Tên của nguồn đề thi (ví dụ: <code>"Đề thi tốt nghiệp THPT 2025"</code>). 
-                    <br><span style="color: var(--quiz-primary); font-weight: bold;">*Mẹo: Ghi cùng một tên "source" cho cả 30 câu hỏi sẽ giúp hệ thống nhóm toàn bộ câu hỏi này lại thành một đề thi trọn vẹn và hiển thị trong Kho đề thi!</span>
+                <li><strong>"content"</strong>: {{ _('Main question content (supports Markdown and LaTeX math using') }} <code>$ ... $</code> {{ _('or') }} <code>$$ ... $$</code>).</li>
+                <li><strong>"type"</strong>: {{ _('Accepts') }} <code>"choice"</code> {{ _('(Multiple choice with 4 options) or') }} <code>"tf"</code> {{ _('(True / False).') }}</li>
+                <li><strong>"difficulty"</strong>: {{ _('Question difficulty:') }} <code>"easy"</code> {{ _('(Easy)') }}, <code>"medium"</code> {{ _('(Medium)') }}, <code>"hard"</code> {{ _('(Hard)') }}.</li>
+                <li><strong>"explanation"</strong>: {{ _('Detailed explanation after submission (Supports Markdown).') }}</li>
+                <li><strong>"source"</strong>: {{ _('Name of the exam source (e.g.') }} <code>{{ _('"High School Graduation Exam 2025"') }}</code>). 
+                    <br><span style="color: var(--quiz-primary); font-weight: bold;">{{ _('*Tip: Using the same "source" name for all 30 questions will group them into one complete exam displayed in the Exam Library!') }}</span>
                 </li>
             </ul>
 
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> Cách cấu hình options cho từng loại câu hỏi:</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> {{ _('Configuring options for each question type:') }}</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li><strong>Trắc nghiệm (Choice)</strong>: Mảng <code>"options"</code> gồm đúng 4 lựa chọn với nhãn <code>A, B, C, D</code>. Xác định duy nhất 1 phương án có <code>"is_correct": true</code>.</li>
-                <li><strong>Đúng/Sai (TF)</strong>: Mảng <code>"options"</code> gồm 4 ý phát biểu với nhãn <code>a, b, c, d</code>. Đặt <code>"is_correct": true</code> nếu ý đó đúng và <code>false</code> nếu ý đó sai.</li>
+                <li><strong>{{ _('Multiple Choice') }}</strong>: {{ _('The') }} <code>"options"</code> {{ _('array must have exactly 4 choices with labels') }} <code>A, B, C, D</code>. {{ _('Set exactly 1 option with') }} <code>"is_correct": true</code>.</li>
+                <li><strong>{{ _('True/False (TF)') }}</strong>: {{ _('The') }} <code>"options"</code> {{ _('array has 4 statements with labels') }} <code>a, b, c, d</code>. {{ _('Set') }} <code>"is_correct": true</code> {{ _('if the statement is true and') }} <code>false</code> {{ _('if it is false.') }}</li>
             </ul>
 
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> Định hướng phân môn (Phần riêng KHMT / THUD):</h4>
-            <p style="margin: 0 0 8px 0;">Trong kỳ thi tốt nghiệp THPT, đề thi có phần riêng dành cho Khoa học máy tính (KHMT) và Tin học ứng dụng (THUD). Để gắn nhãn cho câu hỏi thuộc phần riêng:</p>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> {{ _('Subject orientation (CS / IT section):') }}</h4>
+            <p style="margin: 0 0 8px 0;">{{ _('In the high school graduation exam, there are separate sections for Computer Science (CS) and Applied Information Technology (IT). To label questions for these sections:') }}</p>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li>Thêm nhãn <code>"khmt"</code> hoặc <code>"KHMT"</code> vào mảng <code>"tags"</code> để hệ thống nhận diện là câu hỏi riêng KHMT (ví dụ: <code>"tags": ["khmt", "Thuật toán"]</code>).</li>
-                <li>Thêm nhãn <code>"thud"</code> hoặc <code>"THUD"</code> vào mảng <code>"tags"</code> để nhận diện là câu hỏi riêng THUD (ví dụ: <code>"tags": ["thud", "Hệ quản trị CSDL"]</code>).</li>
-                <li>Phần chung (cả hai định hướng đều làm): Không thêm nhãn <code>"khmt"</code> hay <code>"thud"</code> vào <code>"tags"</code>.</li>
+                <li>{{ _('Add the tag') }} <code>"khmt"</code> {{ _('or') }} <code>"KHMT"</code> {{ _('to the') }} <code>"tags"</code> {{ _('array for CS questions (e.g.') }} <code>"tags": ["khmt", "Algorithm"]</code>).</li>
+                <li>{{ _('Add the tag') }} <code>"thud"</code> {{ _('or') }} <code>"THUD"</code> {{ _('to the') }} <code>"tags"</code> {{ _('array for IT questions (e.g.') }} <code>"tags": ["thud", "Database management"]</code>).</li>
+                <li>{{ _('Common section (both orientations): Do not add') }} <code>"khmt"</code> {{ _('or') }} <code>"thud"</code> {{ _('tags.') }}</li>
             </ul>
         </div>
     </div>

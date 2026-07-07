@@ -2,7 +2,8 @@ window.MathJax = {
     tex: {
         inlineMath: [
             ['~', '~'],
-            ['\\(', '\\)']
+            ['\\(', '\\)'],
+            ['$', '$']
         ]
     },
     options: {

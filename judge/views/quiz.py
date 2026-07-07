@@ -184,6 +184,9 @@ class QuizHomeView(View):
         return render(request, 'quiz/home.html', context)
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            from django.urls import reverse
+            return redirect(f'{reverse("auth_login")}?next={request.get_full_path()}')
         # Start practice session
         tag_slug = request.POST.get('tag')
         difficulty = request.POST.get('difficulty')
@@ -275,7 +278,7 @@ class QuizHomeView(View):
         return redirect('quiz_session_detail', session_id=session.id)
 
 
-class QuizSessionDetailView(View):
+class QuizSessionDetailView(LoginRequiredMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -333,7 +336,7 @@ class QuizSessionDetailView(View):
         return render(request, 'quiz/session.html', context)
 
 
-class QuizSessionActionView(View):
+class QuizSessionActionView(LoginRequiredMixin, View):
     def post(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -640,7 +643,7 @@ class QuizQuestionDeleteView(View):
         return redirect('quiz_manage_dashboard')
 
 
-class QuizSessionReviewView(View):
+class QuizSessionReviewView(LoginRequiredMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -949,6 +952,9 @@ class QuizExamsListView(View):
 
 class QuizStartExamView(View):
     def post(self, request, exam_id):
+        if not request.user.is_authenticated:
+            from django.urls import reverse
+            return redirect(f'{reverse("auth_login")}?next={request.get_full_path()}')
         source = get_object_or_404(QuizSource, id=exam_id)
         
         duration_str = request.POST.get('duration', '45')
@@ -990,7 +996,7 @@ class QuizStartExamView(View):
         return redirect('quiz_exam_session', session_id=session.id)
 
 
-class QuizExamSessionView(View):
+class QuizExamSessionView(LoginRequiredMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -1062,7 +1068,7 @@ class QuizExamSessionView(View):
         return render(request, 'quiz/exam_session.html', context)
 
 
-class QuizExamActionView(View):
+class QuizExamActionView(LoginRequiredMixin, View):
     def post(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -1194,7 +1200,7 @@ class QuizExamActionView(View):
         return JsonResponse({'error': 'Invalid action'}, status=400)
 
 
-class QuizExamReviewView(View):
+class QuizExamReviewView(LoginRequiredMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         

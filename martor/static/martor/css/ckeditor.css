@@ -23,6 +23,28 @@
     box-sizing: border-box !important;
 }
 
+/* Remove Semantic UI segment padding around CKEditor for flush fit */
+.ck-editor.editor-container > .ui.bottom.attached.tab.segment {
+    padding: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    border-top: none !important;
+}
+.ck-editor.editor-container > .ui.bottom.attached.tab.segment .editor-container__editor {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* CKEditor loading placeholder */
+.ck-editor-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 500px;
+    background: var(--ck-custom-bg, #fff);
+}
+
 #pdf-iframe {
     width: 793px;
     height: 1122px;

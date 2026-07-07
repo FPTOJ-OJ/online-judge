@@ -10,26 +10,26 @@
     <div class="quiz-session-header">
         <div class="header-actions">
             <button type="button" class="quiz-session-btn" onclick="exitExam()" style="border-color: var(--quiz-danger); color: var(--quiz-danger);">
-                <i class="fa fa-arrow-left"></i> Thoát
+                <i class="fa fa-arrow-left"></i> {{ _('Exit') }}
             </button>
             <div class="view-mode-tabs">
-                <div class="view-mode-tab active" id="mode-tab-single" onclick="setViewMode('single')">Từng câu</div>
-                <div class="view-mode-tab" id="mode-tab-list" onclick="setViewMode('list')">Danh sách</div>
+                <div class="view-mode-tab active" id="mode-tab-single" onclick="setViewMode('single')">{{ _('Single question') }}</div>
+                <div class="view-mode-tab" id="mode-tab-list" onclick="setViewMode('list')">{{ _('List') }}</div>
             </div>
         </div>
 
         <div class="header-actions">
             <button type="button" class="quiz-session-btn" id="nav-btn-prev" onclick="jumpPrevQuestion()">
-                <i class="fa fa-chevron-left"></i> Câu trước
+                <i class="fa fa-chevron-left"></i> {{ _('Previous') }}
             </button>
             <button type="button" class="quiz-session-btn" id="nav-btn-next" onclick="jumpNextQuestion()">
-                Câu sau <i class="fa fa-chevron-right"></i>
+                {{ _('Next') }} <i class="fa fa-chevron-right"></i>
             </button>
         </div>
 
         <div class="orient-toggles">
-            <div class="orient-toggle {% if selected_orientation == 'KHMT' %}active{% endif %}" id="btn-toggle-khmt" onclick="changeOrientation('KHMT')">Chọn KHMT</div>
-            <div class="orient-toggle {% if selected_orientation == 'THUD' %}active{% endif %}" id="btn-toggle-thud" onclick="changeOrientation('THUD')">Chọn THUD</div>
+            <div class="orient-toggle {% if selected_orientation == 'KHMT' %}active{% endif %}" id="btn-toggle-khmt" onclick="changeOrientation('KHMT')">{{ _('Select CS') }}</div>
+            <div class="orient-toggle {% if selected_orientation == 'THUD' %}active{% endif %}" id="btn-toggle-thud" onclick="changeOrientation('THUD')">{{ _('Select IT') }}</div>
         </div>
 
         <div class="header-actions">
@@ -40,19 +40,19 @@
             
             <div class="tools-dropdown">
                 <button type="button" class="quiz-session-btn" id="btn-tools-trigger" onclick="toggleToolsMenu()">
-                    <i class="fa fa-wrench"></i> Công cụ <i class="fa fa-caret-down"></i>
+                    <i class="fa fa-wrench"></i> {{ _('Tools') }} <i class="fa fa-caret-down"></i>
                 </button>
                 <div class="tools-menu" id="tools-dropdown-menu">
-                    <div class="tools-item" onclick="openScratchpad()"><i class="fa fa-pencil"></i> Giấy nháp</div>
-                    <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">Vẽ lên đề</span></div>
-                    <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> Highlight</div>
-                    <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> Xóa highlight</div>
-                    <div class="tools-item" onclick="clearDrawingOnCurrentQuestion()"><i class="fa fa-trash-o"></i> Xóa vẽ trên đề</div>
+                    <div class="tools-item" onclick="openScratchpad()"><i class="fa fa-pencil"></i> {{ _('Scratchpad') }}</div>
+                    <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">{{ _('Draw on question') }}</span></div>
+                    <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> {{ _('Highlight') }}</div>
+                    <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> {{ _('Clear highlight') }}</div>
+                    <div class="tools-item" onclick="clearDrawingOnCurrentQuestion()"><i class="fa fa-trash-o"></i> {{ _('Clear drawings') }}</div>
                 </div>
             </div>
 
             <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="background: var(--quiz-success); color: #ffffff;">
-                <i class="fa fa-paper-plane"></i> Nộp bài
+                <i class="fa fa-paper-plane"></i> {{ _('Submit') }}
             </button>
         </div>
     </div>
@@ -68,11 +68,11 @@
                     <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">TRẮC NGHIỆM</span>
-                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">PHẦN I - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type">{{ _('MULTIPLE CHOICE') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">{{ _('PART I - Q%(index)s', index=q.index) }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Orientation %(orientation)s', orientation=q.orientation) }}</span>
                             {% endif %}
                         </div>
                         <div class="quiz-q-body text-content-body">
@@ -99,11 +99,11 @@
                     <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">ĐÚNG / SAI</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">PHẦN II - CÂU {{ q.index }}</span>
+                            <span class="quiz-q-tag type">{{ _('TRUE / FALSE') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PART II - Q%(index)s', index=q.index) }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">Định hướng {{ q.orientation }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Orientation %(orientation)s', orientation=q.orientation) }}</span>
                             {% endif %}
                         </div>
                         <div class="quiz-q-body text-content-body">
@@ -118,8 +118,8 @@
                                         <div class="quiz-tf-text">{{ opt.content|markdown('problem') }}</div>
                                     </div>
                                     <div class="quiz-tf-buttons">
-                                        <button type="button" class="quiz-tf-btn true-btn {% if q.user_answer and q.user_answer[opt.label] == True %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', true)">Đúng</button>
-                                        <button type="button" class="quiz-tf-btn false-btn {% if q.user_answer and q.user_answer[opt.label] == False %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', false)">Sai</button>
+                                        <button type="button" class="quiz-tf-btn true-btn {% if q.user_answer and q.user_answer[opt.label] == True %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', true)">{{ _('True') }}</button>
+                                        <button type="button" class="quiz-tf-btn false-btn {% if q.user_answer and q.user_answer[opt.label] == False %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', false)">{{ _('False') }}</button>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -133,10 +133,10 @@
         <!-- Right Sidebar -->
         <div class="quiz-right-pane">
             <div class="sidebar-card">
-                <h3>Danh sách câu hỏi</h3>
+                <h3>{{ _('Question list') }}</h3>
                 <div class="part-tabs">
-                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">PHẦN I</div>
-                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">PHẦN II</div>
+                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PART I') }}</div>
+                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PART II') }}</div>
                 </div>
                 
                 <!-- Part I Grid -->
@@ -159,30 +159,30 @@
             </div>
             
             <div class="quiz-legend-card">
-                <h4>Chú thích</h4>
+                <h4>{{ _('Legend') }}</h4>
                 <div class="legend-content">
                     <div class="legend-item">
                         <span class="legend-swatch correct"></span>
-                        <span>Đã trả lời</span>
+                        <span>{{ _('Answered') }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-swatch unanswered"></span>
-                        <span>Chưa trả lời</span>
+                        <span>{{ _('Unanswered') }}</span>
                     </div>
                 </div>
             </div>
             
             <div class="learning-help-card">
-                <h4><i class="fa fa-info-circle"></i> Công cụ hỗ trợ học tập</h4>
+                <h4><i class="fa fa-info-circle"></i> {{ _('Learning tools') }}</h4>
                 <div class="help-content">
                     <div>
-                        <strong><i class="fa fa-pencil"></i> Giấy nháp:</strong> Click menu <em>Công cụ</em> &gt; <em>Giấy nháp</em> để mở bảng vẽ nháp tự do.
+                        <strong><i class="fa fa-pencil"></i> {{ _('Scratchpad:') }}</strong> {{ _('Click <em>Tools</em> &gt; <em>Scratchpad</em> to open the drawing board.')|safe }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-paint-brush"></i> Vẽ trực tiếp:</strong> Chọn <em>Vẽ lên đề</em> để vẽ nháp bằng chuột hoặc cảm ứng ngay trên nội dung câu hỏi.
+                        <strong><i class="fa fa-paint-brush"></i> {{ _('Draw directly:') }}</strong> {{ _('Select <em>Draw on question</em> to sketch with mouse or touch directly on the question content.')|safe }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-font"></i> Đánh dấu (Highlight):</strong> Bôi đen bất kỳ đoạn chữ nào trong câu hỏi, sau đó chọn <em>Highlight</em> để lưu chú thích.
+                        <strong><i class="fa fa-font"></i> {{ _('Highlight:') }}</strong> {{ _('Select any text in the question, then choose <em>Highlight</em> to save annotations.')|safe }}
                     </div>
                 </div>
             </div>
@@ -193,30 +193,30 @@
 <!-- Scratchpad Modal overlay -->
 <div id="quiz-scratchpad-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 750px; height: 500px; background: var(--quiz-card-bg); border: 2px solid var(--quiz-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 10000; flex-direction: column; overflow: hidden; font-family: 'Outfit', sans-serif;">
     <div class="scratchpad-header" style="background: var(--quiz-card-bg); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--quiz-border);">
-        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> Bảng nháp học sinh</h3>
+        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> {{ _('Student scratchpad') }}</h3>
         <div style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="quiz-session-btn" id="scratchpad-tool-pen" onclick="setScratchpadTool('pen')" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-info) !important; border-color: var(--quiz-info) !important; color: #fff !important;">
-                <i class="fa fa-pencil"></i> Bút vẽ
+                <i class="fa fa-pencil"></i> {{ _('Pen') }}
             </button>
             <button type="button" class="quiz-session-btn" id="scratchpad-tool-eraser" onclick="setScratchpadTool('eraser')" style="padding: 4px 10px; font-size: 0.75rem; background: transparent; border-color: var(--quiz-border); color: var(--quiz-text-muted);">
-                <i class="fa fa-eraser"></i> Tẩy xóa
+                <i class="fa fa-eraser"></i> {{ _('Eraser') }}
             </button>
             <span style="width: 1px; height: 16px; background: var(--quiz-border); margin: 0 4px;"></span>
-            <button type="button" class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa bảng vẽ</button>
-            <button type="button" class="quiz-session-btn" onclick="clearScratchpadText()" style="padding: 4px 10px; font-size: 0.75rem;">Xóa ghi chú</button>
-            <button type="button" class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important;">Đóng</button>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Clear canvas') }}</button>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpadText()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Clear notes') }}</button>
+            <button type="button" class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important;">{{ _('Close') }}</button>
         </div>
     </div>
     <div class="scratchpad-body" style="display: flex; gap: 16px; padding: 16px; height: calc(100% - 50px); box-sizing: border-box; background: var(--quiz-card-bg);">
         <div style="flex: 1.3; display: flex; flex-direction: column; height: 100%;">
-            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Bảng vẽ nháp:</div>
+            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">{{ _('Drawing canvas:') }}</div>
             <div id="scratchpad-canvas-container" style="flex: 1; position: relative; background: #ffffff; border-radius: 6px; overflow: hidden; border: 1px solid var(--quiz-border);">
                 <canvas id="scratchpad-canvas" style="position: absolute; top: 0; left: 0; cursor: crosshair;"></canvas>
             </div>
         </div>
         <div style="flex: 0.8; display: flex; flex-direction: column; height: 100%;">
-            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Văn bản ghi chú:</div>
-            <textarea id="scratchpad-text" placeholder="Nhập ghi chú hoặc tính nháp bằng bàn phím tại đây..." style="flex: 1; resize: none; border-radius: 6px; padding: 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); color: var(--quiz-text-muted); font-family: inherit; font-size: 0.9rem; line-height: 1.5; outline: none; box-sizing: border-box;"></textarea>
+            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; color: var(--quiz-text-muted); text-transform: uppercase; letter-spacing: 0.5px;">{{ _('Text notes:') }}</div>
+            <textarea id="scratchpad-text" placeholder="{{ _('Enter notes or calculations here...') }}" style="flex: 1; resize: none; border-radius: 6px; padding: 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); color: var(--quiz-text-muted); font-family: inherit; font-size: 0.9rem; line-height: 1.5; outline: none; box-sizing: border-box;"></textarea>
         </div>
     </div>
 </div>
@@ -478,14 +478,14 @@
     // Submit / Exit logic
     function exitExam() {
         Swal.fire({
-            title: 'Thoát luyện thi?',
-            text: 'Tiến độ làm bài sẽ được lưu lại, nhưng thời gian thi vẫn sẽ tiếp tục chạy nếu bạn không nộp bài.',
+            title: '{{ _("Exit exam?") }}',
+            text: '{{ _("Your progress will be saved, but the timer will continue running if you don\'t submit.") }}',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: 'var(--quiz-danger)',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Thoát ra',
-            cancelButtonText: 'Làm tiếp'
+            confirmButtonText: '{{ _("Exit") }}',
+            cancelButtonText: '{{ _("Continue") }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = '/quiz/exams/';
@@ -495,14 +495,14 @@
 
     function submitExam() {
         Swal.fire({
-            title: 'Nộp bài thi?',
-            text: 'Bạn có chắc chắn muốn nộp bài thi để xem kết quả đánh giá?',
+            title: '{{ _("Submit exam?") }}',
+            text: '{{ _("Are you sure you want to submit to see your results?") }}',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: 'var(--quiz-success)',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Nộp bài',
-            cancelButtonText: 'Làm tiếp'
+            confirmButtonText: '{{ _("Submit") }}',
+            cancelButtonText: '{{ _("Continue") }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 performSubmission();
@@ -512,8 +512,8 @@
 
     function autoSubmitExam() {
         Swal.fire({
-            title: 'Hết giờ làm bài!',
-            text: 'Hệ thống đang tự động nộp bài thi của bạn.',
+            title: '{{ _("Time\'s up!") }}',
+            text: '{{ _("Your exam is being auto-submitted.") }}',
             icon: 'info',
             allowOutsideClick: false,
             showConfirmButton: false,
@@ -537,7 +537,7 @@
             if (data.success && data.redirect) {
                 window.location.href = data.redirect;
             } else {
-                Swal.fire('Lỗi', 'Có lỗi xảy ra khi nộp bài.', 'error');
+                Swal.fire('{{ _("Error") }}', '{{ _("An error occurred while submitting.") }}', 'error');
             }
         });
     }
@@ -563,12 +563,12 @@
             btn.style.background = 'rgba(239, 68, 68, 0.1)';
             btn.style.borderColor = 'var(--quiz-danger)';
             btn.style.color = 'var(--quiz-danger)';
-            btn.innerHTML = '<i class="fa fa-font"></i> Tắt Highlight';
+            btn.innerHTML = '<i class="fa fa-font"></i> {{ _("Disable Highlight") }}';
         } else {
             btn.style.background = '';
             btn.style.borderColor = '';
             btn.style.color = '';
-            btn.innerHTML = '<i class="fa fa-font"></i> Highlight';
+            btn.innerHTML = '<i class="fa fa-font"></i> {{ _("Highlight") }}';
         }
     }
 
@@ -751,7 +751,7 @@
 
     function toggleDrawingOnQuestion() {
         drawOnQuestionActive = !drawOnQuestionActive;
-        document.getElementById('draw-mode-label').innerText = drawOnQuestionActive ? 'Tắt vẽ lên đề' : 'Vẽ lên đề';
+        document.getElementById('draw-mode-label').innerText = drawOnQuestionActive ? '{{ _("Disable drawing") }}' : '{{ _("Draw on question") }}';
         document.getElementById('btn-tools-trigger').classList.toggle('active', drawOnQuestionActive);
 
         document.querySelectorAll('.drawing-canvas-overlay').forEach(overlay => {

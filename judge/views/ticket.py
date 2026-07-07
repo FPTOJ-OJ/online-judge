@@ -31,7 +31,7 @@ ticket_widget = MartorWidget(attrs={'data-markdownfy-url': reverse_lazy('ticket_
 
 class TicketForm(forms.Form):
     captcha = TurnstileField()
-    title = forms.CharField(max_length=100, label=gettext_lazy('Ticket title'))
+    title = forms.CharField(max_length=255, label=gettext_lazy('Ticket title'))
     body = forms.CharField(widget=ticket_widget)
 
     def __init__(self, request, *args, **kwargs):
@@ -92,8 +92,10 @@ class NewStandaloneTicketView(LoginRequiredMixin, TitleMixin, FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        if self.request.GET.get('url'):
-            initial['title'] = _('Report from %s') % self.request.GET.get('url')
+        url = self.request.GET.get('url')
+        if url:
+            initial['title'] = _('Report from %s') % url
+            initial['body'] = _('URL: %s\n\nPlease describe the issue below.') % url
         return initial
 
     def get_assignees(self):

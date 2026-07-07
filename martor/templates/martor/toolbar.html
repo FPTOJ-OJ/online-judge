@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <div class="ui icon button top left pointing dropdown no-border" title="Cài MathType hỗ trợ viết các công thức toán học và chuyển nó sang Latex.">
+    <div class="ui icon button top left pointing dropdown no-border" title="{% trans 'MathType - write formulas and convert them to LaTeX' %}">
       <i class="superscript icon"></i>
       <div class="menu">
         <div class="item markdown-selector markdown-inline-math" title="{% trans 'Inline Math' %} (Ctrl+Alt+I)">
@@ -60,9 +60,9 @@
       <i class="image icon"></i>
     </div>
     {% if uploads_enabled %}
-      <div class="ui icon button no-border markdown-selector markdown-image-upload" title="Upload an Image or PDF">
+      <div class="ui icon button no-border markdown-selector markdown-image-upload" title="{% trans 'Upload an Image or PDF' %}">
         <i class="upload icon"></i>
-        <input name="markdown-image-upload" class="button" type="file" accept="image/*,.pdf" title="Upload an Image or PDF">
+        <input name="markdown-image-upload" class="button" type="file" accept="image/*,.pdf" title="{% trans 'Upload an Image or PDF' %}">
       </div>
     {% endif %}
     <div class="ui icon button no-border markdown-selector markdown-direct-mention" title="{% trans 'Direct Mention a User' %} (Ctrl+M)">

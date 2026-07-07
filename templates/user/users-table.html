@@ -25,10 +25,10 @@
     </th>
     {% if site_config.quiz_enabled %}
     <th class="exams" style="text-align: center;">
-        Đề đã làm
+        {{ _('Completed exams') }}
     </th>
     <th class="exam-points" style="text-align: center;">
-        Điểm thi thử
+        {{ _('Mock exam score') }}
     </th>
     {% endif %}
 {% endblock %}

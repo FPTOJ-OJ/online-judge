@@ -51,23 +51,23 @@
 <div class="quiz-container" style="max-width: 800px;">
     
     <div class="quiz-header-card" style="margin-bottom: 24px; text-align: center;">
-        <h1 class="quiz-title">Kết Quả Luyện Tập</h1>
-        <p class="quiz-subtitle">Phiên làm bài #{{ session.id }} thực hiện lúc {{ session.created_at.strftime('%H:%M - %d/%m/%Y') }}</p>
+        <h1 class="quiz-title">{{ _('Kết Quả Luyện Tập') }}</h1>
+        <p class="quiz-subtitle">{{ _('Phiên làm bài #%(session_id)s thực hiện lúc %(time)s', session_id=session.id, time=session.created_at.strftime('%H:%M - %d/%m/%Y')) }}</p>
         
         <div style="display: flex; justify-content: center; gap: 24px; margin-top: 20px;">
             <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
-                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">Tổng Điểm</div>
+                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">{{ _('Tổng Điểm') }}</div>
                 <div style="font-size: 2rem; font-weight: 700; color: var(--quiz-info);">{{ "%.2f"|format(session.score) }}</div>
             </div>
             <div style="background-color: rgba(255, 255, 255, 0.05); padding: 12px 24px; border-radius: 8px;">
-                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">Trạng Thái</div>
-                <div style="font-size: 1.1rem; font-weight: 600; color: var(--quiz-success); margin-top: 8px;">Đã hoàn thành</div>
+                <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">{{ _('Trạng Thái') }}</div>
+                <div style="font-size: 1.1rem; font-weight: 600; color: var(--quiz-success); margin-top: 8px;">{{ _('Đã hoàn thành') }}</div>
             </div>
         </div>
 
         <div style="margin-top: 20px;">
             <a href="{{ url('quiz_home') }}" class="quiz-btn-primary" style="display: inline-block; text-decoration: none;">
-                <i class="fa fa-home"></i> Quay lại Trang chủ
+                <i class="fa fa-home"></i> {{ _('Quay lại Trang chủ') }}
             </a>
         </div>
     </div>
@@ -78,7 +78,7 @@
             
             <div class="quiz-q-meta">
                 <span class="quiz-q-type">
-                    {% if item.question.type == 'choice' %}Trắc nghiệm A/B/C/D{% else %}Đúng/Sai{% endif %}
+                    {% if item.question.type == 'choice' %}{{ _('Trắc nghiệm A/B/C/D') }}{% else %}{{ _('Đúng/Sai') }}{% endif %}
                 </span>
                 <span class="quiz-q-diff quiz-diff-{{ item.question.difficulty }}">
                     {{ item.question.get_difficulty_display() }}
@@ -89,7 +89,7 @@
                     </span>
                 {% endif %}
                 <span style="margin-left: auto; font-weight: 600;">
-                    Câu {{ item.index }} / {{ review_data|length }}
+                    {{ _('Câu %(index)s / %(total)s', index=item.index, total=review_data|length) }}
                 </span>
             </div>
 
@@ -116,15 +116,15 @@
                             </div>
 
                             {% if opt.is_correct %}
-                                <span style="color: var(--quiz-success); font-weight: bold;"><i class="fa fa-check"></i> Đáp án đúng</span>
+                                <span style="color: var(--quiz-success); font-weight: bold;"><i class="fa fa-check"></i> {{ _('Đáp án đúng') }}</span>
                             {% elif is_selected %}
-                                <span style="color: var(--quiz-danger); font-weight: bold;"><i class="fa fa-times"></i> Bạn chọn sai</span>
+                                <span style="color: var(--quiz-danger); font-weight: bold;"><i class="fa fa-times"></i> {{ _('Bạn chọn sai') }}</span>
                             {% endif %}
                         </div>
                     {% endfor %}
 
                     {% if item.is_skipped %}
-                        <p style="color: var(--quiz-text-muted); font-style: italic; margin-top: 8px;"><i class="fa fa-info-circle"></i> Bạn đã bỏ qua câu hỏi này.</p>
+                        <p style="color: var(--quiz-text-muted); font-style: italic; margin-top: 8px;"><i class="fa fa-info-circle"></i> {{ _('Bạn đã bỏ qua câu hỏi này.') }}</p>
                     {% endif %}
 
                 {% else %}
@@ -132,10 +132,10 @@
                     <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--quiz-border); text-align: left;">
-                                <th style="padding: 8px; color: var(--quiz-text-muted);">Ý</th>
-                                <th style="padding: 8px; color: var(--quiz-text-muted);">Nội dung phát biểu</th>
-                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 100px;">Đáp án</th>
-                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 150px;">Bạn trả lời</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted);">{{ _('Ý') }}</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted);">{{ _('Nội dung phát biểu') }}</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 100px;">{{ _('Đáp án') }}</th>
+                                <th style="padding: 8px; color: var(--quiz-text-muted); text-align: center; width: 150px;">{{ _('Bạn trả lời') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,15 +149,15 @@
                                     <td style="padding: 12px 8px;">{{ opt.content|markdown('problem') }}</td>
                                     <td style="padding: 12px 8px; text-align: center;">
                                         <span class="quiz-badge {% if correct_val %}quiz-badge-success{% else %}quiz-badge-danger{% endif %}" style="display: inline-block; min-width: 60px;">
-                                            {% if correct_val %}Đúng{% else %}Sai{% endif %}
+                                            {% if correct_val %}{{ _('Đúng') }}{% else %}{{ _('Sai') }}{% endif %}
                                         </span>
                                     </td>
                                     <td style="padding: 12px 8px; text-align: center;">
                                         {% if user_val is none or item.is_skipped %}
-                                            <span style="color: var(--quiz-text-muted); font-style: italic;">Chưa trả lời</span>
+                                            <span style="color: var(--quiz-text-muted); font-style: italic;">{{ _('Chưa trả lời') }}</span>
                                         {% else %}
                                             <span class="quiz-badge {% if user_val %}quiz-badge-success{% else %}quiz-badge-danger{% endif %}" style="display: inline-block; min-width: 60px;">
-                                                {% if user_val %}Đúng{% else %}Sai{% endif %}
+                                                {% if user_val %}{{ _('Đúng') }}{% else %}{{ _('Sai') }}{% endif %}
                                             </span>
                                             <span style="margin-left: 6px; color: {% if is_statement_correct %}var(--quiz-success){% else %}var(--quiz-danger){% endif %};">
                                                 {% if is_statement_correct %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times"></i>{% endif %}
@@ -170,8 +170,8 @@
                     </table>
 
                     <p style="margin-top: 12px; font-size: 0.9rem; color: var(--quiz-text-muted);">
-                        <i class="fa fa-calculator"></i> Điểm thành phần: <strong>Đúng {{ item.correct_count }} / 4 ý</strong> 
-                        (Nhận được <strong>{% if item.correct_count == 4 %}1.0{% elif item.correct_count == 3 %}0.5{% elif item.correct_count == 2 %}0.25{% elif item.correct_count == 1 %}0.1{% else %}0.0{% endif %} điểm</strong>).
+                        <i class="fa fa-calculator"></i> {{ _('Điểm thành phần:') }} <strong>{{ _('Đúng %(count)s / 4 ý', count=item.correct_count) }}</strong> 
+                        ({{ _('Nhận được') }} <strong>{% if item.correct_count == 4 %}1.0{% elif item.correct_count == 3 %}0.5{% elif item.correct_count == 2 %}0.25{% elif item.correct_count == 1 %}0.1{% else %}0.0{% endif %} {{ _('điểm') }}</strong>).
                     </p>
                 {% endif %}
             </div>
@@ -179,7 +179,7 @@
             <!-- Explanation section -->
             {% if item.question.explanation %}
                 <div style="background-color: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 16px; margin-top: 16px; border: 1px dashed var(--quiz-border);">
-                    <h5 style="margin: 0 0 8px 0; color: var(--quiz-info); font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> Lời giải chi tiết:</h5>
+                    <h5 style="margin: 0 0 8px 0; color: var(--quiz-info); font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> {{ _('Lời giải chi tiết:') }}</h5>
                     <div style="font-size: 0.9rem; color: var(--quiz-text-muted);">
                         {{ item.question.explanation|markdown('problem') }}
                     </div>

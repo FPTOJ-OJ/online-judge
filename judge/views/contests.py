@@ -1155,11 +1155,6 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
             except Language.DoesNotExist:
                 return JsonResponse({'success': False, 'error': _('Language not found: %s') % lang_key})
 
-            # Normalize source code for file IO if applicable
-            if hasattr(problem, 'data_files') and problem.data_files:
-                data_files = problem.data_files
-                if (data_files.io_mode == 'file' and data_files.input_filename and data_files.output_filename):
-                    source_code = normalize_filenames(source_code, data_files.input_filename, data_files.output_filename)
 
             sub = Submission.objects.create(user=profile, problem=problem, language=language, contest_object=self.object)
             SubmissionSource.objects.create(submission=sub, source=source_code)
@@ -1175,40 +1170,6 @@ class ContestThemisUpload(ContestMixin, LoginRequiredMixin, TitleMixin, SingleOb
         except Exception as e:
             import traceback
             return JsonResponse({'success': False, 'error': f"Server Error: {str(e)}", 'trace': traceback.format_exc()})
-
-
-def normalize_filenames(code: str, input_file: str, output_file: str) -> str:
-    input_file = input_file.lower()
-    output_file = output_file.lower()
-
-    def split_filename_ext(filename: str):
-        name, sep, ext = filename.rpartition('.')
-        return (name, ext) if name else (filename, '')
-
-    input_name, input_ext = split_filename_ext(input_file)
-    output_name, output_ext = split_filename_ext(output_file)
-
-    def repl(match):
-        quote = match.group(1)
-        content = match.group(2)
-        content_lower = content.lower()
-
-        if content_lower in [input_file, output_file]:
-            return f'{quote}{content.upper()}{quote}'
-
-        if content_lower.startswith('.') and content_lower[1:] in [input_ext, output_ext]:
-            return f'{quote}{content.upper()}{quote}'
-
-        if content_lower in [input_ext, output_ext]:
-            return f'{quote}{content.upper()}{quote}'
-
-        name, ext = split_filename_ext(content_lower)
-        if name in [input_name, output_name]:
-            return f'{quote}{content.upper()}{quote}'
-
-        return match.group(0)
-
-    return re.sub(r'(["\'])([^"\']+)\1', repl, code)
 
 
 class ContestQuickEdit(ContestMixin, LoginRequiredMixin, TitleMixin, SingleObjectMixin, TemplateView):

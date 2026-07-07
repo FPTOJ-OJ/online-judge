@@ -26,8 +26,7 @@
     {% set meta_desc = raw_text | truncatewords(30) %}
     {% else %}
     {% set meta_desc = site_config.welcome_message | striptags | truncatewords(30) if (site_config and
-    site_config.welcome_message) else "Trang bài tập trực tuyến " ~ SITE_NAME ~ " – nơi luyện tập và thi đấu thuật
-    toán." %}
+    site_config.welcome_message) else _("Online judge ") ~ SITE_NAME ~ " – " ~ _("a place to practice and compete in algorithms.") %}
     {% endif %}
     {% endif %}
     {% if meta_desc %}
@@ -137,7 +136,7 @@
     {% endif %}
 
     {% compress js %}
-    <script>{{ inlinei18n(LANGUAGE_CODE)|safe }}</script>
+    <script>{{ inlinei18n(LANGUAGE_CODE) | safe }}</script>
     {% if INLINE_JQUERY %}
     <script src="{{ static('libs/jquery-3.4.1.min.js') }}"></script>
     {% endif %}
@@ -319,7 +318,7 @@
                     var fallbackLink = $('<p>').append(
                         $('<a>', {
                             href: imgSrc,
-                            text: 'Trình duyệt của bạn không hỗ trợ hiển thị PDF. Nhấn vào đây để tải về.',
+                            text: '{{ _("Your browser does not support PDF viewing. Click here to download.") }}',
                             target: '_blank'
                         })
                     );
@@ -418,25 +417,47 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (function () {
+            var _nativeAlert = window.alert;
+            var _nativeConfirm = window.confirm;
+            var _nativePrompt = window.prompt;
+
+            function _swalReady() {
+                return typeof Swal !== 'undefined' && Swal;
+            }
+
             window.alert = function (msg) {
-                Swal.fire({ text: msg, icon: 'info' });
+                if (_swalReady()) {
+                    return Swal.fire({ text: msg, icon: 'info', confirmButtonText: 'OK' });
+                }
+                return _nativeAlert(msg);
             };
 
             window.confirm = function (msg) {
-                return Swal.fire({
-                    text: msg,
-                    icon: 'question',
-                    showCancelButton: true
-                }).then(r => r.isConfirmed);
+                if (_swalReady()) {
+                    return Swal.fire({
+                        text: msg,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Hủy'
+                    }).then(function (r) { return r.isConfirmed; });
+                }
+                return _nativeConfirm(msg);
             };
 
-            window.prompt = function (msg, val = '') {
-                return Swal.fire({
-                    title: msg,
-                    input: 'text',
-                    inputValue: val,
-                    showCancelButton: true
-                }).then(r => r.isConfirmed ? r.value : null);
+            window.prompt = function (msg, val) {
+                if (val === undefined) val = '';
+                if (_swalReady()) {
+                    return Swal.fire({
+                        title: msg,
+                        input: 'text',
+                        inputValue: val,
+                        showCancelButton: true,
+                        confirmButtonText: 'OK',
+                        cancelButtonText: 'Hủy'
+                    }).then(function (r) { return r.isConfirmed ? r.value : null; });
+                }
+                return _nativePrompt(msg, val);
             };
         })();
     </script>
@@ -474,11 +495,11 @@
                 {% if site_config.quiz_enabled %}
                 <li>
                     <a href="#" class="nav-quiz{% if request.path.startswith('/quiz') %} active{% endif %}">
-                        Luyện THPT <div class="nav-expand">&gt;</div>
+                        {{ _("Exam Practice") }} <div class="nav-expand">&gt;</div>
                     </a>
                     <ul>
-                        <li><a href="{{ url('quiz_home') }}">Luyện tập</a></li>
-                        <li><a href="{{ url('quiz_exams_list') }}">Đề thi</a></li>
+                        <li><a href="{{ url('quiz_home') }}">{{ _("Practice") }}</a></li>
+                        <li><a href="{{ url('quiz_exams_list') }}">{{ _("Exams") }}</a></li>
                     </ul>
                 </li>
                 {% endif %}
@@ -488,13 +509,13 @@
                 <ul class="horizontal-list">
                     <li id="quick-settings-container"
                         style="vertical-align: middle; padding: 0 6px; position: relative;">
-                        <button id="quick-settings-toggle" title="Cài đặt nhanh (Theme & Language)" style="
+                        <button id="quick-settings-toggle" title='{{ _("Quick Settings (Theme & Language)") }}' style="
                         background: none;
                         border: none;
                         cursor: pointer;
                         font-size: 18px;
                         color: #fff;
-                        padding: 0 4px;
+                        padding: 1px 4px 0;
                         line-height: 44px;
                         height: 44px;
                         display: inline-flex;
@@ -525,11 +546,10 @@
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                                 <span
-                                    style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">Giao
-                                    diện (Theme)</span>
+                                    style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">{{ _("Theme") }}</span>
                                 <div
                                     style="display: flex; background: #151515; border-radius: 6px; padding: 2px; border: 1px solid #2d2d2d;">
-                                    <button id="theme-btn-light" title="Giao diện Sáng" style="
+                                    <button id="theme-btn-light" title='{{ _("Light theme") }}' style="
                                     background: none;
                                     border: none;
                                     color: #888;
@@ -541,7 +561,7 @@
                                     display: inline-flex;
                                     align-items: center;
                                 ">☀️</button>
-                                    <button id="theme-btn-dark" title="Giao diện Tối" style="
+                                    <button id="theme-btn-dark" title='{{ _("Dark theme") }}' style="
                                     background: none;
                                     border: none;
                                     color: #888;
@@ -559,11 +579,10 @@
                             <!-- Language Row -->
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span
-                                    style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">Ngôn
-                                    ngữ (Language)</span>
+                                    style="font-size: 13.5px; font-weight: 500; text-transform: none; color: #e0e0e0;">{{ _("Language") }}</span>
                                 <div
                                     style="display: flex; background: #151515; border-radius: 6px; padding: 2px; border: 1px solid #2d2d2d;">
-                                    <button id="lang-btn-vi" title="Tiếng Việt" style="
+                                    <button id="lang-btn-vi" title='{{ _("Vietnamese") }}' style="
                                     background: none;
                                     border: none;
                                     color: #888;
@@ -574,7 +593,7 @@
                                     font-size: 11.5px;
                                     transition: background 0.15s, color 0.15s;
                                 ">VI</button>
-                                    <button id="lang-btn-en" title="English" style="
+                                    <button id="lang-btn-en" title='{{ _("English") }}' style="
                                     background: none;
                                     border: none;
                                     color: #888;

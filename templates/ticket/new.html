@@ -9,13 +9,13 @@
         {% block guideline_message %}
             <div class="alert alert-info alert-dismissable">
                 <a class="close">x</a>
-                <b>Hướng dẫn báo lỗi</b>
+                <b>{{ _("Bug Report Guide") }}</b>
                 <br><br>
-                Để giúp chúng tôi xử lý lỗi nhanh chóng, vui lòng cung cấp các thông tin sau:
+                {{ _("To help us resolve the issue quickly, please provide the following information:") }}
                 <ul style="margin-left: 1.5em; margin-bottom: 0;">
-                    <li><b>Mô tả:</b> Lỗi xảy ra khi nào? Bạn đang cố gắng làm gì?</li>
-                    <li><b>Đường dẫn:</b> URL của trang bị lỗi (nếu có).</li>
-                    <li><b>Các bước tái hiện:</b> Làm thế nào để chúng tôi thấy lỗi này?</li>
+                    <li><b>{{ _("Description:") }}</b> {{ _("When does the error occur? What were you trying to do?") }}</li>
+                    <li><b>{{ _("URL:") }}</b> {{ _("The URL of the page with the error (if applicable).") }}</li>
+                    <li><b>{{ _("Steps to reproduce:") }}</b> {{ _("How can we see this error?") }}</li>
                 </ul>
             </div>
         {% endblock %}

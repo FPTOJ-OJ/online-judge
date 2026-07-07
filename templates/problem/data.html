@@ -352,7 +352,7 @@
     {% if data_form.instance.has_yml %}
         <div class="title-line-action">
             [<a href="{{ url('problem_data_init', problem.code) }}">{{ _('View YAML') }}</a>]
-            [<a href="#" id="auto-fill">Tự Động Điền Tất Cả Dữ Liệu Test</a>]
+            [<a href="#" id="auto-fill">{{ _('Auto-fill All Test Data') }}</a>]
         </div>
     {% endif %}
 {% endblock %}
@@ -481,18 +481,18 @@ document.addEventListener("DOMContentLoaded", function () {
 document.getElementById("auto-fill").addEventListener("click", async function () {
     const link = this;
     const originalText = link.textContent;
-    link.textContent = "Đang autofill testcase...";
+    link.textContent = '{{ _("Auto-filling testcases...") }}';
 
     try {
         const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
         if (!csrfToken) {
-            console.error("Không tìm thấy CSRF token");
+            console.error('{{ _("CSRF token not found") }}');
             return;
         }
 
         const validFiles = window.valid_files || [];
         if (!validFiles.length) {
-            console.error("Không tìm thấy danh sách file hợp lệ trong window.valid_files");
+            console.error('{{ _("No valid file list found in window.valid_files") }}');
             return;
         }
 
@@ -500,70 +500,70 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
             const pathMatch = file.match(/[\\\/](?:test|case)(\d+)[\\\/]/i);
             if (pathMatch) return parseInt(pathMatch[1], 10);
 
-            // ƯU TIÊN 2: (Code gốc của bạn) Tìm số ngay trước extension
-            // Ví dụ: "test001.in" -> trích xuất 001
+            // PRIORITY 2: Find number right before extension
+            // e.g. "test001.in" -> extract 001
             const simpleMatch = file.match(/(\d+)(?=\.(in|inp|out)$)/i);
             if (simpleMatch) return parseInt(simpleMatch[1], 10);
             
-            // ƯU TIÊN 3: (Fallback gốc của bạn) Tìm số cuối cùng trong tên file
+            // PRIORITY 3: Find last number in filename
             const fallbackMatch = file.match(/(\d+)[^\d]*\.(in|inp|out)$/i);
             return fallbackMatch ? parseInt(fallbackMatch[1], 10) : null;
         };
         
-        // 1. Tạo Map cho output (để tra cứu nhanh O(1))
+        // 1. Create Map for output (O(1) lookup)
         const outputMap = new Map();
         
-        // 2. Tạo mảng cho input
+        // 2. Create array for input
         const inputFiles = [];
 
-        // 3. Phân loại file trong MỘT vòng lặp
+        // 3. Classify files in a single loop
         for (const file of validFiles) {
             const index = extractTestIndex(file); // Dùng hàm mới
             
             if (index === null) {
-                console.warn(`Bỏ qua file không có index: ${file}`);
+                console.warn('{{ _("Skipping file without index:") }} ' + file);
                 continue;
             }
 
             if (/\.(in|inp)$/i.test(file)) {
-                // Thêm TẤT CẢ file input tìm thấy
+                // Add ALL input files found
                 inputFiles.push({ file, index });
             } else if (/\.out$/i.test(file)) {
-                // Chỉ lưu file output ĐẦU TIÊN tìm thấy cho index đó
+                // Only keep the FIRST output file found for that index
                 if (!outputMap.has(index)) {
                     outputMap.set(index, file);
                 } else {
-                     console.warn(`Tìm thấy file output trùng lặp cho index ${index}: Bỏ qua ${file}, giữ lại ${outputMap.get(index)}`);
+                     console.warn('{{ _("Duplicate output file found for index") }} ' + index + ': {{ _("Skipping") }} ' + file + ', {{ _("keeping") }} ' + outputMap.get(index));
                 }
             }
         }
 
-        // 4. Sắp xếp inputFiles theo index
+        // 4. Sort inputFiles by index
         inputFiles.sort((a, b) => a.index - b.index);
 
-        // 5. Lặp qua inputFiles và ghép cặp (rất nhanh)
+        // 5. Loop through inputFiles and pair them (very fast)
         const testCases = [];
         for (const input of inputFiles) {
             const output_file = outputMap.get(input.index);
             
             if (output_file) {
                 testCases.push({
-                    index: input.index + 1, // Cộng 1 tại đây
+                    index: input.index + 1, // Add 1 here
                     input_file: input.file,
                     output_file: output_file
                 });
             } else {
-                console.warn(`Không tìm thấy file output tương ứng cho ${input.file} (index gốc: ${input.index})`);
+                console.warn('{{ _("No matching output file found for") }} ' + input.file + ' ({{ _("original index:") }} ' + input.index + ')');
             }
         }
 
         if (!testCases.length) {
-            console.error("Không tìm thấy cặp test case hợp lệ (.in/.inp và .out)");
-            alert("Không tìm thấy cặp test case hợp lệ. Kiểm tra tên file.");
+            console.error('{{ _("No valid test case pair found (.in/.inp and .out)") }}');
+            alert('{{ _("No valid test case pair found. Check file names.") }}');
             return;
         }
 
-        console.log(`Tìm thấy ${testCases.length} test case (index đã +1):`, testCases);
+        console.log('{{ _("Found") }} ' + testCases.length + ' {{ _("test cases (index +1):") }}', testCases);
 
         const payload = {
             total_testcase: testCases.length,
@@ -581,16 +581,16 @@ document.getElementById("auto-fill").addEventListener("click", async function ()
 
         if (!response.ok) {
             const error = await response.json();
-            console.error("Lỗi khi gửi POST request:", error);
-            alert(`Đã xảy ra lỗi: ${error.error || 'Vui lòng kiểm tra console.'}`);
+            console.error('{{ _("Error sending POST request:") }}', error);
+            alert('{{ _("An error occurred:") }} ' + (error.error || '{{ _("Please check the console.") }}'));
             return;
         }
 
         window.location.href = "{{ problem_data_url }}";
 
     } catch (e) {
-        console.error("Lỗi trong quá trình auto-fill:", e.message);
-        alert("Đã xảy ra lỗi. Vui lòng kiểm tra console để biết chi tiết.");
+        console.error('{{ _("Error during auto-fill:") }}', e.message);
+        alert('{{ _("An error occurred. Please check the console for details.") }}');
     } finally {
         link.textContent = originalText;
     }

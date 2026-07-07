@@ -15,11 +15,11 @@
     <div class="quiz-header-card">
         <div class="quiz-title-section">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                <span class="quiz-q-tag type" style="font-size: 0.8rem; margin: 0; display: inline-block;">Trang Luyện Tập</span>
-                <button type="button" class="quiz-help-btn" onclick="openHelpModal()" title="Trợ giúp nhanh">?</button>
+                <span class="quiz-q-tag type" style="font-size: 0.8rem; margin: 0; display: inline-block;">{{ _('Practice Portal') }}</span>
+                <button type="button" class="quiz-help-btn" onclick="openHelpModal()" title="{{ _('Quick Help') }}">?</button>
             </div>
-            <h1>Luyện tập trắc nghiệm tốt nghiệp THPT</h1>
-            <p>Luyện ngẫu nhiên theo số câu cố định hoặc mở trọn vẹn từng đề đã lưu.</p>
+            <h1>{{ _('High School Graduation Exam Practice') }}</h1>
+            <p>{{ _('Practice randomly with a fixed number of questions or open full saved exams.') }}</p>
         </div>
         <div style="text-align: right;">
             <form method="post" action="{{ url('quiz_home') }}" id="start-session-form-header">
@@ -33,12 +33,12 @@
                 <input type="hidden" name="num_questions" id="header-num-input" value="">
                 
                 <button type="submit" class="quiz-btn-primary">
-                    <i class="fa fa-play"></i> Luyện {{ total_matching }} câu
+                    <i class="fa fa-play"></i> {{ _('Practice') }} {{ total_matching }} {{ _('questions') }}
                 </button>
             </form>
             {% if is_teacher %}
                 <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="margin-top: 10px; display: inline-flex;">
-                    <i class="fa fa-cog"></i> Quản lý câu hỏi
+                    <i class="fa fa-cog"></i> {{ _('Manage Questions') }}
                 </a>
             {% endif %}
         </div>
@@ -47,14 +47,14 @@
     <!-- Active filters display -->
     {% if active_filters %}
         <div class="quiz-q-tags" style="margin-bottom: 20px;">
-            <span style="color: var(--quiz-text-muted); font-size: 0.9rem; align-self: center; margin-right: 8px;">Bộ lọc hiện tại:</span>
+            <span style="color: var(--quiz-text-muted); font-size: 0.9rem; align-self: center; margin-right: 8px;">{{ _('Current filters:') }}</span>
             {% for filter in active_filters %}
                 <span class="quiz-q-tag source" style="background: rgba(255, 214, 10, 0.08); border-color: var(--quiz-primary); color: var(--quiz-primary);">
                     {{ filter }}
                 </span>
             {% endfor %}
             <a href="{{ url('quiz_home') }}" class="quiz-q-tag type" style="background: rgba(255, 23, 68, 0.1); color: var(--quiz-danger); border: 1px solid var(--quiz-danger);">
-                Xóa bộ lọc
+                {{ _('Clear filters') }}
             </a>
         </div>
     {% endif %}
@@ -66,10 +66,10 @@
         <div class="quiz-left-pane">
             <div id="questions-list-container">
                 <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: var(--quiz-text);">
-                    Tìm thấy <span style="color: var(--quiz-success); font-weight: 700;">{{ total_matching }}</span> câu hỏi phù hợp
+                    {{ _('Found') }} <span style="color: var(--quiz-success); font-weight: 700;">{{ total_matching }}</span> {{ _('matching questions') }}
                 </h2>
                 <p style="color: var(--quiz-text-muted); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    Mở từng câu để xem đáp án, hoặc click nút <b>Luyện {{ total_matching }} câu</b> để vào chế độ luyện thi và kiểm tra năng lực.
+                    {{ _('Open each question to view the answer, or click the') }} <b>{{ _('Practice') }} {{ total_matching }} {{ _('questions') }}</b> {{ _('to enter exam mode and test your ability.') }}
                 </p>
 
                 {% for q in questions %}
@@ -94,11 +94,11 @@
 
                         <!-- Answers options shown when "Xem câu trả lời" is toggled -->
                         <button class="quiz-answer-toggle-btn" data-qid="{{ q.id }}" onclick="toggleAnswer(this)">
-                            <i class="fa fa-eye"></i> Xem câu trả lời
+                            <i class="fa fa-eye"></i> {{ _('View answer') }}
                         </button>
 
                         <div class="quiz-answer-details" id="ans-details-{{ q.id }}">
-                            <h4 style="font-size: 1rem; margin: 0 0 12px 0; color: var(--quiz-text);">Đáp án đúng:</h4>
+                            <h4 style="font-size: 1rem; margin: 0 0 12px 0; color: var(--quiz-text);">{{ _('Correct answer:') }}</h4>
                             
                             {% if q.type == 'choice' %}
                                 <div class="quiz-options-list">
@@ -119,8 +119,8 @@
                                                 <span class="quiz-tf-text">{{ opt.content|markdown('problem') }}</span>
                                             </div>
                                             <div class="quiz-tf-buttons">
-                                                <span class="quiz-tf-btn true-btn {% if opt.is_correct %}active eval-selected{% endif %}" style="cursor: default;">Đúng</span>
-                                                <span class="quiz-tf-btn false-btn {% if not opt.is_correct %}active eval-selected{% endif %}" style="cursor: default;">Sai</span>
+                                                <span class="quiz-tf-btn true-btn {% if opt.is_correct %}active eval-selected{% endif %}" style="cursor: default;">{{ _('True') }}</span>
+                                                <span class="quiz-tf-btn false-btn {% if not opt.is_correct %}active eval-selected{% endif %}" style="cursor: default;">{{ _('False') }}</span>
                                             </div>
                                         </div>
                                     {% endfor %}
@@ -129,7 +129,7 @@
 
                             {% if q.explanation %}
                                 <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 16px; margin-top: 16px;">
-                                    <h5 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">Lời giải chi tiết:</h5>
+                                    <h5 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">{{ _('Detailed explanation:') }}</h5>
                                     <div class="quiz-explanation-body">{{ q.explanation|markdown('problem') }}</div>
                                 </div>
                             {% endif %}
@@ -137,29 +137,29 @@
                     </div>
                 {% else %}
                     <div class="quiz-q-card" style="text-align: center; padding: 40px;">
-                        <p style="color: var(--quiz-text-muted); font-size: 1.1rem; margin: 0;">Không tìm thấy câu hỏi nào phù hợp với bộ lọc.</p>
+                        <p style="color: var(--quiz-text-muted); font-size: 1.1rem; margin: 0;">{{ _('No questions match the current filters.') }}</p>
                     </div>
                 {% endfor %}
             </div>
 
             <div id="exams-list-container" style="display: none;">
                 <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: var(--quiz-text);">
-                    Tìm thấy <span style="color: var(--quiz-success); font-weight: 700;">{{ matching_sources|length }}</span> đề thi phù hợp
+                    {{ _('Found') }} <span style="color: var(--quiz-success); font-weight: 700;">{{ matching_sources|length }}</span> {{ _('matching exams') }}
                 </h2>
                 <p style="color: var(--quiz-text-muted); margin: 0 0 20px 0; font-size: 0.95rem;">
-                    Mỗi đề sẽ được mở theo đúng thứ tự hiện có, không tráo câu.
+                    {{ _('Each exam opens in its original order, questions are not shuffled.') }}
                 </p>
 
                 <div class="quiz-exams-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                     {% for exam in matching_sources %}
                         <div class="quiz-q-card" style="padding: 24px;">
                             <div class="quiz-q-tags" style="margin-bottom: 12px;">
-                                <span class="quiz-q-tag type">Năm {{ exam.year }}</span>
-                                <span class="quiz-q-tag difficulty">{{ exam.total_questions }} câu</span>
+                                <span class="quiz-q-tag type">{{ _('Year') }} {{ exam.year }}</span>
+                                <span class="quiz-q-tag difficulty">{{ exam.total_questions }} {{ _('questions') }}</span>
                                 <span class="quiz-q-tag source">{{ exam.type }}</span>
                                 {% if exam.tf_count > 0 %}
                                     <span class="quiz-q-tag source" style="color: var(--quiz-accent); border-color: rgba(255, 110, 196, 0.2);">
-                                        Phần II: {{ exam.tf_count }} câu đúng/sai
+                                        {{ _('Part II:') }} {{ exam.tf_count }} {{ _('true/false questions') }}
                                     </span>
                                 {% endif %}
                             </div>
@@ -168,21 +168,21 @@
                                 {{ exam.snippet }}
                                 <br>
                                 <span style="font-size: 0.8rem; color: var(--quiz-primary); font-weight: bold; text-transform: uppercase;">
-                                    MỞ NGUYÊN ĐỀ THEO THỨ TỰ HIỆN CÓ, KHÔNG TRÁO CÂU.
+                                    {{ _('OPEN THE FULL EXAM IN ORIGINAL ORDER, QUESTIONS NOT SHUFFLED.') }}
                                 </span>
                             </p>
                             
                             {% if exam.best_score is not none %}
                                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-                                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">ĐIỂM CỦA BẠN</div>
+                                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('YOUR SCORE') }}</div>
                                     <div style="font-size: 1rem; color: var(--quiz-success); font-weight: bold; margin-top: 2px;">
-                                        Điểm cao nhất: {{ exam.best_score }}/10.0
+                                        {{ _('Highest score:') }} {{ exam.best_score }}/10.0
                                     </div>
                                 </div>
                             {% else %}
                                 <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-                                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">ĐIỂM CỦA BẠN</div>
-                                    <div style="font-size: 0.9rem; color: var(--quiz-text-muted); margin-top: 2px;">Chưa có dữ liệu làm bài.</div>
+                                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('YOUR SCORE') }}</div>
+                                    <div style="font-size: 0.9rem; color: var(--quiz-text-muted); margin-top: 2px;">{{ _('No practice data available.') }}</div>
                                 </div>
                             {% endif %}
 
@@ -195,12 +195,12 @@
                                     data-tf="{{ exam.tf_count }}"
                                     data-history='{{ exam.history|tojson|safe }}'
                                     onclick="openStartModal(this)">
-                                <i class="fa fa-play"></i> Làm theo đề
+                                <i class="fa fa-play"></i> {{ _('Practice by exam') }}
                             </button>
                         </div>
                     {% else %}
                         <div class="quiz-q-card" style="text-align: center; padding: 40px;">
-                            <p style="color: var(--quiz-text-muted); font-size: 1.1rem; margin: 0;">Không tìm thấy đề thi nào phù hợp với bộ lọc.</p>
+                            <p style="color: var(--quiz-text-muted); font-size: 1.1rem; margin: 0;">{{ _('No exams match the current filters.') }}</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -210,13 +210,13 @@
         <!-- Right sidebar pane: Filters & Mode selection -->
         <div class="quiz-right-pane">
             <div class="quiz-sidebar-card">
-                <h3>Bộ lọc câu hỏi</h3>
+                <h3>{{ _('Question Filters') }}</h3>
                 <form method="get" action="{{ url('quiz_home') }}" id="quiz-filter-form">
                     
                     <div class="quiz-form-group">
-                        <label for="tag-select">Chủ đề / Bài học</label>
+                        <label for="tag-select">{{ _('Topic / Lesson') }}</label>
                         <select id="tag-select" name="tag" class="quiz-select" onchange="this.form.submit()">
-                            <option value="">Tất cả chủ đề</option>
+                            <option value="">{{ _('All topics') }}</option>
                             {% for tag in tags %}
                                 <option value="{{ tag.slug }}" {% if selected_tag == tag.slug %}selected{% endif %}>{{ tag.name }}</option>
                             {% endfor %}
@@ -224,29 +224,29 @@
                     </div>
 
                     <div class="quiz-form-group">
-                        <label for="diff-select">Độ khó</label>
+                        <label for="diff-select">{{ _('Difficulty') }}</label>
                         <select id="diff-select" name="difficulty" class="quiz-select" onchange="this.form.submit()">
-                            <option value="">Tất cả độ khó</option>
-                            <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Nhận biết</option>
-                            <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>Thông hiểu</option>
-                            <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>Vận dụng</option>
-                            <option value="very_hard" {% if selected_difficulty == 'very_hard' %}selected{% endif %}>Vận dụng cao</option>
+                            <option value="">{{ _('All difficulties') }}</option>
+                            <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>{{ _('Recognize') }}</option>
+                            <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>{{ _('Understand') }}</option>
+                            <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>{{ _('Apply') }}</option>
+                            <option value="very_hard" {% if selected_difficulty == 'very_hard' %}selected{% endif %}>{{ _('High-level Apply') }}</option>
                         </select>
                     </div>
 
                     <div class="quiz-form-group">
-                        <label for="type-select">Loại câu hỏi</label>
+                        <label for="type-select">{{ _('Question Type') }}</label>
                         <select id="type-select" name="type" class="quiz-select" onchange="this.form.submit()">
-                            <option value="">Tất cả loại câu</option>
-                            <option value="choice" {% if selected_type == 'choice' %}selected{% endif %}>Trắc nghiệm A/B/C/D</option>
-                            <option value="tf" {% if selected_type == 'tf' %}selected{% endif %}>Chùm Đúng/Sai</option>
+                            <option value="">{{ _('All question types') }}</option>
+                            <option value="choice" {% if selected_type == 'choice' %}selected{% endif %}>{{ _('Multiple choice A/B/C/D') }}</option>
+                            <option value="tf" {% if selected_type == 'tf' %}selected{% endif %}>{{ _('True/False set') }}</option>
                         </select>
                     </div>
 
                     <div class="quiz-form-group">
-                        <label for="source-select">Nguồn / Đề thi</label>
+                        <label for="source-select">{{ _('Source / Exam') }}</label>
                         <select id="source-select" name="source" class="quiz-select" onchange="this.form.submit()">
-                            <option value="">Tất cả đề đã lưu</option>
+                            <option value="">{{ _('All saved exams') }}</option>
                             {% for src in sources %}
                                 <option value="{{ src.id }}" {% if selected_source == src.id|string %}selected{% endif %}>{{ src.name }}</option>
                             {% endfor %}
@@ -255,7 +255,7 @@
                     
                     <div class="quiz-form-group" style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="only-incorrect-checkbox" name="only_incorrect" value="true" {% if only_incorrect %}checked{% endif %} onchange="this.form.submit()" style="width: 18px; height: 18px; cursor: pointer;">
-                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: var(--quiz-text);">Luyện câu từng làm sai</label>
+                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: var(--quiz-text);">{{ _('Practice previously incorrect questions') }}</label>
                     </div>
 
                     {% if search_query %}
@@ -265,18 +265,18 @@
             </div>
 
             <div class="quiz-sidebar-card">
-                <h3>Chế độ luyện tập</h3>
+                <h3>{{ _('Practice Mode') }}</h3>
                 
                 <div class="quiz-radio-tabs" style="margin-bottom: 16px;">
-                    <div class="quiz-radio-tab active" id="tab-random" onclick="setMode('random')">Ngẫu nhiên</div>
-                    <div class="quiz-radio-tab" id="tab-original" onclick="setMode('original')">Theo đề</div>
+                    <div class="quiz-radio-tab active" id="tab-random" onclick="setMode('random')">{{ _('Random') }}</div>
+                    <div class="quiz-radio-tab" id="tab-original" onclick="setMode('original')">{{ _('By exam') }}</div>
                 </div>
 
                 <div class="quiz-form-group">
-                    <label for="num-questions-input">Số câu luyện tập</label>
-                    <input type="number" id="num-questions-input" class="quiz-input" placeholder="Để trống để luyện toàn bộ {{ total_matching }} câu" oninput="syncNumQuestions(this.value)">
+                    <label for="num-questions-input">{{ _('Number of practice questions') }}</label>
+                    <input type="number" id="num-questions-input" class="quiz-input" placeholder="{{ _('Leave blank to practice all') }} {{ total_matching }} {{ _('questions') }}" oninput="syncNumQuestions(this.value)">
                     <p style="font-size: 0.75rem; color: var(--quiz-text-muted); margin: 6px 0 0 0;">
-                        Mặc định luyện toàn bộ {{ total_matching }} câu theo bộ lọc hiện tại.
+                        {{ _('Default: practice all') }} {{ total_matching }} {{ _('questions with current filters.') }}
                     </p>
                 </div>
             </div>
@@ -285,12 +285,12 @@
             {% if past_sessions %}
                 <div class="quiz-sidebar-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Tiến độ luyện tập</h3>
+                        <h3 style="margin: 0;">{{ _('Practice Progress') }}</h3>
                         <span style="background-color: var(--quiz-primary); color: #000000; font-weight: bold; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">
                             {{ past_sessions|length }}
                         </span>
                     </div>
-                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: 0 0 12px 0;">Lưu riêng từng lần làm bài của bạn.</p>
+                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: 0 0 12px 0;">{{ _('Each practice session is saved separately.') }}</p>
                     
                     <div class="quiz-progress-panel">
                         {% for s in past_sessions %}
@@ -300,11 +300,11 @@
                             
                             <div class="quiz-progress-card">
                                 <div class="quiz-progress-header">
-                                    <span class="quiz-progress-title">Luyện tập #{{ s.id }}</span>
+                                    <span class="quiz-progress-title">{{ _('Session') }} #{{ s.id }}</span>
                                     {% if s.completed %}
-                                        <span class="quiz-q-tag source" style="background-color: rgba(16, 185, 129, 0.15); color: var(--quiz-success); border: 1px solid var(--quiz-success); margin: 0; font-size: 0.75rem;">HOÀN THÀNH</span>
+                                        <span class="quiz-q-tag source" style="background-color: rgba(16, 185, 129, 0.15); color: var(--quiz-success); border: 1px solid var(--quiz-success); margin: 0; font-size: 0.75rem;">{{ _('COMPLETED') }}</span>
                                     {% else %}
-                                        <span class="quiz-q-tag source" style="background-color: rgba(59, 130, 246, 0.15); color: var(--quiz-info); border: 1px solid var(--quiz-info); margin: 0; font-size: 0.75rem;">ĐANG LÀM</span>
+                                        <span class="quiz-q-tag source" style="background-color: rgba(59, 130, 246, 0.15); color: var(--quiz-info); border: 1px solid var(--quiz-info); margin: 0; font-size: 0.75rem;">{{ _('IN PROGRESS') }}</span>
                                     {% endif %}
                                 </div>
                                 
@@ -313,24 +313,24 @@
                                 </div>
                                 
                                 <div class="quiz-progress-stats">
-                                    <div>Đã làm: {{ answered_count }}/{{ total_count }}</div>
-                                    <div>Chưa làm: {{ total_count - answered_count }}</div>
-                                    <div>Điểm: {{ "%.2f"|format(s.score) }}</div>
+                                    <div>{{ _('Answered:') }} {{ answered_count }}/{{ total_count }}</div>
+                                    <div>{{ _('Unanswered:') }} {{ total_count - answered_count }}</div>
+                                    <div>{{ _('Score:') }} {{ "%.2f"|format(s.score) }}</div>
                                     <div style="text-align: right;">{{ percent }}%</div>
                                 </div>
                                 
                                 <div class="quiz-progress-actions">
                                     {% if s.completed %}
                                         <a href="{{ url('quiz_session_review', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: var(--quiz-success); color: var(--quiz-success);">
-                                            Xem lại
+                                            {{ _('Review') }}
                                         </a>
                                     {% else %}
                                         <a href="{{ url('quiz_session_detail', s.id) }}" class="quiz-session-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center; font-size: 0.75rem; padding: 4px 8px; border-color: var(--quiz-info); color: var(--quiz-info);">
-                                            Làm tiếp
+                                            {{ _('Continue') }}
                                         </a>
                                     {% endif %}
                                     <button type="button" class="quiz-session-btn" onclick="deleteSession({{ s.id }})" style="border-color: var(--quiz-danger); color: var(--quiz-danger); padding: 4px 8px; font-size: 0.75rem;">
-                                        Xóa
+                                        {{ _('Delete') }}
                                     </button>
                                 </div>
                             </div>
@@ -439,13 +439,13 @@
 
     function deleteSession(sid) {
         Swal.fire({
-            text: 'Bạn có chắc chắn muốn xóa phiên luyện tập này?',
+            text: '{{ _("Are you sure you want to delete this practice session?") }}',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy'
+            confirmButtonText: '{{ _("Delete") }}',
+            cancelButtonText: '{{ _("Cancel") }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 var formData = new FormData();
@@ -461,7 +461,7 @@
                     if (data.success) {
                         location.reload();
                     } else {
-                        Swal.fire('Lỗi', 'Lỗi khi xóa phiên luyện tập.', 'error');
+                        Swal.fire('{{ _("Error") }}', '{{ _("Error deleting practice session.") }}', 'error');
                     }
                 });
             }
@@ -484,13 +484,13 @@
 
         var tagsContainer = document.getElementById('modal-exam-tags');
         tagsContainer.innerHTML = `
-            <span class="quiz-q-tag type">Năm ${year}</span>
+            <span class="quiz-q-tag type">{{ _('Year') }} ${year}</span>
             <span class="quiz-q-tag source">${type}</span>
         `;
         if (tf > 0) {
             tagsContainer.innerHTML += `
                 <span class="quiz-q-tag source" style="color: var(--quiz-accent); border-color: rgba(255,110,196,0.2);">
-                    Phần II: ${tf} câu đúng/sai
+                    {{ _('Part II:') }} ${tf} {{ _('true/false questions') }}
                 </span>
             `;
         }
@@ -501,20 +501,20 @@
         // Render history
         var histCount = document.getElementById('modal-history-count');
         var histList = document.getElementById('modal-history-list');
-        histCount.innerText = history.length + ' lần';
+        histCount.innerText = history.length + ' {{ _("times") }}';
         
         if (history.length > 0) {
             histList.innerHTML = history.map(h => `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
-                    <span style="color: var(--quiz-text-muted);">Lần làm #${h.id} (${h.date})</span>
+                    <span style="color: var(--quiz-text-muted);">{{ _('Attempt') }} #${h.id} (${h.date})</span>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="color: var(--quiz-success); font-weight: bold;">${h.score}/10đ</span>
-                        <a href="/quiz/exams/session/${h.id}/review/" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.7rem; text-decoration: none;">Xem lại</a>
+                        <span style="color: var(--quiz-success); font-weight: bold;">${h.score}/10</span>
+                        <a href="/quiz/exams/session/${h.id}/review/" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.7rem; text-decoration: none;">{{ _('Review') }}</a>
                     </div>
                 </div>
             `).join('');
         } else {
-            histList.innerHTML = '<div style="color: var(--quiz-text-muted); font-size: 0.85rem; text-align: center; padding: 12px;">Bạn chưa từng làm đề này.</div>';
+            histList.innerHTML = '<div style="color: var(--quiz-text-muted); font-size: 0.85rem; text-align: center; padding: 12px;">{{ _("You have not taken this exam yet.") }}</div>';
         }
 
         // Reset inputs
@@ -536,17 +536,17 @@
         if (minutes === 'custom') {
             var val = document.getElementById('custom-minutes-input').value;
             document.getElementById('modal-duration-input').value = val;
-            document.getElementById('summary-tag-time').innerText = val + ' phút';
+            document.getElementById('summary-tag-time').innerText = val + ' {{ _("minutes") }}';
         } else {
             document.getElementById('modal-duration-input').value = minutes;
-            document.getElementById('summary-tag-time').innerText = minutes + ' phút';
+            document.getElementById('summary-tag-time').innerText = minutes + ' {{ _("minutes") }}';
         }
     }
 
     function updateCustomTime(val) {
         if (document.querySelector('.custom-time-option').classList.contains('active')) {
             document.getElementById('modal-duration-input').value = val;
-            document.getElementById('summary-tag-time').innerText = val + ' phút';
+            document.getElementById('summary-tag-time').innerText = val + ' {{ _("minutes") }}';
         }
     }
 
@@ -568,73 +568,73 @@
     }
 </script>
 
-<!-- Modal: Chọn thông số cho đề thi -->
+<!-- Modal: Setup before starting -->
 <div id="exam-start-modal" class="quiz-modal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
     <div class="quiz-modal-content" style="background-color: var(--quiz-card-bg); border: 1px solid var(--quiz-border); width: 90%; max-width: 750px; border-radius: 12px; padding: 24px; color: var(--quiz-text); box-shadow: 0 8px 32px rgba(0,0,0,0.5); position: relative;">
         
         <button type="button" class="modal-close-btn" onclick="closeStartModal()">×</button>
         
-        <div style="font-size: 0.8rem; color: var(--quiz-primary); text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">Thiết lập trước khi làm bài</div>
-        <h2 style="font-size: 1.6rem; margin: 0 0 20px 0; color: var(--quiz-text);" id="modal-exam-title">CHỌN THÔNG SỐ CHO ĐỀ THI</h2>
-        <p style="color: var(--quiz-text-muted); font-size: 0.9rem; margin-top: -15px; margin-bottom: 20px;">Bạn có thể đặt thời gian làm bài và chọn định hướng chấm phần riêng trước khi vào đề.</p>
+        <div style="font-size: 0.8rem; color: var(--quiz-primary); text-transform: uppercase; font-weight: bold; margin-bottom: 6px;">{{ _('Setup before starting') }}</div>
+        <h2 style="font-size: 1.6rem; margin: 0 0 20px 0; color: var(--quiz-text);" id="modal-exam-title">{{ _('CONFIGURE EXAM PARAMETERS') }}</h2>
+        <p style="color: var(--quiz-text-muted); font-size: 0.9rem; margin-top: -15px; margin-bottom: 20px;">{{ _('You can set the time limit and choose the orientation for grading before starting.') }}</p>
         
         <form id="modal-start-form" method="post" action="">
             {% csrf_token %}
             
             <div class="modal-info-box" style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div style="font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase;">Đề đang chọn</div>
-                    <h3 style="margin: 4px 0; font-size: 1.2rem; color: var(--quiz-text);" id="modal-exam-card-title">Tên Đề Thi</h3>
+                    <div style="font-size: 0.8rem; color: var(--quiz-text-muted); text-transform: uppercase;">{{ _('Selected exam') }}</div>
+                    <h3 style="margin: 4px 0; font-size: 1.2rem; color: var(--quiz-text);" id="modal-exam-card-title">{{ _('Exam Name') }}</h3>
                     <div class="quiz-q-tags" style="margin-top: 8px;" id="modal-exam-tags">
                         <!-- Filled by JS -->
                     </div>
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <div class="modal-summary-stat">
-                        <div class="stat-label">SỐ CÂU</div>
+                        <div class="stat-label">{{ _('QUESTIONS') }}</div>
                         <div class="stat-value" id="modal-exam-qcount">30</div>
                     </div>
                     <div class="modal-summary-stat">
-                        <div class="stat-label">MẶC ĐỊNH</div>
-                        <div class="stat-value">45 phút</div>
+                        <div class="stat-label">{{ _('DEFAULT') }}</div>
+                        <div class="stat-value">{{ _('45 minutes') }}</div>
                     </div>
                 </div>
             </div>
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
                 <div>
-                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">Chọn thời gian</h4>
-                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">Dùng mặc định, preset nhanh hoặc tự nhập.</p>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">{{ _('Choose time') }}</h4>
+                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">{{ _('Use default, quick preset, or enter custom time.') }}</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div class="time-preset-option active" onclick="selectTimePreset(this, 45)">
-                            <div style="font-weight: bold; font-size: 0.95rem;">Mặc định</div>
-                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Theo đề (45 phút)</div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">{{ _('Default') }}</div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('By exam (45 minutes)') }}</div>
                         </div>
                         <div class="time-preset-option" onclick="selectTimePreset(this, 45)">
-                            <div style="font-weight: bold; font-size: 0.95rem;">45 phút</div>
-                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Nhanh, tốc độ</div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">{{ _('45 minutes') }}</div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('Fast, quick pace') }}</div>
                         </div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div class="time-preset-option" onclick="selectTimePreset(this, 60)">
-                            <div style="font-weight: bold; font-size: 0.95rem;">60 phút</div>
-                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Thời lượng phổ biến</div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">{{ _('60 minutes') }}</div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('Popular duration') }}</div>
                         </div>
                         <div class="time-preset-option" onclick="selectTimePreset(this, 90)">
-                            <div style="font-weight: bold; font-size: 0.95rem;">90 phút</div>
-                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Thoải mái hơn</div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">{{ _('90 minutes') }}</div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('More relaxed') }}</div>
                         </div>
                     </div>
                     
                     <div class="time-preset-option custom-time-option" onclick="selectTimePreset(this, 'custom')" style="display: flex; align-items: center; justify-content: space-between;">
                         <div>
-                            <div style="font-weight: bold; font-size: 0.95rem;">Tự nhập</div>
-                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Chọn số phút riêng theo ý bạn.</div>
+                            <div style="font-weight: bold; font-size: 0.95rem;">{{ _('Custom') }}</div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('Set your own duration.') }}</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="number" id="custom-minutes-input" value="45" min="5" max="180" style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); width: 60px; padding: 4px 8px; text-align: center;" onclick="event.stopPropagation()" oninput="updateCustomTime(this.value)">
-                            <span style="font-size: 0.85rem; color: var(--quiz-text-muted);">phút</span>
+                            <span style="font-size: 0.85rem; color: var(--quiz-text-muted);">{{ _('minutes') }}</span>
                         </div>
                     </div>
                     
@@ -642,24 +642,24 @@
                 </div>
                 
                 <div>
-                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">Chọn định hướng</h4>
-                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">Ưu tiên chấm theo lựa chọn này.</p>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; text-transform: uppercase; color: var(--quiz-text);">{{ _('Choose orientation') }}</h4>
+                    <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin: -8px 0 12px 0;">{{ _('Prioritize grading based on this selection.') }}</p>
                     
                     <div class="orientation-option active" onclick="selectOrientation('KHMT')" id="orient-option-khmt" style="margin-bottom: 12px;">
-                        <div style="font-weight: bold; font-size: 0.95rem;">Khoa học máy tính</div>
-                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Ưu tiên phần riêng KHMT.</div>
+                        <div style="font-weight: bold; font-size: 0.95rem;">{{ _('Computer Science') }}</div>
+                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('Prioritize CS section.') }}</div>
                     </div>
                     <div class="orientation-option" onclick="selectOrientation('THUD')" id="orient-option-thud" style="margin-bottom: 24px;">
-                        <div style="font-weight: bold; font-size: 0.95rem;">Tin học ứng dụng</div>
-                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">Ưu tiên phần riêng THUD.</div>
+                        <div style="font-weight: bold; font-size: 0.95rem;">{{ _('Applied Information Technology') }}</div>
+                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 4px;">{{ _('Prioritize IT section.') }}</div>
                     </div>
                     
                     <input type="hidden" name="orientation" id="modal-orientation-input" value="KHMT">
                     
                     <div class="modal-config-summary">
-                        <div class="summary-label">Tóm tắt cấu hình</div>
+                        <div class="summary-label">{{ _('Configuration Summary') }}</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                            <span class="quiz-q-tag type" id="summary-tag-time" style="margin: 0;">45 phút</span>
+                            <span class="quiz-q-tag type" id="summary-tag-time" style="margin: 0;">{{ _('45 minutes') }}</span>
                             <span class="quiz-q-tag source" id="summary-tag-orient" style="margin: 0; border-color: var(--quiz-success); color: var(--quiz-success);">KHMT</span>
                         </div>
                     </div>
@@ -668,16 +668,16 @@
             
             <div style="border-top: 1px solid var(--quiz-border); padding-top: 16px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleModalHistory()">
-                    <h4 style="font-size: 0.95rem; margin: 0; color: var(--quiz-text);"><i class="fa fa-history"></i> Lịch sử làm bài đề này</h4>
-                    <span id="modal-history-count" style="background: var(--quiz-primary); color: #000; font-weight: bold; border-radius: 12px; padding: 2px 8px; font-size: 0.75rem;">0 lần</span>
+                    <h4 style="font-size: 0.95rem; margin: 0; color: var(--quiz-text);"><i class="fa fa-history"></i> {{ _('Practice history for this exam') }}</h4>
+                    <span id="modal-history-count" style="background: var(--quiz-primary); color: #000; font-weight: bold; border-radius: 12px; padding: 2px 8px; font-size: 0.75rem;">0 {{ _('times') }}</span>
                 </div>
                 <div id="modal-history-list" class="modal-history-list" style="display: none;">
                 </div>
             </div>
             
             <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--quiz-border); padding-top: 16px;">
-                <button type="button" class="quiz-session-btn" onclick="closeStartModal()" style="margin: 0; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #ffffff !important;">Đóng</button>
-                <button type="submit" class="quiz-btn-primary" style="margin: 0; padding: 10px 24px;"><i class="fa fa-play"></i> Bắt đầu làm bài</button>
+                <button type="button" class="quiz-session-btn" onclick="closeStartModal()" style="margin: 0; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #ffffff !important;">{{ _('Close') }}</button>
+                <button type="submit" class="quiz-btn-primary" style="margin: 0; padding: 10px 24px;"><i class="fa fa-play"></i> {{ _('Start') }}</button>
             </div>
         </form>
     </div>
@@ -692,32 +692,32 @@
                     <i class="fa fa-question-circle"></i>
                 </div>
                 <div>
-                    <div class="help-modal-title-sub">Trợ giúp nhanh</div>
-                    <h3 class="help-modal-title-main">Luyện tập</h3>
+                    <div class="help-modal-title-sub">{{ _('Quick Help') }}</div>
+                    <h3 class="help-modal-title-main">{{ _('Practice') }}</h3>
                 </div>
             </div>
             <button type="button" class="help-modal-close" onclick="closeHelpModal()">&times;</button>
         </div>
         
-        <p class="help-modal-subtitle">Chọn chủ đề và bắt đầu luyện câu hỏi ngắn.</p>
+        <p class="help-modal-subtitle">{{ _('Choose a topic and start practicing short questions.') }}</p>
         
         <div class="help-modal-grid">
             <!-- Conditions Card -->
             <div class="help-modal-card condition-card">
-                <div class="help-card-header">Điều kiện</div>
+                <div class="help-card-header">{{ _('Requirements') }}</div>
                 <ul class="help-card-list">
-                    <li>- Cần đăng nhập để lưu lịch sử và tính độ chính xác.</li>
-                    <li>- Câu đã làm gần đây có thể được ẩn để tránh lặp quá nhanh.</li>
+                    <li>{{ _('- Login required to save history and calculate accuracy.') }}</li>
+                    <li>{{ _('- Recently answered questions may be hidden to avoid quick repetition.') }}</li>
                 </ul>
             </div>
             
             <!-- Usage Card -->
             <div class="help-modal-card usage-card">
-                <div class="help-card-header">Cách dùng cơ bản</div>
+                <div class="help-card-header">{{ _('Basic Usage') }}</div>
                 <ul class="help-card-list">
-                    <li>1. Chọn tag hoặc chủ đề cần luyện.</li>
-                    <li>2. Bắt đầu phiên luyện tập.</li>
-                    <li>3. Theo dõi điểm mạnh, điểm yếu trong hồ sơ sau khi luyện.</li>
+                    <li>{{ _('1. Select a tag or topic to practice.') }}</li>
+                    <li>{{ _('2. Start a practice session.') }}</li>
+                    <li>{{ _('3. Track your strengths and weaknesses in your profile after practicing.') }}</li>
                 </ul>
             </div>
         </div>

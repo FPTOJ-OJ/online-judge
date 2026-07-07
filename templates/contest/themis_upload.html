@@ -15,7 +15,7 @@
 {% block body %}
 {% set is_dark = PREFERRED_STYLE_CSS and 'dark' in PREFERRED_STYLE_CSS %}
 <style>
-    /* === Layout chính === */
+    /* === Main layout === */
     .upload-container { display: flex; flex-direction: column; gap: 20px; margin-bottom: 50px; }
 
     .upload-main-grid {
@@ -42,7 +42,7 @@
         font-size: 1em;
     }
 
-    /* === Bảng tra cứu tên file === */
+    /* === Filename lookup table === */
     .filename-lookup {
         position: sticky;
         top: 60px;
@@ -126,7 +126,7 @@
     .ext-badge { background: #1a3a5c; color: #90caf9; }
     {% endif %}
 
-    /* === Khu vực upload === */
+    /* === Upload area === */
     .status-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .status-table th, .status-table td { border: 1px solid rgba(128, 128, 128, 0.2); padding: 8px; text-align: left; }
     .status-table th { background-color: rgba(128, 128, 128, 0.1); }
@@ -166,7 +166,7 @@
         border-radius: 8px;
     }
 
-    /* Hướng dẫn đặt tên file */
+    /* File naming guide */
     .naming-tip {
         background: rgba(255, 193, 7, 0.1);
         border: 1px solid rgba(255, 193, 7, 0.4);
@@ -191,40 +191,40 @@
 
 <div class="contest-tab-content upload-container {{ 'dark-mode' if is_dark else '' }}">
 
-    <!-- === Hướng dẫn === -->
+    <!-- === Guide === -->
     <div class="settings-panel" style="border-left: 5px solid #007bff;">
-        <h4><i class="fa fa-info-circle"></i> Hướng dẫn nộp bài</h4>
+        <h4><i class="fa fa-info-circle"></i> {{ _('Hướng dẫn nộp bài') }}</h4>
         <div style="padding-left: 10px;">
             {% if request.user.is_staff %}
-                <p><strong>Chấm điểm hàng loạt (Quản trị viên):</strong></p>
+                <p><strong>{{ _('Chấm điểm hàng loạt (Quản trị viên):') }}</strong></p>
                 <ul style="margin-bottom: 5px;">
-                    <li>Tải lên file <strong>ZIP</strong> theo cấu trúc thư mục Themis (mỗi thư mục là một tên đăng nhập học sinh).</li>
-                    <li>Hệ thống sẽ tự động nhận diện học sinh và nộp bài lần lượt.</li>
-                    <li>Tiến trình chấm và điểm số cập nhật theo thời gian thực. Kết quả được lưu tự động vào trình duyệt.</li>
-                    <li>Dùng "Xóa kết quả" để xóa lịch sử cục bộ và bắt đầu phiên mới.</li>
+                    <li>{{ _('Tải lên file') }} <strong>ZIP</strong> {{ _('theo cấu trúc thư mục Themis (mỗi thư mục là một tên đăng nhập học sinh).') }}</li>
+                    <li>{{ _('Hệ thống sẽ tự động nhận diện học sinh và nộp bài lần lượt.') }}</li>
+                    <li>{{ _('Tiến trình chấm và điểm số cập nhật theo thời gian thực. Kết quả được lưu tự động vào trình duyệt.') }}</li>
+                    <li>{{ _('Dùng "Xóa kết quả" để xóa lịch sử cục bộ và bắt đầu phiên mới.') }}</li>
                 </ul>
             {% else %}
                 <ul style="margin-bottom: 0;">
-                    <li><strong>Cách nộp bài:</strong> Chọn các file bài giải hoặc chọn cả thư mục. Hệ thống sẽ tự động khớp tên file với bài tập tương ứng và nộp bài.</li>
-                    <li><strong>Đặt tên file đúng</strong> theo bảng tra cứu bên phải để hệ thống nhận diện được.</li>
-                    <li>Sau khi chọn file, nhấn <strong>"Nộp tất cả"</strong> để bắt đầu nộp bài.</li>
+                    <li><strong>{{ _('Cách nộp bài:') }}</strong> {{ _('Chọn các file bài giải hoặc chọn cả thư mục. Hệ thống sẽ tự động khớp tên file với bài tập tương ứng và nộp bài.') }}</li>
+                    <li><strong>{{ _('Đặt tên file đúng') }}</strong> {{ _('theo bảng tra cứu bên phải để hệ thống nhận diện được.') }}</li>
+                    <li>{{ _('Sau khi chọn file, nhấn') }} <strong>"{{ _('Nộp tất cả') }}"</strong> {{ _('để bắt đầu nộp bài.') }}</li>
                 </ul>
             {% endif %}
         </div>
     </div>
 
-    <!-- === Grid: Upload + Bảng tra cứu === -->
+    <!-- === Grid: Upload + Lookup table === -->
     <div class="upload-main-grid">
 
-        <!-- Cột trái: Upload -->
+        <!-- Left column: Upload -->
         <div>
             {% if request.user.is_staff %}
-            <!-- Tải ZIP hàng loạt (Chỉ admin) -->
+            <!-- Bulk ZIP upload (Admin only) -->
             <div class="settings-panel" style="border-left: 5px solid #ffc107; margin-bottom: 20px;">
-                <h4><i class="fa fa-file-archive-o"></i> Tải lên ZIP bài giải hàng loạt</h4>
+                <h4><i class="fa fa-file-archive-o"></i> {{ _('Tải lên ZIP bài giải hàng loạt') }}</h4>
                 <div class="form-group" style="text-align: center; padding: 10px;">
                     <label for="zip-input" class="button" style="background-color: #ffc107; color: #333; cursor: pointer; font-size: 1.2em; padding: 10px 30px;">
-                        <i class="fa fa-cloud-upload"></i> Chọn file ZIP
+                        <i class="fa fa-cloud-upload"></i> {{ _('Chọn file ZIP') }}
                     </label>
                     <input type="file" id="zip-input" accept=".zip" style="display: none;">
                     <div id="upload-progress-wrapper" class="progress-wrapper">
@@ -234,20 +234,20 @@
                 </div>
             </div>
 
-            <!-- Bảng kết quả chấm hàng loạt -->
+            <!-- Bulk grading results table -->
             <div id="bulk-matrix-container" class="matrix-container" style="display: none;">
                 <div class="action-bar">
-                    <button id="btn-toggle-log" class="button"><i class="fa fa-terminal"></i> Nhật ký chấm</button>
-                    <button id="btn-clear-history" class="button red"><i class="fa fa-trash"></i> Xóa kết quả</button>
-                    <button id="btn-export-csv" class="button"><i class="fa fa-file-excel-o"></i> Xuất CSV</button>
+                    <button id="btn-toggle-log" class="button"><i class="fa fa-terminal"></i> {{ _('Nhật ký chấm') }}</button>
+                    <button id="btn-clear-history" class="button red"><i class="fa fa-trash"></i> {{ _('Xóa kết quả') }}</button>
+                    <button id="btn-export-csv" class="button"><i class="fa fa-file-excel-o"></i> {{ _('Xuất CSV') }}</button>
                 </div>
-                <h3>Kết quả chấm điểm</h3>
+                <h3>{{ _('Kết quả chấm điểm') }}</h3>
                 <table class="matrix-table" id="matrix-table">
                     <thead>
                         <tr id="matrix-header">
-                            <th class="username-col">Tên đăng nhập</th>
+                            <th class="username-col">{{ _('Tên đăng nhập') }}</th>
                             <!-- Problem headers inserted dynamically -->
-                            <th class="total-col">Tổng</th>
+                            <th class="total-col">{{ _('Tổng') }}</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-body"></tbody>
@@ -256,26 +256,26 @@
             </div>
             {% endif %}
 
-            <!-- === Upload file cá nhân === -->
+            <!-- === Individual file upload === -->
             <div class="settings-panel" style="border-left: 5px solid #28a745;">
-                <h4><i class="fa fa-upload"></i> Nộp bài giải</h4>
+                <h4><i class="fa fa-upload"></i> {{ _('Nộp bài giải') }}</h4>
 
                 <p class="naming-tip">
                     <i class="fa fa-lightbulb-o"></i>
-                    <strong>Mẹo đặt tên file:</strong>
-                    Đặt tên file đúng tên bài tập (ví dụ: <span class="example-code">BAITAP1.cpp</span>
-                    hoặc <span class="example-code">tenDangNhap_BAITAP1.cpp</span>).
-                    Xem bảng tra cứu bên phải để biết tên chính xác.
+                    <strong>{{ _('Mẹo đặt tên file:') }}</strong>
+                    {{ _('Đặt tên file đúng tên bài tập (ví dụ:') }} <span class="example-code">BAITAP1.cpp</span>
+                    {{ _('hoặc') }} <span class="example-code">tenDangNhap_BAITAP1.cpp</span>).
+                    {{ _('Xem bảng tra cứu bên phải để biết tên chính xác.') }}
                 </p>
 
                 <div class="form-group individual-upload-area">
                     <label for="file-input" class="button primary" style="font-size: 1.4em; padding: 14px 28px; cursor: pointer;">
-                        <i class="fa fa-folder-open"></i> Chọn file bài giải
+                        <i class="fa fa-folder-open"></i> {{ _('Chọn file bài giải') }}
                     </label>
                     <input type="file" id="file-input" multiple webkitdirectory accept="{{ all_extensions }}" style="display: none;">
                     <div id="file-count" style="margin-top: 10px; font-weight: bold; font-size: 1.1em; color: #0056b3;"></div>
                     <button id="btn-submit-all" class="button" style="display: none; margin-top: 20px; font-size: 1.2em; background-color: #28a745; color: white;">
-                        <i class="fa fa-cloud-upload"></i> Nộp tất cả
+                        <i class="fa fa-cloud-upload"></i> {{ _('Nộp tất cả') }}
                     </button>
                 </div>
 
@@ -284,9 +284,9 @@
                         <thead>
                             <tr>
                                 <th>File</th>
-                                <th>Bài tập</th>
-                                <th>Ngôn ngữ</th>
-                                <th>Trạng thái</th>
+                                <th>{{ _('Bài tập') }}</th>
+                                <th>{{ _('Ngôn ngữ') }}</th>
+                                <th>{{ _('Trạng thái') }}</th>
                             </tr>
                         </thead>
                         <tbody id="status-body"></tbody>
@@ -295,31 +295,31 @@
             </div>
         </div>
 
-        <!-- Cột phải: Bảng tra cứu tên file -->
+        <!-- Right column: Filename lookup table -->
         <div class="filename-lookup">
             <div class="filename-lookup-header">
                 <i class="fa fa-table"></i>
-                Tra cứu tên file nộp bài
+                {{ _('Tra cứu tên file nộp bài') }}
             </div>
             <div style="padding: 10px 14px 6px 14px;">
                 <p style="margin: 0 0 8px 0; font-size: 0.82em; opacity: 0.75;">
-                    Đặt tên file theo cột <strong>Tên file</strong> dưới đây (không phân biệt hoa thường). Phần mở rộng (.cpp, .py, ...) theo ngôn ngữ lập trình của bạn.
+                    {{ _('Đặt tên file theo cột') }} <strong>{{ _('Tên file') }}</strong> {{ _('dưới đây (không phân biệt hoa thường). Phần mở rộng (.cpp, .py, ...) theo ngôn ngữ lập trình của bạn.') }}
                 </p>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Bài tập</th>
-                        <th>Tên file</th>
-                        <th>Đuôi hợp lệ</th>
+                        <th>{{ _('Bài tập') }}</th>
+                        <th>{{ _('Tên file') }}</th>
+                        <th>{{ _('Đuôi hợp lệ') }}</th>
                     </tr>
                 </thead>
                 <tbody id="filename-lookup-body">
-                    <!-- Được điền bởi JS -->
+                    <!-- Populated by JS -->
                 </tbody>
             </table>
             <div style="padding: 8px 14px; font-size: 0.78em; opacity: 0.6; border-top: 1px solid rgba(128,128,128,0.15);">
-                <i class="fa fa-info-circle"></i> Ví dụ đặt tên:
+                <i class="fa fa-info-circle"></i> {{ _('Ví dụ đặt tên:') }}
                 <span id="lookup-example" style="font-family: monospace; font-weight: bold;"></span>
             </div>
         </div>
@@ -335,25 +335,25 @@
     const STORAGE_KEY = 'themis_bulk_results_{{ contest.key }}';
     const hideScoresFromStudents = {% if contest.format_config and contest.format_config.hide_scores_from_students and not (request.user.is_staff or request.user.is_superuser) %}true{% else %}false{% endif %};
 
-    // === Điền bảng tra cứu tên file ===
+    // === Populate filename lookup table ===
     (function buildLookupTable() {
         const tbody = document.getElementById('filename-lookup-body');
         const exampleEl = document.getElementById('lookup-example');
 
-        // Lấy danh sách đuôi file phổ biến từ mappings
+        // Get common file extensions from mappings
         const commonExts = {};
         Object.entries(globalMappings).forEach(([ext, langId]) => {
             if (!commonExts[langId]) commonExts[langId] = [];
             commonExts[langId].push(ext);
         });
 
-        // Lấy top 3 đuôi phổ biến
+        // Get top 3 common extensions
         const topExts = Object.entries(globalMappings)
             .filter(([ext]) => ['.cpp', '.py', '.java', '.pas', '.c', '.cs', '.go'].includes(ext))
             .map(([ext]) => ext);
 
         orderedProblems.forEach(function(prob) {
-            // Tìm code file từ problemsMap ngược lại
+            // Find code file from problemsMap in reverse
             const fileCodes = Object.entries(problemsMap)
                 .filter(([code, pCode]) => pCode === prob.code)
                 .map(([code]) => code);
@@ -362,7 +362,7 @@
 
             const tr = document.createElement('tr');
 
-            // Tên bài tập
+            // Problem name
             const tdName = document.createElement('td');
             tdName.style.fontWeight = 'bold';
             tdName.style.maxWidth = '90px';
@@ -373,24 +373,24 @@
             tdName.textContent = prob.name || prob.code;
             tr.appendChild(tdName);
 
-            // Tên file (code)
+            // Filename (code)
             const tdCode = document.createElement('td');
             const codeSpan = document.createElement('span');
             codeSpan.className = 'file-code';
             codeSpan.textContent = mainCode;
             tdCode.appendChild(codeSpan);
 
-            // Thêm alias nếu có nhiều tên
+            // Add alias if there are multiple names
             if (fileCodes.length > 1) {
                 const aliasDiv = document.createElement('div');
                 aliasDiv.style.fontSize = '0.75em';
                 aliasDiv.style.opacity = '0.6';
-                aliasDiv.textContent = '(hoặc: ' + fileCodes.slice(1).join(', ') + ')';
+                aliasDiv.textContent = '{{ _("(hoặc: ") }}' + fileCodes.slice(1).join(', ') + ')';
                 tdCode.appendChild(aliasDiv);
             }
             tr.appendChild(tdCode);
 
-            // Đuôi file
+            // File extensions
             const tdExt = document.createElement('td');
             topExts.slice(0, 4).forEach(function(ext) {
                 const badge = document.createElement('span');
@@ -403,7 +403,7 @@
             tbody.appendChild(tr);
         });
 
-        // Ví dụ đặt tên
+        // Naming example
         if (orderedProblems.length > 0) {
             const firstProb = orderedProblems[0];
             const fileCodes = Object.entries(problemsMap)
@@ -508,7 +508,7 @@
                 if (isGraded) {
                     const status = resultDiv.classList.contains('AC') ? 'success' : 'error';
                     if (hideScoresFromStudents) {
-                        cell.innerHTML = `<span class="status-success">Đã nộp</span>`;
+                        cell.innerHTML = `<span class="status-success">{{ _('Đã nộp') }}</span>`;
                     } else {
                         cell.innerHTML = `<a href="/submission/${id}" target="_blank" class="status-${status}">${score}</a>`;
                     }
@@ -518,7 +518,7 @@
                     const progressDiv = tempDiv.querySelector('.sub-testcase');
                     const progress = progressDiv ? ` (${progressDiv.innerText.trim()})` : '';
                     if (hideScoresFromStudents) {
-                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>Đang chấm${progress}</span>`;
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>{{ _('Đang chấm') }}${progress}</span>`;
                     } else {
                         cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${score}${progress}</span>`;
                     }
@@ -561,7 +561,7 @@
         const progressWrapper = document.getElementById('upload-progress-wrapper');
         const progressBar = document.getElementById('upload-progress-bar');
 
-        statusDiv.innerText = 'Đang tải lên file ZIP...';
+        statusDiv.innerText = '{{ _("Đang tải lên file ZIP...") }}';
         progressWrapper.style.display = 'block';
         progressBar.style.width = '0%';
 
@@ -574,7 +574,7 @@
                 const percent = Math.round((event.loaded / event.total) * 100);
                 progressBar.style.width = percent + '%';
                 progressBar.innerText = percent + '%';
-                if (percent === 100) statusDiv.innerText = 'Đang giải nén và nhận diện học sinh...';
+                if (percent === 100) statusDiv.innerText = '{{ _("Đang giải nén và nhận diện học sinh...") }}';
             }
         };
 
@@ -582,13 +582,13 @@
             try {
                 const result = JSON.parse(xhr.responseText);
                 if (result.success) {
-                    statusDiv.innerText = 'Giải nén thành công. Đang nộp bài và chấm điểm...';
+                    statusDiv.innerText = '{{ _("Giải nén thành công. Đang nộp bài và chấm điểm...") }}';
                     const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 
                     renderMatrix(result.results);
 
                     for (const [user, userProbs] of Object.entries(result.results)) {
-                        log(`>>> Đang xử lý học sinh: ${user}`);
+                        log(`>>> {{ _('Đang xử lý học sinh:') }} ${user}`);
                         if (!history[user]) history[user] = {};
 
                         for (const prob of orderedProblems) {
@@ -597,29 +597,29 @@
                                 const sub = await submitSolution(prob.code, data.lang, data.source, user);
                                 if (sub.success) {
                                     if (sub.user_not_found) {
-                                        log(`!! Học sinh [${user}] không tồn tại trong hệ thống. Nộp dưới tên admin [${sub.submitted_as}].`);
+                                        log(`!! {{ _('Học sinh') }} [${user}] {{ _('không tồn tại trong hệ thống. Nộp dưới tên admin') }} [${sub.submitted_as}].`);
                                     } else {
-                                        log(`Nộp bài [${prob.code}] cho học sinh [${user}]...`);
+                                        log(`{{ _('Nộp bài') }} [${prob.code}] {{ _('cho học sinh') }} [${user}]...`);
                                     }
                                     history[user][prob.code] = sub.id;
                                     const cell = document.querySelector(`tr[data-username="${CSS.escape(user)}"] td[data-problem="${CSS.escape(prob.code)}"]`);
                                     listenToSubmission(sub.id, cell);
                                     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
                                     await new Promise(r => setTimeout(r, 800));
-                                } else log(`!! Lỗi nộp bài [${prob.code}]: ${sub.error}`);
+                                } else log(`!! {{ _('Lỗi nộp bài') }} [${prob.code}]: ${sub.error}`);
                             }
                         }
                     }
-                    statusDiv.innerText = 'Tất cả bài đã được nộp và đang chờ chấm điểm.';
+                    statusDiv.innerText = '{{ _("Tất cả bài đã được nộp và đang chờ chấm điểm.") }}';
                     progressWrapper.style.display = 'none';
                 } else {
-                    statusDiv.innerText = 'Lỗi: ' + result.error;
+                    statusDiv.innerText = '{{ _("Lỗi: ") }}' + result.error;
                     progressWrapper.style.display = 'none';
                 }
-            } catch (e) { statusDiv.innerText = 'Lỗi phản hồi từ máy chủ.'; progressWrapper.style.display = 'none'; }
+            } catch (e) { statusDiv.innerText = '{{ _("Lỗi phản hồi từ máy chủ.") }}'; progressWrapper.style.display = 'none'; }
         };
 
-        xhr.onerror = () => { statusDiv.innerText = 'Tải lên thất bại. Vui lòng thử lại.'; progressWrapper.style.display = 'none'; };
+        xhr.onerror = () => { statusDiv.innerText = '{{ _("Tải lên thất bại. Vui lòng thử lại.") }}'; progressWrapper.style.display = 'none'; };
 
         const formData = new FormData();
         formData.append('zip_file', file);
@@ -647,7 +647,7 @@
     });
 
     document.getElementById('btn-clear-history').addEventListener('click', function() {
-        if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử chấm điểm cục bộ?')) {
+        if (confirm('{{ _("Bạn có chắc muốn xóa toàn bộ lịch sử chấm điểm cục bộ?") }}')) {
             localStorage.removeItem(STORAGE_KEY);
             location.reload();
         }
@@ -663,7 +663,7 @@
         let base = filename.replace(/\.[^/.]+$/, "").toUpperCase();
         if (problemsMap[base]) return problemsMap[base];
 
-        // Xử lý dạng TenHS_TenBai (ví dụ: user123_DIFFSSTR)
+        // Handle TenHS_TenBai format (e.g., user123_DIFFSSTR)
         const parts = base.split('_');
         for (let i = 1; i < parts.length; i++) {
             const potentialCode = parts.slice(i).join('_');
@@ -701,7 +701,7 @@
 
             if (probCode && langId) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${path}</td><td>${probCode}</td><td>${langId}</td><td class="status-cell">Chờ nộp</td>`;
+                tr.innerHTML = `<td>${path}</td><td>${probCode}</td><td>${langId}</td><td class="status-cell">{{ _('Chờ nộp') }}</td>`;
                 statusBody.appendChild(tr);
                 identifiedFiles.push({ file, probCode, langId, cell: tr.querySelector('.status-cell') });
             }
@@ -710,30 +710,30 @@
         const total = files.length;
         const found = identifiedFiles.length;
         const missed = total - found;
-        fileCountDiv.innerHTML = `<span style="color:#28a745">${found}</span> / ${total} file nhận diện được.` +
-            (missed > 0 ? ` <span style="color:#dc3545; font-size:0.9em;">(${missed} file không khớp tên bài tập)</span>` : '');
+        fileCountDiv.innerHTML = `<span style="color:#28a745">${found}</span> / ${total} {{ _('file nhận diện được.') }}` +
+            (missed > 0 ? ` <span style="color:#dc3545; font-size:0.9em;">(${missed} {{ _('file không khớp tên bài tập') }})</span>` : '');
 
         if (identifiedFiles.length > 0) {
             btnSubmitAll.style.display = 'inline-block';
             btnSubmitAll.onclick = async () => {
                 btnSubmitAll.disabled = true;
                 for (const item of identifiedFiles) {
-                    item.cell.innerText = 'Đang đọc file...';
+                    item.cell.innerText = '{{ _("Đang đọc file...") }}';
                     const reader = new FileReader();
                     const source = await new Promise(resolve => {
                         reader.onload = e => resolve(e.target.result);
                         reader.readAsText(item.file);
                     });
 
-                    item.cell.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang nộp...';
+                    item.cell.innerHTML = '<i class="fa fa-spinner fa-spin"></i> {{ _("Đang nộp...") }}';
                     const result = await submitSolution(item.probCode, item.langId, source);
                     if (result.success) {
                         item.cell.className = 'status-cell status-success';
-                        item.cell.innerText = 'Đã nộp';
+                        item.cell.innerText = '{{ _("Đã nộp") }}';
                         listenToSubmission(result.id, item.cell);
                     } else {
                         item.cell.className = 'status-cell status-error';
-                        item.cell.innerText = 'Lỗi: ' + result.error;
+                        item.cell.innerText = '{{ _("Lỗi: ") }}' + result.error;
                     }
                     await new Promise(r => setTimeout(r, 500));
                 }

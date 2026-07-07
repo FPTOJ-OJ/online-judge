@@ -3,7 +3,7 @@
 {% block before_posts %}
 <!-- Bảng mô tả -->
 <div class="home-description sidebox">
-    <h3>Chào mừng bạn đến với {% if site_config and site_config.site_name %}{{ site_config.site_name }}{% else %}FPT -
+    <h3>{{ _("Welcome to") }} {% if site_config and site_config.site_name %}{{ site_config.site_name }}{% else %}FPT -
         Online Judge{% endif %}!
         <i class="fa fa-globe"></i>
     </h3>
@@ -13,17 +13,15 @@
             {{ site_config.welcome_message|markdown }}
             {% else %}
             <p>
-                Đây là nơi chia sẻ kiến thức về lập trình, thuật toán và thi đấu lập trình dành riêng cho FSCHOOLERS.
-                Hãy cùng khám phá các bài toán thú vị và thảo luận cùng cộng đồng!
+                {{ _("This is a place to share knowledge about programming, algorithms, and competitive programming. Explore interesting problems and discuss with the community!") }}
             </p>
             <p>
-                - 🌟 Học thuật toán qua bài tập thực tế. <br>
-                - 🏆 Tham gia các cuộc thi lập trình. <br>
-                - 📚 Chia sẻ kinh nghiệm và mẹo giải bài. <br>
+                - 🌟 {{ _("Learn algorithms through practical problems.") }} <br>
+                - 🏆 {{ _("Participate in programming contests.") }} <br>
+                - 📚 {{ _("Share experiences and problem-solving tips.") }} <br>
             </p>
             <p>
-                Bắt đầu ngay bằng cách <a href="/problems/">xem danh sách bài toán</a> hoặc <a href="/contests/">tham
-                    gia cuộc thi</a>!
+                {{ _("Get started by") }} <a href="/problems/">{{ _("browsing the problem list") }}</a> {{ _("or") }} <a href="/contests/">{{ _("joining a contest") }}</a>!
             </p>
             {% endif %}
         </section>

@@ -1,0 +1,70 @@
+name: Test Setup Script
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+
+jobs:
+  test-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y expect lsof curl
+
+      - name: Create Expect Test Script
+        run: |
+          cat << 'EOF' > test_script.exp
+          #!/usr/bin/expect -f
+          set timeout -1
+          spawn sudo ./setup_fptoj.sh
+          expect {
+              "Tên trang web Online Judge của bạn" { send "\r"; exp_continue }
+              "Bạn có muốn tự động tạo bằng Docker" { send "\r"; exp_continue }
+              "Đặt mật khẩu" { send "fake_password\r"; exp_continue }
+              "Địa chỉ máy chủ SMTP Mail" { send "\r"; exp_continue }
+              "Cổng SMTP" { send "\r"; exp_continue }
+              "Tên đăng nhập SMTP Email" { send "\r"; exp_continue }
+              "Mật khẩu SMTP Email" { send "\r"; exp_continue }
+              "Email gửi đi hiển thị" { send "\r"; exp_continue }
+              "Tên miền hoặc IP truy cập" { send "fake.domain.com\r"; exp_continue }
+              "Google OAuth2 Key:" { send "\r"; exp_continue }
+              "Google OAuth2 Secret:" { send "\r"; exp_continue }
+              "GitHub OAuth2 Key:" { send "\r"; exp_continue }
+              "GitHub OAuth2 Secret:" { send "\r"; exp_continue }
+              "Cloudflare Turnstile SiteKey:" { send "\r"; exp_continue }
+              "Cloudflare Turnstile Secret:" { send "\r"; exp_continue }
+              "Bạn có muốn tạo một tài khoản Admin mới" { send "n\r"; exp_continue }
+              "Vui lòng nhập port khác cho Web Server" { send "8080\r"; exp_continue }
+              "Tên định danh máy chấm" { send "test-judge-1\r"; exp_continue }
+              "Khóa xác thực bí mật máy chấm" { send "\r"; exp_continue }
+              "Bạn có muốn cài đặt và chạy máy chấm" { send "n\r"; exp_continue }
+              eof
+          }
+          catch wait result
+          set exit_status [lindex $result 3]
+          if {$exit_status != 0} {
+              exit 1
+          }
+          EOF
+          chmod +x test_script.exp
+
+      - name: Run Setup Script with Expect
+        run: ./test_script.exp
+
+      - name: Verify Setup Results
+        run: |
+          # Check if local_settings.py was created and has the fake domain
+          cat dmoj/local_settings.py | grep "fake.domain.com"
+          # Check if info file was created in root home (since script runs with sudo)
+          cat ~/fptoj_setup_info.txt || sudo cat /root/fptoj_setup_info.txt || true

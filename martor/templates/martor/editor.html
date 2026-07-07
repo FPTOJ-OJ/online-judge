@@ -1,8 +1,11 @@
 {% load i18n %}
 <style>
-    /* Ẩn select editor switch gốc từ đầu để tránh 2 dropdown */
     select.editor-switch {
         display: none !important;
+    }
+    .editor-toggle {
+        margin-top: 15px;
+        margin-bottom: 10px;
     }
 </style>
 
@@ -61,13 +64,6 @@
         const style = document.createElement('style');
         style.id = 'editor-switch-styles';
         style.textContent = `
-            .editor-toggle { margin-top: 15px; margin-bottom: 10px; }
-            
-            /* Ẩn select editor switch gốc để tránh hiển thị 2 dropdown */
-            select.editor-switch {
-                display: none !important;
-            }
-            
             /* Đồng bộ theme tối cho Martor Editor khi ở Dark Mode của Jazzmin */
             body.dark-mode .main-martor {
                 background-color: #1a1a2e !important;
@@ -168,8 +164,8 @@
                         th { background-color: #f2f2f2; }
                         code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
                     </style>
-                    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
                     <script type="text/javascript" src="/static/mathjax_config.js"><\/script>
+                    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
                 </head>
                 <body>${htmlContent}</body>
             </html>
@@ -296,8 +292,8 @@
     <!-- Editor Type Switcher -->
     <div class="ui right floated item editor-toggle">
       <select id="editor-switch-{{ field_name }}" class="editor-switch" style="display: none !important;">
-        <option value="martor">Martor (Markdown)</option>
-        <option value="ckeditor">CKEditor (HTML)</option>
+        <option value="martor">{% trans "Martor (Markdown)" %}</option>
+        <option value="ckeditor">{% trans "CKEditor (HTML)" %}</option>
       </select>
     </div>
     <div style="clear: both;"></div>
@@ -332,7 +328,9 @@
       
       <div class="ui bottom attached tab segment active" data-tab="ckeditor-editor-tab-{{ field_name }}">
         <div class="editor-container__editor">
-            <div id="ckeditor-{{ field_name }}"></div>
+            <div id="ckeditor-{{ field_name }}" class="ck-editor-loading">
+                <div class="ui active centered inline loader"></div>
+            </div>
         </div>
       </div>
       

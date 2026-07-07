@@ -1,40 +1,4 @@
 <script type="text/javascript" src="{{ static('mathjax_config.js') }}"></script>
-<script type="text/javascript">
-    if (window.MathJax && window.MathJax.tex) {
-        if (!window.MathJax.tex.inlineMath) {
-            window.MathJax.tex.inlineMath = [];
-        }
-        const additionalInline = [
-            ['$', '$'],
-            ['~', '~'],
-            ['\\(', '\\)']
-        ];
-        additionalInline.forEach(function(pair) {
-            const exists = window.MathJax.tex.inlineMath.some(function(existingPair) {
-                return existingPair[0] === pair[0] && existingPair[1] === pair[1];
-            });
-            if (!exists) {
-                window.MathJax.tex.inlineMath.push(pair);
-            }
-        });
-
-        if (!window.MathJax.tex.displayMath) {
-            window.MathJax.tex.displayMath = [];
-        }
-        const additionalDisplay = [
-            ['$$', '$$'],
-            ['\\[', '\\]']
-        ];
-        additionalDisplay.forEach(function(pair) {
-            const exists = window.MathJax.tex.displayMath.some(function(existingPair) {
-                return existingPair[0] === pair[0] && existingPair[1] === pair[1];
-            });
-            if (!exists) {
-                window.MathJax.tex.displayMath.push(pair);
-            }
-        });
-    }
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js" integrity="sha256-+KniKIYcAlCpR+TN3/SuJANyNgD1pV+jzj/R1sR8E9w=" crossorigin="anonymous"></script>
 <script type="text/javascript">
     if (window.MathJax && typeof MathJax.typesetPromise === 'function') {

@@ -6460,3 +6460,27 @@ msgstr ""
 #: templates/widgets/select_all.html:8
 msgid "Check all"
 msgstr ""
+
+#: martor/templates/martor/toolbar.html:30
+msgid "MathType - write formulas and convert them to LaTeX"
+msgstr ""
+
+#: martor/templates/martor/toolbar.html:63 martor/templates/martor/toolbar.html:65
+msgid "Upload an Image or PDF"
+msgstr ""
+
+#: martor/templates/martor/guide.html:11
+msgid "Linux/Windows"
+msgstr ""
+
+#: martor/templates/martor/guide.html:12
+msgid "Mac OS"
+msgstr ""
+
+#: martor/templates/martor/editor.html:295
+msgid "Martor (Markdown)"
+msgstr ""
+
+#: martor/templates/martor/editor.html:296
+msgid "CKEditor (HTML)"
+msgstr ""

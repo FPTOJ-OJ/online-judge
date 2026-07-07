@@ -123,7 +123,7 @@
                 $(document).ready(function() {
                     if ($('.django-ace-toolbar').length) {
                         $('.django-ace-toolbar').append(
-                            '<label for="fileInput" style="font-size: 16px;margin-left: 10px;font-style: italic;">📂 Dán, Kéo File bài làm của bạn vào đây hoặc nhập từ file:</label> ' +
+                            '<label for="fileInput" style="font-size: 16px;margin-left: 10px;font-style: italic;">{{ _("📂 Paste, Drag & Drop your code file here or upload from file:") }}</label> ' +
                             '<input type="file" id="fileInput" accept="*.*" style="margin-left: 5px;margin-bottom: 10px;">'
                         );
                     }
@@ -246,10 +246,10 @@
         {% endif %}
     </form>
     <p style="color: #d9534f; font-size: 14px; line-height: 1.6; margin: 10px 0;">
-      ⚠️ Khi bài yêu cầu đọc/ghi file, bạn phải sử dụng 
-      <span style="text-decoration: underline;">đúng tên file</span> 
-      như trong phần <strong>Input:</strong> và <strong>Output:</strong> của đề bài.  
-      Hệ thống sẽ <strong>không phân biệt hoa thường</strong> và sẽ tự động chuẩn hóa tên file trong code của bạn.  
-      Nếu ghi <code>stdin</code>/<code>stdout</code>, chương trình sẽ đọc/ghi trực tiếp từ console thay vì file.
+      ⚠️ {{ _("When the problem requires file input/output, you must use the") }}
+      <span style="text-decoration: underline;">{{ _("correct filename") }}</span> 
+      {{ _("as specified in the") }} <strong>Input:</strong> {{ _("and") }} <strong>Output:</strong> {{ _("sections of the problem statement.") }}  
+      {{ _("The system is") }} <strong>{{ _("case-insensitive") }}</strong> {{ _("and will automatically normalize filenames in your code.") }}  
+      {{ _("If using") }} <code>stdin</code>/<code>stdout</code>, {{ _("the program will read/write from the console instead of files.") }}
     </p>
 {% endblock %}

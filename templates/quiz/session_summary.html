@@ -16,35 +16,35 @@
         </div>
         
         <h1 class="quiz-summary-title">
-            Hoàn thành luyện tập!
+            {{ _('Hoàn thành luyện tập!') }}
         </h1>
         <p class="quiz-summary-subtitle">
-            Bạn đã hoàn thành phiên luyện tập trắc nghiệm THPT.
+            {{ _('Bạn đã hoàn thành phiên luyện tập trắc nghiệm THPT.') }}
         </p>
 
         <!-- Stats Grid -->
         <div class="quiz-summary-grid">
             <div class="quiz-summary-box">
-                <span class="label">Tổng số câu</span>
+                <span class="label">{{ _('Tổng số câu') }}</span>
                 <span class="value">{{ total_questions }}</span>
             </div>
             <div class="quiz-summary-box">
-                <span class="label">Đã trả lời</span>
+                <span class="label">{{ _('Đã trả lời') }}</span>
                 <span class="value">{{ answered_questions }}</span>
             </div>
             <div class="quiz-summary-box">
-                <span class="label">Bỏ qua / Chưa làm</span>
+                <span class="label">{{ _('Bỏ qua / Chưa làm') }}</span>
                 <span class="value">{{ skipped_questions }}</span>
             </div>
             <div class="quiz-summary-box score-box">
-                <span class="label">Tổng điểm đạt được</span>
+                <span class="label">{{ _('Tổng điểm đạt được') }}</span>
                 <span class="value">{{ score }}</span>
             </div>
         </div>
 
         <div>
             <a href="{{ url('quiz_home') }}" class="quiz-btn-primary" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; box-sizing: border-box;">
-                Quay lại Trang luyện tập <i class="fa fa-arrow-right"></i>
+                {{ _('Quay lại Trang luyện tập') }} <i class="fa fa-arrow-right"></i>
             </a>
         </div>
     </div>

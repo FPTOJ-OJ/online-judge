@@ -107,7 +107,7 @@ function getEditorConfig(textarea) {
                 'alignment', '|',
                 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent'
             ],
-            shouldNotGroupWhenFull: false
+            shouldNotGroupWhenFull: true
         },
         plugins: [
             Alignment, Autoformat, AutoImage, AutoLink, Autosave, BalloonToolbar, BlockQuote, BlockToolbar,
@@ -253,6 +253,7 @@ function switchEditor(valueOrElement, fieldName) {
 
             window.CKEDITOR.ClassicEditor.create(ckeditorEditor, getEditorConfig(textarea))
                 .then(editor => {
+                    ckeditorEditor.classList.remove('ck-editor-loading');
                     window.ckeditorInstances = window.ckeditorInstances || {};
                     window.ckeditorInstances[fieldName] = editor;
 
