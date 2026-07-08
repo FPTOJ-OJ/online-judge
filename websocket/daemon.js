@@ -49,6 +49,10 @@ messages.last = function () {
 wss_receiver.on('connection', function (socket) {
     socket.channel = null;
     socket.last_msg = 0;
+    socket.isAlive = true;
+    socket.on('pong', function () {
+        socket.isAlive = true;
+    });
 
     var commands = {
         start_msg: function (request) {
@@ -204,3 +208,18 @@ require('http').createServer(function (req, res) {
         });
     }
 }).listen(config.http_port, config.http_host);
+
+const pingInterval = setInterval(function ping() {
+    wss_receiver.clients.forEach(function each(socket) {
+        if (socket.isAlive === false) {
+            return socket.terminate();
+        }
+        socket.isAlive = false;
+        socket.ping(function noop() {});
+    });
+}, 30000);
+
+wss_receiver.on('close', function close() {
+    clearInterval(pingInterval);
+});
+

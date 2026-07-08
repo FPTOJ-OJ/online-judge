@@ -317,7 +317,7 @@ try:
             exit(0)
 except Exception:
     pass
-print('$default_val')
+print(default)
 PYEOF
   else
     echo "$default_val"
@@ -429,6 +429,43 @@ chown -R $REAL_USER:$REAL_USER "$data_dir"
 mkdir -p "$SITE_DIR/logs"
 chown -R $REAL_USER:$REAL_USER "$SITE_DIR/logs"
 chmod -R 775 "$SITE_DIR/logs"
+
+# Kiểm tra cài đặt hiện có -> hỏi cập nhật
+if [ -f "$SITE_DIR/dmoj/local_settings.py" ] && [ -f "$SITE_DIR/dmoj/celery.py" ]; then
+    echo ""
+    echo "[i] Phát hiện hệ thống đã được cài đặt trước đó."
+    echo ""
+    echo "    Chọn chế độ:"
+    echo "    1) Cập nhật đầy đủ  - Ghi đè local_settings.py (giữ SECRET_KEY cũ + DB),"
+    echo "                           cập nhật supervisor, biên dịch assets, restart dịch vụ."
+    echo "    2) Giữ nguyên cấu hình - Chỉ cập nhật supervisor, assets, restart."
+    echo "                           local_settings.py và DB được giữ nguyên 100%."
+    echo "    3) Cài đặt mới     - Chạy toàn bộ tiến trình cài đặt từ đầu."
+    echo ""
+    read -p "[?] Nhập lựa chọn (1/2/3) [1]: " update_choice
+    update_choice=${update_choice:-1}
+    case "$update_choice" in
+        1)
+            UPDATE_MODE=true
+            KEEP_LOCAL_SETTINGS=false
+            OLD_SECRET_KEY=$(parse_setting "SECRET_KEY" "")
+            echo "[i] Cập nhật đầy đủ: ghi đè local_settings.py, giữ DB + SECRET_KEY."
+            ;;
+        2)
+            UPDATE_MODE=true
+            KEEP_LOCAL_SETTINGS=true
+            echo "[i] Giữ nguyên local_settings.py, chỉ cập nhật cấu hình hệ thống."
+            ;;
+        *)
+            UPDATE_MODE=false
+            KEEP_LOCAL_SETTINGS=false
+            echo "[i] Cài đặt mới hoàn toàn."
+            ;;
+    esac
+else
+    UPDATE_MODE=false
+    KEEP_LOCAL_SETTINGS=false
+fi
 
 # Kiểm tra và tự động cấu hình các cổng kết nối tránh trùng lặp
 echo ""
@@ -608,12 +645,15 @@ else
     admin_config=""
 fi
 
-cat << EOF > "$SITE_DIR/dmoj/local_settings.py"
+if [ "$KEEP_LOCAL_SETTINGS" = "true" ]; then
+    echo "[i] Giữ nguyên file local_settings.py hiện có."
+else
+    cat << EOF > "$SITE_DIR/dmoj/local_settings.py"
 # Sinh tự động bởi setup_fptoj.sh vào $(date)
 import datetime
 import os
 
-SECRET_KEY = '$(python3 -c "import secrets; print(secrets.token_urlsafe(50))")'
+SECRET_KEY = '${OLD_SECRET_KEY:-$(python3 -c "import secrets; print(secrets.token_urlsafe(50))")}'
 DEBUG = False
 
 ALLOWED_HOSTS = $formatted_hosts
@@ -754,7 +794,8 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 2000
 LOGIN_URL = '/accounts/login/'
 EOF
 
-echo "[✓] Đã tạo file cấu hình dmoj/local_settings.py thành công."
+    echo "[✓] Đã tạo file cấu hình dmoj/local_settings.py thành công."
+fi
 
 # 10. TẠO FILE UWSGI.INI CHO PRODUCTION
 echo "[i] Sinh file cấu hình uwsgi.ini..."
@@ -824,14 +865,23 @@ fi
 # 12. KHỞI TẠO CSDL VÀ NAP DỮ LIỆU
 echo ""
 echo "=== 5. KHỞI TẠO CƠ SỞ DỮ LIỆU ==="
+if [ "$UPDATE_MODE" = "true" ]; then
+    echo "[i] Chế độ cập nhật: migrate để đồng bộ schema mới (nếu có), giữ nguyên dữ liệu."
+fi
 "$SITE_DIR/dmojsite/bin/python" manage.py migrate
-"$SITE_DIR/dmojsite/bin/python" manage.py loaddata navbar
-"$SITE_DIR/dmojsite/bin/python" manage.py loaddata language_small
-"$SITE_DIR/dmojsite/bin/python" manage.py loaddata demo
+if [ "$UPDATE_MODE" != "true" ]; then
+    "$SITE_DIR/dmojsite/bin/python" manage.py loaddata navbar
+    "$SITE_DIR/dmojsite/bin/python" manage.py loaddata language_small
+    "$SITE_DIR/dmojsite/bin/python" manage.py loaddata demo
+fi
 
 # Tạo superuser
-read -p "[?] Bạn có muốn tạo một tài khoản Admin mới? (y/n) [n]: " create_admin_ans
-create_admin_ans=${create_admin_ans:-n}
+if [ "$UPDATE_MODE" != "true" ]; then
+    read -p "[?] Bạn có muốn tạo một tài khoản Admin mới? (y/n) [n]: " create_admin_ans
+    create_admin_ans=${create_admin_ans:-n}
+else
+    create_admin_ans="n"
+fi
 if [ "$create_admin_ans" = "y" ] || [ "$create_admin_ans" = "Y" ]; then
   "$SITE_DIR/dmojsite/bin/python" manage.py createsuperuser
 fi
@@ -851,23 +901,38 @@ for i in $(seq 1 $NUM_JUDGES); do
     current_id="${judge_id}-${i}"
   fi
   
-  current_key=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "judge-key-auto-${i}")
-  echo "${current_id}:${current_key}" >> /tmp/fptoj_judges.txt
-  JUDGES_INFO="${JUDGES_INFO} - Judge ID: $current_id | Key: $current_key"$'\n'
-
-  # Đăng ký Judge vào DMOJ qua Django ORM
-  "$SITE_DIR/dmojsite/bin/python" manage.py shell -c "
+  # Tạo key ngẫu nhiên đề phòng tạo mới
+  fallback_key=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "judge-key-auto-${i}")
+  
+  # Đăng ký hoặc kiểm tra Judge trong DB, trả về key tương ứng
+  django_output=$("$SITE_DIR/dmojsite/bin/python" manage.py shell -c "
 from judge.models import Judge
-if not Judge.objects.filter(name='$current_id').exists():
-    j = Judge(name='$current_id', auth_key='$current_key', is_blocked=False)
-    j.save()
-    print('[OK] Đã tạo Judge:', '$current_id')
-else:
-    j = Judge.objects.get(name='$current_id')
-    j.auth_key = '$current_key'
-    j.save()
-    print('[OK] Đã cập nhật Judge:', '$current_id')
-" 2>/dev/null || echo "[!] Cảnh báo: Không thể đăng ký Judge $current_id vào DB."
+try:
+    if not Judge.objects.filter(name='$current_id').exists():
+        j = Judge(name='$current_id', auth_key='$fallback_key', is_blocked=False)
+        j.save()
+        print('STATUS:CREATED:' + '$fallback_key')
+    else:
+        j = Judge.objects.get(name='$current_id')
+        print('STATUS:EXISTING:' + j.auth_key)
+except Exception as e:
+    print('STATUS:ERROR:' + str(e))
+" 2>/dev/null || echo "")
+
+  actual_key=""
+  if echo "$django_output" | grep -q "^STATUS:CREATED:"; then
+    actual_key=$(echo "$django_output" | grep "^STATUS:CREATED:" | cut -d':' -f3)
+    echo "[✓] Đã đăng ký Judge mới: $current_id"
+  elif echo "$django_output" | grep -q "^STATUS:EXISTING:"; then
+    actual_key=$(echo "$django_output" | grep "^STATUS:EXISTING:" | cut -d':' -f3)
+    echo "[✓] Giữ nguyên thông tin Judge đã có: $current_id"
+  else
+    actual_key="$fallback_key"
+    echo "[!] Không thể truy cập DB hoặc xảy ra lỗi, sử dụng key tạm cho: $current_id"
+  fi
+
+  echo "${current_id}:${actual_key}" >> /tmp/fptoj_judges.txt
+  JUDGES_INFO="${JUDGES_INFO} - Judge ID: $current_id | Key: $actual_key"$'\n'
 done
 
 # 13. CẤU HÌNH SUPERVISOR CHO CÁC DỊCH VỤ NỀN
@@ -1011,18 +1076,30 @@ fi
 echo ""
 echo "=== 8. CẤU HÌNH WEB SERVER NGINX ==="
 
-if lsof -Pi :80 -sTCP:LISTEN -t >/dev/null 2>&1; then
-    echo "[!] Cảnh báo: Port 80 đang bị phần mềm khác chiếm dụng!"
-    read -p "[?] Vui lòng nhập port khác cho Web Server (VD: 8080): " nginx_port
-    nginx_port=${nginx_port:-8080}
-    echo "[i] Đã cấu hình Nginx chạy ở port $nginx_port."
-    echo "[!] KHUYÊN DÙNG: Bạn nên dùng Cloudflare Tunnel (cloudflared) để public web qua port $nginx_port mà không cần mở port trên router."
-else
-    nginx_port=80
+configure_nginx=true
+if [ "$UPDATE_MODE" = "true" ]; then
+    echo ""
+    read -p "[?] Phát hiện chế độ cập nhật. Bạn có muốn thiết lập lại cấu hình Nginx gốc của FPTOJ? (y/n) [n]: " setup_nginx_ans
+    setup_nginx_ans=${setup_nginx_ans:-n}
+    if [ "$setup_nginx_ans" != "y" ] && [ "$setup_nginx_ans" != "Y" ]; then
+        configure_nginx=false
+        echo "[i] Bỏ qua cấu hình lại Nginx để tránh ghi đè các cấu hình tùy chỉnh (SSL, Cloudflare, v.v.)."
+    fi
 fi
 
-nginx_conf="/etc/nginx/sites-available/fptoj"
-cat << EOF > "$nginx_conf"
+if [ "$configure_nginx" = "true" ]; then
+    if lsof -Pi :80 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        echo "[!] Cảnh báo: Port 80 đang bị phần mềm khác chiếm dụng!"
+        read -p "[?] Vui lòng nhập port khác cho Web Server (VD: 8080): " nginx_port
+        nginx_port=${nginx_port:-8080}
+        echo "[i] Đã cấu hình Nginx chạy ở port $nginx_port."
+        echo "[!] KHUYÊN DÙNG: Bạn nên dùng Cloudflare Tunnel (cloudflared) để public web qua port $nginx_port mà không cần mở port trên router."
+    else
+        nginx_port=80
+    fi
+
+    nginx_conf="/etc/nginx/sites-available/fptoj"
+    cat << EOF > "$nginx_conf"
 server {
     listen       $nginx_port;
     listen       [::]:$nginx_port;
@@ -1075,19 +1152,34 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_read_timeout 86400;
+        proxy_buffering off;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+        proxy_connect_timeout 75s;
+
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_redirect off;
     }
 
     location /channels/ {
-        proxy_read_timeout          120;
+        proxy_read_timeout          120s;
         proxy_pass http://127.0.0.1:$wsevent_http_port;
+
+        proxy_set_header Host \$http_host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOF
 
-# Active cấu hình Nginx
-rm -f /etc/nginx/sites-enabled/default
-ln -sf "$nginx_conf" /etc/nginx/sites-enabled/fptoj
+    # Active cấu hình Nginx
+    rm -f /etc/nginx/sites-enabled/default
+    ln -sf "$nginx_conf" /etc/nginx/sites-enabled/fptoj
+fi
 
 # Cấu hình Firewall (UFW) nếu có
 if command -v ufw >/dev/null 2>&1; then
