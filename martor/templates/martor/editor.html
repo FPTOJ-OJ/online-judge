@@ -3,6 +3,7 @@
     select.editor-switch {
         display: none !important;
     }
+
     .editor-toggle {
         margin-top: 15px;
         margin-bottom: 10px;
@@ -11,59 +12,59 @@
 
 {# --- Initialization Script --- #}
 <script id="CKEDITOR_Script">
-(function() {
-    // Ensure we only initialize once
-    if (window.__MARTOR_EDITORS_INITIALIZED__) return;
-    window.__MARTOR_EDITORS_INITIALIZED__ = true;
+    (function () {
+        // Ensure we only initialize once
+        if (window.__MARTOR_EDITORS_INITIALIZED__) return;
+        window.__MARTOR_EDITORS_INITIALIZED__ = true;
 
-    // --- Helper Functions ---
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            if (document.querySelector(`script[src="${src}"]`)) {
-                resolve(); // Script already loaded
-                return;
-            }
-            const s = document.createElement('script');
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
-        });
-    }
-
-    function getCookie(name) {
-        if (!document.cookie) return null;
-        const cookies = document.cookie.split(";");
-        for (let cookie of cookies) {
-            const trimmed = cookie.trim();
-            if (trimmed.startsWith(name + "=")) {
-                return decodeURIComponent(trimmed.substring(name.length + 1));
-            }
+        // --- Helper Functions ---
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                if (document.querySelector(`script[src="${src}"]`)) {
+                    resolve(); // Script already loaded
+                    return;
+                }
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
         }
-        return null;
-    }
 
-    // --- Style Injections ---
-    const CKEDITOR_CSS_URL = '/static/martor/css/ckeditor5.css';
-    if (!document.querySelector(`link[href="${CKEDITOR_CSS_URL}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CKEDITOR_CSS_URL;
-        document.head.prepend(link);
-    }
+        function getCookie(name) {
+            if (!document.cookie) return null;
+            const cookies = document.cookie.split(";");
+            for (let cookie of cookies) {
+                const trimmed = cookie.trim();
+                if (trimmed.startsWith(name + "=")) {
+                    return decodeURIComponent(trimmed.substring(name.length + 1));
+                }
+            }
+            return null;
+        }
 
-    const CHOSEN_CSS_URL = '/static/libs/chosen.js/chosen.min.css';
-    if (!document.querySelector(`link[href="${CHOSEN_CSS_URL}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CHOSEN_CSS_URL;
-        document.head.appendChild(link);
-    }
+        // --- Style Injections ---
+        const CKEDITOR_CSS_URL = '/static/martor/css/ckeditor5.css';
+        if (!document.querySelector(`link[href="${CKEDITOR_CSS_URL}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = CKEDITOR_CSS_URL;
+            document.head.prepend(link);
+        }
 
-    if (!document.getElementById('editor-switch-styles')) {
-        const style = document.createElement('style');
-        style.id = 'editor-switch-styles';
-        style.textContent = `
+        const CHOSEN_CSS_URL = '/static/libs/chosen.js/chosen.min.css';
+        if (!document.querySelector(`link[href="${CHOSEN_CSS_URL}"]`)) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = CHOSEN_CSS_URL;
+            document.head.appendChild(link);
+        }
+
+        if (!document.getElementById('editor-switch-styles')) {
+            const style = document.createElement('style');
+            style.id = 'editor-switch-styles';
+            style.textContent = `
             /* Đồng bộ theme tối cho Martor Editor khi ở Dark Mode của Jazzmin */
             body.dark-mode .main-martor {
                 background-color: #1a1a2e !important;
@@ -121,50 +122,145 @@
             .tab-ckeditor-menu .item {
                 font-size: 13px !important;
                 line-height: 1.2 !important;
-                padding: 10px 14px !important;
+                padding: 2px 20px !important;
                 height: 38px !important;
                 display: flex !important;
                 align-items: center !important;
             }
 
+            /* Loại bỏ khoảng cách thừa (padding/border) của tab segment chứa CKEditor */
+            .ui.segment[data-tab^="ckeditor-editor-tab-"] {
+                padding: 0 !important;
+                border: none !important;
+                background: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+            }
+            .editor-container__editor {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Ngăn chặn các style bên ngoài trang quản trị rò rỉ vào vùng soạn thảo CKEditor */
+            .ck-content {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+                font-size: 14px !important;
+                line-height: 1.6 !important;
+                color: #333333 !important;
+                text-align: left !important;
+            }
+            body.dark-mode .ck-content {
+                color: #c9d1d9 !important;
+            }
+            .ck-content p {
+                margin-top: 0 !important;
+                margin-bottom: 10px !important;
+                line-height: 1.6 !important;
+                font-size: 14px !important;
+                color: inherit !important;
+            }
+            .ck-content h1, .ck-content h2, .ck-content h3, .ck-content h4, .ck-content h5, .ck-content h6 {
+                color: inherit !important;
+                font-weight: 600 !important;
+                margin-top: 1.5em !important;
+                margin-bottom: 0.5em !important;
+                line-height: 1.25 !important;
+            }
+            .ck-content h1 { font-size: 2em !important; }
+            .ck-content h2 { font-size: 1.5em !important; }
+            .ck-content h3 { font-size: 1.25em !important; }
+            .ck-content h4 { font-size: 1em !important; }
+
+            /* Khôi phục hiển thị danh sách (ul/li, ol/li) bị triệt tiêu bởi css reset của trang quản trị */
+            .ck-content ul, .ck-content ol {
+                padding-left: 40px !important;
+                margin-top: 0 !important;
+                margin-bottom: 10px !important;
+            }
+            .ck-content ul {
+                list-style-type: disc !important;
+            }
+            .ck-content ol {
+                list-style-type: decimal !important;
+            }
+            .ck-content ul li {
+                list-style-type: disc !important;
+            }
+            .ck-content ol li {
+                list-style-type: decimal !important;
+            }
+            .ck-content li {
+                margin-bottom: 5px !important;
+            }
+
+            /* Định dạng bảng biểu bên trong CKEditor */
+            .ck-content table {
+                border-collapse: collapse !important;
+                width: 100% !important;
+                margin-bottom: 15px !important;
+            }
+            .ck-content table td, .ck-content table th {
+                border: 1px solid #dbdbdb !important;
+                padding: 6px 10px !important;
+            }
+            body.dark-mode .ck-content table td, body.dark-mode .ck-content table th {
+                border-color: #30363d !important;
+            }
+
             /* Sửa lỗi hiển thị CKEditor trong Light Theme (mất màu icons) */
             .ck.ck-editor__top .ck-toolbar {
-                background-color: #f8f9fa !important;
-                border-color: #ccced1 !important;
+                background: transparent !important;
+                border-color: rgba(34, 36, 38, .15) !important;
             }
             .ck.ck-editor__top .ck-toolbar .ck.ck-button,
             .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button {
-                color: #333333 !important;
+                color: inherit !important;
+                background: transparent !important;
             }
             .ck.ck-editor__top .ck-toolbar .ck.ck-button .ck-icon,
             .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button .ck-icon {
-                color: #333333 !important;
-                fill: #333333 !important;
+                color: currentColor !important;
+                fill: currentColor !important;
             }
             .ck.ck-editor__top .ck-toolbar .ck.ck-button:hover,
             .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button:hover,
             .ck.ck-editor__top .ck-toolbar .ck.ck-button.ck-on {
-                background-color: #e6e6e6 !important;
-                color: #000000 !important;
+                background-color: rgba(128, 128, 128, 0.15) !important;
+                color: inherit !important;
             }
             .ck.ck-editor__top .ck-toolbar .ck.ck-button:hover .ck-icon,
             .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button:hover .ck-icon {
-                color: #000000 !important;
-                fill: #000000 !important;
+                color: currentColor !important;
+                fill: currentColor !important;
             }
             .ck.ck-dropdown__panel {
                 background-color: #ffffff !important;
+                border-color: rgba(34, 36, 38, .15) !important;
+            }
+            body.dark-mode .ck.ck-dropdown__panel {
+                background-color: #161b22 !important;
+                border-color: #30363d !important;
             }
             .ck.ck-list {
-                background-color: #ffffff !important;
+                background-color: transparent !important;
             }
-            .ck.ck-list__item .ck-button {
-                background-color: #ffffff !important;
+            .ck.ck-dropdown__panel .ck-button {
+                background-color: transparent !important;
                 color: #333333 !important;
             }
-            .ck.ck-list__item .ck-button:hover {
-                background-color: #e6e6e6 !important;
-                color: #000000 !important;
+            .ck.ck-dropdown__panel .ck-button .ck-icon {
+                color: #333333 !important;
+                fill: #333333 !important;
+            }
+            body.dark-mode .ck.ck-dropdown__panel .ck-button {
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .ck.ck-dropdown__panel .ck-button .ck-icon {
+                color: #c9d1d9 !important;
+                fill: #c9d1d9 !important;
+            }
+            .ck.ck-dropdown__panel .ck-button:hover {
+                background-color: rgba(128, 128, 128, 0.2) !important;
             }
 
             /* Đồng bộ CKEditor cho Dark Mode */
@@ -225,39 +321,39 @@
                 border-color: #30363d !important;
             }
         `;
-        document.head.appendChild(style);
-    }
-
-    
-    // --- Preview Logic ---
-    async function fetchPreview(content) {
-        try {
-            const response = await fetch("/widgets/preview/problem", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({
-                    content: content,
-                    csrfmiddlewaretoken: getCookie("csrftoken")
-                })
-            });
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            return await response.text();
-        } catch (err) {
-            console.error("Preview fetch failed:", err);
-            return `<div style="color:red; padding:1em;">Error loading preview: ${err.message}</div>`;
+            document.head.appendChild(style);
         }
-    }
 
-    function renderPreviewInIframe(container, htmlContent) {
-        container.innerHTML = "";
-        const iframe = document.createElement("iframe");
-        Object.assign(iframe.style, {
-            width: "100%", height: "500px", border: "1px solid #ddd", borderRadius: "4px", backgroundColor: "#fff"
-        });
-        container.appendChild(iframe);
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        doc.open();
-        doc.write(`
+
+        // --- Preview Logic ---
+        async function fetchPreview(content) {
+            try {
+                const response = await fetch("/widgets/preview/problem", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        content: content,
+                        csrfmiddlewaretoken: getCookie("csrftoken")
+                    })
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return await response.text();
+            } catch (err) {
+                console.error("Preview fetch failed:", err);
+                return `<div style="color:red; padding:1em;">Error loading preview: ${err.message}</div>`;
+            }
+        }
+
+        function renderPreviewInIframe(container, htmlContent) {
+            container.innerHTML = "";
+            const iframe = document.createElement("iframe");
+            Object.assign(iframe.style, {
+                width: "100%", height: "500px", border: "1px solid #ddd", borderRadius: "4px", backgroundColor: "#fff"
+            });
+            container.appendChild(iframe);
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(`
             <!DOCTYPE html>
             <html>
                 <head>
@@ -291,176 +387,206 @@
                 <body>${htmlContent}</body>
             </html>
         `);
-        doc.close();
-    }
-
-    function setupEditorLogic(fieldName) {
-        const textarea = document.getElementById(`id_${fieldName}`);
-        const editorSwitch = document.getElementById(`editor-switch-${fieldName}`);
-        const container = document.querySelector(`.main-martor[data-field-name="${fieldName}"]`);
-
-        if (!container || !textarea) return;
-
-        // Initialize Chosen for Editor Switch
-        if (editorSwitch && window.jQuery && jQuery.fn.chosen) {
-            const $switch = jQuery(editorSwitch);
-            $switch.chosen({
-                width: '180px',
-                disable_search: true
-            }).on('change', function() {
-                if (typeof switchEditor === 'function') switchEditor(this, fieldName);
-            });
+            doc.close();
         }
 
-        // Auto-switch to CKEditor if content starts with marker
-        const currentContent = textarea.value.trim();
-        if (currentContent.startsWith('<htmlrender>')) {
-            if (editorSwitch) {
-                editorSwitch.value = 'ckeditor';
-                jQuery(editorSwitch).trigger('chosen:updated');
-                if (typeof switchEditor === 'function') switchEditor(editorSwitch, fieldName);
-            }
-        }
+        function setupEditorLogic(fieldName) {
+            const textarea = document.getElementById(`id_${fieldName}`);
+            const editorSwitch = document.getElementById(`editor-switch-${fieldName}`);
+            const container = document.querySelector(`.main-martor[data-field-name="${fieldName}"]`);
 
-        const handleTabPreview = async function(tabPath, previewTabName, targetTextarea) {
-            if (tabPath === previewTabName) {
-                const previewBox = this; 
-                const content = targetTextarea.value.trim();
-                if (!content) {
-                    previewBox.innerHTML = '<p class="ui ignored info message">{% trans "Nothing to preview" %}</p>';
-                    return;
-                }
-                previewBox.innerHTML = '<div class="ui active centered inline loader" style="margin-top: 20px;"></div>';
-                const html = await fetchPreview(content);
-                renderPreviewInIframe(previewBox, html);
-            }
-        };
+            if (!container || !textarea) return;
 
-        // CKEditor Preview Tab
-        jQuery(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
-            onVisible: function(tabPath) {
-                handleTabPreview.call(this, tabPath, `ckeditor-preview-tab-${fieldName}`, textarea);
-            }
-        });
-
-        // Martor Preview Tab
-        jQuery(`#martor-container-${fieldName} .tab-martor-menu .item`).tab({
-            onVisible: function(tabPath) {
-                handleTabPreview.call(this, tabPath, `preview-tab-${fieldName}`, textarea);
-            }
-        });
-    }
-
-    function initEditors() {
-        document.querySelectorAll('.main-martor[data-field-name]').forEach(el => {
-            setupEditorLogic(el.dataset.fieldName);
-        });
-    }
-
-    async function boot() {
-        try {
-            await loadScript('/static/vendor/markdown-it.min.js');
-            const markdownIt = window.markdownit;
-            window.__markdownItInstance__ = markdownIt({ html: true, linkify: true, typographer: true });
-
-            await loadScript('/static/martor/js/ckeditor5.umd.js?v=2');
-            await loadScript('/static/libs/chosen.js/chosen.jquery.min.js?v=2');
-            await loadScript('/static/vendor/turndown.js');
-            await loadScript('/static/martor/js/editor-switch.js?v=' + Date.now());
-            await loadScript('/static/martor/js/sidebar-math.js?v=2');
-
-            initEditors();
-
-            // Intercept default Martor preview to isolate it inside an iframe
-            if (window.jQuery) {
-                jQuery(document).on('martor:preview', function(event, $currentTab) {
-                    if ($currentTab && $currentTab.length) {
-                        const container = $currentTab[0];
-                        if (container && !$currentTab.find('iframe').length) {
-                            const htmlContent = container.innerHTML;
-                            renderPreviewInIframe(container, htmlContent);
-                        }
-                    }
+            // Initialize Chosen for Editor Switch
+            if (editorSwitch && window.jQuery && jQuery.fn.chosen) {
+                const $switch = jQuery(editorSwitch);
+                $switch.chosen({
+                    width: '180px',
+                    disable_search: true
+                }).on('change', function () {
+                    if (typeof switchEditor === 'function') switchEditor(this, fieldName);
                 });
             }
 
-            const observer = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.nodeType === 1 && node.classList.contains('main-martor')) {
-                            setupEditorLogic(node.dataset.fieldName);
+            // Auto-switch to CKEditor if content starts with marker
+            const currentContent = textarea.value.trim();
+            if (currentContent.startsWith('<htmlrender>')) {
+                if (editorSwitch) {
+                    editorSwitch.value = 'ckeditor';
+                    jQuery(editorSwitch).trigger('chosen:updated');
+                    if (typeof switchEditor === 'function') switchEditor(editorSwitch, fieldName);
+                }
+            }
+
+            const handleTabPreview = async function (tabPath, previewTabName, targetTextarea) {
+                if (tabPath === previewTabName) {
+                    const previewBox = this;
+                    const content = targetTextarea.value.trim();
+                    if (!content) {
+                        previewBox.innerHTML = '<p class="ui ignored info message">{% trans "Nothing to preview" %}</p>';
+                        return;
+                    }
+                    previewBox.innerHTML = '<div class="ui active centered inline loader" style="margin-top: 20px;"></div>';
+                    const html = await fetchPreview(content);
+                    renderPreviewInIframe(previewBox, html);
+                }
+            };
+
+            // CKEditor Preview Tab
+            jQuery(`#ckeditor-container-${fieldName} .tab-ckeditor-menu .item`).tab({
+                onVisible: function (tabPath) {
+                    handleTabPreview.call(this, tabPath, `ckeditor-preview-tab-${fieldName}`, textarea);
+                }
+            });
+
+            // Martor Preview Tab
+            jQuery(`#martor-container-${fieldName} .tab-martor-menu .item`).tab({
+                onVisible: function (tabPath) {
+                    handleTabPreview.call(this, tabPath, `preview-tab-${fieldName}`, textarea);
+                }
+            });
+        }
+
+        function initEditors() {
+            document.querySelectorAll('.main-martor[data-field-name]').forEach(el => {
+                setupEditorLogic(el.dataset.fieldName);
+            });
+        }
+
+        async function boot() {
+            // Tự động nhận diện theme tối từ nền của trang mẹ và áp dụng lớp .dark-mode
+            try {
+                const bg = window.getComputedStyle(document.body).backgroundColor;
+                const match = bg.match(/\d+/g);
+                if (match && match.length >= 3) {
+                    const r = parseInt(match[0]);
+                    const g = parseInt(match[1]);
+                    const b = parseInt(match[2]);
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    if (brightness < 120) {
+                        document.body.classList.add('dark-mode');
+                    }
+                }
+            } catch (e) {
+                console.error("Theme detection failed:", e);
+            }
+
+            try {
+                await loadScript('/static/vendor/markdown-it.min.js');
+                const markdownIt = window.markdownit;
+                window.__markdownItInstance__ = markdownIt({ html: true, linkify: true, typographer: true });
+
+                await loadScript('/static/martor/js/ckeditor5.umd.js?v=2');
+                await loadScript('/static/libs/chosen.js/chosen.jquery.min.js?v=2');
+                await loadScript('/static/vendor/turndown.js');
+                await loadScript('/static/martor/js/editor-switch.js?v=' + Date.now());
+                await loadScript('/static/martor/js/sidebar-math.js?v=2');
+
+                initEditors();
+
+                // Intercept default Martor preview to isolate it inside an iframe
+                if (window.jQuery) {
+                    jQuery(document).on('martor:preview', function (event, $currentTab) {
+                        if ($currentTab && $currentTab.length) {
+                            const container = $currentTab[0];
+                            if (container && !$currentTab.find('iframe').length) {
+                                const htmlContent = container.innerHTML;
+                                renderPreviewInIframe(container, htmlContent);
+                            }
                         }
                     });
+                }
+
+                const observer = new MutationObserver(mutations => {
+                    mutations.forEach(mutation => {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.nodeType === 1 && node.classList.contains('main-martor')) {
+                                setupEditorLogic(node.dataset.fieldName);
+                            }
+                        });
+                    });
                 });
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
+                observer.observe(document.body, { childList: true, subtree: true });
 
-        } catch (err) {
-            console.error('Martor/CKEditor initialization error:', err);
+            } catch (err) {
+                console.error('Martor/CKEditor initialization error:', err);
+            }
         }
-    }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-    } else {
-        boot();
-    }
-})();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', boot);
+        } else {
+            boot();
+        }
+    })();
 </script>
 
 <div class="main-martor main-martor-{{ field_name }}" data-field-name="{{ field_name }}">
-  <div class="section-martor">
-    
-    <!-- Editor Type Switcher -->
-    <div class="ui right floated item editor-toggle">
-      <select id="editor-switch-{{ field_name }}" class="editor-switch" style="display: none !important;">
-        <option value="martor">{% trans "Martor (Markdown)" %}</option>
-        <option value="ckeditor">{% trans "CKEditor (HTML)" %}</option>
-      </select>
-    </div>
-    <div style="clear: both;"></div>
+    <div class="section-martor">
 
-    <!-- Martor (Markdown) Container -->
-    <div id="martor-container-{{ field_name }}" class="editor-container">
-      <div class="ui top attached tabular pointing secondary menu tab-martor-menu">
-        <a class="item active" data-tab="editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
-        <a class="item" data-tab="preview-tab-{{ field_name }}"><i class="eye icon"></i>{% trans "Preview" %}</a>
-        {% include "martor/toolbar.html" %}
-      </div>
-      
-      <div class="ui bottom attached tab segment active" data-tab="editor-tab-{{ field_name }}">
-        <div class="ui active dimmer upload-progress" style="display:none" data-field-name="{{ field_name }}">
-          <div class="ui text loader">{% trans "Uploading... please wait..." %}</div>
+        <!-- Editor Type Switcher -->
+        <div class="ui right floated item editor-toggle">
+            <select id="editor-switch-{{ field_name }}" class="editor-switch" style="display: none !important;">
+                <option value="martor">{% trans "Martor (Markdown)" %}</option>
+                <option value="ckeditor">{% trans "CKEditor (HTML)" %}</option>
+            </select>
         </div>
-        <div id="martor-{{ field_name }}" class="martor-field martor-field-{{ field_name }}"></div>
-        {{ martor }} 
-      </div>
-      
-      <div class="ui bottom attached tab segment martor-preview" data-tab="preview-tab-{{ field_name }}">
-        <p>{% trans "Nothing to preview" %}</p>
-      </div>
-    </div>
+        <div style="clear: both;"></div>
 
-    <!-- CKEditor (HTML) Container -->
-    <div id="ckeditor-container-{{ field_name }}" class="ck-editor editor-container" style="display: none;">
-      <div class="ui top attached tabular pointing secondary menu tab-ckeditor-menu">
-        <a class="item active" data-tab="ckeditor-editor-tab-{{ field_name }}"><i class="edit icon"></i> {% trans "Editor" %}</a>
-        <a class="item" data-tab="ckeditor-preview-tab-{{ field_name }}"><i class="eye icon"></i> {% trans "Preview" %}</a>
-      </div>
-      
-      <div class="ui bottom attached tab segment active" data-tab="ckeditor-editor-tab-{{ field_name }}">
-        <div class="editor-container__editor">
-            <div id="ckeditor-{{ field_name }}" class="ck-editor-loading">
-                <div class="ui active centered inline loader"></div>
+        <!-- Martor (Markdown) Container -->
+        <div id="martor-container-{{ field_name }}" class="editor-container">
+            <div class="ui top attached tabular pointing secondary menu tab-martor-menu">
+                <a class="item active"
+                   data-tab="editor-tab-{{ field_name }}">
+                    <i class="edit icon"></i> {% trans "Editor" %}
+                </a>
+                <a class="item"
+                   data-tab="preview-tab-{{ field_name }}">
+                    <i class="eye icon"></i>{% trans "Preview" %}
+                </a>
+                {% include "martor/toolbar.html" %}
+            </div>
+
+            <div class="ui bottom attached tab segment active" data-tab="editor-tab-{{ field_name }}">
+                <div class="ui active dimmer upload-progress" style="display:none" data-field-name="{{ field_name }}">
+                    <div class="ui text loader">{% trans "Uploading... please wait..." %}</div>
+                </div>
+                <div id="martor-{{ field_name }}" class="martor-field martor-field-{{ field_name }}"></div>
+                {{ martor }}
+            </div>
+
+            <div class="ui bottom attached tab segment martor-preview" data-tab="preview-tab-{{ field_name }}">
+                <p>{% trans "Nothing to preview" %}</p>
             </div>
         </div>
-      </div>
-      
-      <div class="ui bottom attached tab segment ckeditor-preview" data-tab="ckeditor-preview-tab-{{ field_name }}">
-        <p>{% trans "Nothing to preview" %}</p>
-      </div>
-    </div>
 
-    {% include 'martor/guide.html' %}
-  </div>
+        <!-- CKEditor (HTML) Container -->
+        <div id="ckeditor-container-{{ field_name }}" class="ck-editor editor-container" style="display: none;">
+            <div class="ui top attached tabular pointing secondary menu tab-ckeditor-menu">
+                <a class="item active"
+                   data-tab="ckeditor-editor-tab-{{ field_name }}">
+                    <i class="edit icon"></i> {% trans "Editor" %}
+                </a>
+                <a class="item"
+                   data-tab="ckeditor-preview-tab-{{ field_name }}">
+                    <i class="eye icon"></i> {% trans "Preview" %}
+                </a>
+            </div>
+
+            <div class="ui bottom attached tab segment active" data-tab="ckeditor-editor-tab-{{ field_name }}">
+                <div class="editor-container__editor">
+                    <div id="ckeditor-{{ field_name }}" class="ck-editor-loading">
+                        <div class="ui active centered inline loader"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ui bottom attached tab segment ckeditor-preview"
+                data-tab="ckeditor-preview-tab-{{ field_name }}">
+                <p>{% trans "Nothing to preview" %}</p>
+            </div>
+        </div>
+
+        {% include 'martor/guide.html' %}
+    </div>
 </div>

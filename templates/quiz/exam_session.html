@@ -28,8 +28,14 @@
         </div>
 
         <div class="orient-toggles">
-            <div class="orient-toggle {% if selected_orientation == 'KHMT' %}active{% endif %}" id="btn-toggle-khmt" onclick="changeOrientation('KHMT')">{{ _('Select CS') }}</div>
-            <div class="orient-toggle {% if selected_orientation == 'THUD' %}active{% endif %}" id="btn-toggle-thud" onclick="changeOrientation('THUD')">{{ _('Select IT') }}</div>
+            <div class="orient-badge-locked" title="{{ _('Orientation is locked during exam. You selected this before starting.') }}">
+                <i class="fa fa-lock" style="margin-right: 5px; font-size: 0.75rem;"></i>
+                {% if selected_orientation == 'KHMT' %}
+                    {{ _('CS (Computer Science)') }}
+                {% else %}
+                    {{ _('IT (Applied Informatics)') }}
+                {% endif %}
+            </div>
         </div>
 
         <div class="header-actions">
@@ -133,7 +139,7 @@
         <!-- Right Sidebar -->
         <div class="quiz-right-pane">
             <div class="sidebar-card">
-                <h3>{{ _('Question list') }}</h3>
+                <h3 style="padding-bottom: 12px;">{{ _('Question list') }}</h3>
                 <div class="part-tabs">
                     <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PART I') }}</div>
                     <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PART II') }}</div>
@@ -176,13 +182,16 @@
                 <h4><i class="fa fa-info-circle"></i> {{ _('Learning tools') }}</h4>
                 <div class="help-content">
                     <div>
-                        <strong><i class="fa fa-pencil"></i> {{ _('Scratchpad:') }}</strong> {{ _('Click <em>Tools</em> &gt; <em>Scratchpad</em> to open the drawing board.')|safe }}
+                        <strong><i class="fa fa-pencil"></i> {{ _('Scratchpad:') }}</strong>
+                        {{ _('Click') }} <em>{{ _('Tools') }}</em> &gt; <em>{{ _('Scratchpad') }}</em> {{ _('to open the drawing board.') }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-paint-brush"></i> {{ _('Draw directly:') }}</strong> {{ _('Select <em>Draw on question</em> to sketch with mouse or touch directly on the question content.')|safe }}
+                        <strong><i class="fa fa-paint-brush"></i> {{ _('Draw directly:') }}</strong>
+                        {{ _('Select') }} <em>{{ _('Draw on question') }}</em> {{ _('to sketch with mouse or touch directly on the question content.') }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-font"></i> {{ _('Highlight:') }}</strong> {{ _('Select any text in the question, then choose <em>Highlight</em> to save annotations.')|safe }}
+                        <strong><i class="fa fa-font"></i> {{ _('Highlight:') }}</strong>
+                        {{ _('Select any text in the question, then choose') }} <em>{{ _('Highlight') }}</em> {{ _('to save annotations.') }}
                     </div>
                 </div>
             </div>
@@ -298,13 +307,19 @@
             // Find active question card
             var activeCard = document.getElementById('q-card-' + currentIndex);
             if (activeCard) {
-                activeCard.classList.add('active');
-                
-                // Show/hide based on orientation
+                // If the current question belongs to the inactive orientation, jump to first valid one
                 var qOrient = activeCard.getAttribute('data-orientation');
                 if (qOrient !== 'Common' && qOrient !== activeOrientation) {
-                    // Automatically jump next/prev if it's inactive? No, just keep active, card styling handles it.
+                    for (var j = 1; j <= totalQuestions; j++) {
+                        var jBtn = document.getElementById('grid-btn-' + j);
+                        if (jBtn && !jBtn.classList.contains('orientation-disabled')) {
+                            currentIndex = j;
+                            break;
+                        }
+                    }
+                    activeCard = document.getElementById('q-card-' + currentIndex);
                 }
+                if (activeCard) activeCard.classList.add('active');
             }
         }
         
@@ -371,10 +386,10 @@
     }
 
     // Orientation Logic
-    function changeOrientation(orient) {
+
+    function applyOrientationUI(orient) {
         activeOrientation = orient;
-        document.getElementById('btn-toggle-khmt').classList.toggle('active', orient === 'KHMT');
-        document.getElementById('btn-toggle-thud').classList.toggle('active', orient === 'THUD');
+        // Note: toggle buttons no longer exist (orientation is locked) - skip toggle UI
 
         // Apply visual classes to cards and sidebar
         document.querySelectorAll('.question-card').forEach(card => {
@@ -399,15 +414,24 @@
             }
         });
 
-        // Persist to server
-        var formData = new FormData();
-        formData.append('action', 'change_orientation');
-        formData.append('orientation', orient);
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-        fetch('/quiz/exams/session/{{ session.id }}/action/', {
-            method: 'POST',
-            body: formData
-        });
+        // If current question belongs to the other orientation, jump to first valid question
+        var currentCard = document.getElementById('q-card-' + currentIndex);
+        if (currentCard) {
+            var currentOrient = currentCard.getAttribute('data-orientation');
+            if (currentOrient !== 'Common' && currentOrient !== orient) {
+                // Find first valid question
+                var found = false;
+                for (var i = 1; i <= totalQuestions; i++) {
+                    var btn = document.getElementById('grid-btn-' + i);
+                    if (btn && !btn.classList.contains('orientation-disabled')) {
+                        currentIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) currentIndex = 1;
+            }
+        }
 
         updateActiveQuestionUI();
     }
@@ -479,7 +503,7 @@
     function exitExam() {
         Swal.fire({
             title: '{{ _("Exit exam?") }}',
-            text: '{{ _("Your progress will be saved, but the timer will continue running if you don\'t submit.") }}',
+            text: '{{ _("Your progress will be saved, but the timer will continue running if you do not submit.") }}',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: 'var(--quiz-danger)',
@@ -876,7 +900,7 @@
 
     // Initialization
     document.addEventListener("DOMContentLoaded", function() {
-        changeOrientation(activeOrientation);
+        applyOrientationUI(activeOrientation);
         updateActiveQuestionUI();
         wrapQuestionCodeBlocks();
     });

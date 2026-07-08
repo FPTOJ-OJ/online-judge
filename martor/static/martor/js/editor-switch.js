@@ -212,7 +212,7 @@ function getEditorConfig(textarea) {
                 }
             ]
         },
-        menuBar: { isVisible: true },
+        menuBar: { isVisible: false },
         placeholder: 'Type or paste your content here!',
         style: {
             definitions: [

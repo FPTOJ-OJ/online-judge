@@ -332,6 +332,7 @@ class QuizSessionDetailView(LoginRequiredMixin, View):
             'total_questions': len(session.questions),
             'user_answer': user_ans,
             'is_answered': user_ans is not None,
+            'score': round(session.score, 2),
         }
         return render(request, 'quiz/session.html', context)
 
@@ -1120,13 +1121,11 @@ class QuizExamActionView(LoginRequiredMixin, View):
             return JsonResponse({'success': True})
             
         if action == 'change_orientation':
-            orientation = request.POST.get('orientation')
-            if orientation in ['KHMT', 'THUD']:
-                if '__meta__' in session.answers:
-                    session.answers['__meta__']['orientation'] = orientation
-                    session.save()
-                    return JsonResponse({'success': True})
-            return JsonResponse({'error': 'Invalid orientation'}, status=400)
+            # Orientation is locked once exam has started — cannot be changed
+            return JsonResponse({
+                'error': 'cannot_change',
+                'message': 'Định hướng môn học đã được khóa. Bạn không thể thay đổi định hướng khi đang thi.'
+            }, status=400)
             
         if action == 'submit_exam':
             meta = session.answers.get('__meta__', {})

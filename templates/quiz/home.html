@@ -156,7 +156,7 @@
                             <div class="quiz-q-tags" style="margin-bottom: 12px;">
                                 <span class="quiz-q-tag type">{{ _('Year') }} {{ exam.year }}</span>
                                 <span class="quiz-q-tag difficulty">{{ exam.total_questions }} {{ _('questions') }}</span>
-                                <span class="quiz-q-tag source">{{ exam.type }}</span>
+                                <span class="quiz-q-tag source">{{ exam.type_label }}</span>
                                 {% if exam.tf_count > 0 %}
                                     <span class="quiz-q-tag source" style="color: var(--quiz-accent); border-color: rgba(255, 110, 196, 0.2);">
                                         {{ _('Part II:') }} {{ exam.tf_count }} {{ _('true/false questions') }}
