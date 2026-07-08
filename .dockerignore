@@ -1,0 +1,14 @@
+.git
+.gitignore
+.gitmodules
+data/
+logs/
+static/
+userdata/
+tmp/
+node_modules/
+__pycache__
+*.pyc
+*.pyo
+.DS_Store
+.conda

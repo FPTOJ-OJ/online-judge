@@ -1,3 +1,4 @@
+logs
 .idea
 .vscode
 .sass-cache
@@ -25,5 +26,4 @@ userdata
 build
 node_modules
 uwsgi.ini
-tmp/
 static
