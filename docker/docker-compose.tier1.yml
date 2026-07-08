@@ -45,6 +45,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EVENT_DAEMON_POST=ws://wsevent:15101/
+      - UWSGI_WORKERS=2
     volumes:
       - ${DATA_DIR}/pdfcache:/data/pdfcache
       - ${DATA_DIR}/datacache:/data/datacache

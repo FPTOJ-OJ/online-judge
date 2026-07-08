@@ -27,7 +27,7 @@ if [ "$SERVICE_TYPE" = "web" ]; then
     
     # Khởi chạy ứng dụng Web uWSGI
     echo "[i] Khởi chạy uWSGI Web Server..."
-    exec uwsgi --ini uwsgi.ini
+    exec uwsgi --ini docker/uwsgi.ini --workers "${UWSGI_WORKERS:-4}"
 
 elif [ "$SERVICE_TYPE" = "celery" ]; then
     # Khởi chạy Celery Worker
