@@ -20,7 +20,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lsof curl
+          sudo apt-get install -y lsof curl mysql-server redis-server
+          sudo systemctl start mysql || true
+          sudo systemctl start redis-server || true
 
       - name: Occupy Default Ports to Test Auto-Detection
         run: |

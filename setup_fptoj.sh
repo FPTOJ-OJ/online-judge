@@ -279,11 +279,13 @@ default = os.environ['PARSE_DEFAULT']
 try:
     with open(fpath) as f:
         content = f.read()
-    pattern = r'^\s*' + re.escape(key) + r'\s*=\s*["\x27](.*?)["\x27]'
+    pattern = r'^\s*' + re.escape(key) + r'\s*=\s*(?:["\x27](.*?)["\x27]|(\d+))'
     val = re.search(pattern, content, re.MULTILINE)
     if val:
-        print(val.group(1))
-        exit(0)
+        res = val.group(1) or val.group(2)
+        if res is not None:
+            print(res)
+            exit(0)
 except Exception:
     pass
 print(default)
@@ -335,7 +337,7 @@ OLD_DB_USER=$(parse_db_setting "USER" "dmoj")
 OLD_DB_PASS=$(parse_db_setting "PASSWORD" "12345678")
 
 OLD_EMAIL_HOST=$(parse_setting "EMAIL_HOST" "")
-OLD_EMAIL_PORT=$(parse_setting "EMAIL_PORT" "")
+OLD_EMAIL_PORT=$(parse_setting "EMAIL_PORT" "587")
 OLD_EMAIL_USER=$(parse_setting "EMAIL_HOST_USER" "")
 OLD_EMAIL_PASS=$(parse_setting "EMAIL_HOST_PASSWORD" "")
 OLD_EMAIL_FROM=$(parse_setting "DEFAULT_FROM_EMAIL" "")
@@ -393,7 +395,7 @@ read -p "[?] Địa chỉ máy chủ SMTP Mail [$OLD_EMAIL_HOST]: " email_host
 email_host=${email_host:-$OLD_EMAIL_HOST}
 if [ -n "$email_host" ]; then
     read -p "[?] Cổng SMTP (thường là 587 hoặc 465) [$OLD_EMAIL_PORT]: " email_port
-    email_port=${email_port:-$OLD_EMAIL_PORT}
+    email_port=${email_port:-${OLD_EMAIL_PORT:-587}}
     read -p "[?] Tên đăng nhập SMTP Email [$OLD_EMAIL_USER]: " email_user
     email_user=${email_user:-$OLD_EMAIL_USER}
     read -p "[?] Mật khẩu SMTP Email [$OLD_EMAIL_PASS]: " email_pass
@@ -469,7 +471,7 @@ fi
 echo ""
 echo "=== 1. CÀI ĐẶT THƯ VIỆN HỆ THỐNG ==="
 apt-get update
-apt-get install -y git gcc g++ make python3-dev python3-pip python3-venv libxml2-dev libxslt1-dev zlib1g-dev gettext curl supervisor nginx wkhtmltopdf lsof
+apt-get install -y git gcc g++ make python3-dev python3-pip python3-venv libxml2-dev libxslt1-dev zlib1g-dev gettext curl supervisor nginx wkhtmltopdf lsof pkg-config default-libmysqlclient-dev
 
 # Kiểm tra và cài đặt Node.js nếu chưa có
 if ! command -v node >/dev/null 2>&1; then
@@ -543,11 +545,10 @@ if [ ! -d "$SITE_DIR/dmojsite" ]; then
   python3 -m venv "$SITE_DIR/dmojsite"
 fi
 
-# Kích hoạt môi trường ảo và cài đặt thư viện
-source "$SITE_DIR/dmojsite/bin/activate"
-pip install --upgrade pip
-pip install -r "$SITE_DIR/requirements.txt"
-pip install mysqlclient uwsgi pymysql redis
+# Cài đặt thư viện trực tiếp vào môi trường ảo thông qua module pip của môi trường ảo
+"$SITE_DIR/dmojsite/bin/python" -m pip install --upgrade pip
+"$SITE_DIR/dmojsite/bin/python" -m pip install -r "$SITE_DIR/requirements.txt"
+"$SITE_DIR/dmojsite/bin/python" -m pip install mysqlclient uwsgi pymysql redis
 
 # Tạo symbolic link hoặc mock cho pymysql
 # (Trường hợp không compile được mysqlclient trên các nền tảng đặc biệt)
@@ -786,6 +787,7 @@ EOF
 echo ""
 echo "=== 4. BIÊN DỊCH GIAO DIỆN & ASSETS ==="
 # Tải các submodules nếu có
+git config --global --add safe.directory "$SITE_DIR" || true
 git submodule init
 git submodule update
 
@@ -811,23 +813,23 @@ fi
 
 # Biên dịch css/Sass
 ./make_style.sh
-python manage.py collectstatic --no-input
-python manage.py compilemessages -i dmojsite
-python manage.py compilejsi18n
+"$SITE_DIR/dmojsite/bin/python" manage.py collectstatic --no-input
+"$SITE_DIR/dmojsite/bin/python" manage.py compilemessages -i dmojsite
+"$SITE_DIR/dmojsite/bin/python" manage.py compilejsi18n
 
 # 12. KHỞI TẠO CSDL VÀ NAP DỮ LIỆU
 echo ""
 echo "=== 5. KHỞI TẠO CƠ SỞ DỮ LIỆU ==="
-python manage.py migrate
-python manage.py loaddata navbar
-python manage.py loaddata language_small
-python manage.py loaddata demo
+"$SITE_DIR/dmojsite/bin/python" manage.py migrate
+"$SITE_DIR/dmojsite/bin/python" manage.py loaddata navbar
+"$SITE_DIR/dmojsite/bin/python" manage.py loaddata language_small
+"$SITE_DIR/dmojsite/bin/python" manage.py loaddata demo
 
 # Tạo superuser
 read -p "[?] Bạn có muốn tạo một tài khoản Admin mới? (y/n) [n]: " create_admin_ans
 create_admin_ans=${create_admin_ans:-n}
 if [ "$create_admin_ans" = "y" ] || [ "$create_admin_ans" = "Y" ]; then
-  python manage.py createsuperuser
+  "$SITE_DIR/dmojsite/bin/python" manage.py createsuperuser
 fi
 
 # Tự động đăng ký các Judge vào DMOJ database
@@ -850,7 +852,7 @@ for i in $(seq 1 $NUM_JUDGES); do
   JUDGES_INFO="${JUDGES_INFO} - Judge ID: $current_id | Key: $current_key"$'\n'
 
   # Đăng ký Judge vào DMOJ qua Django ORM
-  python manage.py shell -c "
+  "$SITE_DIR/dmojsite/bin/python" manage.py shell -c "
 from judge.models import Judge
 if not Judge.objects.filter(name='$current_id').exists():
     j = Judge(name='$current_id', auth_key='$current_key', is_blocked=False)
@@ -1081,6 +1083,21 @@ EOF
 # Active cấu hình Nginx
 rm -f /etc/nginx/sites-enabled/default
 ln -sf "$nginx_conf" /etc/nginx/sites-enabled/fptoj
+
+# Cấu hình Firewall (UFW) nếu có
+if command -v ufw >/dev/null 2>&1; then
+  if ufw status | grep -q "Status: active"; then
+    echo "[i] Phát hiện UFW đang hoạt động. Tiến hành mở các cổng dịch vụ cần thiết..."
+    echo "[i] Mở cổng kết nối máy chấm Bridge (Port $judge_port/tcp)..."
+    ufw allow $judge_port/tcp || true
+    echo "[i] Mở cổng Web Server Nginx (Port $nginx_port/tcp)..."
+    ufw allow $nginx_port/tcp || true
+    echo "[i] Mở thông tuyến cho interface docker0 để máy chấm kết nối về host..."
+    ufw allow in on docker0 || true
+    ufw allow out on docker0 || true
+    ufw reload || true
+  fi
+fi
 
 # 16. HỖ TRỢ THIẾT LẬP MÁY CHẤM (JUDGE SERVER) QUA DOCKER
 echo ""
