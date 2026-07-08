@@ -1148,14 +1148,14 @@ if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
         echo "[i] Tạo cấu hình judge.yml cho máy chấm tại $data_dir/problems/judge.yml"
         cat << EOF > "$data_dir/problems/judge.yml"
 problem_storage_globs:
-  - /problems/
+  - /problems/*
 EOF
       fi
 
       echo "[i] Đang khởi chạy Docker Container 'fptoj-judge-${local_idx}' cho Judge ID '$current_id'..."
       docker run \
         --name "fptoj-judge-${local_idx}" \
-        -v "$data_dir/problems":/problems \
+        -v "$data_dir/problems":/problems:ro \
         --cap-add=SYS_PTRACE \
         --network host \
         -d \

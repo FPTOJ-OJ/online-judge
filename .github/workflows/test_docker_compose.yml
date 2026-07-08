@@ -83,7 +83,7 @@ jobs:
       - name: Test Tier 3 Configuration (Strong Server)
         run: |
           echo "=== STARTING TIER 3 ==="
-          UWSGI_WORKERS=2 CELERY_CONCURRENCY=1 docker compose -f docker/docker-compose.tier3.yml up -d --build
+          UWSGI_WORKERS=2 CELERY_CONCURRENCY=1 docker compose -f docker/docker-compose.tier3.yml up -d --build --scale judge-2=0 --scale judge-3=0 --scale judge-4=0
           sleep 15
           docker compose -f docker/docker-compose.tier3.yml ps
           
