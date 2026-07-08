@@ -78,7 +78,11 @@ jobs:
             echo ""
             echo ""
             echo "fake_password"
-            echo ""; echo ""; echo ""; echo ""; echo ""
+            echo "smtp.example.com"
+            echo "587"
+            echo "user@example.com"
+            echo "smtp_password"
+            echo "webmaster@example.com"
             echo ""
             echo "/data"
             echo "fake.domain.com"
@@ -94,7 +98,7 @@ jobs:
           echo "=== Checking local_settings.py ==="
           cat dmoj/local_settings.py | grep "fake.domain.com"
           echo "=== Checking info file ==="
-          sudo cat /root/fptoj_setup_info.txt || true
+          cat /home/runner/fptoj_setup_info.txt || true
 
       - name: Prepare Debug Files
         if: always()
@@ -103,7 +107,7 @@ jobs:
           cp dmoj/local_settings.py debug_files/ || true
           cp uwsgi.ini debug_files/ || true
           sudo cp /etc/nginx/sites-available/fptoj debug_files/ || true
-          sudo cp /root/fptoj_setup_info.txt debug_files/ || true
+          cp /home/runner/fptoj_setup_info.txt debug_files/ || true
           sudo cp -r logs debug_files/ || true
 
       - name: Upload Debug Artifacts

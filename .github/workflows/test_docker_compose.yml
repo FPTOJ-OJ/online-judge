@@ -1,0 +1,78 @@
+name: Test Docker Compose Tiers
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test-compose:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Stop Host Services (To Prevent Port Conflicts)
+        run: |
+          sudo systemctl stop mysql.service || true
+          sudo systemctl stop redis-server.service || true
+          sudo killall nc || true
+
+      - name: Create Data Directory
+        run: |
+          mkdir -p ${{ github.workspace }}/data/problems
+          mkdir -p ${{ github.workspace }}/data/mysql
+          mkdir -p ${{ github.workspace }}/data/pdfcache
+          mkdir -p ${{ github.workspace }}/data/datacache
+          chmod -R 777 ${{ github.workspace }}/data
+
+      - name: Prepare Environment File (.env)
+        run: |
+          cp docker/.env.example docker/.env
+          # Ghi đè thư mục DATA_DIR vào workspace của CI để tránh lỗi ghi root /data
+          sed -i "s|DATA_DIR=/data|DATA_DIR=${{ github.workspace }}/data|g" docker/.env
+          # Cấu hình mật khẩu giả định cho CI
+          sed -i "s|MYSQL_ROOT_PASSWORD=mysql_root_password_here|MYSQL_ROOT_PASSWORD=ci_root_password|g" docker/.env
+          sed -i "s|MYSQL_PASSWORD=dmoj_user_password_here|MYSQL_PASSWORD=ci_user_password|g" docker/.env
+          cat docker/.env
+
+      - name: Test Tier 1 Configuration (Weak Server)
+        run: |
+          echo "=== STARTING TIER 1 ==="
+          docker compose -f docker/docker-compose.tier1.yml up -d --build
+          sleep 15
+          docker compose -f docker/docker-compose.tier1.yml ps
+          
+          echo "=== RUNNING MIGRATIONS CHECK TIER 1 ==="
+          docker exec fptoj-web-tier1 python manage.py showmigrations
+          
+          echo "=== DOWN TIER 1 ==="
+          docker compose -f docker/docker-compose.tier1.yml down -v
+
+      - name: Test Tier 2 Configuration (Medium Server)
+        run: |
+          echo "=== STARTING TIER 2 ==="
+          docker compose -f docker/docker-compose.tier2.yml up -d --build
+          sleep 15
+          docker compose -f docker/docker-compose.tier2.yml ps
+          
+          echo "=== RUNNING MIGRATIONS CHECK TIER 2 ==="
+          docker exec fptoj-web-tier2 python manage.py showmigrations
+          
+          echo "=== DOWN TIER 2 ==="
+          docker compose -f docker/docker-compose.tier2.yml down -v
+
+      - name: Test Tier 3 Configuration (Strong Server)
+        run: |
+          echo "=== STARTING TIER 3 ==="
+          docker compose -f docker/docker-compose.tier3.yml up -d --build
+          sleep 15
+          docker compose -f docker/docker-compose.tier3.yml ps
+          
+          echo "=== RUNNING MIGRATIONS CHECK TIER 3 ==="
+          docker exec fptoj-web-tier3 python manage.py showmigrations
+          
+          echo "=== DOWN TIER 3 ==="
+          docker compose -f docker/docker-compose.tier3.yml down -v

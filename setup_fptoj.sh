@@ -608,6 +608,7 @@ fi
 cat << EOF > "$SITE_DIR/dmoj/local_settings.py"
 # Sinh tự động bởi setup_fptoj.sh vào $(date)
 import datetime
+import os
 
 SECRET_KEY = '$(python3 -c "import secrets; print(secrets.token_urlsafe(50))")'
 DEBUG = False
@@ -627,11 +628,11 @@ CACHES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '$db_name',
-        'USER': '$db_user',
-        'PASSWORD': '$db_pass',
-        'HOST': '$db_host',
-        'PORT': '$db_port',
+        'NAME': os.environ.get('MYSQL_DATABASE', '$db_name'),
+        'USER': os.environ.get('MYSQL_USER', '$db_user'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', '$db_pass'),
+        'HOST': os.environ.get('MYSQL_HOST', '$db_host'),
+        'PORT': os.environ.get('MYSQL_PORT', '$db_port'),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'sql_mode': 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',
@@ -674,14 +675,14 @@ DMOJ_PROBLEM_DATA_ROOT = "$data_dir/problems"
 
 # Event Server
 EVENT_DAEMON_USE = True
-EVENT_DAEMON_POST = 'ws://127.0.0.1:$wsevent_post_port/'
-EVENT_DAEMON_GET = 'ws://$first_host/event/'
-EVENT_DAEMON_GET_SSL = 'wss://$first_host/event/'
+EVENT_DAEMON_POST = os.environ.get('EVENT_DAEMON_POST', 'ws://127.0.0.1:$wsevent_post_port/')
+EVENT_DAEMON_GET = os.environ.get('EVENT_DAEMON_GET', 'ws://$first_host/event/')
+EVENT_DAEMON_GET_SSL = os.environ.get('EVENT_DAEMON_GET_SSL', 'wss://$first_host/event/')
 EVENT_DAEMON_POLL = '/channels/'
 
 # Celery Broker
-CELERY_BROKER_URL = 'redis://localhost:$redis_port/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:$redis_port/0'
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:$redis_port/0')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:$redis_port/0')
 
 ACE_URL = '//cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/'
 JQUERY_JS = '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
@@ -693,7 +694,7 @@ TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_M
 DMOJ_HTTPS = 2
 
 # Xuất PDF
-DMOJ_PDF_PDFOID_URL = 'http://localhost:$pdf_port'
+DMOJ_PDF_PDFOID_URL = os.environ.get('DMOJ_PDF_PDFOID_URL', 'http://localhost:$pdf_port')
 DMOJ_PDF_PROBLEM_CACHE = '$data_dir/pdfcache'
 DMOJ_PDF_PROBLEM_INTERNAL = '/pdfcache'
 
@@ -928,13 +929,14 @@ EOF
 # Celery worker
 cat << EOF > /etc/supervisor/conf.d/celery.conf
 [program:celery]
-command=$SITE_DIR/dmojsite/bin/celery -A dmoj_celery worker --concurrency=$CELERY_CONCURRENCY
+command=$SITE_DIR/dmojsite/bin/celery -A dmoj worker -l info --concurrency=$CELERY_CONCURRENCY
 directory=$SITE_DIR
 user=$REAL_USER
 group=$REAL_USER
 stdout_logfile=$SITE_DIR/logs/celery.stdout.log
 stderr_logfile=$SITE_DIR/logs/celery.stderr.log
 autorestart=true
+environment=PYTHONUNBUFFERED=1
 stdout_logfile_maxbytes=10MB
 stderr_logfile_maxbytes=10MB
 stdout_logfile_backups=5

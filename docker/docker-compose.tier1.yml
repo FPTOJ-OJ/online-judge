@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # 1. Cơ sở dữ liệu MariaDB (Cấu hình nhẹ cho máy chủ yếu)
+  db:
+    image: mariadb:10.11
+    container_name: fptoj-db-tier1
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ${DATA_DIR}/mysql:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+
+  # 2. Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fptoj-redis-tier1
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  # 3. Web Application (uWSGI - 2 workers cho Tier 1)
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fptoj-web-tier1
+    restart: always
+    environment:
+      - DMOJ_SERVICE_TYPE=web
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DEBUG=${DEBUG}
+      - SITE_NAME=${SITE_NAME}
+      - SITE_LONG_NAME=${SITE_LONG_NAME}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - EVENT_DAEMON_POST=ws://wsevent:15101/
+    volumes:
+      - ${DATA_DIR}/pdfcache:/data/pdfcache
+      - ${DATA_DIR}/datacache:/data/datacache
+      - ./nginx.conf:/app/nginx.conf:ro
+    depends_on:
+      - db
+      - redis
+
+  # 4. Celery Worker (Concurrency = 1 cho Tier 1)
+  celery:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fptoj-celery-tier1
+    restart: always
+    environment:
+      - DMOJ_SERVICE_TYPE=celery
+      - CELERY_CONCURRENCY=1
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  # 5. Websocket Event Server
+  wsevent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fptoj-wsevent-tier1
+    restart: always
+    environment:
+      - DMOJ_SERVICE_TYPE=wsevent
+    depends_on:
+      - web
+
+  # 6. Bridged Connection Server (Phân phối cho máy chấm)
+  bridged:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fptoj-bridged-tier1
+    restart: always
+    environment:
+      - DMOJ_SERVICE_TYPE=bridged
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST=db
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - "127.0.0.1:10000:10000"
+    depends_on:
+      - web
+
+  # 7. Nginx Web Server (Cổng 80)
+  nginx:
+    image: nginx:alpine
+    container_name: fptoj-nginx-tier1
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${DATA_DIR}/pdfcache:/data/pdfcache
+    depends_on:
+      - web
+      - wsevent
+
+  # 8. Máy chấm (Judge Server) (Tier 1 - 1 máy chấm chạy song song)
+  judge-1:
+    image: dmoj/judge-tier1:latest
+    container_name: fptoj-judge-tier1-1
+    restart: always
+    environment:
+      - DMOJ_HOST=bridged
+      - DMOJ_PORT=10000
+      - DMOJ_KEY=${JUDGE_KEY}
+      - DMOJ_NAME=${JUDGE_ID}-1
+    volumes:
+      - ${DATA_DIR}/problems:/problems
+    command: ${JUDGE_ID}-1 ${JUDGE_KEY} bridged -p 10000
+    depends_on:
+      - bridged
