@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export DJANGO_SETTINGS_MODULE=dmoj.settings
+
 # Đọc loại dịch vụ từ tham số đầu tiên, mặc định là 'web'
 SERVICE_TYPE="${1:-web}"
 

@@ -1,9 +1,8 @@
 version: '3.8'
 
 services:
-  # 1. Cơ sở dữ liệu MySQL 8.0 (Cấu hình hiệu năng cao cho Production)
   db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: fptoj-db-tier3
     restart: always
     command: --innodb-buffer-pool-size=2G --innodb-log-file-size=512M --max-connections=500

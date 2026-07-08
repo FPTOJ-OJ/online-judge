@@ -1,9 +1,8 @@
 version: '3.8'
 
 services:
-  # 1. Cơ sở dữ liệu MySQL 8.0 (Cấu hình chuẩn)
   db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: fptoj-db-tier2
     restart: always
     environment:
