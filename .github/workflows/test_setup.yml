@@ -23,6 +23,11 @@ jobs:
           sudo apt-get install -y lsof curl mysql-server redis-server
           sudo systemctl start mysql || true
           sudo systemctl start redis-server || true
+          # Khởi tạo database và user dmoj cho môi trường CI
+          sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS dmoj CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+          sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'dmoj'@'localhost' IDENTIFIED BY 'fake_password';"
+          sudo mysql -u root -e "GRANT ALL PRIVILEGES ON dmoj.* TO 'dmoj'@'localhost';"
+          sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
       - name: Occupy Default Ports to Test Auto-Detection
         run: |
