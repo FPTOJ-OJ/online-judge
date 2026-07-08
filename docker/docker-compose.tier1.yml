@@ -50,6 +50,7 @@ services:
       - ${DATA_DIR}/pdfcache:/data/pdfcache
       - ${DATA_DIR}/datacache:/data/datacache
       - ./nginx.conf:/app/nginx.conf:ro
+      - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
       - redis
@@ -72,6 +73,8 @@ services:
       - MYSQL_HOST=db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
       - redis
@@ -107,6 +110,8 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     ports:
       - "127.0.0.1:10000:10000"
+    volumes:
+      - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - web
 
@@ -136,6 +141,7 @@ services:
       - DMOJ_NAME=${JUDGE_ID}-1
     volumes:
       - ${DATA_DIR}/problems:/problems
-    command: ${JUDGE_ID}-1 ${JUDGE_KEY} bridged -p 10000
+      - ./judge.yml:/problems/judge.yml:ro
+    command: -c /problems/judge.yml ${JUDGE_ID}-1 ${JUDGE_KEY} bridged -p 10000
     depends_on:
       - bridged
