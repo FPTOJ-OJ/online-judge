@@ -29,7 +29,7 @@ jQuery(function ($) {
                         window.MathJax.startup = {typeset: false};
                         $.ajax({
                             type: 'GET',
-                            url: '/static/libs/mathjax/tex-chtml.min.js',
+                            url: '/static/vendor/mathjax/tex-chtml.min.js',
                             dataType: 'script',
                             cache: true,
                             success: update_math

@@ -165,7 +165,7 @@
                         code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
                     </style>
                     <script type="text/javascript" src="/static/mathjax_config.js"><\/script>
-                    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+                    <script src="/static/vendor/mathjax/tex-mml-chtml.js"><\/script>
                 </head>
                 <body>${htmlContent}</body>
             </html>
@@ -238,12 +238,13 @@
 
     async function boot() {
         try {
-            const { default: markdownIt } = await import('https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm');
+            await loadScript('/static/vendor/markdown-it.min.js');
+            const markdownIt = window.markdownit;
             window.__markdownItInstance__ = markdownIt({ html: true, linkify: true, typographer: true });
 
             await loadScript('/static/martor/js/ckeditor5.umd.js?v=2');
             await loadScript('/static/libs/chosen.js/chosen.jquery.min.js?v=2');
-            await loadScript('https://unpkg.com/turndown/dist/turndown.js');
+            await loadScript('/static/vendor/turndown.js');
             await loadScript('/static/martor/js/editor-switch.js?v=' + Date.now());
             await loadScript('/static/martor/js/sidebar-math.js?v=2');
 

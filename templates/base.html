@@ -414,53 +414,7 @@
             }
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        (function () {
-            var _nativeAlert = window.alert;
-            var _nativeConfirm = window.confirm;
-            var _nativePrompt = window.prompt;
-
-            function _swalReady() {
-                return typeof Swal !== 'undefined' && Swal;
-            }
-
-            window.alert = function (msg) {
-                if (_swalReady()) {
-                    return Swal.fire({ text: msg, icon: 'info', confirmButtonText: 'OK' });
-                }
-                return _nativeAlert(msg);
-            };
-
-            window.confirm = function (msg) {
-                if (_swalReady()) {
-                    return Swal.fire({
-                        text: msg,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'OK',
-                        cancelButtonText: 'Hủy'
-                    }).then(function (r) { return r.isConfirmed; });
-                }
-                return _nativeConfirm(msg);
-            };
-
-            window.prompt = function (msg, val) {
-                if (val === undefined) val = '';
-                if (_swalReady()) {
-                    return Swal.fire({
-                        title: msg,
-                        input: 'text',
-                        inputValue: val,
-                        showCancelButton: true,
-                        confirmButtonText: 'OK',
-                        cancelButtonText: 'Hủy'
-                    }).then(function (r) { return r.isConfirmed ? r.value : null; });
-                }
-                return _nativePrompt(msg, val);
-            };
-        })();
-    </script>
+    <script src="{{ static('vendor/sweetalert2.all.min.js') }}"></script>
 
 </head>
 <body{% if perms.judge.test_site %} data-theme="{{ SITE_THEME_NAME }}" {% endif %}>
