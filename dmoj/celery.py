@@ -10,13 +10,12 @@ app = Celery('dmoj')
 from django.conf import settings  # noqa: E402, I202, django must be imported here
 app.config_from_object(settings, namespace='CELERY')
 
-# broker_url is set by config_from_object from settings.CELERY_BROKER_URL
-# result_backend is derived from the same URL to avoid deprecated CELERY_RESULT_BACKEND
-redis_url = getattr(settings, 'CELERY_BROKER_URL', os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'))
-app.conf.result_backend = redis_url
+# result_backend is derived from broker_url to avoid deprecated CELERY_RESULT_BACKEND
+app.conf.result_backend = app.conf.broker_url
 
 if hasattr(settings, 'CELERY_BROKER_URL_SECRET'):
     app.conf.broker_url = settings.CELERY_BROKER_URL_SECRET
+    app.conf.result_backend = settings.CELERY_BROKER_URL_SECRET
 if hasattr(settings, 'CELERY_RESULT_BACKEND_SECRET'):
     app.conf.result_backend = settings.CELERY_RESULT_BACKEND_SECRET
 
