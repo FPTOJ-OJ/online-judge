@@ -324,113 +324,42 @@ PYEOF
   fi
 }
 
+parse_judge_ip() {
+  local default_ip="127.0.0.1"
+  if [ -f "$SITE_DIR/dmoj/local_settings.py" ]; then
+    PARSE_FILE="$SITE_DIR/dmoj/local_settings.py" PARSE_DEFAULT="$default_ip" \
+      python3 - <<'PYEOF' 2>/dev/null
+import re, os
+fpath = os.environ['PARSE_FILE']
+default = os.environ['PARSE_DEFAULT']
+try:
+    with open(fpath) as f:
+        content = f.read()
+    match = re.search(r'BRIDGED_JUDGE_ADDRESS\s*=\s*\[\s*\(\s*["\x27]([^"\x27]+)["\x27]\s*,\s*(\d+)\s*\)', content)
+    if match:
+        ip = match.group(1)
+        if ip == '0.0.0.0':
+            print('127.0.0.1')
+        else:
+            print(ip)
+        exit(0)
+except Exception:
+    pass
+print(default)
+PYEOF
+  else
+    echo "$default_ip"
+  fi
+}
+
 # 5. HƯỚNG DẪN TƯƠNG TÁC NHẬP THÔNG TIN CẤU HÌNH
 echo ""
 echo "=== HƯỚNG DẪN THIẾT LẬP CẤU HÌNH (Bấm Enter để lấy mặc định) ==="
 
-# Đọc các giá trị mặc định sẵn có
-OLD_SITE_NAME=$(parse_setting "SITE_NAME" "FPTOJ")
-OLD_HOSTS=$(parse_setting "ALLOWED_HOSTS" "fptoj.com,www.fptoj.com,127.0.0.1")
-OLD_DB_HOST=$(parse_db_setting "HOST" "127.0.0.1")
-OLD_DB_NAME=$(parse_db_setting "NAME" "dmoj")
-OLD_DB_USER=$(parse_db_setting "USER" "dmoj")
-OLD_DB_PASS=$(parse_db_setting "PASSWORD" "12345678")
+# Kiểm tra cài đặt hiện có -> hỏi cập nhật trước khi prompt
+UPDATE_MODE=false
+KEEP_LOCAL_SETTINGS=false
 
-OLD_EMAIL_HOST=$(parse_setting "EMAIL_HOST" "")
-OLD_EMAIL_PORT=$(parse_setting "EMAIL_PORT" "587")
-OLD_EMAIL_USER=$(parse_setting "EMAIL_HOST_USER" "")
-OLD_EMAIL_PASS=$(parse_setting "EMAIL_HOST_PASSWORD" "")
-OLD_EMAIL_FROM=$(parse_setting "DEFAULT_FROM_EMAIL" "")
-
-read -p "[?] Tên trang web Online Judge của bạn [$OLD_SITE_NAME]: " site_name
-site_name=${site_name:-$OLD_SITE_NAME}
-
-OLD_SITE_LONG_NAME=$(parse_setting "SITE_LONG_NAME" "${site_name}: FPT Online Judge")
-read -p "[?] Tên dài (long name) hiển thị trên trang web [$OLD_SITE_LONG_NAME]: " site_long_name
-site_long_name=${site_long_name:-$OLD_SITE_LONG_NAME}
-
-# Hỏi về Docker cho MySQL/Redis
-use_docker_mysql=false
-use_docker_redis=false
-
-if [ "$mysql_on_host" = "false" ]; then
-  read -p "[?] MySQL/MariaDB không chạy trên Host. Bạn có muốn tự động tạo bằng Docker? (y/n) [y]: " docker_mysql_ans
-  docker_mysql_ans=${docker_mysql_ans:-y}
-  if [ "$docker_mysql_ans" = "y" ] || [ "$docker_mysql_ans" = "Y" ]; then
-    use_docker_mysql=true
-  fi
-fi
-
-if [ "$redis_on_host" = "false" ]; then
-  read -p "[?] Redis không chạy trên Host. Bạn có muốn tự động tạo bằng Docker? (y/n) [y]: " docker_redis_ans
-  docker_redis_ans=${docker_redis_ans:-y}
-  if [ "$docker_redis_ans" = "y" ] || [ "$docker_redis_ans" = "Y" ]; then
-    use_docker_redis=true
-  fi
-fi
-
-# Thiết lập Database
-if [ "$use_docker_mysql" = "true" ]; then
-  db_host="127.0.0.1"
-  db_name="dmoj"
-  db_user="dmoj"
-  read -p "[?] Đặt mật khẩu cho người dùng database 'dmoj' [$OLD_DB_PASS]: " db_pass
-  db_pass=${db_pass:-$OLD_DB_PASS}
-  read -p "[?] Đặt mật khẩu cho tài khoản ROOT của MySQL Docker [rootpass]: " db_root_pass
-  db_root_pass=${db_root_pass:-rootpass}
-else
-  read -p "[?] Địa chỉ máy chủ Database (Host IP) [$OLD_DB_HOST]: " db_host
-  db_host=${db_host:-$OLD_DB_HOST}
-  read -p "[?] Cổng Database (Port) [3306]: " db_port
-  db_port=${db_port:-3306}
-  read -p "[?] Tên Cơ sở dữ liệu [$OLD_DB_NAME]: " db_name
-  db_name=${db_name:-$OLD_DB_NAME}
-  read -p "[?] Tên đăng nhập Database [$OLD_DB_USER]: " db_user
-  db_user=${db_user:-$OLD_DB_USER}
-  read -p "[?] Mật khẩu đăng nhập Database [$OLD_DB_PASS]: " db_pass
-  db_pass=${db_pass:-$OLD_DB_PASS}
-fi
-
-# Thiết lập Email SMTP
-echo ""
-echo "[i] Thiết lập Email SMTP (Để trống nếu không dùng - cấu hình lại sau ở local_settings.py)"
-read -p "[?] Địa chỉ máy chủ SMTP Mail [$OLD_EMAIL_HOST]: " email_host
-email_host=${email_host:-$OLD_EMAIL_HOST}
-if [ -n "$email_host" ]; then
-    read -p "[?] Cổng SMTP (thường là 587 hoặc 465) [$OLD_EMAIL_PORT]: " email_port
-    email_port=${email_port:-${OLD_EMAIL_PORT:-587}}
-    read -p "[?] Tên đăng nhập SMTP Email [$OLD_EMAIL_USER]: " email_user
-    email_user=${email_user:-$OLD_EMAIL_USER}
-    read -p "[?] Mật khẩu SMTP Email [$OLD_EMAIL_PASS]: " email_pass
-    email_pass=${email_pass:-$OLD_EMAIL_PASS}
-    read -p "[?] Email gửi đi hiển thị (From Email) [$OLD_EMAIL_FROM]: " email_from
-    email_from=${email_from:-$OLD_EMAIL_FROM}
-fi
-
-echo ""
-echo "[i] Thiết lập Tài khoản Admin Mặc định"
-read -p "[?] Tên Admin (Để trống nếu không dùng) []: " admin_name
-if [ -n "$admin_name" ]; then
-    read -p "[?] Email Admin []: " admin_email
-fi
-
-echo ""
-echo "[i] Thiết lập Thư mục Dữ liệu (Data Directory)"
-read -p "[?] Thư mục chứa dữ liệu tĩnh (Problems, Cache) [/data]: " data_dir
-data_dir=${data_dir:-/data}
-
-# Tạo các thư mục dữ liệu cần thiết trước để tránh Docker tạo với quyền root
-mkdir -p "$data_dir"
-mkdir -p "$data_dir/problems" "$data_dir/pdfcache" "$data_dir/datacache" "$data_dir/mysql"
-chmod -R 775 "$data_dir"
-chown -R $REAL_USER:$REAL_USER "$data_dir"
-
-# Tạo thư mục logs sớm cho dự án tránh lỗi Django FileHandler
-mkdir -p "$SITE_DIR/logs"
-chown -R $REAL_USER:$REAL_USER "$SITE_DIR/logs"
-chmod -R 775 "$SITE_DIR/logs"
-
-# Kiểm tra cài đặt hiện có -> hỏi cập nhật
 if [ -f "$SITE_DIR/dmoj/local_settings.py" ] && [ -f "$SITE_DIR/dmoj/celery.py" ]; then
     echo ""
     echo "[i] Phát hiện hệ thống đã được cài đặt trước đó."
@@ -462,10 +391,138 @@ if [ -f "$SITE_DIR/dmoj/local_settings.py" ] && [ -f "$SITE_DIR/dmoj/celery.py" 
             echo "[i] Cài đặt mới hoàn toàn."
             ;;
     esac
-else
-    UPDATE_MODE=false
-    KEEP_LOCAL_SETTINGS=false
 fi
+
+if [ "$KEEP_LOCAL_SETTINGS" = "true" ]; then
+    # Tự động đọc cấu hình cũ mà không cần hỏi lại người dùng
+    site_name=$(parse_setting "SITE_NAME" "FPTOJ")
+    site_long_name=$(parse_setting "SITE_LONG_NAME" "FPTOJ: FPT Online Judge")
+    allowed_hosts=$(parse_setting "ALLOWED_HOSTS" "localhost")
+    db_host=$(parse_db_setting "HOST" "127.0.0.1")
+    db_port=$(parse_db_setting "PORT" "3306")
+    db_name=$(parse_db_setting "NAME" "dmoj")
+    db_user=$(parse_db_setting "USER" "dmoj")
+    db_pass=$(parse_db_setting "PASSWORD" "")
+    email_host=$(parse_setting "EMAIL_HOST" "")
+    email_port=$(parse_setting "EMAIL_PORT" "587")
+    email_user=$(parse_setting "EMAIL_HOST_USER" "")
+    email_pass=$(parse_setting "EMAIL_HOST_PASSWORD" "")
+    email_from=$(parse_setting "DEFAULT_FROM_EMAIL" "")
+    google_oauth_key=$(parse_setting "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY" "")
+    google_oauth_secret=$(parse_setting "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET" "")
+    github_oauth_key=$(parse_setting "SOCIAL_AUTH_GITHUB_SECURE_KEY" "")
+    github_oauth_secret=$(parse_setting "SOCIAL_AUTH_GITHUB_SECURE_SECRET" "")
+    turnstile_sitekey=$(parse_setting "TURNSTILE_SITEKEY" "")
+    turnstile_secret=$(parse_setting "TURNSTILE_SECRET" "")
+    
+    problems_root=$(parse_setting "DMOJ_PROBLEM_DATA_ROOT" "/data/problems")
+    data_dir=$(echo "$problems_root" | sed -e 's|/problems/\?$||')
+    data_dir=${data_dir:-/data}
+else
+    # Tiến trình nhập cấu hình chuẩn của script
+    OLD_SITE_NAME=$(parse_setting "SITE_NAME" "FPTOJ")
+    OLD_HOSTS=$(parse_setting "ALLOWED_HOSTS" "fptoj.com,www.fptoj.com,127.0.0.1")
+    OLD_DB_HOST=$(parse_db_setting "HOST" "127.0.0.1")
+    OLD_DB_NAME=$(parse_db_setting "NAME" "dmoj")
+    OLD_DB_USER=$(parse_db_setting "USER" "dmoj")
+    OLD_DB_PASS=$(parse_db_setting "PASSWORD" "12345678")
+
+    OLD_EMAIL_HOST=$(parse_setting "EMAIL_HOST" "")
+    OLD_EMAIL_PORT=$(parse_setting "EMAIL_PORT" "587")
+    OLD_EMAIL_USER=$(parse_setting "EMAIL_HOST_USER" "")
+    OLD_EMAIL_PASS=$(parse_setting "EMAIL_HOST_PASSWORD" "")
+    OLD_EMAIL_FROM=$(parse_setting "DEFAULT_FROM_EMAIL" "")
+
+    read -p "[?] Tên trang web Online Judge của bạn [$OLD_SITE_NAME]: " site_name
+    site_name=${site_name:-$OLD_SITE_NAME}
+
+    OLD_SITE_LONG_NAME=$(parse_setting "SITE_LONG_NAME" "${site_name}: FPT Online Judge")
+    read -p "[?] Tên dài (long name) hiển thị trên trang web [$OLD_SITE_LONG_NAME]: " site_long_name
+    site_long_name=${site_long_name:-$OLD_SITE_LONG_NAME}
+
+    # Hỏi về Docker cho MySQL/Redis
+    use_docker_mysql=false
+    use_docker_redis=false
+
+    if [ "$mysql_on_host" = "false" ]; then
+      read -p "[?] MySQL/MariaDB không chạy trên Host. Bạn có muốn tự động tạo bằng Docker? (y/n) [y]: " docker_mysql_ans
+      docker_mysql_ans=${docker_mysql_ans:-y}
+      if [ "$docker_mysql_ans" = "y" ] || [ "$docker_mysql_ans" = "Y" ]; then
+        use_docker_mysql=true
+      fi
+    fi
+
+    if [ "$redis_on_host" = "false" ]; then
+      read -p "[?] Redis không chạy trên Host. Bạn có muốn tự động tạo bằng Docker? (y/n) [y]: " docker_redis_ans
+      docker_redis_ans=${docker_redis_ans:-y}
+      if [ "$docker_redis_ans" = "y" ] || [ "$docker_redis_ans" = "Y" ]; then
+        use_docker_redis=true
+      fi
+    fi
+
+    # Thiết lập Database
+    if [ "$use_docker_mysql" = "true" ]; then
+      db_host="127.0.0.1"
+      db_name="dmoj"
+      db_user="dmoj"
+      read -p "[?] Đặt mật khẩu cho người dùng database 'dmoj' [$OLD_DB_PASS]: " db_pass
+      db_pass=${db_pass:-$OLD_DB_PASS}
+      read -p "[?] Đặt mật khẩu cho tài khoản ROOT của MySQL Docker [rootpass]: " db_root_pass
+      db_root_pass=${db_root_pass:-rootpass}
+    else
+      read -p "[?] Địa chỉ máy chủ Database (Host IP) [$OLD_DB_HOST]: " db_host
+      db_host=${db_host:-$OLD_DB_HOST}
+      read -p "[?] Cổng Database (Port) [3306]: " db_port
+      db_port=${db_port:-3306}
+      read -p "[?] Tên Cơ sở dữ liệu [$OLD_DB_NAME]: " db_name
+      db_name=${db_name:-$OLD_DB_NAME}
+      read -p "[?] Tên đăng nhập Database [$OLD_DB_USER]: " db_user
+      db_user=${db_user:-$OLD_DB_USER}
+      read -p "[?] Mật khẩu đăng nhập Database [$OLD_DB_PASS]: " db_pass
+      db_pass=${db_pass:-$OLD_DB_PASS}
+    fi
+
+    # Thiết lập Email SMTP
+    echo ""
+    echo "[i] Thiết lập Email SMTP (Để trống nếu không dùng - cấu hình lại sau ở local_settings.py)"
+    read -p "[?] Địa chỉ máy chủ SMTP Mail [$OLD_EMAIL_HOST]: " email_host
+    email_host=${email_host:-$OLD_EMAIL_HOST}
+    if [ -n "$email_host" ]; then
+        read -p "[?] Cổng SMTP (thường là 587 hoặc 465) [$OLD_EMAIL_PORT]: " email_port
+        email_port=${email_port:-${OLD_EMAIL_PORT:-587}}
+        read -p "[?] Tên đăng nhập SMTP Email [$OLD_EMAIL_USER]: " email_user
+        email_user=${email_user:-$OLD_EMAIL_USER}
+        read -p "[?] Mật khẩu SMTP Email [$OLD_EMAIL_PASS]: " email_pass
+        email_pass=${email_pass:-$OLD_EMAIL_PASS}
+        read -p "[?] Email gửi đi hiển thị (From Email) [$OLD_EMAIL_FROM]: " email_from
+        email_from=${email_from:-$OLD_EMAIL_FROM}
+    fi
+
+    echo ""
+    echo "[i] Thiết lập Tài khoản Admin Mặc định"
+    read -p "[?] Tên Admin (Để trống nếu không dùng) []: " admin_name
+    if [ -n "$admin_name" ]; then
+        read -p "[?] Email Admin []: " admin_email
+    fi
+
+    echo ""
+    echo "[i] Thiết lập Thư mục Dữ liệu (Data Directory)"
+    read -p "[?] Thư mục chứa dữ liệu tĩnh (Problems, Cache) [/data]: " data_dir
+    data_dir=${data_dir:-/data}
+fi
+
+# Tạo các thư mục dữ liệu cần thiết trước để tránh Docker tạo với quyền root
+mkdir -p "$data_dir"
+mkdir -p "$data_dir/problems" "$data_dir/pdfcache" "$data_dir/datacache" "$data_dir/mysql"
+chmod -R 775 "$data_dir"
+chown -R $REAL_USER:$REAL_USER "$data_dir"
+
+# Tạo thư mục logs sớm cho dự án tránh lỗi Django FileHandler
+mkdir -p "$SITE_DIR/logs"
+chown -R $REAL_USER:$REAL_USER "$SITE_DIR/logs"
+chmod -R 775 "$SITE_DIR/logs"
+
+
 
 # Kiểm tra và tự động cấu hình các cổng kết nối tránh trùng lặp
 echo ""
@@ -727,10 +784,10 @@ EVENT_DAEMON_POLL = '/channels/'
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:$redis_port/0')
 # result_backend is derived from broker_url in dmoj/celery.py
 
-ACE_URL = '//cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/'
-JQUERY_JS = '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
-SELECT2_JS_URL = '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
-SELECT2_CSS_URL = '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
+ACE_URL = '/static/libs/ace/'
+JQUERY_JS = '/static/libs/jquery-3.4.1.min.js'
+SELECT2_JS_URL = '/static/libs/select2/select2.js'
+SELECT2_CSS_URL = '/static/libs/select2/select2.css'
 
 TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/1024px-Blue_Marble_2002.png'
 
@@ -1231,6 +1288,7 @@ if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
     
     # Khởi chạy các container máy chấm
     local_idx=1
+    connect_ip=$(parse_judge_ip)
     while IFS=':' read -r current_id current_key; do
       if [ -z "$current_id" ]; then continue; fi
       
@@ -1254,7 +1312,7 @@ EOF
         --restart=always \
         dmoj/judge-$JUDGE_TIER:latest \
         run -p $judge_port -c /problems/judge.yml \
-        127.0.0.1 "$current_id" "$current_key"
+        $connect_ip "$current_id" "$current_key"
         
       echo "[✓] Máy chấm '$current_id' đã được khởi chạy thành công!"
       local_idx=$((local_idx + 1))

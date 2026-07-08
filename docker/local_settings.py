@@ -84,10 +84,10 @@ EVENT_DAEMON_POLL = '/channels/'
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 # result_backend is derived from broker_url in dmoj/celery.py
 
-ACE_URL = '//cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/'
-JQUERY_JS = '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'
-SELECT2_JS_URL = '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
-SELECT2_CSS_URL = '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
+ACE_URL = '/static/libs/ace/'
+JQUERY_JS = '/static/libs/jquery-3.4.1.min.js'
+SELECT2_JS_URL = '/static/libs/select2/select2.js'
+SELECT2_CSS_URL = '/static/libs/select2/select2.css'
 
 TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/1024px-Blue_Marble_2002.png'
 

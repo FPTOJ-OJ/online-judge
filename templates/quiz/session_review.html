@@ -2,8 +2,8 @@
 
 {% block media %}
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="{{ static('libs/highlight/github-dark.min.css') }}">
+    <script src="{{ static('libs/highlight/highlight.min.js') }}"></script>
     <style>
         .quiz-review-card-skipped {
             border-left: 5px solid var(--quiz-text-muted);
