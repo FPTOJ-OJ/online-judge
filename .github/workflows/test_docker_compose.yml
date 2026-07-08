@@ -14,6 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Clone Judge Server Repository
+        run: |
+          git clone --recursive https://github.com/FPTOJ-OJ/judge-server.git judge-server
+
       - name: Stop Host Services (To Prevent Port Conflicts)
         run: |
           sudo systemctl stop mysql.service || true
@@ -38,6 +42,10 @@ jobs:
           sed -i "s|MYSQL_PASSWORD=dmoj_user_password_here|MYSQL_PASSWORD=ci_user_password|g" docker/.env
           cat docker/.env
 
+      - name: Build Judge Tier 1 Image
+        run: |
+          docker build --build-arg TAG="master" -t dmoj/judge-tier1 -t dmoj/judge-tier1:latest ./judge-server/.docker/tier1
+
       - name: Test Tier 1 Configuration (Weak Server)
         run: |
           echo "=== STARTING TIER 1 ==="
@@ -51,6 +59,10 @@ jobs:
           echo "=== DOWN TIER 1 ==="
           docker compose -f docker/docker-compose.tier1.yml down -v
 
+      - name: Build Judge Tier 2 Image
+        run: |
+          docker build --build-arg TAG="master" -t dmoj/judge-tier2 -t dmoj/judge-tier2:latest ./judge-server/.docker/tier2
+
       - name: Test Tier 2 Configuration (Medium Server)
         run: |
           echo "=== STARTING TIER 2 ==="
@@ -63,6 +75,10 @@ jobs:
           
           echo "=== DOWN TIER 2 ==="
           docker compose -f docker/docker-compose.tier2.yml down -v
+
+      - name: Build Judge Tier 3 Image
+        run: |
+          docker build --build-arg TAG="master" -t dmoj/judge-tier3 -t dmoj/judge-tier3:latest ./judge-server/.docker/tier3
 
       - name: Test Tier 3 Configuration (Strong Server)
         run: |
