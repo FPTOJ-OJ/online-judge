@@ -685,7 +685,7 @@ EVENT_DAEMON_POLL = '/channels/'
 
 # Celery Broker
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:$redis_port/0')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localhost:$redis_port/0')
+# result_backend is derived from broker_url in dmoj/celery.py
 
 ACE_URL = '//cdnjs.cloudflare.com/ajax/libs/ace/1.43.3/'
 JQUERY_JS = '//cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js'

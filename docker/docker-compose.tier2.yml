@@ -40,7 +40,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_HOST=db
       - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EVENT_DAEMON_POST=ws://wsevent:15101/
       - UWSGI_WORKERS=${UWSGI_WORKERS:-4}
     volumes:
@@ -69,7 +68,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_HOST=db
       - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
@@ -104,7 +102,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_HOST=db
       - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     ports:
       - "127.0.0.1:10000:10000"
     volumes:
