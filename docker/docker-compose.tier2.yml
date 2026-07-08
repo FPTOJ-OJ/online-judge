@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mariadb:10.11
@@ -44,7 +42,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EVENT_DAEMON_POST=ws://wsevent:15101/
-      - UWSGI_WORKERS=4
+      - UWSGI_WORKERS=${UWSGI_WORKERS:-4}
     volumes:
       - ${DATA_DIR}/pdfcache:/data/pdfcache
       - ${DATA_DIR}/datacache:/data/datacache
@@ -63,7 +61,7 @@ services:
     restart: always
     environment:
       - DMOJ_SERVICE_TYPE=celery
-      - CELERY_CONCURRENCY=2
+      - CELERY_CONCURRENCY=${CELERY_CONCURRENCY:-2}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - MYSQL_DATABASE=${MYSQL_DATABASE}

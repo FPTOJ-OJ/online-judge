@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Cơ sở dữ liệu MariaDB (Cấu hình nhẹ cho máy chủ yếu)
   db:
@@ -45,7 +43,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - EVENT_DAEMON_POST=ws://wsevent:15101/
-      - UWSGI_WORKERS=2
+      - UWSGI_WORKERS=${UWSGI_WORKERS:-2}
     volumes:
       - ${DATA_DIR}/pdfcache:/data/pdfcache
       - ${DATA_DIR}/datacache:/data/datacache
@@ -64,7 +62,7 @@ services:
     restart: always
     environment:
       - DMOJ_SERVICE_TYPE=celery
-      - CELERY_CONCURRENCY=1
+      - CELERY_CONCURRENCY=${CELERY_CONCURRENCY:-1}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - MYSQL_DATABASE=${MYSQL_DATABASE}

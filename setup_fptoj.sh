@@ -345,6 +345,9 @@ OLD_EMAIL_FROM=$(parse_setting "DEFAULT_FROM_EMAIL" "")
 read -p "[?] Tên trang web Online Judge của bạn [$OLD_SITE_NAME]: " site_name
 site_name=${site_name:-$OLD_SITE_NAME}
 
+OLD_SITE_LONG_NAME=$(parse_setting "SITE_LONG_NAME" "${site_name}: FPT Online Judge")
+read -p "[?] Tên dài (long name) hiển thị trên trang web [$OLD_SITE_LONG_NAME]: " site_long_name
+site_long_name=${site_long_name:-$OLD_SITE_LONG_NAME}
 
 # Hỏi về Docker cho MySQL/Redis
 use_docker_mysql=false
@@ -665,7 +668,7 @@ STATIC_ROOT = '$SITE_DIR/static'
 STATIC_URL = '/static/'
 
 SITE_NAME = '$site_name'
-SITE_LONG_NAME = '${site_name}: FPT Online Judge'
+SITE_LONG_NAME = '$site_long_name'
 SITE_ADMIN_EMAIL = '$admin_email'
 TERMS_OF_SERVICE_URL = '/about/tos/'
 
@@ -1144,69 +1147,8 @@ if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
         mkdir -p "$data_dir/problems"
         echo "[i] Tạo cấu hình judge.yml cho máy chấm tại $data_dir/problems/judge.yml"
         cat << EOF > "$data_dir/problems/judge.yml"
-id: $current_id
-key: "$current_key"
 problem_storage_globs:
-  - /problems/*
-
-runtime:
-  as_x64: /usr/bin/x86_64-linux-gnu-as
-  as_x86: /usr/bin/as
-  awk: /usr/bin/mawk
-  cargo: /home/judge/.cargo/bin/cargo
-  cat: /usr/bin/cat
-  chicken-csc: /usr/bin/chicken-csc
-  clang: /usr/bin/clang
-  clang++: /usr/bin/clang++
-  dmd: /opt/dlang/linux/bin64/dmd
-  fpc: /usr/bin/fpc
-  fpc-themis: /usr/bin/fpc
-  fsharpc: /usr/bin/fsharpc
-  g++: /usr/bin/g++
-  g++-themis: /usr/bin/g++
-  g++11: /usr/bin/g++
-  g++14: /usr/bin/g++
-  g++17: /usr/bin/g++
-  g++20: /usr/bin/g++
-  gcc: /usr/bin/gcc
-  gcc11: /usr/bin/gcc
-  ghc: /usr/bin/ghc
-  go: /usr/bin/go
-  java: /usr/lib/jvm/java-22-openjdk-amd64/bin/java
-  java8: /usr/lib/jvm/java-8-openjdk-amd64/bin/java
-  javac: /usr/lib/jvm/java-22-openjdk-amd64/bin/javac
-  javac8: /usr/lib/jvm/java-8-openjdk-amd64/bin/javac
-  ld_x64: /usr/bin/x86_64-linux-gnu-ld
-  ld_x86: /usr/bin/ld
-  llc: /usr/bin/llc
-  mono: /usr/bin/mono
-  mono-csc: /usr/bin/mono-csc
-  mono-vbnc: /usr/bin/vbnc
-  nasm: /usr/bin/nasm
-  ocamlfind: /home/judge/.opam/dmoj/bin/ocamlfind
-  opt: /usr/bin/opt
-  perl: /usr/bin/perl
-  pypy: /opt/pypy2/bin/pypy
-  pypy3: /opt/pypy3/bin/pypy3
-  python: /usr/bin/python2.7
-  python3: /usr/bin/python3
-  racket: /usr/bin/racket
-  raco: /usr/bin/raco
-  ruby: /usr/bin/ruby
-  scala_args:
-  - -Xbootclasspath/a:/usr/share/scala-2.11/lib/hawtjni-runtime.jar:/usr/share/scala-2.11/lib/jansi.jar:/usr/share/scala-2.11/lib/jline.jar:/usr/share/scala-2.11/lib/scala-actors.jar:/usr/share/scala-2.11/lib/scala-compiler.jar:/usr/share/scala-2.11/lib/scala-library.jar:/usr/share/scala-2.11/lib/scala-parser-combinators.jar:/usr/share/scala-2.11/lib/scala-reflect.jar:/usr/share/scala-2.11/lib/scala-xml.jar:/usr/share/scala-2.11/lib/scalap.jar
-  - -classpath
-  - '""'
-  - -Dscala.boot.class.path=/usr/share/scala-2.11/lib/hawtjni-runtime.jar:/usr/share/scala-2.11/lib/jansi.jar:/usr/share/scala-2.11/lib/jline.jar:/usr/share/scala-2.11/lib/scala-actors.jar:/usr/share/scala-2.11/lib/scala-compiler.jar:/usr/share/scala-2.11/lib/scala-library.jar:/usr/share/scala-2.11/lib/scala-parser-combinators.jar:/usr/share/scala-2.11/lib/scala-reflect.jar:/usr/share/scala-2.11/lib/scala-xml.jar:/usr/share/scala-2.11/lib/scalap.jar
-  - -Dscala.home=/usr/share/scala-2.11
-  - -Dscala.usejavacp=true
-  - -Denv.emacs=
-  - scala.tools.nsc.MainGenericRunner
-  scala_vm: /usr/lib/jvm/java-22-openjdk-amd64/bin/java
-  scalac: /usr/bin/scalac
-  sed: /usr/bin/sed
-  v8dmoj: /usr/bin/v8dmoj
-  crt_x86_in_lib32: true
+  - /problems/
 EOF
       fi
 
