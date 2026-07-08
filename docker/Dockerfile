@@ -3,6 +3,8 @@ FROM node:20-alpine AS asset-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+# Cài đặt các công cụ biên dịch css/sass trong container build
+RUN npm install -g sass postcss postcss-cli autoprefixer
 COPY make_style.sh ./
 COPY resources/ ./resources/
 RUN ./make_style.sh
