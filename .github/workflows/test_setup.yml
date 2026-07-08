@@ -13,6 +13,23 @@ on:
 jobs:
   test-setup:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: dmoj
+          MYSQL_USER: dmoj
+          MYSQL_PASSWORD: fake_password
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,14 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lsof curl mysql-server redis-server
-          sudo systemctl start mysql || true
-          sudo systemctl start redis-server || true
-          # Khởi tạo database và user dmoj cho môi trường CI
-          sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS dmoj CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
-          sudo mysql -u root -e "CREATE USER IF NOT EXISTS 'dmoj'@'localhost' IDENTIFIED BY 'fake_password';"
-          sudo mysql -u root -e "GRANT ALL PRIVILEGES ON dmoj.* TO 'dmoj'@'localhost';"
-          sudo mysql -u root -e "FLUSH PRIVILEGES;"
+          sudo apt-get install -y lsof curl
 
       - name: Occupy Default Ports to Test Auto-Detection
         run: |
