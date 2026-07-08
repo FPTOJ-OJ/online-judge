@@ -116,6 +116,114 @@
                 color: #c9d1d9 !important;
                 background-color: #21262d !important;
             }
+
+            /* Đồng bộ kích thước tab bar của CKEditor với Martor */
+            .tab-ckeditor-menu .item {
+                font-size: 13px !important;
+                line-height: 1.2 !important;
+                padding: 10px 14px !important;
+                height: 38px !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+
+            /* Sửa lỗi hiển thị CKEditor trong Light Theme (mất màu icons) */
+            .ck.ck-editor__top .ck-toolbar {
+                background-color: #f8f9fa !important;
+                border-color: #ccced1 !important;
+            }
+            .ck.ck-editor__top .ck-toolbar .ck.ck-button,
+            .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button {
+                color: #333333 !important;
+            }
+            .ck.ck-editor__top .ck-toolbar .ck.ck-button .ck-icon,
+            .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button .ck-icon {
+                color: #333333 !important;
+                fill: #333333 !important;
+            }
+            .ck.ck-editor__top .ck-toolbar .ck.ck-button:hover,
+            .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button:hover,
+            .ck.ck-editor__top .ck-toolbar .ck.ck-button.ck-on {
+                background-color: #e6e6e6 !important;
+                color: #000000 !important;
+            }
+            .ck.ck-editor__top .ck-toolbar .ck.ck-button:hover .ck-icon,
+            .ck.ck-editor__top .ck-toolbar .ck.ck-dropdown__button:hover .ck-icon {
+                color: #000000 !important;
+                fill: #000000 !important;
+            }
+            .ck.ck-dropdown__panel {
+                background-color: #ffffff !important;
+            }
+            .ck.ck-list {
+                background-color: #ffffff !important;
+            }
+            .ck.ck-list__item .ck-button {
+                background-color: #ffffff !important;
+                color: #333333 !important;
+            }
+            .ck.ck-list__item .ck-button:hover {
+                background-color: #e6e6e6 !important;
+                color: #000000 !important;
+            }
+
+            /* Đồng bộ CKEditor cho Dark Mode */
+            body.dark-mode .ck-editor__editable,
+            body.dark-mode .ck-editor__editable_inline {
+                background-color: #1d2127 !important;
+                color: #c9d1d9 !important;
+                border-color: #30363d !important;
+            }
+            body.dark-mode .ck.ck-editor__top .ck-toolbar {
+                background-color: #161b22 !important;
+                border-color: #30363d !important;
+            }
+            body.dark-mode .ck.ck-toolbar__separator {
+                background-color: #30363d !important;
+            }
+            body.dark-mode .ck.ck-button,
+            body.dark-mode .ck.ck-dropdown__button {
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .ck.ck-button .ck-icon,
+            body.dark-mode .ck.ck-dropdown__button .ck-icon {
+                color: #c9d1d9 !important;
+                fill: #c9d1d9 !important;
+            }
+            body.dark-mode .ck.ck-button:hover,
+            body.dark-mode .ck.ck-dropdown__button:hover,
+            body.dark-mode .ck.ck-button.ck-on {
+                background-color: #21262d !important;
+                color: #ffffff !important;
+            }
+            body.dark-mode .ck.ck-button:hover .ck-icon,
+            body.dark-mode .ck.ck-dropdown__button:hover .ck-icon {
+                color: #ffffff !important;
+                fill: #ffffff !important;
+            }
+            body.dark-mode .ck.ck-dropdown__panel {
+                background-color: #161b22 !important;
+                border-color: #30363d !important;
+            }
+            body.dark-mode .ck.ck-list {
+                background-color: #161b22 !important;
+            }
+            body.dark-mode .ck.ck-list__item .ck-button {
+                background-color: #161b22 !important;
+                color: #c9d1d9 !important;
+            }
+            body.dark-mode .ck.ck-list__item .ck-button:hover {
+                background-color: #21262d !important;
+                color: #ffffff !important;
+            }
+            body.dark-mode .ck.ck-labeled-field-view__input-wrapper {
+                background-color: #1d2127 !important;
+            }
+            body.dark-mode .ck.ck-input {
+                background-color: #1d2127 !important;
+                color: #c9d1d9 !important;
+                border-color: #30363d !important;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -154,18 +262,31 @@
             <html>
                 <head>
                     <meta charset="utf-8">
+                    <link rel="stylesheet" href="/static/vendor/highlight/github-dark.min.css">
                     <style>
                         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; margin: 0; line-height: 1.6; color: #333; }
-                        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; border: 1px solid #eee; }
+                        pre { background: #1e1e1e; padding: 15px; border-radius: 4px; overflow-x: auto; border: 1px solid #333; color: #fff; }
                         img { max-width: 100%; height: auto; display: block; margin: 10px 0; }
                         blockquote { border-left: 5px solid #eee; padding-left: 20px; margin: 20px 0; color: #666; font-style: italic; }
                         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
                         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
                         th { background-color: #f2f2f2; }
-                        code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; }
+                        code { background-color: #f0f0f0; padding: 2px 4px; border-radius: 3px; font-family: monospace; color: #d14; }
+                        pre code { background-color: transparent; padding: 0; border-radius: 0; color: inherit; }
                     </style>
+                    <script src="/static/vendor/highlight/highlight.min.js"><\/script>
                     <script type="text/javascript" src="/static/mathjax_config.js"><\/script>
                     <script src="/static/vendor/mathjax/tex-mml-chtml.js"><\/script>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            if (typeof hljs !== 'undefined') {
+                                hljs.highlightAll();
+                            }
+                            if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+                                MathJax.typesetPromise();
+                            }
+                        });
+                    <\/script>
                 </head>
                 <body>${htmlContent}</body>
             </html>

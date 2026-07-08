@@ -267,10 +267,6 @@ function switchEditor(valueOrElement, fieldName) {
                     // Ensure markdown-it is available
                     const htmlContent = md ? md.render(markdownContent) : markdownContent;
 
-                    if (!textarea.value.startsWith(HTML_MARKER)) {
-                        textarea.value = HTML_MARKER + textarea.value;
-                    }
-
                     editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
                         return new MartorUploadAdapter(loader, textarea);
                     };
@@ -279,8 +275,7 @@ function switchEditor(valueOrElement, fieldName) {
                         writer.setAttribute('spellcheck', 'false', editor.editing.view.document.getRoot());
                     });
 
-                    // Nạp vào CKEditor và cập nhật textarea
-                    editor.setData(htmlContent);
+                    // Đăng ký listener trước để hứng event setData
                     editor.model.document.on('change:data', () => {
                         let data = editor.getData();
 
@@ -293,6 +288,9 @@ function switchEditor(valueOrElement, fieldName) {
 
                         textarea.value = data;
                     });
+
+                    // Nạp vào CKEditor
+                    editor.setData(htmlContent);
 
                     // Fix initial layout issues, especially in Django Admin
                     setTimeout(() => {
