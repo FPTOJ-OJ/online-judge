@@ -37,24 +37,25 @@ jobs:
 
       - name: Run Setup Script via stdin pipe
         run: |
-          # Chuẩn bị file câu trả lời để pipe vào stdin của script.
+          # Chuẩn bị file câu trả lời để pipe vào stdin của script (chạy với tham số -y để tự động đồng ý cấu hình đề xuất).
           # Thứ tự đúng với luồng câu hỏi khi MySQL & Redis đã chạy trên host CI:
           #   1. Tên trang web         → enter (dùng default FPTOJ)
           #   2. Địa chỉ DB host       → enter (127.0.0.1)
           #   3. Cổng DB               → enter (3306)
-          #   4. User DB               → enter (dmoj)
-          #   5. Mật khẩu DB           → fake_password
-          #   6-10. SMTP (host/port/user/pass/from) → 5 lần enter
-          #   11. Tên Admin            → enter (để trống = bỏ qua)
-          #   12. Thư mục dữ liệu      → /data
-          #   13. Domain               → fake.domain.com
-          #   14-19. OAuth (6 keys)    → 6 lần enter
-          #   20. Tạo tài khoản admin? → n
-          #   21. Tên Judge            → test-judge-1
-          #   22. Khóa Judge           → enter (auto random)
+          #   4. Tên DB                → enter (dmoj)
+          #   5. User DB               → enter (dmoj)
+          #   6. Mật khẩu DB           → fake_password
+          #   7-11. SMTP (host/port/user/pass/from) → 5 lần enter
+          #   12. Tên Admin            → enter (để trống = bỏ qua)
+          #   13. Thư mục dữ liệu      → /data
+          #   14. Domain               → fake.domain.com
+          #   15-20. OAuth (6 keys)    → 6 lần enter
+          #   21. Tạo tài khoản admin? → n
+          #   22. Tên Judge            → test-judge-1
           #   23. Cài Judge?           → n
           #   + 50 dòng trắng padding (đề phòng prompt phụ, tránh set -e EOF crash)
           {
+            echo ""
             echo ""
             echo ""
             echo ""
@@ -67,10 +68,9 @@ jobs:
             echo ""; echo ""; echo ""; echo ""; echo ""; echo ""
             echo "n"
             echo "test-judge-1"
-            echo ""
             echo "n"
             python3 -c "print('\n' * 50)"
-          } | sudo bash ./setup_fptoj.sh
+          } | sudo bash ./setup_fptoj.sh -y
 
       - name: Verify Setup Results
         run: |

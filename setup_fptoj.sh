@@ -12,6 +12,16 @@ if [ "$EUID" -ne 0 ]; then
   exec sudo "$0" "$@"
 fi
 
+# Phân tích tham số dòng lệnh
+AUTO_CONFIRM_PROFILE=false
+for arg in "$@"; do
+  case "$arg" in
+    --non-interactive|-y)
+      AUTO_CONFIRM_PROFILE=true
+      ;;
+  esac
+done
+
 # Xác định user gốc chạy script (để gán quyền chính xác cho các thư mục / dịch vụ)
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo "~$REAL_USER")
@@ -31,22 +41,58 @@ total_mem=$(free -m | awk '/^Mem:/{print $2}')
 echo "[i] Số nhân CPU: $cpu_cores cores"
 echo "[i] Dung lượng RAM: ${total_mem} MB"
 
-# Đưa ra profile khuyến nghị
-if [ "$total_mem" -lt 2000 ]; then
+# Đưa ra profile khuyến nghị theo CPU + RAM
+if [ "$total_mem" -lt 1500 ] || [ "$cpu_cores" -lt 2 ]; then
+  PROFILE="MICRO"
+  UWSGI_WORKERS=1
+  CELERY_CONCURRENCY=1
+  JUDGE_TIER="tier1"
+  JUDGE_CONCURRENCY=1
+  echo "[!] Nhận diện máy chủ cấu hình rất thấp (Micro). Đề xuất cấu hình tối giản nhất."
+elif [ "$total_mem" -lt 3500 ] || [ "$cpu_cores" -lt 4 ]; then
   PROFILE="LIGHTWEIGHT"
   UWSGI_WORKERS=2
   CELERY_CONCURRENCY=1
-  echo "[!] Nhận diện máy chủ cấu hình thấp. Tự động đề xuất cấu hình tối giản."
-elif [ "$total_mem" -lt 4000 ]; then
+  JUDGE_TIER="tier1"
+  JUDGE_CONCURRENCY=2
+  echo "[!] Nhận diện máy chủ cấu hình thấp (Lightweight). Dùng Tier 1, 2 workers."
+elif [ "$total_mem" -lt 8000 ] || [ "$cpu_cores" -lt 8 ]; then
   PROFILE="MEDIUM"
   UWSGI_WORKERS=4
   CELERY_CONCURRENCY=2
-  echo "[!] Nhận diện máy chủ cấu hình trung bình."
-else
+  JUDGE_TIER="tier2"
+  JUDGE_CONCURRENCY=4
+  echo "[!] Nhận diện máy chủ cấu hình trung bình (Medium). Dùng Tier 2, 4 workers."
+elif [ "$total_mem" -lt 24000 ] || [ "$cpu_cores" -lt 16 ]; then
   PROFILE="PRODUCTION"
   UWSGI_WORKERS=8
   CELERY_CONCURRENCY=4
-  echo "[!] Nhận diện máy chủ cấu hình cao. Bật cấu hình tối đa."
+  JUDGE_TIER="tier3"
+  JUDGE_CONCURRENCY=8
+  echo "[!] Nhận diện máy chủ cấu hình cao (Production). Dùng Tier 3, 8 workers."
+else
+  PROFILE="HIGHEND"
+  UWSGI_WORKERS=16
+  CELERY_CONCURRENCY=8
+  JUDGE_TIER="tier3"
+  JUDGE_CONCURRENCY=$((cpu_cores / 2))
+  echo "[!] Nhận diện máy chủ cấu hình rất cao (High-End). Dùng Tier 3, $JUDGE_CONCURRENCY workers."
+fi
+echo "[i] Profile: $PROFILE | uWSGI: $UWSGI_WORKERS workers | Celery: $CELERY_CONCURRENCY | Judge Tier: $JUDGE_TIER, $JUDGE_CONCURRENCY concurrent"
+
+# Kiểm tra dung lượng ổ cứng còn trống tối thiểu
+echo ""
+echo "=== KIỂM TRA DUNG LƯỢNG Ổ CỨNG ==="
+avail_disk_gb=$(df -BG / | awk 'NR==2{gsub("G","",$4); print $4}')
+echo "[i] Dung lượng trống ở /: ${avail_disk_gb} GB"
+if [ "$avail_disk_gb" -lt 10 ]; then
+  echo "[x] Lỗi nghiêm trọng: Ổ cứng chỉ còn ${avail_disk_gb} GB - Cần ít nhất 10 GB để cài đặt!" >&2
+  echo "[i] Hãy dọn dập hoặc mở rộng ổ cứng trước khi tiếp tục." >&2
+  exit 1
+elif [ "$avail_disk_gb" -lt 20 ]; then
+  echo "[!] Cảnh báo: Chỉ còn ${avail_disk_gb} GB. Khử́ng nên chạy máy chấm có nhiều đề bài lớn (khuyến nghị >= 20 GB)."
+else
+  echo "[✓] Dung lượng ổ cứng đủ điều kiện."
 fi
 
 # 3. PHÁT HIỆN CÁC DỊCH VỤ ĐÃ CÓ TRÊN HOST
@@ -93,6 +139,131 @@ find_free_port() {
   done
   echo $port
 }
+
+# KHỞI TẠO CẤU HÌNH TỪ HƯỚNG CÀI ĐẶT ĐỀ XUẤT
+CHOSEN_PROFILE=$PROFILE
+CHOSEN_UWSGI_WORKERS=$UWSGI_WORKERS
+CHOSEN_CELERY_CONCURRENCY=$CELERY_CONCURRENCY
+CHOSEN_JUDGE_TIER=$JUDGE_TIER
+CHOSEN_NUM_JUDGES=$JUDGE_CONCURRENCY
+
+if [ "$AUTO_CONFIRM_PROFILE" = "false" ]; then
+  while true; do
+    echo ""
+    echo "======================================================================"
+    echo "                 BẢNG CẤU HÌNH HỆ THỐNG ĐỀ XUẤT"
+    echo "======================================================================"
+    echo " Cấu hình phần cứng phát hiện:"
+    echo "   - Số nhân CPU: $cpu_cores cores"
+    echo "   - Dung lượng RAM: ${total_mem} MB"
+    echo "   - Dung lượng ổ cứng trống ở /: ${avail_disk_gb} GB"
+    echo ""
+    echo " Dịch vụ đang chạy trên Host:"
+    echo "   - MySQL/MariaDB: $([ "$mysql_on_host" = "true" ] && echo "Đã tìm thấy" || echo "Không tìm thấy")"
+    echo "   - Redis:         $([ "$redis_on_host" = "true" ] && echo "Đã tìm thấy" || echo "Không tìm thấy")"
+    echo "   - Nginx:         $([ "$nginx_on_host" = "true" ] && echo "Đã tìm thấy" || echo "Không tìm thấy")"
+    echo "   - Supervisor:    $([ "$supervisor_on_host" = "true" ] && echo "Đã tìm thấy" || echo "Không tìm thấy")"
+    echo ""
+    echo " Lựa chọn cấu hình cài đặt hiện tại:"
+    echo "   [1] Profile hệ thống:          $CHOSEN_PROFILE"
+    echo "   [2] Số uWSGI workers:          $CHOSEN_UWSGI_WORKERS workers"
+    echo "   [3] Celery concurrency:        $CHOSEN_CELERY_CONCURRENCY workers"
+    echo "   [4] Tier máy chấm (Judge Tier): $CHOSEN_JUDGE_TIER"
+    echo "   [5] Số lượng máy chấm (Judges): $CHOSEN_NUM_JUDGES máy"
+    echo "======================================================================"
+    echo ""
+    
+    read -p "[?] Bạn có đồng ý với cấu hình trên không? (y/n) [y]: " confirm_conf
+    confirm_conf=${confirm_conf:-y}
+    
+    if [ "$confirm_conf" = "y" ] || [ "$confirm_conf" = "Y" ]; then
+      break
+    fi
+    
+    echo ""
+    echo "--- CẤU HÌNH THỦ CÔNG HỆ THỐNG ---"
+    echo "[?] Chọn Profile hệ thống để reset cấu hình nhanh:"
+    echo "   1) MICRO       (uWSGI: 1, Celery: 1, Tier: tier1, Judges: 1)"
+    echo "   2) LIGHTWEIGHT (uWSGI: 2, Celery: 1, Tier: tier1, Judges: 2)"
+    echo "   3) MEDIUM      (uWSGI: 4, Celery: 2, Tier: tier2, Judges: 4)"
+    echo "   4) PRODUCTION  (uWSGI: 8, Celery: 4, Tier: tier3, Judges: 8)"
+    echo "   5) HIGHEND     (uWSGI: 16, Celery: 8, Tier: tier3, Judges: $((cpu_cores / 2)))"
+    echo "   6) Giữ cấu hình hiện tại ($CHOSEN_PROFILE)"
+    read -p "Lựa chọn (1-6) [6]: " prof_choice
+    prof_choice=${prof_choice:-6}
+    
+    case "$prof_choice" in
+      1)
+        CHOSEN_PROFILE="MICRO"
+        CHOSEN_UWSGI_WORKERS=1
+        CHOSEN_CELERY_CONCURRENCY=1
+        CHOSEN_JUDGE_TIER="tier1"
+        CHOSEN_NUM_JUDGES=1
+        ;;
+      2)
+        CHOSEN_PROFILE="LIGHTWEIGHT"
+        CHOSEN_UWSGI_WORKERS=2
+        CHOSEN_CELERY_CONCURRENCY=1
+        CHOSEN_JUDGE_TIER="tier1"
+        CHOSEN_NUM_JUDGES=2
+        ;;
+      3)
+        CHOSEN_PROFILE="MEDIUM"
+        CHOSEN_UWSGI_WORKERS=4
+        CHOSEN_CELERY_CONCURRENCY=2
+        CHOSEN_JUDGE_TIER="tier2"
+        CHOSEN_NUM_JUDGES=4
+        ;;
+      4)
+        CHOSEN_PROFILE="PRODUCTION"
+        CHOSEN_UWSGI_WORKERS=8
+        CHOSEN_CELERY_CONCURRENCY=4
+        CHOSEN_JUDGE_TIER="tier3"
+        CHOSEN_NUM_JUDGES=8
+        ;;
+      5)
+        CHOSEN_PROFILE="HIGHEND"
+        CHOSEN_UWSGI_WORKERS=16
+        CHOSEN_CELERY_CONCURRENCY=8
+        CHOSEN_JUDGE_TIER="tier3"
+        CHOSEN_NUM_JUDGES=$((cpu_cores / 2))
+        [ "$CHOSEN_NUM_JUDGES" -lt 1 ] && CHOSEN_NUM_JUDGES=1
+        ;;
+    esac
+    
+    read -p "[?] Bạn có muốn tùy chỉnh chi tiết từng thông số không? (y/n) [n]: " detail_choice
+    detail_choice=${detail_choice:-n}
+    if [ "$detail_choice" = "y" ] || [ "$detail_choice" = "Y" ]; then
+      read -p " - Nhập số lượng uWSGI workers [$CHOSEN_UWSGI_WORKERS]: " opt_uwsgi
+      CHOSEN_UWSGI_WORKERS=${opt_uwsgi:-$CHOSEN_UWSGI_WORKERS}
+      
+      read -p " - Nhập Celery concurrency [$CHOSEN_CELERY_CONCURRENCY]: " opt_celery
+      CHOSEN_CELERY_CONCURRENCY=${opt_celery:-$CHOSEN_CELERY_CONCURRENCY}
+      
+      echo " - Chọn Tier máy chấm (Judge Tier):"
+      echo "   1) tier1"
+      echo "   2) tier2"
+      echo "   3) tier3"
+      read -p "Lựa chọn (1-3) [$(echo $CHOSEN_JUDGE_TIER | sed 's/tier//')]: " opt_tier_choice
+      case "$opt_tier_choice" in
+        1) CHOSEN_JUDGE_TIER="tier1" ;;
+        2) CHOSEN_JUDGE_TIER="tier2" ;;
+        3) CHOSEN_JUDGE_TIER="tier3" ;;
+      esac
+      
+      read -p " - Nhập số lượng máy chấm (N) [$CHOSEN_NUM_JUDGES]: " opt_num_judges
+      CHOSEN_NUM_JUDGES=${opt_num_judges:-$CHOSEN_NUM_JUDGES}
+    fi
+  done
+fi
+
+# Áp dụng các cấu hình đã lựa chọn vào các biến chạy thực tế của script
+PROFILE=$CHOSEN_PROFILE
+UWSGI_WORKERS=$CHOSEN_UWSGI_WORKERS
+CELERY_CONCURRENCY=$CHOSEN_CELERY_CONCURRENCY
+JUDGE_TIER=$CHOSEN_JUDGE_TIER
+JUDGE_CONCURRENCY=$CHOSEN_NUM_JUDGES
+NUM_JUDGES=$CHOSEN_NUM_JUDGES
 
 # 4. TRÌNH PHÂN TÍCH CẤU HÌNH CŨ (ĐỌC DEFAULTS TỪ LOCAL_SETTINGS.PY NẾU CÓ)
 parse_setting() {
@@ -217,7 +388,7 @@ fi
 
 # Thiết lập Email SMTP
 echo ""
-echo "[i] Thiết lập Email SMTP (Để trống nếu không dùng - cấu hình lại sau ở Admin)"
+echo "[i] Thiết lập Email SMTP (Để trống nếu không dùng - cấu hình lại sau ở local_settings.py)"
 read -p "[?] Địa chỉ máy chủ SMTP Mail [$OLD_EMAIL_HOST]: " email_host
 email_host=${email_host:-$OLD_EMAIL_HOST}
 if [ -n "$email_host" ]; then
@@ -520,7 +691,7 @@ TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_M
 
 DMOJ_HTTPS = 2
 
-# Xuất PDF độc quyền
+# Xuất PDF
 DMOJ_PDF_PDFOID_URL = 'http://localhost:$pdf_port'
 DMOJ_PDF_PROBLEM_CACHE = '$data_dir/pdfcache'
 DMOJ_PDF_PROBLEM_INTERNAL = '/pdfcache'
@@ -659,6 +830,40 @@ if [ "$create_admin_ans" = "y" ] || [ "$create_admin_ans" = "Y" ]; then
   python manage.py createsuperuser
 fi
 
+# Tự động đăng ký các Judge vào DMOJ database
+echo "[i] Đang đăng ký $NUM_JUDGES máy chấm vào cơ sở dữ liệu DMOJ..."
+read -p "[?] Tên định danh máy chấm (Judge ID) [judge-01]: " judge_id
+judge_id=${judge_id:-judge-01}
+
+rm -f /tmp/fptoj_judges.txt
+JUDGES_INFO=""
+
+for i in $(seq 1 $NUM_JUDGES); do
+  if [ "$NUM_JUDGES" -eq 1 ]; then
+    current_id="$judge_id"
+  else
+    current_id="${judge_id}-${i}"
+  fi
+  
+  current_key=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "judge-key-auto-${i}")
+  echo "${current_id}:${current_key}" >> /tmp/fptoj_judges.txt
+  JUDGES_INFO="${JUDGES_INFO} - Judge ID: $current_id | Key: $current_key"$'\n'
+
+  # Đăng ký Judge vào DMOJ qua Django ORM
+  python manage.py shell -c "
+from judge.models import Judge
+if not Judge.objects.filter(name='$current_id').exists():
+    j = Judge(name='$current_id', auth_key='$current_key', is_blocked=False)
+    j.save()
+    print('[OK] Đã tạo Judge:', '$current_id')
+else:
+    j = Judge.objects.get(name='$current_id')
+    j.auth_key = '$current_key'
+    j.save()
+    print('[OK] Đã cập nhật Judge:', '$current_id')
+" 2>/dev/null || echo "[!] Cảnh báo: Không thể đăng ký Judge $current_id vào DB."
+done
+
 # 13. CẤU HÌNH SUPERVISOR CHO CÁC DỊCH VỤ NỀN
 echo ""
 echo "=== 6. CẤU HÌNH DỊCH VỤ NỀN SUPERVISOR ==="
@@ -736,9 +941,9 @@ EOF
 
 echo "[✓] Đã ghi các file cấu hình Supervisor (site, bridged, wsevent, celery)."
 
-# 14. CẤU HÌNH DỊCH VỤ XUẤT PDF ĐỘC QUYỀN (html-to-pdf-flask)
+# 14. CẤU HÌNH DỊCH VỤ XUẤT PDF (html-to-pdf-flask)
 echo ""
-echo "=== 7. CẤU HÌNH DỊCH VỤ XUẤT PDF ĐỘC QUYỀN ==="
+echo "=== 7. CẤU HÌNH DỊCH VỤ XUẤT PDF ==="
 PDF_DIR="/home/$REAL_USER/html-to-pdf-flask"
 if [ ! -d "$PDF_DIR" ]; then
   echo "[i] Đang tải mã nguồn html-to-pdf-flask từ Github..."
@@ -890,23 +1095,38 @@ if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
     git clone --recursive https://github.com/FPTOJ-OJ/judge-server.git "$JUDGE_DIR"
     chown -R $REAL_USER:$REAL_USER "$JUDGE_DIR"
   fi
-  
-  read -p "[?] Tên định danh máy chấm (Judge ID) [judge-01]: " judge_id
-  judge_id=${judge_id:-judge-01}
-  
-  read -p "[?] Khóa xác thực bí mật máy chấm (Judge Key, để trống để tạo ngẫu nhiên): " judge_key
-  
-  if [ -z "$judge_key" ]; then
-    echo "[!] Không nhập Judge Key. Hệ thống sẽ tự tạo khóa ngẫu nhiên..."
-    judge_key=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
+
+  # Nếu file danh sách máy chấm chưa được tạo ở Section 12, tạo mặc định 1 máy chấm
+  if [ ! -f /tmp/fptoj_judges.txt ]; then
+    judge_id=${judge_id:-judge-01}
+    judge_key=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "judge-key-auto")
+    echo "${judge_id}:${judge_key}" >> /tmp/fptoj_judges.txt
+    JUDGES_INFO=" - Judge ID: $judge_id | Key: $judge_key"$'\n'
   fi
 
-  if [ -n "$judge_key" ]; then
-    # Viết cấu hình judge.yml
-    mkdir -p "$data_dir/problems"
-    cat << EOF > "$data_dir/problems/judge.yml"
-id: $judge_id
-key: "$judge_key"
+  # Build judge container theo JUDGE_TIER nếu chưa có
+  echo "[i] Đang biên dịch Docker Image cho máy chấm (judge-$JUDGE_TIER)..."
+  if [ "$use_docker_mysql" = "true" ] || [ "$use_docker_redis" = "true" ] || command -v docker >/dev/null 2>&1; then
+    cd "$JUDGE_DIR/.docker"
+    # Build image với tag là dmoj/judge-$JUDGE_TIER
+    docker build --build-arg TAG="master" -t dmoj/judge-$JUDGE_TIER -t dmoj/judge-$JUDGE_TIER:latest ./$JUDGE_TIER || true
+    
+    # Dọn dẹp các container máy chấm cũ
+    echo "[i] Đang dọn dẹp các container máy chấm cũ..."
+    docker ps -a --filter "name=fptoj-judge" --format "{{.Names}}" | xargs -r docker rm -f >/dev/null 2>&1 || true
+    
+    # Khởi chạy các container máy chấm
+    local_idx=1
+    while IFS=':' read -r current_id current_key; do
+      if [ -z "$current_id" ]; then continue; fi
+      
+      # Viết cấu hình judge.yml cho máy chấm hiện tại (tạo file judge.yml dùng chung)
+      if [ "$local_idx" -eq 1 ]; then
+        mkdir -p "$data_dir/problems"
+        echo "[i] Tạo cấu hình judge.yml cho máy chấm tại $data_dir/problems/judge.yml"
+        cat << EOF > "$data_dir/problems/judge.yml"
+id: $current_id
+key: "$current_key"
 problem_storage_globs:
   - /problems/*
 
@@ -969,33 +1189,28 @@ runtime:
   v8dmoj: /usr/bin/v8dmoj
   crt_x86_in_lib32: true
 EOF
-    
-    # Build judge-tier1 container nếu chưa có
-    echo "[i] Đang biên dịch Docker Image cho máy chấm (judge-tier1)..."
-    if [ "$use_docker_mysql" = "true" ] || [ "$use_docker_redis" = "true" ] || command -v docker >/dev/null 2>&1; then
-      cd "$JUDGE_DIR/.docker"
-      # Build image
-      docker build --build-arg TAG="master" -t dmoj/judge-tier1 -t dmoj/judge-tier1:latest ./tier1 || true
-      
-      # Run container
-      docker rm -f fptoj-judge >/dev/null 2>&1 || true
+      fi
+
+      echo "[i] Đang khởi chạy Docker Container 'fptoj-judge-${local_idx}' cho Judge ID '$current_id'..."
       docker run \
-        --name fptoj-judge \
+        --name "fptoj-judge-${local_idx}" \
         -v "$data_dir/problems":/problems \
         --cap-add=SYS_PTRACE \
         --network host \
         -d \
         --restart=always \
-        dmoj/judge-tier1:latest \
+        dmoj/judge-$JUDGE_TIER:latest \
         run -p $judge_port -c /problems/judge.yml \
-        127.0.0.1 "$judge_id" "$judge_key"
+        127.0.0.1 "$current_id" "$current_key"
         
-      echo "[✓] Máy chấm '$judge_id' đã được khởi chạy trong Docker!"
-    else
-      echo "[x] Lỗi: Docker chưa cài đặt. Không thể khởi chạy máy chấm Docker."
-    fi
+      echo "[✓] Máy chấm '$current_id' đã được khởi chạy thành công!"
+      local_idx=$((local_idx + 1))
+    done < /tmp/fptoj_judges.txt
+
+    rm -f /tmp/fptoj_judges.txt
+    cd "$SITE_DIR"
   else
-    echo "[!] Không nhập Judge Key. Bỏ qua khởi chạy máy chấm tự động."
+    echo "[x] Lỗi: Docker chưa cài đặt. Không thể khởi chạy máy chấm Docker."
   fi
 fi
 
@@ -1057,8 +1272,7 @@ From: $email_from
 
 4. THÔNG TIN MÁY CHẤM (JUDGE)
 $(if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
-echo "Judge ID: $judge_id
-Judge Key: $judge_key"
+echo "$JUDGES_INFO"
 else
 echo "Không cài đặt máy chấm tự động qua Docker."
 fi)
@@ -1082,7 +1296,7 @@ echo "  * Giao diện site: http://localhost:$nginx_port hoặc địa chỉ IP 
 echo "  * FILE THÔNG TIN CÀI ĐẶT (QUAN TRỌNG): $SETUP_INFO_FILE"
 echo "  * Trạng thái dịch vụ nền (Supervisor):"
 supervisorctl status
-echo "  * Dịch vụ PDF độc quyền: chạy trên http://127.0.0.1:$pdf_port"
+echo "  * Dịch vụ PDF: chạy trên http://127.0.0.1:$pdf_port"
 echo "  * Dữ liệu đề bài lưu tại: $data_dir/problems"
 echo "  * Truy cập nhanh MySQL Docker: chạy ./mysql_cli.sh"
 echo "=============================================================================="

@@ -4767,7 +4767,7 @@ msgstr "Cài đặt nhanh (Chủ đề & Ngôn ngữ)"
 
 #: templates/base.html:549
 msgid "Theme"
-msgstr "chủ đề"
+msgstr "Chủ đề"
 
 #: templates/base.html:552
 #| msgid "site theme"
