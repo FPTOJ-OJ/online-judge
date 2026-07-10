@@ -2,25 +2,25 @@
 
 $is_light_theme: true;
 
-// Màu nền và thành phần cho light mode
-$color_primary0: #fff;
-$color_primary5: #f2f2f2;   // nền sáng nhẹ
-$color_primary10: #e8e8e8;     // nền chính
-$color_primary25: #9c9c9c;     // đường viền
-$color_primary33: #757575;     // widget
-$color_primary50: #6b7280;
-$color_primary66: #4b5563;     // tabs
-$color_primary75: #3b3b3b;  // widget
-$color_primary90: #111;
+// Màu nền và thành phần cho light mode (tối ưu hóa độ tương phản cao, dùng thang màu xám nguyên bản đậm đà)
+$color_primary0: #eaeaea;   // Giảm chói tối đa (màu xám dịu mắt thay cho xám trắng)
+$color_primary5: #d0d0d0;   // Nền phụ xám rõ rệt hơn (pre, code blocks)
+$color_primary10: #c5c5c5;  // Nền chính/header bảng xám đậm sắc nét
+$color_primary25: #666666;  // Đường viền xám đậm hẳn để chống chói/lóa mất viền tuyệt đối
+$color_primary33: #4d4d4d;  // Widget border xám đậm
+$color_primary50: #3b3b3b;  // Chữ phụ / muted text
+$color_primary66: #2b2b2b;  // Tabs
+$color_primary75: #1a1a1a;  // Widget text
+$color_primary90: #0d0d0d;  // Chữ chính
 $color_primary100: #000;
 
 // Màu liên kết: dùng màu cam FPT cho tiêu đề
-$color_link50: #0073e6;  // Mặc định
-$color_link75: #3399ff;  // Đã truy cập (visited)
-$color_link100: #005bb5; // Hover
-$color_link200: #003f7f; // Active   // active
+$color_link50: #005ebb;  // Mặc định (xanh cô-ban đậm đà, dễ đọc trên nền xám)
+$color_link75: #0066cc;  // Đã truy cập (visited)
+$color_link100: #004899; // Hover
+$color_link200: #003366; // Active   // active
 
-$color_pageBg: #fff;   // nền trang
+$color_pageBg: #e2e2e2;   // Nền trang chính xám trung tính dịu nhẹ (giảm chói tối ưu)
 
 // Các màu one-off
 $color_base_description_blockquote: #d0d0d0;
@@ -28,8 +28,8 @@ $color_contest_ranking_disqualified: #ffa8a8;
 $color_martor_resize_dragger: #c8c8c8;
 
 // Màu xếp hạng (theo bảng màu FPT)
-$color_rating_none: #999;
-$color_rating_newbie: #999;
+$color_rating_none: #555;
+$color_rating_newbie: #555;
 $color_rating_amateur: #00B140;    // xanh lá cây FPT
 $color_rating_expert: #0066B3;     // xanh nước biển FPT
 $color_rating_candidate_master: mediumpurple;
@@ -39,7 +39,7 @@ $color_rating_target: #700;
 
 $color_select2_search_dropdown: $color_primary0;
 
-$color_user_submission_activity0: #ddd;
+$color_user_submission_activity0: #b5b5b5;  // Tăng độ tương phản màu xám của ô chưa nộp bài trên nền trang mới
 $color_user_submission_activity1: #9be9a8;
 $color_user_submission_activity2: #40c463;
 $color_user_submission_activity3: #2f9c4c;

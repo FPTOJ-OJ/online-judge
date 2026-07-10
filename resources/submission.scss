@@ -42,7 +42,7 @@
         min-width: 80px;
         width: 80px;
         text-align: center;
-        border-bottom-color: $color_primary0;
+        border-bottom-color: $color_pageBg;  // Ẩn border đáy bằng cách blend với màu nền trang
         border-right: $color_primary25 1px solid;
 
         .state {
@@ -132,12 +132,14 @@ label[for="language"], label[for="status"] {
     width: 100%;
 }
 
+// Dùng $color_primary5 thay vì hardcode "white" để border blend với nền của .sidebox-content
+// (nền sidebox = $color_primary5, không phải trắng thuần)
 #statistics-table tr:not(:first-child) td {
-    border-top: 1px solid white !important;
+    border-top: 1px solid $color_primary5 !important;
 }
 
 #statistics-table tr:not(:last-child) td:not(:last-child) {
-    border-right: 1px solid white;
+    border-right: 1px solid $color_primary5;
 }
 
 #content-right.submission {

@@ -320,15 +320,32 @@ ul.problem-list {
     margin: 30px 15px 10px;
     height: 10px;
 
+    // Cấu hình thanh trượt
+    &.noUi-target {
+        background: $color_primary5;
+        border: 1px solid $color_primary25;
+        box-shadow: none;
+    }
+
+    .noUi-connect {
+        background: $highlight_blue;
+    }
+
     .noUi-handle {
         height: 20px;
         width: 16px;
         left: -8px;
+        background: $color_primary10;
+        border: 1px solid $color_primary25;
+        border-radius: $widget_border_radius;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        cursor: ew-resize;
     }
 
     .noUi-handle:before, .noUi-handle:after {
         top: 3px;
         height: 12px;
+        background: $color_primary33;
     }
 
     .noUi-handle:before {
@@ -344,5 +361,9 @@ ul.problem-list {
         line-height: 13px;
         padding: 0 3px;
         font-size: 13px;
+        background: $color_primary0;
+        border: 1px solid $color_primary25;
+        color: $color_primary90;
+        border-radius: 3px;
     }
 }
