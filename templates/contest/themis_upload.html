@@ -260,6 +260,19 @@
             <div class="settings-panel" style="border-left: 5px solid #28a745;">
                 <h4><i class="fa fa-upload"></i> {{ _('Nộp bài giải') }}</h4>
 
+                {% if contest.format_config and contest.format_config.one_submission_only %}
+                    <div style="background-color: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 10px 15px; margin: 10px 0; border-radius: 4px; font-size: 0.95em;">
+                        <strong>⚠️ {{ _('Important Notice:') }}</strong>
+                        {{ _('This contest is configured for one-time submission only. After your first submission, you have a 120-second (2 minutes) grace period to modify or re-submit. After this period, the submission button will be disabled.') }}
+                    </div>
+                {% endif %}
+                {% if contest.format_config and contest.format_config.hide_scores_from_students %}
+                    <div style="background-color: rgba(23, 162, 184, 0.1); border-left: 4px solid #17a2b8; padding: 10px 15px; margin: 10px 0; border-radius: 4px; font-size: 0.95em;">
+                        <strong>ℹ️ {{ _('Notice:') }}</strong>
+                        {{ _('This contest has been configured to hide student scores. You will only see the "Received" status once grading is complete.') }}
+                    </div>
+                {% endif %}
+
                 <p class="naming-tip">
                     <i class="fa fa-lightbulb-o"></i>
                     <strong>{{ _('Mẹo đặt tên file:') }}</strong>
@@ -477,7 +490,11 @@
             Submission.watch(id, function(data) {
                 if (data.state === 'grading') {
                     const progress = data.current ? ` (Test #${data.current})` : '';
-                    cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${data.points || 0}${progress}</span>`;
+                    if (hideScoresFromStudents) {
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>{{ _('Received') }}${progress}</span>`;
+                    } else {
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${data.points || 0}${progress}</span>`;
+                    }
                 } else {
                     pollSubmission(id, cell).then(done => { if (done) finished = true; });
                 }
@@ -508,7 +525,7 @@
                 if (isGraded) {
                     const status = resultDiv.classList.contains('AC') ? 'success' : 'error';
                     if (hideScoresFromStudents) {
-                        cell.innerHTML = `<span class="status-success">{{ _('Đã nộp') }}</span>`;
+                        cell.innerHTML = `<span class="status-success">{{ _('Received') }}</span>`;
                     } else {
                         cell.innerHTML = `<a href="/submission/${id}" target="_blank" class="status-${status}">${score}</a>`;
                     }
@@ -518,7 +535,7 @@
                     const progressDiv = tempDiv.querySelector('.sub-testcase');
                     const progress = progressDiv ? ` (${progressDiv.innerText.trim()})` : '';
                     if (hideScoresFromStudents) {
-                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>{{ _('Đang chấm') }}${progress}</span>`;
+                        cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>{{ _('Received') }}${progress}</span>`;
                     } else {
                         cell.innerHTML = `<span class="score-loading"><i class="fa fa-spinner fa-spin"></i>${score}${progress}</span>`;
                     }

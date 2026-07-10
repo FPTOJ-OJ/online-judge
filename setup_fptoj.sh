@@ -788,8 +788,8 @@ ACE_URL = '/static/vendor/ace/'
 JQUERY_JS = '/static/vendor/jquery-3.4.1.min.js'
 SELECT2_JS_URL = '/static/vendor/select2/select2.js'
 SELECT2_CSS_URL = '/static/vendor/select2/select2.css'
-
-TIMEZONE_MAP = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/1024px-Blue_Marble_2002.png'
+FONTAWESOME_CSS = '/static/libs/fontawesome/font-awesome.css'
+TIMEZONE_MAP = '/static/vendor/timezone-map/earth.jpg'
 
 DMOJ_HTTPS = 2
 

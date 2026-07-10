@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: dmoj\n"
@@ -11,11 +12,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Crowdin-Project: dmoj\n"
-"X-Crowdin-Project-ID: 142963\n"
-"X-Crowdin-Language: vi\n"
 "X-Crowdin-File: djangojs.po\n"
 "X-Crowdin-File-ID: 12\n"
+"X-Crowdin-Language: vi\n"
+"X-Crowdin-Project: dmoj\n"
+"X-Crowdin-Project-ID: 142963\n"
 
 #: resources/common.js:194
 msgctxt "time format with day"
@@ -74,4 +75,3 @@ msgstr[0] "%(cnt)d bài gửi trong năm %(year)d"
 msgid "%(cnt)d submission on %(date)s"
 msgid_plural "%(cnt)d submissions on %(date)s"
 msgstr[0] "%(cnt)d bài gửi trong ngày %(date)s"
-

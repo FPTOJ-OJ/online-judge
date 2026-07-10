@@ -53,6 +53,15 @@ class DMOJLoginMiddleware(object):
             change_password_path = reverse('password_change')
             change_password_done_path = reverse('password_change_done')
             has_2fa = profile.is_totp_enabled or profile.is_webauthn_enabled
+            
+            if has_2fa and not request.session.get('2fa_passed', False):
+                try:
+                    cookie_val = request.get_signed_value('2fa_remember', salt='2fa_remember_salt', max_age=30 * 24 * 60 * 60)
+                    if cookie_val == str(profile.id):
+                        request.session['2fa_passed'] = True
+                except Exception:
+                    pass
+
             if (has_2fa and not request.session.get('2fa_passed', False) and
                     request.path not in (login_2fa_path, logout_path, webauthn_path) and
                     not request.path.startswith(settings.STATIC_URL)):

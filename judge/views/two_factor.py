@@ -253,7 +253,17 @@ class TwoFactorLoginView(RedirectURLMixin, TOTPView, ContextMixin):
 
     def form_valid(self, form):
         self.request.session['2fa_passed'] = True
-        return self.next_page()
+        response = self.next_page()
+        if form.cleaned_data.get('remember_device'):
+            response.set_signed_cookie(
+                '2fa_remember',
+                str(self.profile.id),
+                salt='2fa_remember_salt',
+                max_age=30 * 24 * 60 * 60,
+                httponly=True,
+                samesite='Lax',
+            )
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

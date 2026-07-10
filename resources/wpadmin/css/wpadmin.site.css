@@ -1,3 +1,9 @@
+@import url('/static/vendor/fonts/inter/inter.css');
+
+body, #content, input, select, textarea, button, .select2-container, #content h1, #content h2, #content h3, #content h4, #content h5, #content h6, .module h2, .inline-group h2 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
 .select2-selection ul li {
     list-style-type: inherit;
 }
@@ -44,10 +50,29 @@
     }
 }
 
+
+
+
 /* Custom overrides for DMOJ Admin Panel to improve contrast and readability */
 
 :root {
         /* Base Colors */
+
+        /* Extra variables for light/dark abstraction */
+        --panel-bg: #1f2937 !important;
+        --panel-border: #374151 !important;
+        --pill-bg: #111827 !important;
+        --pill-border: #374151 !important;
+        --pill-fg: #9ca3af !important;
+        --pill-fg-hover: #60a5fa !important;
+        --pill-bg-hover: #374151 !important;
+        --pill-border-hover: #4b5563 !important;
+        --pill-bg-selected: #2563eb !important;
+        --pill-fg-selected: #ffffff !important;
+        --pill-border-selected: #3b82f6 !important;
+        --label-fg: #9ca3af !important;
+        --title-fg: #f3f4f6 !important;
+        --border-color: #374151 !important;
         --body-bg: #111827 !important; /* Dark Gray-900 */
         --body-fg: #f3f4f6 !important; /* Light Gray-100 */
         --border-color: #374151 !important; /* Gray-700 */
@@ -311,27 +336,7 @@
         background-color: #1f2937 !important;
         border: 1px solid #374151 !important;
     }
-    #changelist-filter h2 {
-        background: #374151 !important;
-        color: #f9fafb !important;
-        border-bottom: 1px solid #4b5563 !important;
-    }
-    #changelist-filter ul {
-        background-color: transparent !important;
-    }
-    #changelist-filter li {
-        color: #9ca3af !important;
-    }
-    #changelist-filter li a {
-        color: #60a5fa !important;
-    }
-    #changelist-filter li a:hover {
-        color: #93c5fd !important;
-    }
-    #changelist-filter li.selected a {
-        color: #ffffff !important;
-        font-weight: bold;
-    }
+
 
     /* 6. Paginator Box */
     .paginator {
@@ -965,4 +970,367 @@ ul.actionlist li {
     background-color: #1f2937 !important;
     border-color: #374151 !important;
     color: #ffffff !important;
+}
+
+/* 5. Fix text color of Recent Actions for dark background */
+#recent-actions-module ul.actionlist li span,
+#recent-actions-module ul.actionlist li .quiet,
+#recent-actions-module ul.actionlist li .mini {
+    color: #9ca3af !important;
+}
+
+#content #changelist {
+    border: none !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+/* 6. Fix changelist search vertical alignment & layout */
+#changelist-search {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+}
+
+#changelist-search label {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+#changelist-search input[type="text"] {
+    height: 30px !important;
+    box-sizing: border-box !important;
+    padding: 4px 8px !important;
+    margin: 0 !important;
+}
+
+#changelist-search input[type="submit"] {
+    height: 30px !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+}
+
+/* 7. Redesign changelist filter (horizontal filter bar) */
+#changelist-filter {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 20px !important;
+    padding: 12px 20px !important;
+    margin: 15px 0 !important;
+    border-radius: 6px !important;
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    width: auto !important;
+    height: auto !important;
+    position: relative !important;
+}
+
+#changelist-filter h2 {
+    display: none !important;
+}
+
+#changelist-filter .filter {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+#changelist-filter .filter h3 {
+    font-size: 13px !important;
+    color: var(--title-fg) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-weight: 500 !important;
+}
+
+#changelist-filter .filter ul {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+#changelist-filter .filter li {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+}
+
+#content #changelist #changelist-filter .filter ul li a,
+#changelist-filter .filter li a {
+    color: var(--pill-fg) !important;
+    background-color: var(--pill-bg) !important;
+    border: 1px solid var(--pill-border) !important;
+    padding: 3px 10px !important;
+    font-size: 12px !important;
+    border-radius: 12px !important; /* Pill style */
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+}
+
+#content #changelist #changelist-filter .filter ul li a:hover,
+#changelist-filter .filter li a:hover {
+    color: var(--pill-fg-hover) !important;
+    background-color: var(--pill-bg-hover) !important;
+    border-color: var(--pill-border-hover) !important;
+}
+
+#content #changelist #changelist-filter .filter ul li.selected a,
+#changelist-filter .filter li.selected a {
+    color: var(--pill-fg-selected) !important;
+    background-color: var(--pill-bg-selected) !important;
+    border-color: var(--pill-border-selected) !important;
+    font-weight: 600 !important;
+}
+
+/* 8. Fix toplinks year/date filter styling and spacing */
+nav.toplinks {
+    margin: 15px 0 !important;
+    padding: 12px 20px !important;
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
+}
+
+nav.toplinks a {
+    color: var(--pill-fg) !important;
+    text-decoration: none !important;
+    font-size: 12px !important;
+    padding: 4px 12px !important;
+    border-radius: 12px !important; /* Consistent pill style */
+    background-color: var(--pill-bg) !important;
+    border: 1px solid var(--pill-border) !important;
+    transition: all 0.15s ease !important;
+}
+
+nav.toplinks a:hover {
+    background-color: var(--pill-bg-hover) !important;
+    color: var(--pill-fg-hover) !important;
+    border-color: var(--pill-border-hover) !important;
+}
+
+nav.toplinks a.selected, nav.toplinks a.active {
+    color: var(--pill-fg-selected) !important;
+    background-color: var(--pill-bg-selected) !important;
+    border-color: var(--pill-border-selected) !important;
+    font-weight: 600 !important;
+}
+
+/* 9. Fix actions-and-paginator block to avoid squishing */
+.actions-and-paginator {
+    margin: 6px 0 12px 0 !important;
+    padding: 6px 16px !important;
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--panel-border) !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+}
+
+.actions-and-paginator .actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.actions-and-paginator .actions label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: var(--label-fg) !important;
+    font-size: 13px !important;
+}
+
+.actions-and-paginator .actions select {
+    height: 30px !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    background-color: var(--pill-bg) !important;
+    border: 1px solid var(--pill-border) !important;
+    color: var(--title-fg) !important;
+}
+
+.actions-and-paginator .actions button.button {
+    height: 30px !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+}
+
+.actions-and-paginator .actions button.button:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #2563eb !important;
+}
+
+.actions-and-paginator .paginator {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    color: var(--label-fg) !important;
+    font-size: 13px !important;
+}
+
+.actions-and-paginator .paginator a, 
+.actions-and-paginator .paginator .this-page {
+    background-color: var(--pill-bg) !important;
+    border: 1px solid var(--pill-border) !important;
+    color: var(--pill-fg) !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    text-decoration: none !important;
+}
+
+.actions-and-paginator .paginator .this-page {
+    background-color: var(--pill-bg-selected) !important;
+    border-color: var(--pill-border-selected) !important;
+    color: var(--pill-fg-selected) !important;
+    font-weight: 600 !important;
+}
+
+.tabular tr.has_original td.original p {
+    font-size: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px !important;
+    height: 30px !important;
+    width: 24px !important;
+    display: block !important;
+    position: static !important;
+    margin: 0 auto !important;
+    cursor: grab !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='18' viewBox='0 0 10 18'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='%239ca3af'/%3E%3Ccircle cx='2' cy='9' r='1.5' fill='%239ca3af'/%3E%3Ccircle cx='2' cy='16' r='1.5' fill='%239ca3af'/%3E%3Ccircle cx='8' cy='2' r='1.5' fill='%239ca3af'/%3E%3Ccircle cx='8' cy='9' r='1.5' fill='%239ca3af'/%3E%3Ccircle cx='8' cy='16' r='1.5' fill='%239ca3af'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    opacity: 0.8 !important;
+    overflow: hidden !important;
+}
+
+.tabular tr.has_original td.original p:active {
+    cursor: grabbing !important;
+}
+
+.tabular tr.has_original td.original {
+    width: 40px !important;
+    min-width: 40px !important;
+    padding: 4px 6px !important;
+    vertical-align: middle !important;
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    border-right: 1px solid var(--border-color, #eaeaea) !important;
+}
+
+/* 11. Refine horizontal changelist filter design (hide vertical separators and colons, format labels) */
+#changelist-filter .filter h3:before {
+    content: "" !important;
+    padding-right: 0 !important;
+}
+
+#changelist-filter .filter h3:after {
+    content: "" !important;
+}
+
+#changelist-filter .filter {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    width: 100% !important;
+    border-bottom: 1px solid #2d3748 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 8px !important;
+}
+
+#changelist-filter .filter:last-of-type {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#changelist-filter .filter h3 {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #9ca3af !important;
+    margin: 0 !important;
+    min-width: 180px !important;
+}
+
+#changelist-filter .filter ul {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+
+/* Fix heading style */
+
+.module h2, .inline-group h2 {
+    background: #2563eb !important; /* Blue background */
+    color: #ffffff !important;
+    padding: 10px 15px !important;
+    border-radius: 6px 6px 0 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+.module {
+    border-radius: 6px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    border: 1px solid var(--border-color) !important;
+    
+}
+/* Fix for selected text/pills blending with background */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border: 1px solid #2563eb !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #ffffff !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #ef4444 !important;
+    background-color: transparent !important;
 }

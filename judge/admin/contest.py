@@ -87,11 +87,22 @@ from django import forms
 
 class ContestForm(ModelForm):
     is_infinite = forms.BooleanField(label=_('Infinite'), required=False, help_text=_('Check to make the contest last forever.'))
-    is_lock_infinite = forms.BooleanField(label=_('Infinite Lock'), required=False, help_text=_('Check to make the contest lock date infinite (will be set to 9999-12-31).'))
+    is_lock_infinite = forms.BooleanField(label=_('Infinite Lock'), required=False, help_text=_('Check to make the contest lock date infinite (will be set to 3099-12-31).'))
     one_submission_only = forms.BooleanField(label=_('One-time Submission Only'), required=False, help_text=_('Check to allow only one ZIP/bulk upload per student (Themis Style).'))
     hide_scores_from_students = forms.BooleanField(label=_('Hide Scores from Students'), required=False, help_text=_('Check to hide scores and details from students, behaving like a real exam (Themis Style).'))
 
     def __init__(self, *args, **kwargs):
+        # Replace far-future dates (year >= 2999) with None to prevent pytz overflow
+        instance = kwargs.get('instance')
+        if instance and instance.pk:
+            if 'initial' not in kwargs:
+                kwargs['initial'] = {}
+            if instance.end_time and instance.end_time.year >= 2999:
+                kwargs['initial']['end_time'] = None
+                kwargs['initial']['is_infinite'] = True
+            if instance.locked_after and instance.locked_after.year >= 2999:
+                kwargs['initial']['locked_after'] = None
+                kwargs['initial']['is_lock_infinite'] = True
         super(ContestForm, self).__init__(*args, **kwargs)
         if 'rate_exclude' in self.fields:
             if self.instance and self.instance.id:
@@ -103,42 +114,50 @@ class ContestForm(ModelForm):
         self.fields['view_contest_scoreboard'].widget.can_add_related = False
         if 'end_time' in self.fields:
             self.fields['end_time'].required = False
-            self.fields['end_time'].help_text = _('Leave blank for infinite contest (will be set to 9999-12-31).')
+            self.fields['end_time'].help_text = _('Leave blank for infinite contest (will be set to 3099-12-31).')
         if 'locked_after' in self.fields:
             self.fields['locked_after'].required = False
             self.fields['locked_after'].help_text = _('Leave blank or check infinite to never lock.')
         
         if self.instance and self.instance.pk:
-            if self.instance.end_time and self.instance.end_time.year >= 9999:
+            if self.instance.end_time and self.instance.end_time.year >= 2999:
                 self.fields['is_infinite'].initial = True
-            if self.instance.locked_after and self.instance.locked_after.year >= 9999:
+                self.initial['end_time'] = None
+            if self.instance.locked_after and self.instance.locked_after.year >= 2999:
                 self.fields['is_lock_infinite'].initial = True
+                self.initial['locked_after'] = None
             config = self.instance.format_config or {}
             self.fields['one_submission_only'].initial = config.get('one_submission_only', False)
             self.fields['hide_scores_from_students'].initial = config.get('hide_scores_from_students', False)
+            # Strip admin-only keys from format_config widget display
+            if isinstance(self.initial.get('format_config'), dict):
+                self.initial['format_config'] = {
+                    k: v for k, v in self.initial['format_config'].items()
+                    if k not in ('one_submission_only', 'hide_scores_from_students')
+                }
 
     def clean_end_time(self):
         end_time = self.cleaned_data.get('end_time')
         if not end_time:
             import datetime
-            return timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+            return datetime.datetime(3099, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
         return end_time
 
     def clean_locked_after(self):
         locked_after = self.cleaned_data.get('locked_after')
         if not locked_after and self.cleaned_data.get('is_lock_infinite'):
             import datetime
-            return timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+            return datetime.datetime(3099, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
         return locked_after
 
     def clean(self):
         cleaned_data = super(ContestForm, self).clean()
         if cleaned_data.get('is_infinite'):
             import datetime
-            cleaned_data['end_time'] = timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+            cleaned_data['end_time'] = datetime.datetime(3099, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
         if cleaned_data.get('is_lock_infinite'):
             import datetime
-            cleaned_data['locked_after'] = timezone.make_aware(datetime.datetime(9999, 12, 31, 23, 59, 59))
+            cleaned_data['locked_after'] = datetime.datetime(3099, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
         
         # Merge themis format settings into format_config
         one_sub = cleaned_data.get('one_submission_only', False)
@@ -151,6 +170,7 @@ class ContestForm(ModelForm):
             cleaned_data['format_config'] = format_config
             
         cleaned_data['banned_users'].filter(current_contest__contest=self.instance).update(current_contest=None)
+        return cleaned_data
 
     class Meta:
         widgets = {

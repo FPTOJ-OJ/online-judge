@@ -1,14 +1,18 @@
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse, path
+from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
 import json
 from django import forms
 from django.urls import reverse_lazy
 from django.db import models
-from django.forms import Textarea
+from django.forms import Textarea, CheckboxSelectMultiple
 from judge.widgets import AdminMartorWidget
 
 from judge.models.quiz import QuizTag, QuizSource, QuizQuestion, QuizOption, QuizSession
+from judge.models.profile import Organization
 
 class QuizOptionInline(admin.TabularInline):
     model = QuizOption
@@ -88,14 +92,73 @@ class QuizTagAdmin(admin.ModelAdmin):
         return obj.questions.count()
     question_count.short_description = _('Questions Count')
 
+class QuizSourceAdminForm(forms.ModelForm):
+    class Meta:
+        model = QuizSource
+        fields = '__all__'
+        widgets = {
+            'organizations': CheckboxSelectMultiple(),
+        }
+
 @admin.register(QuizSource)
 class QuizSourceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'question_count')
-    search_fields = ('name',)
+    form = QuizSourceAdminForm
+    list_display = ('name', 'question_count', 'is_visible', 'is_featured', 'require_login', 'is_locked', 'is_organization_only', 'default_duration', 'created_by', 'created_at')
+    list_filter = ('is_visible', 'is_featured', 'require_login', 'is_locked', 'is_organization_only', 'organizations')
+    search_fields = ('name', 'description')
+    list_editable = ('is_visible', 'is_featured', 'require_login', 'is_locked', 'is_organization_only')
+    filter_horizontal = ('organizations',)
+    actions = ['mark_visible', 'mark_hidden', 'mark_featured', 'mark_locked', 'mark_unlocked']
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description', 'default_duration')
+        }),
+        (_('Visibility & Access'), {
+            'fields': ('is_visible', 'is_featured', 'require_login', 'is_locked', 'is_organization_only', 'organizations'),
+            'description': _('Control who can see and access this exam.'),
+        }),
+        (_('Metadata'), {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    readonly_fields = ('created_at', 'updated_at')
 
     def question_count(self, obj):
         return obj.questions.count()
     question_count.short_description = _('Questions Count')
+
+    def save_model(self, request, obj, form, change):
+        if not change and not obj.created_by_id:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    @admin.action(description=_('Mark selected exams as visible'))
+    def mark_visible(self, request, queryset):
+        updated = queryset.update(is_visible=True)
+        self.message_user(request, f"Đã hiện {updated} đề thi.")
+
+    @admin.action(description=_('Mark selected exams as hidden'))
+    def mark_hidden(self, request, queryset):
+        updated = queryset.update(is_visible=False)
+        self.message_user(request, f"Đã ẩn {updated} đề thi.")
+
+    @admin.action(description=_('Mark selected exams as featured'))
+    def mark_featured(self, request, queryset):
+        updated = queryset.update(is_featured=True)
+        self.message_user(request, f"Đã gắn dấu nổi bật cho {updated} đề thi.")
+
+    @admin.action(description=_('Lock selected exams'))
+    def mark_locked(self, request, queryset):
+        updated = queryset.update(is_locked=True)
+        self.message_user(request, f"Đã khóa {updated} đề thi.")
+
+    @admin.action(description=_('Unlock selected exams'))
+    def mark_unlocked(self, request, queryset):
+        updated = queryset.update(is_locked=False)
+        self.message_user(request, f"Đã mở khóa {updated} đề thi.")
 
 @admin.register(QuizOption)
 class QuizOptionAdmin(admin.ModelAdmin):

@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import os
 import sys
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 try:
     import MySQLdb  # noqa: F401, imported for side effect

@@ -2,7 +2,7 @@
 set -e
 
 # Change directory to the workspace root
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
 echo "==> Compiling SASS stylesheets..."
 ./make_style.sh

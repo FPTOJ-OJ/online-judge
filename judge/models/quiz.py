@@ -16,13 +16,30 @@ class QuizTag(models.Model):
 
 class QuizSource(models.Model):
     name = models.CharField(max_length=200, verbose_name=_('source name'), unique=True)
+    is_visible = models.BooleanField(default=True, verbose_name=_('visible to users'),
+                                     help_text=_('Whether this exam appears in the exam list.'))
+    require_login = models.BooleanField(default=False, verbose_name=_('require login'),
+                                        help_text=_('Users must be logged in to view and start this exam.'))
+    is_locked = models.BooleanField(default=False, verbose_name=_('locked'),
+                                    help_text=_('Exam is locked and cannot be started by users.'))
+    is_featured = models.BooleanField(default=False, verbose_name=_('featured'),
+                                      help_text=_('Show as featured exam.'))
+    is_organization_only = models.BooleanField(default=False, verbose_name=_('organization only'),
+                                               help_text=_('Only members of selected organizations can view and start this exam.'))
+    organizations = models.ManyToManyField('Organization', verbose_name=_('organizations'), blank=True,
+                                           help_text=_('Organizations that can access this exam (empty = all if unchecked).'))
+    description = models.TextField(verbose_name=_('description'), blank=True, default='')
+    default_duration = models.IntegerField(default=45, verbose_name=_('default duration (minutes)'))
+    created_by = models.ForeignKey(User, verbose_name=_('created by'), on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name=_('updated at'), auto_now=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = _('quiz source')
-        verbose_name_plural = _('quiz sources')
+        verbose_name = _('quiz source / exam')
+        verbose_name_plural = _('quiz sources / exams')
 
 
 class QuizQuestion(models.Model):

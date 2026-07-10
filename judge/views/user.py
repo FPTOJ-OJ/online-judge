@@ -353,30 +353,119 @@ def edit_profile(request):
     if request.profile.mute:
         return generic_message(request, _("Can't edit profile"), _('Your part is silent, little toad.'), status=403)
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.profile, user=request.user)
+        form = ProfileForm(request.POST, request.FILES, instance=request.profile, user=request.user)
         if form.is_valid():
             with revisions.create_revision(atomic=True):
-                form.save()
-                revisions.set_user(request.user)
-                revisions.set_comment(_('Updated on site'))
+                profile = form.save(commit=False)
+                
+                # Handle avatar upload and removal
+                avatar_file = request.FILES.get('avatar_file')
+                remove_avatar = form.cleaned_data.get('remove_avatar')
+                avatar_cropped_data = request.POST.get('avatar_cropped_data')
+                
+                if remove_avatar and profile.avatar:
+                    old_path = os.path.join(settings.AVATAR_UPLOAD_DIR, profile.avatar)
+                    if os.path.exists(old_path):
+                        try:
+                            os.remove(old_path)
+                        except Exception:
+                            pass
+                    profile.avatar = None
+                
+                if avatar_cropped_data and avatar_cropped_data.startswith('data:image/webp;base64,'):
+                    try:
+                        import base64
+                        import uuid
+                        
+                        header, encoded = avatar_cropped_data.split(',', 1)
+                        image_data = base64.b64decode(encoded)
+                        
+                        os.makedirs(settings.AVATAR_UPLOAD_DIR, exist_ok=True)
+                        filename = f"{profile.id}_{uuid.uuid4().hex[:8]}.webp"
+                        filepath = os.path.join(settings.AVATAR_UPLOAD_DIR, filename)
+                        
+                        with open(filepath, 'wb') as f:
+                            f.write(image_data)
+                            
+                        # Delete old avatar
+                        if profile.avatar:
+                            old_path = os.path.join(settings.AVATAR_UPLOAD_DIR, profile.avatar)
+                            if os.path.exists(old_path):
+                                try:
+                                    os.remove(old_path)
+                                except Exception:
+                                    pass
+                        profile.avatar = filename
+                    except Exception as e:
+                        form.add_error(None, _('Failed to save cropped image: %s') % str(e))
+                elif avatar_file:
+                    try:
+                        from PIL import Image
+                        import uuid
+                        
+                        img = Image.open(avatar_file)
+                        
+                        # Crop to center square
+                        width, height = img.size
+                        if width != height:
+                            min_dim = min(width, height)
+                            left = (width - min_dim) / 2
+                            top = (height - min_dim) / 2
+                            right = (width + min_dim) / 2
+                            bottom = (height + min_dim) / 2
+                            img = img.crop((left, top, right, bottom))
+                        
+                        # Resize to standard 256x256
+                        img = img.resize((256, 256), Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.ANTIALIAS)
+                        
+                        os.makedirs(settings.AVATAR_UPLOAD_DIR, exist_ok=True)
+                        
+                        # Generate a unique WebP filename
+                        filename = f"{profile.id}_{uuid.uuid4().hex[:8]}.webp"
+                        filepath = os.path.join(settings.AVATAR_UPLOAD_DIR, filename)
+                        
+                        # Convert to RGB/RGBA and save as WebP
+                        if img.mode in ('RGBA', 'LA'):
+                            img.save(filepath, format='WEBP', quality=85)
+                        else:
+                            img.convert('RGB').save(filepath, format='WEBP', quality=85)
+                        
+                        # Delete old avatar
+                        if profile.avatar:
+                            old_path = os.path.join(settings.AVATAR_UPLOAD_DIR, profile.avatar)
+                            if os.path.exists(old_path):
+                                try:
+                                    os.remove(old_path)
+                                except Exception:
+                                    pass
+                        profile.avatar = filename
+                    except Exception as e:
+                        form.add_error(None, _('Failed to process image: %s') % str(e))
+                
+                if not form.errors:
+                    profile.save()
+                    form.save_m2m()
+                    revisions.set_user(request.user)
+                    revisions.set_comment(_('Updated on site'))
+            
+            if not form.errors:
+                if newsletter_id is not None:
+                    try:
+                        subscription = Subscription.objects.get(user=request.user, newsletter_id=newsletter_id)
+                    except Subscription.DoesNotExist:
+                        if form.cleaned_data['newsletter']:
+                            Subscription(user=request.user, newsletter_id=newsletter_id, subscribed=True).save()
+                    else:
+                        if subscription.subscribed != form.cleaned_data['newsletter']:
+                            subscription.update(('unsubscribe', 'subscribe')[form.cleaned_data['newsletter']])
 
-            if newsletter_id is not None:
-                try:
-                    subscription = Subscription.objects.get(user=request.user, newsletter_id=newsletter_id)
-                except Subscription.DoesNotExist:
-                    if form.cleaned_data['newsletter']:
-                        Subscription(user=request.user, newsletter_id=newsletter_id, subscribed=True).save()
+                perm = Permission.objects.get(codename='test_site', content_type=ContentType.objects.get_for_model(Profile))
+                if form.cleaned_data['test_site']:
+                    request.user.user_permissions.add(perm)
                 else:
-                    if subscription.subscribed != form.cleaned_data['newsletter']:
-                        subscription.update(('unsubscribe', 'subscribe')[form.cleaned_data['newsletter']])
+                    request.user.user_permissions.remove(perm)
 
-            perm = Permission.objects.get(codename='test_site', content_type=ContentType.objects.get_for_model(Profile))
-            if form.cleaned_data['test_site']:
-                request.user.user_permissions.add(perm)
-            else:
-                request.user.user_permissions.remove(perm)
-
-            return HttpResponseRedirect(request.path)
+                return HttpResponseRedirect(request.path)
     else:
         form = ProfileForm(instance=request.profile, user=request.user)
         if newsletter_id is not None:

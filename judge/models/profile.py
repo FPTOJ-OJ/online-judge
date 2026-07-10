@@ -198,6 +198,7 @@ class Profile(models.Model):
                                                               _('Scratch codes must be empty or a JSON array of '
                                                                 '16-character Base32 codes.'))])
     last_totp_timecode = models.IntegerField(verbose_name=_('last TOTP timecode'), default=0)
+    avatar = models.CharField(max_length=255, null=True, blank=True, verbose_name=_('avatar filename'))
     api_token = models.CharField(max_length=64, null=True, verbose_name=_('API token'),
                                  help_text=_('64-character hex-encoded API access token.'),
                                  validators=[RegexValidator('^[a-f0-9]{64}$',

@@ -3,98 +3,94 @@
 {% block user_media %}
     {% include "timezone/media-css.html" %}
     {{ form.media.css }}
-    <style>
-        .sortedm2m-container, .sortedm2m-container p.selector-filter {
-            width: 300px;
-        }
-
-        .sortedm2m-container p.selector-filter input {
-            width: 262px;
-        }
-
-        ul.sortedm2m {
-            width: 284px;
-            min-height: 70px;
-            max-height: 200px;
-            height: 70px
-        }
-
-        .inline-header {
-            float: left;
-            font-size: 1.1em;
-            padding: 4px 8px;
-            padding-left: 0;
-        }
-
-        .block-header {
-            font-size: 1.1em;
-        }
-
-        .block-buttons {
-            margin: 0.5em 0 0.8em;
-        }
-
-        .fullwidth {
-            display: block;
-            overflow: hidden;
-        }
-
-        #edit-form {
-            border: unset;
-            background: unset;
-            display: block;
-            padding-bottom: 30px;
-        }
-
-        .settings {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .pane {
-            display: block;
-            width: 337px;
-        }
-
-        .api-token {
-            padding-top: 5px;
-            font-family: Consolas, Liberation Mono, Monaco, Courier New, monospace;
-            font-size: 12px;
-            -webkit-user-select: all;
-            -ms-user-select: all;
-            user-select: all;
-            white-space: nowrap;
-        }
-
-        .ml-5 {
-            margin-left: 5px;
-        }
-
-        #hidden-word {
-            padding-top: 5px;
-            font-family: Consolas, Liberation Mono, Monaco, Courier New, monospace;
-            font-size: 12px;
-        }
-
-        #scratch-codes {
-            font-family: Consolas, Liberation Mono, Monaco, Courier New, monospace;
-            font-size: 12px;
-            white-space: pre;
-        }
-
-        #scratch-codes-text {
-            padding-top: 5px;
-            font-size: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ static('vendor/cropper/cropper.min.css') }}">
 {% endblock %}
 
 {% block js_media %}
     {% include "timezone/media-js.html" %}
     {{ form.media.js }}
+    <script src="{{ static('vendor/cropper/cropper.min.js') }}"></script>
     <script type="text/javascript">
         $(function () {
+            // Force local Select2 initialization with the 'dmoj' theme
+            $('#id_timezone, #id_language, #id_site_theme, #id_ace_theme').select2({
+                theme: 'dmoj',
+                dropdownAutoWidth: true,
+                width: '200px'
+            });
+
+            // Avatar Cropper & Compression implementation
+            $('#id_avatar_file').change(function (e) {
+                var files = e.target.files;
+                if (files && files.length > 0) {
+                    var file = files[0];
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#cropper-image').attr('src', e.target.result);
+                        $('#cropper-container').show();
+                        
+                        if (window.cropper) {
+                            window.cropper.destroy();
+                        }
+                        
+                        var image = document.getElementById('cropper-image');
+                        window.cropper = new Cropper(image, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            dragMode: 'move',
+                            autoCropArea: 1,
+                            restore: false,
+                            guides: false,
+                            center: false,
+                            highlight: false,
+                            cropBoxMovable: true,
+                            cropBoxResizable: true,
+                            toggleDragModeOnDblclick: false
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            $('#btn-crop-confirm').click(function (e) {
+                e.preventDefault();
+                if (window.cropper) {
+                    var canvas = window.cropper.getCroppedCanvas({
+                        width: 256,
+                        height: 256
+                    });
+                    
+                    var croppedDataUrl = canvas.toDataURL('image/webp', 0.85);
+                    $('#id_avatar_cropped_data').val(croppedDataUrl);
+                    $('.avatar-preview').attr('src', croppedDataUrl);
+                    $('#cropper-container').hide();
+                    
+                    window.cropper.destroy();
+                    window.cropper = null;
+                }
+            });
+
+            $('#btn-crop-cancel').click(function (e) {
+                e.preventDefault();
+                if (window.cropper) {
+                    window.cropper.destroy();
+                    window.cropper = null;
+                }
+                $('#cropper-container').hide();
+                $('#id_avatar_file').val('');
+            });
+
+            $('#edit-form').submit(function (e) {
+                if (window.cropper) {
+                    var canvas = window.cropper.getCroppedCanvas({
+                        width: 256,
+                        height: 256
+                    });
+                    var croppedDataUrl = canvas.toDataURL('image/webp', 0.85);
+                    $('#id_avatar_cropped_data').val(croppedDataUrl);
+                }
+            });
+
             $('#ace_user_script').on('ace_load', function (e, editor) {
                 editor.getSession().setMode("ace/mode/javascript");
             });
@@ -259,191 +255,258 @@
 {% endblock %}
 
 {% block body %}
-    <div class="centered-form">
-        <form id="edit-form" action="" method="post" class="form-area">
+    <div class="centered-form" style="max-width: 1200px; margin: 0 auto;">
+        <form id="edit-form" action="" method="post" enctype="multipart/form-data" class="form-area">
             {% if form.errors %}
                 <div class="alert alert-danger alert-dismissable">
                     <a href="#" class="close">x</a>
                     {{ form.non_field_errors() }}
                     {{ form.about.errors }}
+                    {{ form.avatar_file.errors }}
                 </div>
             {% endif %}
 
             {% csrf_token %}
 
-            <div style="padding-top:0.5em" class="block-header grayed">{{ _('Self-description:') }}</div>
-            {{ form.about }}
-            <hr>
+            <div class="form-actions top-actions">
+                <input type="submit" value="{{ _('Update profile') }}" class="button primary">
+            </div>
 
-            <div class="settings" style="padding-top:0.7em">
-                <div class="pane" style="vertical-align:top">
-                    <table style="padding-right:0.8em">
-                        <tr title="{{ _('Select your closest major city') }}">
-                            <td><label class="inline-header grayed">{{ _('Time zone:') }}</label></td>
-                            <td><span class="fullwidth">{{ form.timezone }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><label class="inline-header grayed">{{ _('Language:') }}</label></td>
-                            <td><span class="fullwidth">{{ form.language }}</span></td>
-                        </tr>
-                        <tr{% if not perms.judge.test_site %} style="display: none"{% endif %}>
-                            <td><label class="inline-header grayed">{{ _('Site theme:') }}</label></td>
-                            <td><span class="fullwidth">{{ form.site_theme }}</span></td>
-                        </tr>
-                        <tr>
-                            <td><label class="inline-header grayed">{{ _('Editor theme:') }}</label></td>
-                            <td><span class="fullwidth">{{ form.ace_theme }}</span></td>
-                        </tr>
-                        {% if has_math_config %}
-                            <tr>
-                                <td><label class="inline-header grayed">{{ _('Math engine:') }}</label></td>
-                                <td><span class="fullwidth">{{ form.math_engine }}</span></td>
-                            </tr>
-                        {% endif %}
-                    </table>
+            <div class="profile-grid">
+                <!-- Card 1: Self-description -->
+                <div class="profile-card full-width">
+                    <div class="card-title"><i class="fa fa-info-circle"></i> {{ _('Self-description') }}</div>
+                    <div class="card-content">
+                        {{ form.about }}
+                    </div>
                 </div>
-                {% if form.organizations %}
-                    <div class="pane">
-                        <div style="padding-bottom:0.3em; margin-top:0.3em" class="block-header grayed">
-                            {{- _('Affiliated organizations:') -}}
+
+                <!-- Card 2: Preferences -->
+                <div class="profile-card">
+                    <div class="card-title"><i class="fa fa-sliders"></i> {{ _('Preferences') }}</div>
+                    <div class="card-content">
+                        <table>
+                            <tr title="{{ _('Select your closest major city') }}">
+                                <td><label>{{ _('Time zone:') }}</label></td>
+                                <td><span class="fullwidth">{{ form.timezone }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><label>{{ _('Language:') }}</label></td>
+                                <td><span class="fullwidth">{{ form.language }}</span></td>
+                            </tr>
+                            <tr{% if not perms.judge.test_site %} style="display: none"{% endif %}>
+                                <td><label>{{ _('Site theme:') }}</label></td>
+                                <td><span class="fullwidth">{{ form.site_theme }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><label>{{ _('Editor theme:') }}</label></td>
+                                <td><span class="fullwidth">{{ form.ace_theme }}</span></td>
+                            </tr>
+                            {% if has_math_config %}
+                                <tr>
+                                    <td><label>{{ _('Math engine:') }}</label></td>
+                                    <td><span class="fullwidth">{{ form.math_engine }}</span></td>
+                                </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Card 3: Profile Avatar -->
+                <div class="profile-card">
+                    <div class="card-title"><i class="fa fa-picture-o"></i> {{ _('Profile Avatar') }}</div>
+                    <div class="card-content">
+                        <div class="avatar-preview-container">
+                            <img src="{{ gravatar(profile, 80) }}" class="avatar-preview" alt="Avatar">
+                            <div>
+                                <div style="font-weight: bold; margin-bottom: 5px;">{{ _('Current avatar') }}</div>
+                                <div style="font-size: 0.85em; opacity: 0.8;">{{ _('Supports WebP format') }}</div>
+                            </div>
                         </div>
-                        {{ form.organizations }}
+                        <div style="margin-bottom: 10px;">
+                            {{ form.avatar_file }}
+                            <input type="hidden" name="avatar_cropped_data" id="id_avatar_cropped_data">
+                        </div>
+                        <div id="cropper-container" style="display: none; margin-top: 15px; border-top: 1px solid rgba(128,128,128,0.2); padding-top: 15px;">
+                            <div style="font-weight: bold; margin-bottom: 8px;">{{ _('Crop your avatar:') }}</div>
+                            <div style="max-width: 100%; overflow: hidden; background: #000; border-radius: 8px;">
+                                <img id="cropper-image" style="max-width: 100%; max-height: 250px; display: block; margin: 0 auto;">
+                            </div>
+                            <div style="margin-top: 12px; display: flex; gap: 10px; justify-content: center;">
+                                <button type="button" id="btn-crop-confirm" class="button primary" style="padding: 6px 16px; font-size: 0.9em; width: auto;">{{ _('Crop') }}</button>
+                                <button type="button" id="btn-crop-cancel" class="button" style="padding: 6px 16px; font-size: 0.9em; width: auto;">{{ _('Cancel') }}</button>
+                            </div>
+                        </div>
+                        {% if profile.avatar %}
+                            <div>
+                                {{ form.remove_avatar }}
+                                <label for="id_remove_avatar" style="display: inline; float: none; font-weight: normal; margin-left: 5px;">
+                                    {{ _('Remove current avatar') }}
+                                </label>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Card 4: Affiliated organizations -->
+                {% if form.organizations %}
+                    <div class="profile-card">
+                        <div class="card-title"><i class="fa fa-users"></i> {{ _('Affiliated organizations') }}</div>
+                        <div class="card-content">
+                            {{ form.organizations }}
+                        </div>
                     </div>
                 {% endif %}
-            </div>
-            <hr>
-            <div class="settings" style="padding-top:0.7em">
-                <div class="pane">
-                    <table border="0">
-                        {% if form.newsletter %}
-                            <tr><td>
-                                {{ form.newsletter }}
-                                <label for="id_newsletter" style="float: unset" class="inline-header grayed">
-                                        {{- _('Notify me about upcoming contests') -}}
-                                </label>
-                            </td></tr>
-                        {% endif %}
-                        <tr><td>
-                            {{ form.test_site }}
-                            <label for="id_test_site" style="float: unset" class="inline-header grayed">
-                                {{- form.test_site.label -}}
-                            </label>
-                        </td></tr>
-                        <tr><td>
-                            <a href="https://www.gravatar.com/" target="_blank" class="inline-header" rel="noopener">
-                                {{ _('Change your avatar') }}
-                            </a>
-                        </td></tr>
-                        <tr><td>
-                            <a href="{{ url('password_change') }}" class="inline-header">
-                                {{ _('Change your password') }}
-                            </a>
-                        </td></tr>
-                        <tr><td>
-                            <a href="{{ url('email_change') }}" class="inline-header">
-                                {{ _('Change your email') }}
-                            </a>
-                        </td></tr>
-                        {% if can_download_data %}
-                            <tr><td>
-                                <a href="{{ url('user_prepare_data') }}" class="inline-header">
-                                    {{ _('Download your data') }}
-                                </a>
-                            </td></tr>
-                        {% endif %}
-                        <tr><td>
-                            <span id="api-token-td" class="inline-header grayed">
-                                {{ _('API token:') }}
-                                {% if profile.api_token %}
-                                    <a id="generate-api-token-button" href="{{ url('generate_api_token') }}"
-                                        class="button inline-button">{{ _('Regenerate') }}</a>
-                                    <a id="remove-api-token-button" href="{{ url('remove_api_token') }}"
-                                        class="button inline-button ml-5">{{ _('Remove') }}</a>
-                                    <div class="api-token" id="api-token">{{ _('Hidden') }}</div>
-                                {% else %}
-                                    <a id="generate-api-token-button" href="{{ url('generate_api_token') }}"
-                                        class="button inline-button">{{ _('Generate') }}</a>
-                                    <div class="api-token" id="api-token"></div>
-                                {% endif %}
-                            </span>
-                        </td></tr>
-                    </table>
-                </div>
-                <div class="pane">
-                    <div>
-                        {% if profile.is_totp_enabled %}
-                            <div class="block-header grayed">{{ _('Two-factor authentication is enabled:') }}</div>
-                            <div class="block-buttons">
-                                {% if require_staff_2fa and request.user.is_staff and not profile.is_webauthn_enabled %}
-                                    <a id="disable-2fa-button" class="button inline-button">{{ _('Disable') }}</a>
-                                {% else %}
-                                    <a href="{{ url('disable_2fa') }}"
-                                       class="button inline-button">{{ _('Disable') }}</a>
-                                {% endif %}
-                                <a href="{{ url('edit_2fa') }}" class="button inline-button">{{ _('Edit') }}</a>
-                            </div>
-                            <div class="block-header grayed">
-                                {{ _('Scratch codes:') }}
-                                {% if profile.scratch_codes %}
-                                    <a id="generate-scratch-codes-button" href="{{ url('generate_scratch_codes') }}"
-                                       class="button inline-button">{{ _('Regenerate') }}</a>
-                                    <div id="hidden-word">{{ _('Hidden') }}</div>
-                                {% else %}
-                                    <a id="generate-scratch-codes-button" href="{{ url('generate_scratch_codes') }}"
-                                       class="button inline-button">{{ _('Generate') }}</a>
-                                {% endif %}
-                                <div style="display: none" id="scratch-codes-regen">
-                                    <div id="scratch-codes-text">
-                                        {{ _('Below is a list of one-time use scratch codes.') }}
-                                        {{ _('These codes can only be used once and are for emergency use.') }}
-                                        {{ _('You can use these codes to login to your account or disable two-factor authentication.') }}
-                                        {{ _('If you ever need more scratch codes, you can regenerate them here.') }}
-                                        {{ _('Please write these down and keep them in a secure location.') }}<br><br>
-                                        {{ _('You will not be able to view your scratch codes after you leave this page!') }}</div>
-                                    <pre><code id="scratch-codes"></code></pre>
-                                </div>
-                            </div>
-                        {% else %}
-                            <span class="inline-header grayed">
-                                {{ _('Two-factor Authentication is disabled:') }}
-                                <a href="{{ url('enable_2fa') }}" class="button inline-button">{{ _('Enable') }}</a>
-                            </span>
-                        {% endif %}
-                    </div>
-                    <span class="grayed">
-                    {% if HAS_WEBAUTHN %}
-                        <div style="padding-bottom:0.4em" class="block-header grayed">
-                            {{- _('Security keys:') -}}
-                        </div>
-                        <table class="table">
-                            {% if profile.is_webauthn_enabled %}
-                                {% for credential in profile.webauthn_credentials.all() %}
-                                    <tr>
-                                        <td>{{ credential.name }}</td>
-                                        <td>
-                                            <button class="webauthn-delete inline-button"
-                                                    data-delete-url="{{ url('webauthn_delete', credential.id) }}">
-                                                {{ _('Delete') }}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+
+                <!-- Card 5: Account settings -->
+                <div class="profile-card">
+                    <div class="card-title"><i class="fa fa-user-secret"></i> {{ _('Account Security') }}</div>
+                    <div class="card-content">
+                        <table>
+                            {% if form.newsletter %}
+                                <tr>
+                                    <td colspan="2">
+                                        {{ form.newsletter }}
+                                        <label for="id_newsletter" style="display: inline; float: none; font-weight: normal; margin-left: 5px;">
+                                            {{ _('Notify me about upcoming contests') }}
+                                        </label>
+                                    </td>
+                                </tr>
                             {% endif %}
                             <tr>
-                                <td><input id="new-webauthn-name" type="text" placeholder="{{ _('Enter a name for this key') }}"></td>
-                                <td><button id="new-webauthn" class="inline-button">{{ _('Add') }}</button></td>
+                                <td colspan="2">
+                                    {{ form.test_site }}
+                                    <label for="id_test_site" style="display: inline; float: none; font-weight: normal; margin-left: 5px;">
+                                        {{ form.test_site.label }}
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding-top: 10px;">
+                                    <a href="{{ url('password_change') }}" class="button inline-button" style="display: inline-block; margin-right: 5px;">
+                                        <i class="fa fa-key"></i> {{ _('Change password') }}
+                                    </a>
+                                    <a href="{{ url('email_change') }}" class="button inline-button" style="display: inline-block;">
+                                        <i class="fa fa-envelope"></i> {{ _('Change email') }}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% if can_download_data %}
+                                <tr>
+                                    <td colspan="2">
+                                        <a href="{{ url('user_prepare_data') }}" class="button inline-button" style="display: inline-block; margin-top: 5px;">
+                                            <i class="fa fa-download"></i> {{ _('Download your data') }}
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td colspan="2" style="padding-top: 10px;">
+                                    <span id="api-token-td" class="inline-header grayed" style="display: block; float: none; padding: 0;">
+                                        <strong>{{ _('API token:') }}</strong>
+                                        {% if profile.api_token %}
+                                            <a id="generate-api-token-button" href="{{ url('generate_api_token') }}"
+                                                class="button inline-button">{{ _('Regenerate') }}</a>
+                                            <a id="remove-api-token-button" href="{{ url('remove_api_token') }}"
+                                                class="button inline-button ml-5">{{ _('Remove') }}</a>
+                                            <div class="api-token" id="api-token" style="margin-top: 5px;">{{ _('Hidden') }}</div>
+                                        {% else %}
+                                            <a id="generate-api-token-button" href="{{ url('generate_api_token') }}"
+                                                class="button inline-button">{{ _('Generate') }}</a>
+                                            <div class="api-token" id="api-token" style="margin-top: 5px;"></div>
+                                        {% endif %}
+                                    </span>
+                                </td>
                             </tr>
                         </table>
-                    {% endif %}
-                    </span>
+                    </div>
+                </div>
+
+                <!-- Card 6: Two-factor authentication -->
+                <div class="profile-card">
+                    <div class="card-title"><i class="fa fa-shield"></i> {{ _('Two-factor Authentication') }}</div>
+                    <div class="card-content">
+                        <div>
+                            {% if profile.is_totp_enabled %}
+                                <div style="font-weight: bold; margin-bottom: 8px; color: green;">
+                                    <i class="fa fa-check-circle"></i> {{ _('2FA is currently enabled') }}
+                                </div>
+                                <div class="block-buttons" style="margin-bottom: 15px;">
+                                    {% if require_staff_2fa and request.user.is_staff and not profile.is_webauthn_enabled %}
+                                        <a id="disable-2fa-button" class="button inline-button">{{ _('Disable') }}</a>
+                                    {% else %}
+                                        <a href="{{ url('disable_2fa') }}"
+                                           class="button inline-button">{{ _('Disable') }}</a>
+                                    {% endif %}
+                                    <a href="{{ url('edit_2fa') }}" class="button inline-button">{{ _('Edit') }}</a>
+                                </div>
+                                <div style="font-weight: bold; margin-bottom: 5px;">
+                                    {{ _('Scratch codes:') }}
+                                    {% if profile.scratch_codes %}
+                                        <a id="generate-scratch-codes-button" href="{{ url('generate_scratch_codes') }}"
+                                           class="button inline-button">{{ _('Regenerate') }}</a>
+                                        <div id="hidden-word" style="margin-top: 5px;">{{ _('Hidden') }}</div>
+                                    {% else %}
+                                        <a id="generate-scratch-codes-button" href="{{ url('generate_scratch_codes') }}"
+                                           class="button inline-button">{{ _('Generate') }}</a>
+                                    {% endif %}
+                                    <div style="display: none" id="scratch-codes-regen">
+                                        <div id="scratch-codes-text" style="font-size: 11px; margin-top: 5px; opacity: 0.8;">
+                                            {{ _('Below is a list of one-time use scratch codes.') }}
+                                            {{ _('Please write these down and keep them in a secure location.') }}<br>
+                                            <strong>{{ _('You will not be able to view these after leaving this page!') }}</strong>
+                                        </div>
+                                        <pre><code id="scratch-codes"></code></pre>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div style="font-weight: bold; margin-bottom: 8px; color: #cc8800;">
+                                    <i class="fa fa-exclamation-triangle"></i> {{ _('2FA is currently disabled') }}
+                                </div>
+                                <a href="{{ url('enable_2fa') }}" class="button inline-button">{{ _('Enable 2FA') }}</a>
+                            {% endif %}
+                        </div>
+                        
+                        {% if HAS_WEBAUTHN %}
+                            <hr style="margin: 15px 0;">
+                            <div style="font-weight: bold; margin-bottom: 8px;">
+                                <i class="fa fa-key"></i> {{ _('Security keys:') }}
+                            </div>
+                            <table class="table" style="width: 100%;">
+                                {% if profile.is_webauthn_enabled %}
+                                    {% for credential in profile.webauthn_credentials.all() %}
+                                        <tr>
+                                            <td>{{ credential.name }}</td>
+                                            <td style="text-align: right;">
+                                                <button class="webauthn-delete inline-button"
+                                                        data-delete-url="{{ url('webauthn_delete', credential.id) }}">
+                                                    {{ _('Delete') }}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                <tr>
+                                    <td><input id="new-webauthn-name" type="text" placeholder="{{ _('Key name') }}" style="width: 100%;"></td>
+                                    <td style="text-align: right;"><button id="new-webauthn" class="inline-button">{{ _('Add') }}</button></td>
+                                </tr>
+                            </table>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Card 7: User script -->
+                <div class="profile-card full-width">
+                    <div class="card-title"><i class="fa fa-code"></i> {{ _('User-script') }}</div>
+                    <div class="card-content">
+                        {{ form.user_script }}
+                    </div>
                 </div>
             </div>
-            <hr>
-            <div class="block-header grayed">{{ _('User-script:') }}</div>
-            {{ form.user_script }}
-            <hr>
 
-            <input type="submit" class="submit-bar" value="{{ _('Update profile') }}">
+            <div class="form-actions bottom-actions">
+                <input type="submit" value="{{ _('Update profile') }}" class="button primary">
+            </div>
         </form>
     </div>
 {% endblock %}

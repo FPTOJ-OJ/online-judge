@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    
+    <div class="quiz-header-card">
+        <div>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Teacher Panel') }}</span>
+            <h1>{{ title }}</h1>
+            <p>{{ _('Configure exam settings including visibility, access control, and more.') }}</p>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="quiz-q-card" style="padding: 16px; margin-bottom: 16px; background: #f8d7da; color: #721c24;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="quiz-q-card" style="padding: 24px;">
+        <form method="post" action="">
+            {% csrf_token %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; color: var(--quiz-text);">{{ _('Basic info') }}</h4>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">{{ _('Exam name') }} *</label>
+                        <input type="text" name="name" value="{{ exam.name if exam else '' }}" required
+                               style="width: 100%; padding: 8px 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); font-size: 0.95rem;">
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">{{ _('Description') }}</label>
+                        <textarea name="description" rows="4"
+                                  style="width: 100%; padding: 8px 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); font-size: 0.9rem; resize: vertical;">{{ exam.description if exam and exam.description else '' }}</textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">{{ _('Default duration (minutes)') }}</label>
+                        <input type="number" name="default_duration" value="{{ exam.default_duration if exam else 45 }}" min="1" max="300"
+                               style="width: 120px; padding: 8px 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); font-size: 0.95rem;">
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; color: var(--quiz-text);">{{ _('Access & visibility') }}</h4>
+                    
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--quiz-border); border-radius: 4px;">
+                        <input type="checkbox" name="is_visible" id="id_is_visible" {% if not exam or exam.is_visible %}checked{% endif %}
+                               style="width: 18px; height: 18px;">
+                        <label for="id_is_visible" style="font-weight: 600; color: var(--quiz-text); cursor: pointer;">{{ _('Visible to users') }}</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--quiz-border); border-radius: 4px;">
+                        <input type="checkbox" name="is_featured" id="id_is_featured" {% if exam and exam.is_featured %}checked{% endif %}
+                               style="width: 18px; height: 18px;">
+                        <label for="id_is_featured" style="font-weight: 600; color: var(--quiz-text); cursor: pointer;">{{ _('Featured (show prominently)') }}</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--quiz-border); border-radius: 4px;">
+                        <input type="checkbox" name="require_login" id="id_require_login" {% if exam and exam.require_login %}checked{% endif %}
+                               style="width: 18px; height: 18px;">
+                        <label for="id_require_login" style="font-weight: 600; color: var(--quiz-text); cursor: pointer;">{{ _('Require login to view') }}</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--quiz-border); border-radius: 4px;">
+                        <input type="checkbox" name="is_locked" id="id_is_locked" {% if exam and exam.is_locked %}checked{% endif %}
+                               style="width: 18px; height: 18px;">
+                        <label for="id_is_locked" style="font-weight: 600; color: var(--quiz-text); cursor: pointer;">{{ _('Locked (users cannot start)') }}</label>
+                    </div>
+                    
+                    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--quiz-border); border-radius: 4px;">
+                        <input type="checkbox" name="is_organization_only" id="id_is_organization_only" {% if exam and exam.is_organization_only %}checked{% endif %}
+                               style="width: 18px; height: 18px;">
+                        <label for="id_is_organization_only" style="font-weight: 600; color: var(--quiz-text); cursor: pointer;">{{ _('Organization only') }}</label>
+                    </div>
+                    
+                    {% if request.user.is_superuser and organizations %}
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">{{ _('Allowed organizations') }}</label>
+                            <select name="organizations" multiple size="6"
+                                    style="width: 100%; padding: 8px 12px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); font-size: 0.9rem;">
+                                {% for org in organizations %}
+                                    <option value="{{ org.id }}" {% if exam and org in exam.organizations.all() %}selected{% endif %}>
+                                        {{ org.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small style="color: var(--quiz-text-muted);">{{ _('Hold Ctrl/Cmd to select multiple. Leave empty = all organizations.') }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid var(--quiz-border); padding-top: 16px; display: flex; gap: 12px; justify-content: flex-end;">
+                <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="margin: 0; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important; text-decoration: none;">
+                    {{ _('Cancel') }}
+                </a>
+                <button type="submit" class="quiz-btn-primary" style="margin: 0; padding: 10px 24px;">
+                    <i class="fa fa-save"></i> {{ _('Save exam') }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

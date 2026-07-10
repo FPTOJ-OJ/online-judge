@@ -448,7 +448,7 @@
                 {% endfor %}
                 {% if site_config.quiz_enabled %}
                 <li>
-                    <a href="#" class="nav-quiz{% if request.path.startswith('/quiz') %} active{% endif %}">
+                    <a href="{{ url('quiz_home') }}" class="nav-quiz{% if request.path.startswith('/quiz') %} active{% endif %}">
                         {{ _("Exam Practice") }} <div class="nav-expand">&gt;</div>
                     </a>
                     <ul>

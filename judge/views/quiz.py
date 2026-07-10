@@ -3,15 +3,27 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, Http404, HttpResponseForbidden
 from django.views import View
 from django.views.generic import ListView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.db import transaction
+from django.contrib import messages
 from django.utils.text import slugify
 from django.db.models import Q, Count
 import random
 
 from judge.models.quiz import QuizTag, QuizSource, QuizQuestion, QuizOption, QuizSession
+from judge.models.profile import Organization
 from judge.jinja2.markdown import markdown
 from judge.widgets.martor import MartorWidget
+
+
+class QuizSessionAccessMixin(AccessMixin):
+    """Mixin that allows access if user owns the session (by user FK or session_key)."""
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        if request.session.session_key:
+            return super().dispatch(request, *args, **kwargs)
+        return self.handle_no_permission()
 
 def is_teacher(user):
     return user.is_authenticated and (
@@ -278,7 +290,7 @@ class QuizHomeView(View):
         return redirect('quiz_session_detail', session_id=session.id)
 
 
-class QuizSessionDetailView(LoginRequiredMixin, View):
+class QuizSessionDetailView(QuizSessionAccessMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -337,7 +349,7 @@ class QuizSessionDetailView(LoginRequiredMixin, View):
         return render(request, 'quiz/session.html', context)
 
 
-class QuizSessionActionView(LoginRequiredMixin, View):
+class QuizSessionActionView(QuizSessionAccessMixin, View):
     def post(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -644,7 +656,7 @@ class QuizQuestionDeleteView(View):
         return redirect('quiz_manage_dashboard')
 
 
-class QuizSessionReviewView(LoginRequiredMixin, View):
+class QuizSessionReviewView(QuizSessionAccessMixin, View):
     def get(self, request, session_id):
         session = get_object_or_404(QuizSession, id=session_id)
         
@@ -828,9 +840,29 @@ class QuizBulkImportView(View):
         return redirect('quiz_manage_dashboard')
 
 
+def can_access_exam(user, source):
+    """Check if a user can view/access an exam based on its settings."""
+    if not source.is_visible:
+        return False
+    if source.require_login and not user.is_authenticated:
+        return False
+    if source.is_organization_only:
+        if not user.is_authenticated:
+            return False
+        if not hasattr(user, 'profile'):
+            return False
+        org_ids = list(source.organizations.values_list('id', flat=True))
+        if org_ids:
+            user_orgs = user.profile.organizations.all()
+            user_org_ids = set(user_orgs.values_list('id', flat=True))
+            if not any(oid in user_org_ids for oid in org_ids):
+                return False
+    return True
+
+
 class QuizExamsListView(View):
     def get(self, request):
-        # Fetch all exams (sources with matching questions)
+        # Fetch visible exams (sources with matching questions)
         sources = QuizSource.objects.annotate(total_questions=Count('questions')).filter(total_questions__gt=0)
         
         # Filtering
@@ -843,6 +875,11 @@ class QuizExamsListView(View):
         import re
         exams = []
         for s in sources:
+            # Permission check
+            if not can_access_exam(request.user, s):
+                if not request.user.is_staff and not request.user.is_superuser and not is_teacher(request.user):
+                    continue
+
             first_q = s.questions.order_by('id').first()
             if not first_q:
                 continue
@@ -910,6 +947,13 @@ class QuizExamsListView(View):
                 'is_done': is_done,
                 'history': history,
                 'created_at': first_q.created_at,
+                'is_locked': s.is_locked,
+                'is_featured': s.is_featured,
+                'require_login': s.require_login,
+                'is_organization_only': s.is_organization_only,
+                'description': s.description,
+                'default_duration': s.default_duration,
+                'can_access': can_access_exam(request.user, s),
             })
             
         # Apply filters
@@ -947,6 +991,7 @@ class QuizExamsListView(View):
             'selected_status': status,
             'search_query': search_query,
             'selected_sort': sort,
+            'is_teacher': is_teacher(request.user),
         }
         return render(request, 'quiz/exams_list.html', context)
 
@@ -958,13 +1003,21 @@ class QuizStartExamView(View):
             return redirect(f'{reverse("auth_login")}?next={request.get_full_path()}')
         source = get_object_or_404(QuizSource, id=exam_id)
         
-        duration_str = request.POST.get('duration', '45')
+        if source.is_locked and not request.user.is_staff and not request.user.is_superuser:
+            messages.error(request, 'Đề thi này đã bị khóa bởi quản trị viên.')
+            return redirect('quiz_exams_list')
+        
+        duration_str = request.POST.get('duration', str(source.default_duration))
         orientation = request.POST.get('orientation', 'KHMT')
+        
+        show_score_per_question = request.POST.get('show_score_per_question') == '1'
+        show_feedback = request.POST.get('show_feedback') == '1'
+        enable_scratchpad = request.POST.get('enable_scratchpad', '1') == '1'
         
         try:
             duration = int(duration_str)
         except ValueError:
-            duration = 45
+            duration = source.default_duration
             
         questions = QuizQuestion.objects.filter(source=source).order_by('id')
         question_ids = list(questions.values_list('id', flat=True))
@@ -982,6 +1035,9 @@ class QuizStartExamView(View):
             'duration': duration,
             'time_left': duration * 60,
             'orientation': orientation,
+            'show_score_per_question': show_score_per_question,
+            'show_feedback': show_feedback,
+            'enable_scratchpad': enable_scratchpad,
         }
         
         session = QuizSession.objects.create(
@@ -1065,6 +1121,9 @@ class QuizExamSessionView(LoginRequiredMixin, View):
             'time_left_seconds': time_left,
             'time_left_str': time_str,
             'selected_orientation': meta.get('orientation', 'KHMT'),
+            'show_score_per_question': meta.get('show_score_per_question', False),
+            'show_feedback': meta.get('show_feedback', False),
+            'enable_scratchpad': meta.get('enable_scratchpad', True),
         }
         return render(request, 'quiz/exam_session.html', context)
 
@@ -1313,5 +1372,138 @@ class QuizExamReviewView(LoginRequiredMixin, View):
             'attempt_date': attempt_date,
         }
         return render(request, 'quiz/exam_review.html', context)
+
+
+class QuizExamManageView(View):
+    """List all exams for management by teachers/admin."""
+    def get(self, request):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền truy cập trang quản lý đề thi.")
+
+        # Superusers see all; teachers see their own
+        if request.user.is_superuser:
+            exams = QuizSource.objects.annotate(total_questions=Count('questions')).order_by('-created_at')
+        else:
+            exams = QuizSource.objects.filter(
+                Q(created_by=request.user) | Q(created_by__isnull=True)
+            ).annotate(total_questions=Count('questions')).order_by('-created_at')
+
+        context = {
+            'title': 'Quản lý đề thi trắc nghiệm',
+            'exams': exams,
+        }
+        return render(request, 'quiz/manage_exams.html', context)
+
+
+class QuizExamCreateEditView(View):
+    """Create or edit an exam (QuizSource)."""
+    def get(self, request, exam_id=None):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền quản lý đề thi.")
+
+        exam = None
+        if exam_id:
+            exam = get_object_or_404(QuizSource, id=exam_id)
+            if not request.user.is_superuser and exam.created_by not in (None, request.user):
+                return HttpResponseForbidden("Bạn không có quyền chỉnh sửa đề thi này.")
+
+        organizations = Organization.objects.all() if request.user.is_superuser else []
+
+        context = {
+            'title': 'Sửa đề thi' if exam else 'Thêm đề thi mới',
+            'exam': exam,
+            'organizations': organizations,
+        }
+        return render(request, 'quiz/edit_exam.html', context)
+
+    def post(self, request, exam_id=None):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền quản lý đề thi.")
+
+        exam = None
+        if exam_id:
+            exam = get_object_or_404(QuizSource, id=exam_id)
+            if not request.user.is_superuser and exam.created_by not in (None, request.user):
+                return HttpResponseForbidden("Bạn không có quyền chỉnh sửa đề thi này.")
+
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        default_duration = request.POST.get('default_duration', '45')
+        is_visible = request.POST.get('is_visible') == 'on'
+        is_featured = request.POST.get('is_featured') == 'on'
+        require_login = request.POST.get('require_login') == 'on'
+        is_locked = request.POST.get('is_locked') == 'on'
+        is_organization_only = request.POST.get('is_organization_only') == 'on'
+        org_ids = request.POST.getlist('organizations')
+
+        if not name:
+            organizations = Organization.objects.all() if request.user.is_superuser else []
+            return render(request, 'quiz/edit_exam.html', {
+                'error': 'Tên đề thi không được để trống.',
+                'exam': exam,
+                'organizations': organizations,
+            })
+
+        try:
+            default_duration = int(default_duration)
+            if default_duration < 1:
+                default_duration = 45
+        except ValueError:
+            default_duration = 45
+
+        with transaction.atomic():
+            if not exam:
+                exam = QuizSource(created_by=request.user)
+
+            exam.name = name
+            exam.description = description
+            exam.default_duration = default_duration
+            exam.is_visible = is_visible
+            exam.is_featured = is_featured
+            exam.require_login = require_login
+            exam.is_locked = is_locked
+            exam.is_organization_only = is_organization_only
+            exam.save()
+
+            if request.user.is_superuser:
+                exam.organizations.set(org_ids)
+
+        return redirect('quiz_exam_manage')
+
+
+class QuizExamDeleteView(View):
+    """Delete an exam (QuizSource)."""
+    def post(self, request, exam_id):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền xóa đề thi.")
+
+        exam = get_object_or_404(QuizSource, id=exam_id)
+        if not request.user.is_superuser and exam.created_by not in (None, request.user):
+            return HttpResponseForbidden("Bạn không có quyền xóa đề thi này.")
+
+        name = exam.name
+        exam.delete()
+        messages.success(request, f'Đã xóa đề thi "{name}".')
+        return redirect('quiz_exam_manage')
+
+
+class QuizExamManageQuestionsView(View):
+    """View and manage questions within an exam."""
+    def get(self, request, exam_id):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền quản lý đề thi.")
+
+        source = get_object_or_404(QuizSource, id=exam_id)
+        if not request.user.is_superuser and source.created_by not in (None, request.user):
+            return HttpResponseForbidden("Bạn không có quyền quản lý đề thi này.")
+
+        questions = QuizQuestion.objects.filter(source=source).prefetch_related('tags').order_by('id')
+
+        context = {
+            'title': f'Câu hỏi trong đề: {source.name}',
+            'source': source,
+            'questions': questions,
+        }
+        return render(request, 'quiz/manage_exam_questions.html', context)
 
 

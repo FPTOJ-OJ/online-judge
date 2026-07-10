@@ -8,6 +8,7 @@ from django.urls import include, path, re_path, reverse
 from django.utils.functional import lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import RedirectView
+from django.views.static import serve
 
 from judge.feed import AtomBlogFeed, AtomCommentFeed, AtomProblemFeed, BlogFeed, CommentFeed, ProblemFeed
 from judge.sitemap import sitemaps
@@ -95,6 +96,9 @@ def paged_list_view(view, name):
 
 
 urlpatterns = [
+    re_path(r'^media/avatars/(?P<path>.*)$', serve, {
+        'document_root': settings.AVATAR_UPLOAD_DIR,
+    }),
     path('problem/<str:problem>/data/add_test_case/', add_single_test_case, name='add_single_test_case'),
     path('', blog.PostList.as_view(template_name='home.html', title=_('Home')), kwargs={'page': 1}, name='home'),
     path('500/', exception),
@@ -118,6 +122,13 @@ urlpatterns = [
     path('quiz/manage/import/', quiz_views.QuizBulkImportView.as_view(), name='quiz_bulk_import'),
     path('quiz/manage/edit/<int:question_id>/', quiz_views.QuizQuestionCreateEditView.as_view(), name='quiz_question_edit'),
     path('quiz/manage/delete/<int:question_id>/', quiz_views.QuizQuestionDeleteView.as_view(), name='quiz_question_delete'),
+
+    # Exam Management (Teacher/Admin)
+    path('quiz/manage/exams/', quiz_views.QuizExamManageView.as_view(), name='quiz_exam_manage'),
+    path('quiz/manage/exams/add/', quiz_views.QuizExamCreateEditView.as_view(), name='quiz_exam_add'),
+    path('quiz/manage/exams/edit/<int:exam_id>/', quiz_views.QuizExamCreateEditView.as_view(), name='quiz_exam_edit'),
+    path('quiz/manage/exams/delete/<int:exam_id>/', quiz_views.QuizExamDeleteView.as_view(), name='quiz_exam_delete'),
+    path('quiz/manage/exams/<int:exam_id>/questions/', quiz_views.QuizExamManageQuestionsView.as_view(), name='quiz_exam_questions'),
 
     path('problems/', problem.ProblemList.as_view(), name='problem_list'),
     path('problems/random/', problem.RandomProblem.as_view(), name='problem_random'),

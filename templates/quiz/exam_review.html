@@ -43,10 +43,10 @@
             <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">{{ _('Exam Results') }}</div>
             <h2 style="font-size: 1.6rem; margin: 4px 0 6px 0;">{{ meta.source_name }}</h2>
             <div class="summary-score-details">
-                {{ review_part1|length }} {{ _('multiple choice questions') }} &bull; 
-                {{ review_part2|length }} {{ _('full true/false questions') }} &bull; 
+                {{ part1_total }} {{ _('multiple choice questions') }} &bull; 
+                {{ part2_total }} {{ _('true/false questions') }} &bull; 
                 {{ _('SCORING') }} {{ orientation }} &bull; 
-                {{ _('COMPLETE') }} {{ part1_correct + part2_correct_full }}/{{ part1_total + part2_total }} {{ _('QUESTIONS') }}
+                {{ _('CORRECT') }} {{ part1_correct + part2_correct_full }}/{{ part1_total + part2_total }} {{ _('QUESTIONS') }}
             </div>
         </div>
 
@@ -83,7 +83,7 @@
             
             <!-- Part I Questions -->
             {% for q in review_part1 %}
-                <div class="question-card" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}" {% if not q.is_graded %}class="question-card orientation-inactive"{% endif %}>
+                <div class="question-card{% if not q.is_graded %} orientation-inactive{% endif %}" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}">
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">{{ _('MULTIPLE CHOICE') }}</span>
@@ -135,7 +135,7 @@
 
             <!-- Part II Questions -->
             {% for q in review_part2 %}
-                <div class="question-card" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}" {% if not q.is_graded %}class="question-card orientation-inactive"{% endif %}>
+                <div class="question-card{% if not q.is_graded %} orientation-inactive{% endif %}" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}">
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">{{ _('TRUE / FALSE') }}</span>

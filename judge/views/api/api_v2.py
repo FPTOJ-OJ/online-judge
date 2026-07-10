@@ -250,6 +250,8 @@ class APIContestDetail(APIDetailView):
         in_contest = contest.is_in_contest(self.request.user)
         can_see_rankings = contest.can_see_full_scoreboard(self.request.user)
         can_see_problems = (in_contest or contest.ended or contest.is_editable_by(self.request.user))
+        hide_scores = contest.format_config and contest.format_config.get('hide_scores_from_students') \
+            and not (self.request.user.is_staff or self.request.user.is_superuser)
 
         problems = list(
             contest.contest_problems
@@ -320,13 +322,13 @@ class APIContestDetail(APIDetailView):
                     'user': participation.username,
                     'start_time': participation.start.isoformat(),
                     'end_time': participation.end_time.isoformat(),
-                    'score': participation.score,
-                    'cumulative_time': participation.cumtime,
-                    'tiebreaker': participation.tiebreaker,
+                    'score': None if hide_scores else participation.score,
+                    'cumulative_time': None if hide_scores else participation.cumtime,
+                    'tiebreaker': None if hide_scores else participation.tiebreaker,
                     'old_rating': participation.old_rating,
                     'new_rating': participation.new_rating,
                     'is_disqualified': participation.is_disqualified,
-                    'solutions': contest.format.get_problem_breakdown(participation, problems),
+                    'solutions': [] if hide_scores else contest.format.get_problem_breakdown(participation, problems),
                 } for participation in participations
             ] if can_see_rankings else [],
         }
@@ -616,6 +618,9 @@ class APISubmissionList(APIListView):
         )
 
     def get_object_data(self, submission):
+        hide_scores = submission.contest_object and submission.contest_object.format_config \
+            and submission.contest_object.format_config.get('hide_scores_from_students') \
+            and not (self.request.user.is_staff or self.request.user.is_superuser)
         return {
             'id': submission.id,
             'problem': submission.problem.code,
@@ -624,11 +629,11 @@ class APISubmissionList(APIListView):
             'language': submission.language.key,
             'time': submission.time,
             'memory': submission.memory,
-            'points': submission.points,
-            'result': submission.result,
+            'points': None if hide_scores else submission.points,
+            'result': None if hide_scores else submission.result,
             'contest': None if not submission.contest_object else {
                 'key': submission.contest_object.key,
-                'points': submission.contest.points,
+                'points': None if hide_scores else submission.contest.points,
                 'virtual_participation_number': submission.contest.participation.virtual,
                 'time_since_start_of_participation': submission.date - submission.contest.participation.real_start,
             },
@@ -647,32 +652,37 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
         return submission
 
     def get_object_data(self, submission):
-        cases = []
-        for batch in group_test_cases(submission.test_cases.all())[0]:
-            batch_cases = [
-                {
-                    'type': 'case',
-                    'case_id': case.case,
-                    'status': case.status,
-                    'time': case.time,
-                    'memory': case.memory,
-                    'points': case.points,
-                    'total': case.total,
-                } for case in batch['cases']
-            ]
+        hide_scores = submission.contest_object and submission.contest_object.format_config \
+            and submission.contest_object.format_config.get('hide_scores_from_students') \
+            and not (self.request.user.is_staff or self.request.user.is_superuser)
 
-            # These are individual cases.
-            if batch['id'] is None:
-                cases.extend(batch_cases)
-            # This is one batch.
-            else:
-                cases.append({
-                    'type': 'batch',
-                    'batch_id': batch['id'],
-                    'cases': batch_cases,
-                    'points': batch['points'],
-                    'total': batch['total'],
-                })
+        cases = []
+        if not hide_scores:
+            for batch in group_test_cases(submission.test_cases.all())[0]:
+                batch_cases = [
+                    {
+                        'type': 'case',
+                        'case_id': case.case,
+                        'status': case.status,
+                        'time': case.time,
+                        'memory': case.memory,
+                        'points': case.points,
+                        'total': case.total,
+                    } for case in batch['cases']
+                ]
+
+                # These are individual cases.
+                if batch['id'] is None:
+                    cases.extend(batch_cases)
+                # This is one batch.
+                else:
+                    cases.append({
+                        'type': 'batch',
+                        'batch_id': batch['id'],
+                        'cases': batch_cases,
+                        'points': batch['points'],
+                        'total': batch['total'],
+                    })
 
         return {
             'id': submission.id,
@@ -681,12 +691,12 @@ class APISubmissionDetail(APILoginRequiredMixin, APIDetailView):
             'date': submission.date.isoformat(),
             'time': submission.time,
             'memory': submission.memory,
-            'points': submission.points,
+            'points': None if hide_scores else submission.points,
             'language': submission.language.key,
             'status': submission.status,
-            'result': submission.result,
-            'case_points': submission.case_points,
-            'case_total': submission.case_total,
+            'result': None if hide_scores else submission.result,
+            'case_points': None if hide_scores else submission.case_points,
+            'case_total': None if hide_scores else submission.case_total,
             'cases': cases,
         }
 

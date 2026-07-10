@@ -203,7 +203,11 @@ class Contest(models.Model):
         # Django will complain if you didn't fill in start_time or end_time, so we don't have to.
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError('What is this? A contest that ended before it starts?')
-        self.format_class.validate(self.format_config)
+        # Strip admin-only keys that are not format-specific before validation
+        config = self.format_config or {}
+        if isinstance(config, dict):
+            config = {k: v for k, v in config.items() if k not in ('one_submission_only', 'hide_scores_from_students')}
+        self.format_class.validate(config)
 
         try:
             # a contest should have at least one problem, with contest problem index 0
@@ -294,7 +298,7 @@ class Contest(models.Model):
 
     @property
     def is_infinite(self):
-        return self.end_time and self.end_time.year >= 9999
+        return self.end_time and self.end_time.year >= 2999
 
     @cached_property
     def ended(self):

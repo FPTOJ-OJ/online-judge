@@ -11,6 +11,9 @@
     {% if submission.is_graded %}
         <div class="ui success message" style="padding: 15px; background-color: rgba(40, 167, 69, 0.05); border: 1px solid rgba(40, 167, 69, 0.2); border-radius: 4px; color: #28a745; margin-bottom: 20px;">
             <h4>{{ _('Your submission has been graded. Results are hidden until the contest ends.') }}</h4>
+            <p style="margin-top: 5px; color: #155724; font-size: 0.95em;">
+                <b>⚠️ {{ _('Notice:') }}</b> {{ _('The system has received and graded your submission. Detailed testcase results and scores are hidden per contest regulations.') }}
+            </p>
         </div>
     {% else %}
         <h4>{{ _('Your submission is being processed...') }}</h4>

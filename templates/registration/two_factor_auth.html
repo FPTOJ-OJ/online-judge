@@ -88,6 +88,12 @@
                 {{ form.webauthn_response }}
                 <button style="display: inline" id="use-webauthn" type="button">{{ _('Use security key') }}</button>
             {% endif %}
+            <div style="margin: 10px 0;">
+                {{ form.remember_device }}
+                <label for="id_remember_device" style="display: inline; float: none; font-weight: normal; margin-left: 5px;">
+                    {{ _('Remember this device for 30 days') }}
+                </label>
+            </div>
             {% if request.profile.is_totp_enabled %}
                 <button style="float:right;" type="submit">{{ _('Login!') }}</button>
             {% elif request.profile.scratch_codes %}

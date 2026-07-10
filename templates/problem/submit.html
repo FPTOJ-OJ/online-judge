@@ -206,6 +206,21 @@
                 </div>
             {% endif %}
         {% endif %}
+
+        {% if one_submission_only %}
+            <div class="alert alert-warning alert-dismissable">
+                <a class="close">x</a>
+                <strong>⚠️ {{ _('Important Notice:') }}</strong>
+                {{ _('This contest is configured for one-time submission only. After your first submission, you have a 120-second (2 minutes) grace period to modify or re-submit. After this period, you cannot submit further.') }}
+            </div>
+        {% endif %}
+        {% if hide_scores_from_students %}
+            <div class="alert alert-info alert-dismissable">
+                <a class="close">x</a>
+                <strong>ℹ️ {{ _('Notice:') }}</strong>
+                {{ _('This contest has been configured to hide student scores. You will only see the "Received" status once grading is complete.') }}
+            </div>
+        {% endif %}
     {% endif %}
 
     <form id="problem_submit" action="" method="post" class="form-area">

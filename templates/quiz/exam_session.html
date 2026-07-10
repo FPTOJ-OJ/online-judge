@@ -49,7 +49,7 @@
                     <i class="fa fa-wrench"></i> {{ _('Tools') }} <i class="fa fa-caret-down"></i>
                 </button>
                 <div class="tools-menu" id="tools-dropdown-menu">
-                    <div class="tools-item" onclick="openScratchpad()"><i class="fa fa-pencil"></i> {{ _('Scratchpad') }}</div>
+                    <div class="tools-item{% if not enable_scratchpad %} disabled-item{% endif %}" onclick="{% if enable_scratchpad %}openScratchpad(){% endif %}" {% if not enable_scratchpad %}style="opacity: 0.4; cursor: not-allowed;"{% endif %}><i class="fa fa-pencil"></i> {{ _('Scratchpad') }}</div>
                     <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">{{ _('Draw on question') }}</span></div>
                     <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> {{ _('Highlight') }}</div>
                     <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> {{ _('Clear highlight') }}</div>
@@ -181,7 +181,7 @@
             <div class="learning-help-card">
                 <h4><i class="fa fa-info-circle"></i> {{ _('Learning tools') }}</h4>
                 <div class="help-content">
-                    <div>
+                    <div{% if not enable_scratchpad %} style="opacity: 0.4;"{% endif %}>
                         <strong><i class="fa fa-pencil"></i> {{ _('Scratchpad:') }}</strong>
                         {{ _('Click') }} <em>{{ _('Tools') }}</em> &gt; <em>{{ _('Scratchpad') }}</em> {{ _('to open the drawing board.') }}
                     </div>
@@ -193,6 +193,13 @@
                         <strong><i class="fa fa-font"></i> {{ _('Highlight:') }}</strong>
                         {{ _('Select any text in the question, then choose') }} <em>{{ _('Highlight') }}</em> {{ _('to save annotations.') }}
                     </div>
+                    {% if show_score_per_question or show_feedback %}
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--quiz-border);">
+                            <strong><i class="fa fa-cog"></i> {{ _('Exam config') }}:</strong>
+                            {% if show_score_per_question %}<span class="quiz-q-tag type" style="margin: 2px; font-size: 0.65rem;">{{ _('Show score') }}</span>{% endif %}
+                            {% if show_feedback %}<span class="quiz-q-tag source" style="margin: 2px; font-size: 0.65rem;">{{ _('Show explanations') }}</span>{% endif %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

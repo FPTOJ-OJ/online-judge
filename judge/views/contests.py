@@ -278,13 +278,51 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ContestDetail, self).get_context_data(**kwargs)
+
+        participation = None
+        participation_data = {}
+        completed_problem_ids = set()
+        attempted_problems = set()
+
+        if self.request.user.is_authenticated:
+            from judge.utils.problems import user_completed_ids, user_attempted_ids
+            completed_problem_ids = user_completed_ids(self.request.profile)
+            attempted_problems = user_attempted_ids(self.request.profile)
+
+            if self.request.profile.current_contest_id:
+                try:
+                    participation = ContestParticipation.objects.get(
+                        id=self.request.profile.current_contest_id,
+                        contest=self.object,
+                    )
+                except ContestParticipation.DoesNotExist:
+                    pass
+
+            if participation is None:
+                participation = ContestParticipation.objects.filter(
+                    contest=self.object,
+                    user=self.request.profile,
+                ).order_by('-id').first()
+
+            if participation:
+                participation_data = participation.format_data or {}
+
+        context['participation'] = participation
+        context['participation_data'] = participation_data
+        context['completed_problem_ids'] = completed_problem_ids
+        context['attempted_problems'] = attempted_problems
+
         context['contest_problems'] = Problem.objects.filter(contests__contest=self.object) \
             .order_by('contests__order').defer('description') \
-            .annotate(has_public_editorial=Case(
-                When(solution__is_public=True, solution__publish_on__lte=timezone.now(), then=True),
-                default=False,
-                output_field=BooleanField(),
-            )) \
+            .annotate(
+                contest_problem_id=F('contests__id'),
+                contest_problem_points=F('contests__points'),
+                has_public_editorial=Case(
+                    When(solution__is_public=True, solution__publish_on__lte=timezone.now(), then=True),
+                    default=False,
+                    output_field=BooleanField(),
+                )
+            ) \
             .add_i18n_name(self.request.LANGUAGE_CODE)
         context['metadata'] = {
             'has_public_editorials': any(
@@ -804,6 +842,13 @@ class ContestRankingCSV(ContestRanking):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="%s.csv"' % self.object.key
         writer = csv.writer(response)
+
+        hide_scores = self.object.format_config and self.object.format_config.get('hide_scores_from_students') \
+            and not (self.request.user.is_staff or self.request.user.is_superuser)
+
+        if hide_scores:
+            writer.writerow([_('Scores are hidden for this contest.')])
+            return response
 
         users = context['users']
         problems = context['problems']

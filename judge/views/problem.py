@@ -714,6 +714,16 @@ class ProblemSubmit(LoginRequiredMixin, ProblemMixin, TitleMixin, SingleObjectFo
             return generic_message(self.request, _('Too many submissions'),
                                    _('You have exceeded the submission limit for this problem.'))
 
+        if self.request.profile.current_contest:
+            contest = self.request.profile.current_contest.contest
+            contest_config = contest.format_config or {}
+            if contest_config.get('one_submission_only') and not contest.is_editable_by(self.request.user):
+                oldest_sub = Submission.objects.filter(
+                    user=self.request.profile, contest_object=contest,
+                ).order_by('date').first()
+                if oldest_sub and (timezone.now() - oldest_sub.date).total_seconds() > 120:
+                    return generic_message(self.request, _('Submission limit reached'),
+                                           _('You can only submit once in this contest.'))
 
         with transaction.atomic():
             self.new_submission = form.save(commit=False)
@@ -751,6 +761,16 @@ class ProblemSubmit(LoginRequiredMixin, ProblemMixin, TitleMixin, SingleObjectFo
         context['submissions_left'] = self.remaining_submission_count
         context['ACE_URL'] = settings.ACE_URL
         context['default_lang'] = self.default_language
+        
+        # Add contest settings for templates
+        context['one_submission_only'] = False
+        context['hide_scores_from_students'] = False
+        if self.request.profile.current_contest:
+            contest = self.request.profile.current_contest.contest
+            contest_config = contest.format_config or {}
+            context['one_submission_only'] = contest_config.get('one_submission_only', False)
+            context['hide_scores_from_students'] = contest_config.get('hide_scores_from_students', False)
+
         return context
 
     def post(self, request, *args, **kwargs):

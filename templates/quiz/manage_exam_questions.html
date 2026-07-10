@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    
+    <div class="quiz-header-card">
+        <div>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Teacher Panel') }}</span>
+            <h1>{{ _('Questions in exam:') }} {{ source.name }}</h1>
+            <p>{{ _('View all questions belonging to this exam.') }}</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="{{ url('quiz_question_add') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
+                <i class="fa fa-plus"></i> {{ _('Add new question') }}
+            </a>
+            <a href="{{ url('quiz_exam_manage') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
+                <i class="fa fa-arrow-left"></i> {{ _('Back to exam list') }}
+            </a>
+        </div>
+    </div>
+
+    <div class="quiz-q-card" style="padding: 24px;">
+        <h3 style="font-size: 1.1rem; margin: 0 0 16px 0; color: var(--quiz-text); border-bottom: 1px solid var(--quiz-border); padding-bottom: 12px;">
+            {{ questions|length }} {{ _('questions') }}
+        </h3>
+
+        {% if questions %}
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
+                            <th style="padding: 10px 8px; width: 60px;">ID</th>
+                            <th style="padding: 10px 8px; width: 100px;">{{ _('Type') }}</th>
+                            <th style="padding: 10px 8px; width: 100px;">{{ _('Difficulty') }}</th>
+                            <th style="padding: 10px 8px;">{{ _('Content') }}</th>
+                            <th style="padding: 10px 8px;">{{ _('Tags') }}</th>
+                            <th style="padding: 10px 8px; width: 120px; text-align: center;">{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q in questions %}
+                            <tr style="border-bottom: 1px solid var(--quiz-border);">
+                                <td style="padding: 10px 8px; font-weight: 700; color: var(--quiz-primary);">#{{ q.id }}</td>
+                                <td style="padding: 10px 8px;">
+                                    <span class="quiz-q-tag type" style="padding: 2px 6px; font-size: 0.7rem;">{{ q.get_type_display() }}</span>
+                                </td>
+                                <td style="padding: 10px 8px;">
+                                    <span class="quiz-q-tag difficulty" style="padding: 2px 6px; font-size: 0.7rem;">{{ q.get_difficulty_display() }}</span>
+                                </td>
+                                <td style="padding: 10px 8px; color: var(--quiz-text); max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ q.content|striptags|truncate(80) }}
+                                </td>
+                                <td style="padding: 10px 8px; color: var(--quiz-text-muted); font-size: 0.8rem;">
+                                    {% for tag in q.tags.all() %}<span class="quiz-q-tag" style="padding: 1px 4px; font-size: 0.65rem; margin-right: 2px;">{{ tag.name }}</span>{% else %}-{% endfor %}
+                                </td>
+                                <td style="padding: 10px 8px; text-align: center;">
+                                    <a href="{{ url('quiz_question_edit', question_id=q.id) }}" class="quiz-session-btn" style="padding: 3px 8px; font-size: 0.75rem; text-decoration: none;">
+                                        {{ _('Edit') }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--quiz-text-muted);">
+                {{ _('No questions in this exam yet.') }}
+                <br><br>
+                <a href="{{ url('quiz_question_add') }}" class="quiz-btn-primary" style="text-decoration: none;">
+                    <i class="fa fa-plus"></i> {{ _('Add new question') }}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

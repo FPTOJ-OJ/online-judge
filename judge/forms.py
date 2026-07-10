@@ -48,6 +48,8 @@ class ProfileForm(ModelForm):
     if newsletter_id is not None:
         newsletter = forms.BooleanField(label=_('Subscribe to contest updates'), initial=False, required=False)
     test_site = forms.BooleanField(label=_('Enable experimental features'), initial=False, required=False)
+    avatar_file = forms.ImageField(label=_('Upload new avatar'), required=False)
+    remove_avatar = forms.BooleanField(label=_('Remove current avatar'), required=False)
 
     class Meta:
         model = Profile
@@ -235,6 +237,7 @@ class TOTPEnableForm(TOTPForm):
 
 class TwoFactorLoginForm(TOTPForm):
     webauthn_response = forms.CharField(widget=forms.HiddenInput(), required=False)
+    remember_device = forms.BooleanField(required=False, label=_('Remember this device for 30 days'))
 
     def __init__(self, *args, **kwargs):
         self.webauthn_challenge = kwargs.pop('webauthn_challenge')

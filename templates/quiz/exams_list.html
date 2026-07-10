@@ -5,6 +5,13 @@
 {% endblock %}
 
 {% block body %}
+{% if is_teacher %}
+    <div style="position: fixed; top: 70px; right: 20px; z-index: 100;">
+        <a href="{{ url('quiz_exam_manage') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.85rem; padding: 8px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <i class="fa fa-cog"></i> {{ _('Manage exams') }}
+        </a>
+    </div>
+{% endif %}
 <div class="quiz-container">
     <!-- Header -->
     <div class="quiz-header-card">
@@ -98,11 +105,25 @@
                     <div class="quiz-q-tags">
                         <span class="quiz-q-tag year">{{ _('Year') }} {{ exam.year }}</span>
                         <span class="quiz-q-tag type">{{ exam.type_label }}</span>
+                        {% if exam.is_featured %}
+                            <span class="quiz-q-tag" style="background: var(--quiz-accent); color: #000; border-color: var(--quiz-accent);">★ {{ _('Featured') }}</span>
+                        {% endif %}
+                        {% if exam.require_login %}
+                            <span class="quiz-q-tag" style="border-color: var(--quiz-warning); color: var(--quiz-warning);">🔒 {{ _('Login required') }}</span>
+                        {% endif %}
+                        {% if exam.is_organization_only %}
+                            <span class="quiz-q-tag" style="border-color: var(--quiz-primary); color: var(--quiz-primary);">🏫 {{ _('Org only') }}</span>
+                        {% endif %}
                         {% if exam.tf_count > 0 %}
                             <span class="quiz-q-tag orient">{{ _('Part II: %(count)s true/false questions', count=exam.tf_count) }}</span>
                         {% endif %}
                     </div>
-                    <h2 class="exam-title">{{ exam.name }}</h2>
+                    <h2 class="exam-title">
+                        {{ exam.name }}
+                        {% if exam.is_locked %}
+                            <span style="color: var(--quiz-danger); font-size: 0.8rem; margin-left: 8px;">🔐</span>
+                        {% endif %}
+                    </h2>
                     <p class="exam-snippet">
                         {{ exam.snippet }}
                         <br>
@@ -125,17 +146,31 @@
                         </div>
                     {% endif %}
                     
-                    <button type="button" class="quiz-btn-primary"
-                            data-id="{{ exam.id }}"
-                            data-name="{{ exam.name }}"
-                            data-total="{{ exam.total_questions }}"
-                            data-type="{{ exam.type_label }}"
-                            data-year="{{ exam.year }}"
-                            data-tf="{{ exam.tf_count }}"
-                            data-history='{{ exam.history|tojson|safe }}'
-                            onclick="openStartModal(this)">
-                        <i class="fa fa-play"></i> {{ _('Start exam') }}
-                    </button>
+                    {% if exam.is_locked %}
+                        <button type="button" class="quiz-btn-primary" disabled
+                                style="opacity: 0.5; cursor: not-allowed;"
+                                title="{{ _('This exam is locked by the administrator.') }}">
+                            <i class="fa fa-lock"></i> {{ _('Locked') }}
+                        </button>
+                    {% elif not exam.can_access %}
+                        <button type="button" class="quiz-btn-primary" disabled
+                                style="opacity: 0.5; cursor: not-allowed;"
+                                title="{{ _('You do not have access to this exam.') }}">
+                            <i class="fa fa-ban"></i> {{ _('Access restricted') }}
+                        </button>
+                    {% else %}
+                        <button type="button" class="quiz-btn-primary"
+                                data-id="{{ exam.id }}"
+                                data-name="{{ exam.name }}"
+                                data-total="{{ exam.total_questions }}"
+                                data-type="{{ exam.type_label }}"
+                                data-year="{{ exam.year }}"
+                                data-tf="{{ exam.tf_count }}"
+                                data-history='{{ exam.history|tojson|safe }}'
+                                onclick="openStartModal(this)">
+                            <i class="fa fa-play"></i> {{ _('Start exam') }}
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         {% else %}
@@ -244,6 +279,25 @@
                 </div>
             </div>
             
+            <!-- Exam Config Options -->
+            <div style="border-top: 1px solid var(--quiz-border); padding-top: 16px; margin-bottom: 16px;">
+                <h4 style="font-size: 0.95rem; margin: 0 0 12px 0; color: var(--quiz-text);">{{ _('Exam options') }}</h4>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 12px; background: var(--quiz-border); border-radius: 6px;">
+                        <input type="checkbox" name="show_score_per_question" value="1" style="width: 18px; height: 18px;">
+                        <span style="font-size: 0.9rem; color: var(--quiz-text);">{{ _('Show score per question') }}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 12px; background: var(--quiz-border); border-radius: 6px;">
+                        <input type="checkbox" name="show_feedback" value="1" style="width: 18px; height: 18px;">
+                        <span style="font-size: 0.9rem; color: var(--quiz-text);">{{ _('Show explanations') }}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 12px; background: var(--quiz-border); border-radius: 6px;">
+                        <input type="checkbox" name="enable_scratchpad" value="1" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 0.9rem; color: var(--quiz-text);">{{ _('Enable scratchpad') }}</span>
+                    </label>
+                </div>
+            </div>
+
             <div style="border-top: 1px solid var(--quiz-border); padding-top: 16px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleModalHistory()">
                     <h4 style="font-size: 0.95rem; margin: 0; color: var(--quiz-text);"><i class="fa fa-history"></i> {{ _('History for this exam') }}</h4>

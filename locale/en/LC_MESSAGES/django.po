@@ -587,8 +587,8 @@ msgstr ""
 #: judge/contest_format/ecoo.py:141
 #, python-format
 msgid ""
-"For every **%d minute** you submit before the end of your window, there will "
-"be a **1** point bonus."
+"For every **%d minute** you submit before the end of your window, there will"
+" be a **1** point bonus."
 msgid_plural ""
 "For every **%d minutes** you submit before the end of your window, there "
 "will be a **1** point bonus."
@@ -612,8 +612,8 @@ msgstr ""
 
 #: judge/contest_format/icpc.py:137
 msgid ""
-"Ties will be broken by the sum of the last score altering submission time on "
-"problems with a non-zero score, followed by the time of the last score "
+"Ties will be broken by the sum of the last score altering submission time on"
+" problems with a non-zero score, followed by the time of the last score "
 "altering submission."
 msgstr ""
 
@@ -627,8 +627,8 @@ msgstr ""
 
 #: judge/contest_format/ioi.py:99 judge/contest_format/legacy_ioi.py:100
 msgid ""
-"Ties will be broken by the sum of the last score altering submission time on "
-"problems with a non-zero score."
+"Ties will be broken by the sum of the last score altering submission time on"
+" problems with a non-zero score."
 msgstr ""
 
 #: judge/contest_format/legacy_ioi.py:18
@@ -638,7 +638,8 @@ msgstr ""
 #: judge/forms.py:31
 #, python-brace-format
 msgid "Two-factor authentication tokens must be {count} decimal digit."
-msgid_plural "Two-factor authentication tokens must be {count} decimal digits."
+msgid_plural ""
+"Two-factor authentication tokens must be {count} decimal digits."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -663,10 +664,12 @@ msgid "Enable experimental features"
 msgstr ""
 
 #: judge/forms.py:74
-msgid "You must solve at least one problem before you can update your profile."
+msgid ""
+"You must solve at least one problem before you can update your profile."
 msgstr ""
 
-#: judge/forms.py:82 judge/views/organization.py:176 judge/views/register.py:50
+#: judge/forms.py:82 judge/views/organization.py:176
+#: judge/views/register.py:50
 #, python-brace-format
 msgid "You may not be part of more than {count} public organization."
 msgid_plural "You may not be part of more than {count} public organizations."
@@ -1122,8 +1125,8 @@ msgstr ""
 
 #: judge/models/contest.py:136
 msgid ""
-"Whether to show a section containing contest settings on the contest page or "
-"not."
+"Whether to show a section containing contest settings on the contest page or"
+" not."
 msgstr ""
 
 #: judge/models/contest.py:139 judge/models/problem.py:181
@@ -1229,8 +1232,8 @@ msgstr ""
 
 #: judge/models/contest.py:169
 msgid ""
-"A custom Lua function to generate problem labels. Requires a single function "
-"with an integer parameter, the zero-indexed contest problem index, and "
+"A custom Lua function to generate problem labels. Requires a single function"
+" with an integer parameter, the zero-indexed contest problem index, and "
 "returns a string, the label."
 msgstr ""
 
@@ -1653,7 +1656,8 @@ msgid "creators"
 msgstr ""
 
 #: judge/models/problem.py:125
-msgid "These users will be able to edit the problem, and be listed as authors."
+msgid ""
+"These users will be able to edit the problem, and be listed as authors."
 msgstr ""
 
 #: judge/models/problem.py:128
@@ -1725,7 +1729,8 @@ msgstr ""
 
 #: judge/models/problem.py:160
 msgid ""
-"Doesn't have the magic ability to auto-publish due to backward compatibility."
+"Doesn't have the magic ability to auto-publish due to backward "
+"compatibility."
 msgstr ""
 
 #: judge/models/problem.py:162
@@ -2435,8 +2440,8 @@ msgstr ""
 
 #: judge/models/runtime.py:25
 msgid ""
-"More readable, but short, name to display publicly; e.g. \"PY2\" or \"C+"
-"+11\". If left blank, it will default to the short identifier."
+"More readable, but short, name to display publicly; e.g. \"PY2\" or "
+"\"C++11\". If left blank, it will default to the short identifier."
 msgstr ""
 
 #: judge/models/runtime.py:29
@@ -2445,8 +2450,8 @@ msgstr ""
 
 #: judge/models/runtime.py:30
 msgid ""
-"Common name for the language. For example, the common name for C++03, C++11, "
-"and C++14 would be \"C++\"."
+"Common name for the language. For example, the common name for C++03, C++11,"
+" and C++14 would be \"C++\"."
 msgstr ""
 
 #: judge/models/runtime.py:32
@@ -2571,8 +2576,8 @@ msgstr ""
 
 #: judge/models/runtime.py:135
 msgid ""
-"The tier of this judge. Only online judges of the minimum tier will be used. "
-"This is used for high-availability."
+"The tier of this judge. Only online judges of the minimum tier will be used."
+" This is used for high-availability."
 msgstr ""
 
 #: judge/models/runtime.py:137
@@ -2986,8 +2991,8 @@ msgstr ""
 #: judge/utils/problem_data.py:124
 #, python-format
 msgid ""
-"Dependencies must be a comma-separated list of integers for batch start case "
-"#%d."
+"Dependencies must be a comma-separated list of integers for batch start case"
+" #%d."
 msgstr ""
 
 #: judge/utils/problem_data.py:129
@@ -3544,7 +3549,8 @@ msgstr ""
 msgid "A username must contain letters, numbers, or underscores."
 msgstr ""
 
-#: judge/views/register.py:25 templates/registration/registration_form.html:173
+#: judge/views/register.py:25
+#: templates/registration/registration_form.html:173
 msgid "Timezone"
 msgstr ""
 
@@ -3805,7 +3811,8 @@ msgid "You have been successfully logged out."
 msgstr ""
 
 #: judge/views/user.py:515
-msgid "You have sent too many password reset requests. Please try again later."
+msgid ""
+"You have sent too many password reset requests. Please try again later."
 msgstr ""
 
 #: judge/views/user.py:521 templates/user/edit-profile.html:343
@@ -4369,15 +4376,15 @@ msgstr ""
 #: templates/contest/contest.html:100
 #, python-format
 msgid ""
-"This contest will be **rated** for **all** participants who have a rating of "
-"at least **%(rating_floor)d**."
+"This contest will be **rated** for **all** participants who have a rating of"
+" at least **%(rating_floor)d**."
 msgstr ""
 
 #: templates/contest/contest.html:102
 #, python-format
 msgid ""
-"This contest will be **rated** for **all** participants who have a rating of "
-"at most **%(rating_ceiling)d**."
+"This contest will be **rated** for **all** participants who have a rating of"
+" at most **%(rating_ceiling)d**."
 msgstr ""
 
 #: templates/contest/contest.html:104
@@ -4387,23 +4394,23 @@ msgstr ""
 #: templates/contest/contest.html:108
 #, python-format
 msgid ""
-"This contest will be **rated** for participants who submit at least once and "
-"have a rating between **%(rating_floor)d** and **%(rating_ceiling)d**, "
+"This contest will be **rated** for participants who submit at least once and"
+" have a rating between **%(rating_floor)d** and **%(rating_ceiling)d**, "
 "inclusive."
 msgstr ""
 
 #: templates/contest/contest.html:110
 #, python-format
 msgid ""
-"This contest will be **rated** for participants who submit at least once and "
-"have a rating of at least **%(rating_floor)d**."
+"This contest will be **rated** for participants who submit at least once and"
+" have a rating of at least **%(rating_floor)d**."
 msgstr ""
 
 #: templates/contest/contest.html:112
 #, python-format
 msgid ""
-"This contest will be **rated** for participants who submit at least once and "
-"have a rating of at most **%(rating_ceiling)d**."
+"This contest will be **rated** for participants who submit at least once and"
+" have a rating of at most **%(rating_ceiling)d**."
 msgstr ""
 
 #: templates/contest/contest.html:114
@@ -4611,7 +4618,8 @@ msgid "This contest is private to specific users."
 msgstr ""
 
 #: templates/contest/private.html:11
-msgid "Additionally, only the following organizations may access this contest:"
+msgid ""
+"Additionally, only the following organizations may access this contest:"
 msgstr ""
 
 #: templates/contest/private.html:13
@@ -4742,8 +4750,8 @@ msgstr ""
 
 #: templates/newsletter/subscription_update.html:9
 msgid ""
-"Due to a technical error we were not able to submit your confirmation email. "
-"This could be because your email address is invalid."
+"Due to a technical error we were not able to submit your confirmation email."
+" This could be because your email address is invalid."
 msgstr ""
 
 #: templates/newsletter/subscription_update.html:14
@@ -5039,7 +5047,8 @@ msgstr ""
 
 #: templates/problem/manage_submission.html:98
 msgid ""
-"You are about to rejudge a few submissions. Are you sure you want to do this?"
+"You are about to rejudge a few submissions. Are you sure you want to do "
+"this?"
 msgstr ""
 
 #: templates/problem/manage_submission.html:117
@@ -5276,8 +5285,8 @@ msgstr ""
 #: templates/problem/submit.html:139
 #, python-format
 msgid ""
-"Your default language, %(language)s, is unavailable for this problem and has "
-"been deselected."
+"Your default language, %(language)s, is unavailable for this problem and has"
+" been deselected."
 msgstr ""
 
 #: templates/problem/submit.html:147
@@ -5314,7 +5323,8 @@ msgstr ""
 
 #: templates/problem/vote-ajax.html:27
 msgid ""
-"A short justification for your vote to this problem's point value (optional)."
+"A short justification for your vote to this problem's point value "
+"(optional)."
 msgstr ""
 
 #: templates/problem/vote-ajax.html:33
@@ -5361,11 +5371,11 @@ msgstr ""
 #: templates/registration/activation_email.html:8
 #, python-format
 msgid ""
-"The last step is activating your account. Please activate your %(site_name)s "
-"account in the next %(count)s day."
+"The last step is activating your account. Please activate your %(site_name)s"
+" account in the next %(count)s day."
 msgid_plural ""
-"The last step is activating your account. Please activate your %(site_name)s "
-"account in the next %(count)s days."
+"The last step is activating your account. Please activate your %(site_name)s"
+" account in the next %(count)s days."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -5440,11 +5450,11 @@ msgstr ""
 #: templates/registration/email_change_activate_email.txt:5
 #, python-format
 msgid ""
-"Please go to this page to confirm this email change. The link will expire in "
-"%(count)s minute."
+"Please go to this page to confirm this email change. The link will expire in"
+" %(count)s minute."
 msgid_plural ""
-"Please go to this page to confirm this email change. The link will expire in "
-"%(count)s minutes."
+"Please go to this page to confirm this email change. The link will expire in"
+" %(count)s minutes."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -5470,8 +5480,8 @@ msgstr ""
 #: templates/registration/email_change_notify_email.txt:6
 #, python-format
 msgid ""
-"If this was not you, please change your password and email us immediately at "
-"%(email)s."
+"If this was not you, please change your password and email us immediately at"
+" %(email)s."
 msgstr ""
 
 #: templates/registration/email_change_notify_email.html:20
@@ -5736,8 +5746,8 @@ msgstr ""
 #, python-format
 msgid ""
 "If you lose your authentication device and are unable to use your scratch "
-"codes, %(site_name)s admins will NOT be able to recover your account. Please "
-"keep your scratch codes safe!"
+"codes, %(site_name)s admins will NOT be able to recover your account. Please"
+" keep your scratch codes safe!"
 msgstr ""
 
 #: templates/registration/two_factor_auth.html:33
@@ -6075,8 +6085,8 @@ msgstr ""
 #: templates/ticket/new_problem.html:9
 msgid ""
 "Please keep in mind that this form is for reporting issues with a problem "
-"statement, and not for asking for help. If you require assistance on solving "
-"a problem, ask in the comments instead."
+"statement, and not for asking for help. If you require assistance on solving"
+" a problem, ask in the comments instead."
 msgstr ""
 
 #: templates/ticket/ticket.html:30
@@ -6465,7 +6475,8 @@ msgstr ""
 msgid "MathType - write formulas and convert them to LaTeX"
 msgstr ""
 
-#: martor/templates/martor/toolbar.html:63 martor/templates/martor/toolbar.html:65
+#: martor/templates/martor/toolbar.html:63
+#: martor/templates/martor/toolbar.html:65
 msgid "Upload an Image or PDF"
 msgstr ""
 
@@ -6483,4 +6494,35 @@ msgstr ""
 
 #: martor/templates/martor/editor.html:296
 msgid "CKEditor (HTML)"
+msgstr ""
+
+msgid "Important Notice:"
+msgstr ""
+
+msgid ""
+"This contest is configured for one-time submission only. After your first "
+"submission, you have a 120-second (2 minutes) grace period to modify or re-"
+"submit. After this period, the submission button will be disabled."
+msgstr ""
+
+msgid ""
+"This contest is configured for one-time submission only. After your first "
+"submission, you have a 120-second (2 minutes) grace period to modify or re-"
+"submit. After this period, you cannot submit further."
+msgstr ""
+
+msgid "Notice:"
+msgstr ""
+
+msgid ""
+"This contest has been configured to hide student scores. You will only see "
+"the \"Received\" status once grading is complete."
+msgstr ""
+
+msgid ""
+"The system has received and graded your submission. Detailed testcase "
+"results and scores are hidden per contest regulations."
+msgstr ""
+
+msgid "Received"
 msgstr ""

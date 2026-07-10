@@ -17,6 +17,7 @@ resources/martor-description.css
 resources/select2-dmoj.css
 resources/style.css
 resources/vars.scss
+media/
 sass_processed
 __pycache__
 dmojsite/
