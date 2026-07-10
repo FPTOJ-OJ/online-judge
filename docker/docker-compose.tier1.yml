@@ -47,6 +47,7 @@ services:
       - ${DATA_DIR}/pdfcache:/data/pdfcache
       - ${DATA_DIR}/datacache:/data/datacache
       - ./nginx.conf:/app/nginx.conf:ro
+      - ../:/app
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
@@ -70,6 +71,7 @@ services:
       - MYSQL_HOST=db
       - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
+      - ../:/app
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
@@ -106,6 +108,7 @@ services:
     ports:
       - "127.0.0.1:10000:10000"
     volumes:
+      - ../:/app
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - web
