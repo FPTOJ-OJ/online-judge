@@ -12,11 +12,16 @@
     <script src="{{ static('vendor/cropper/cropper.min.js') }}"></script>
     <script type="text/javascript">
         $(function () {
-            // Force local Select2 initialization with the 'dmoj' theme
-            $('#id_timezone, #id_language, #id_site_theme, #id_ace_theme').select2({
-                theme: 'dmoj',
-                dropdownAutoWidth: true,
-                width: '200px'
+            // Force local Select2 initialization with the 'dmoj' theme and fix detached dropdown alignment
+            $('#id_timezone, #id_language, #id_site_theme, #id_ace_theme').each(function() {
+                var $select = $(this);
+                $select.parent().css('position', 'relative');
+                $select.select2({
+                    theme: 'dmoj',
+                    dropdownAutoWidth: true,
+                    width: '200px',
+                    dropdownParent: $select.parent()
+                });
             });
 
             // Avatar Cropper & Compression implementation
