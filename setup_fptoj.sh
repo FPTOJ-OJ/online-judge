@@ -721,7 +721,8 @@ INSTALLED_APPS += (
 # Cấu hình cache Redis hoặc LocMem
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:$redis_port/1',
     },
 }
 
