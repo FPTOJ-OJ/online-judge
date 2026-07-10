@@ -92,3 +92,20 @@ jobs:
           
           echo "=== DOWN TIER 3 ==="
           docker compose -f docker/docker-compose.tier3.yml down -v
+
+      - name: Collect Container Logs on Failure
+        if: failure()
+        run: |
+          mkdir -p logs/docker
+          for container in $(docker ps -a --format "{{.Names}}"); do
+            echo "Collecting logs for $container..."
+            docker logs $container > logs/docker/${container}.log 2>&1 || true
+          done
+          zip -r docker_logs.zip logs/docker
+
+      - name: Upload Docker Logs on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-container-logs
+          path: docker_logs.zip
