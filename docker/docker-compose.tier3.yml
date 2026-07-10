@@ -48,6 +48,8 @@ services:
       - ${DATA_DIR}/datacache:/data/datacache
       - ./nginx.conf:/app/nginx.conf:ro
       - ../:/app
+      - /app/node_modules
+      - /app/sass_processed
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
@@ -72,6 +74,8 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
     volumes:
       - ../:/app
+      - /app/node_modules
+      - /app/sass_processed
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - db
@@ -109,6 +113,8 @@ services:
       - "127.0.0.1:10000:10000"
     volumes:
       - ../:/app
+      - /app/node_modules
+      - /app/sass_processed
       - ./local_settings.py:/app/dmoj/local_settings.py:ro
     depends_on:
       - web
