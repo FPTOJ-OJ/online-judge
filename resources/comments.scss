@@ -150,10 +150,18 @@ a {
 
     .gravatar-mobile {
         display: none;
+        img.user-gravatar {
+            width: 35px !important;
+            height: 35px !important;
+        }
     }
 
     .gravatar-main {
         display: unset;
+        img.user-gravatar {
+            width: 75px !important;
+            height: 75px !important;
+        }
     }
 
     .vote {
