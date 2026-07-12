@@ -1,0 +1,66 @@
+<div class="cf-turnstile" {% include "django/forms/widgets/attrs.html" %}></div>
+<script>
+(function() {
+    var api_url = "{{ api_url }}";
+    
+    function loadTurnstile() {
+        if (window.turnstile_script_injected) return;
+        window.turnstile_script_injected = true;
+        
+        // Check if script tag already exists
+        if (document.querySelector('script[src*="challenges.cloudflare.com"]')) {
+            removeInteractionListeners();
+            return;
+        }
+        
+        var script = document.createElement('script');
+        script.src = api_url;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+        
+        removeInteractionListeners();
+    }
+    
+    function removeInteractionListeners() {
+        document.removeEventListener('mousedown', loadTurnstile);
+        document.removeEventListener('keydown', loadTurnstile);
+        document.removeEventListener('touchstart', loadTurnstile);
+        document.removeEventListener('focusin', loadTurnstile);
+    }
+    
+    // Lazy-load on user interaction
+    document.addEventListener('mousedown', loadTurnstile, { passive: true });
+    document.addEventListener('keydown', loadTurnstile, { passive: true });
+    document.addEventListener('touchstart', loadTurnstile, { passive: true });
+    document.addEventListener('focusin', loadTurnstile, { passive: true });
+    
+    // Lazy-load on visibility/scroll using IntersectionObserver
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    loadTurnstile();
+                    observer.disconnect();
+                }
+            });
+        }, { rootMargin: '300px' });
+        
+        var scripts = document.getElementsByTagName('script');
+        var thisScript = scripts.length ? scripts[scripts.length - 1] : null;
+        var widgetDiv = thisScript ? thisScript.previousElementSibling : null;
+        if (widgetDiv && widgetDiv.classList && widgetDiv.classList.contains('cf-turnstile')) {
+            observer.observe(widgetDiv);
+        } else {
+            loadTurnstile();
+        }
+    } else {
+        // Fallback for older browsers
+        if (document.readyState === 'complete') {
+            loadTurnstile();
+        } else {
+            window.addEventListener('load', loadTurnstile);
+        }
+    }
+})();
+</script>
