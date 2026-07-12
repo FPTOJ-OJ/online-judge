@@ -119,6 +119,7 @@ def get_cleaner(name, params):
     if name in cleaner_cache:
         return cleaner_cache[name]
 
+    params = params.copy()
     styles = params.pop('styles', None)
     if styles:
         params['css_sanitizer'] = CSSSanitizer(allowed_css_properties=all_styles if styles is True else styles)

@@ -50,3 +50,8 @@ Disallow: /user/$
 Disallow: /users/find/$
 Disallow: /user/*/submissions
 Disallow: /widgets
+Disallow: /quiz/exam/*/session
+Disallow: /quiz/exam/*/review
+Disallow: /quiz/session
+Disallow: /quiz/import
+

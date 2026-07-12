@@ -24,6 +24,16 @@
     {% if problem is defined and description %}
     {% set raw_text = description | markdown(problem.markdown_style, MATH_ENGINE) | striptags %}
     {% set meta_desc = raw_text | truncatewords(30) %}
+    {% elif contest is defined and contest.description %}
+    {% set meta_desc = contest.description | markdown | striptags | truncatewords(30) %}
+    {% elif source is defined and source.description %}
+    {% set meta_desc = source.description | striptags | truncatewords(30) %}
+    {% elif exam is defined and exam.description %}
+    {% set meta_desc = exam.description | striptags | truncatewords(30) %}
+    {% elif '/quiz/exams/' in request.path %}
+    {% set meta_desc = _("Thư viện đề thi thử tốt nghiệp THPT môn Tin học với đầy đủ định hướng Khoa học máy tính (KHMT) và Tin học ứng dụng (THUD), có chấm điểm tự động tức thì.") %}
+    {% elif '/quiz/' in request.path %}
+    {% set meta_desc = _("Hệ thống luyện thi trắc nghiệm tin học trực tuyến. Luyện tập theo chuyên đề, kiểm tra kiến thức lập trình và làm đề thi thử tốt nghiệp THPT.") %}
     {% else %}
     {% set meta_desc = site_config.welcome_message | striptags | truncatewords(30) if (site_config and
     site_config.welcome_message) else _("Online judge ") ~ SITE_NAME ~ " – " ~ _("a place to practice and compete in
@@ -47,7 +57,7 @@
     {% endif %}
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{% if problem is defined %}article{% else %}website{% endif %}">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -58,6 +68,82 @@
     <meta name="application-name" content="{{ SITE_LONG_NAME }}">
     <meta name="msapplication-tooltip" content="{{ meta_desc }}">
     <meta name="msapplication-starturl" content="{{ DMOJ_SCHEME }}://{{ site.domain }}">
+
+    <!-- Schema.org Structured Data for Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "{{ SITE_NAME }}",
+      "alternateName": "FPTOJ - Hệ thống Chấm bài Trực tuyến",
+      "url": "{{ DMOJ_SCHEME }}://{{ site.domain }}",
+      "description": "Nền tảng thực hành lập trình và luyện thi môn Tin học trực tuyến.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "{{ DMOJ_SCHEME }}://{{ site.domain }}/problems/?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "{{ DMOJ_SCHEME }}://{{ site.domain }}",
+      "name": "{{ SITE_NAME }}",
+      "logo": "{{ DMOJ_SCHEME }}://{{ site.domain }}{{ PWA_APP_ICON | default(STATIC_URL ~ 'icons/logo.png') }}"
+    }
+    </script>
+    {% if problem is defined %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["TechArticle", "LearningResource"],
+      "headline": "{{ title }} - {{ SITE_NAME }}",
+      "description": "{{ meta_desc }}",
+      "learningResourceType": "Programming Problem",
+      "educationalLevel": "Beginner to Advanced",
+      "author": {
+        "@type": "Organization",
+        "name": "{{ SITE_NAME }}"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "{{ SITE_NAME }}",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ DMOJ_SCHEME }}://{{ site.domain }}{{ PWA_APP_ICON | default(STATIC_URL ~ 'icons/logo.png') }}"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ DMOJ_SCHEME }}://{{ site.domain }}{{ request.path }}"
+      }
+    }
+    </script>
+    {% elif exam is defined or source is defined %}
+    {% set current_exam = exam if exam is defined else source %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["Course", "LearningResource"],
+      "name": "{{ current_exam.name }}",
+      "description": "{{ meta_desc }}",
+      "learningResourceType": "Practice Exam",
+      "provider": {
+        "@type": "Organization",
+        "name": "{{ SITE_NAME }}",
+        "sameAs": "{{ DMOJ_SCHEME }}://{{ site.domain }}"
+      },
+      "educationalAlignment": {
+        "@type": "AlignmentObject",
+        "alignmentType": "educationalLevel",
+        "educationalFramework": "Kỳ thi Tốt nghiệp THPT",
+        "targetName": "Luyện thi tốt nghiệp THPT môn Tin học"
+      }
+    }
+    </script>
+    {% endif %}
 
     <!-- Progressive Web App (PWA) -->
     <meta name="theme-color" content="#ffffff">

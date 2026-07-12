@@ -141,7 +141,7 @@ Check out the install documentation at / Xem tài liệu hướng dẫn cài đ�
 
 ## Supported Languages / Ngôn ngữ được hỗ trợ
 
-Check out [**DMOJ/judge-server**](https://github.com/DMOJ/judge-server) for more details. / Xem chi tiết máy chấm tại [**DMOJ/judge-server**](https://github.com/DMOJ/judge-server).
+Check out [**FPTOJ-OJ/judge-server**](https://github.com/FPTOJ-OJ/judge-server) for more details. / Xem chi tiết máy chấm tại [**FPTOJ-OJ/judge-server**](https://github.com/FPTOJ-OJ/judge-server).
 
 * C++ 11/14/17/20 (GCC and Clang)
 * C 99/11
