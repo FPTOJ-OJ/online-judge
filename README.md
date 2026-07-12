@@ -135,7 +135,7 @@ See it live at [fptoj.com](https://fptoj.com/)!
 
 ## Installation / Cài đặt
 
-Check out the install documentation at / Xem tài liệu hướng dẫn cài đặt chi tiết tại [docs.dmoj.ca](https://docs.dmoj.ca/#/site/installation).
+Check out the install documentation at / Xem tài liệu hướng dẫn cài đặt chi tiết tại [docs.fptoj.com](https://docs.fptoj.com/site/installation/).
 
 ---
 
