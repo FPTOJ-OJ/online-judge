@@ -1079,6 +1079,8 @@ class QuizExamSessionView(LoginRequiredMixin, View):
         part1 = []
         part2 = []
         
+        choice_count = 0
+        tf_count = 0
         for index, q in enumerate(ordered_questions):
             q_info = {
                 'id': q.id,
@@ -1103,8 +1105,12 @@ class QuizExamSessionView(LoginRequiredMixin, View):
             q_info['is_answered'] = user_ans is not None
             
             if q.type == 'choice':
+                choice_count += 1
+                q_info['display_index'] = choice_count
                 part1.append(q_info)
             else:
+                tf_count += 1
+                q_info['display_index'] = tf_count
                 part2.append(q_info)
                 
         time_left = meta.get('time_left', 2700)
@@ -1288,6 +1294,8 @@ class QuizExamReviewView(LoginRequiredMixin, View):
         part2_correct_full = 0
         part2_total = 0
         
+        choice_count = 0
+        tf_count = 0
         for index, q in enumerate(ordered_questions):
             q_tags = [t.slug for t in q.tags.all()]
             q_orientation = 'Common'
@@ -1352,8 +1360,12 @@ class QuizExamReviewView(LoginRequiredMixin, View):
             }
             
             if q.type == 'choice':
+                choice_count += 1
+                q_info['display_index'] = choice_count
                 review_part1.append(q_info)
             else:
+                tf_count += 1
+                q_info['display_index'] = tf_count
                 review_part2.append(q_info)
                 
         attempt_date = session.created_at.strftime('%H:%M:%S %d/%m/%Y')

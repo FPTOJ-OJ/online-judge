@@ -139,7 +139,7 @@
                     <div>
                         <div class="quiz-q-tags">
                             <span class="quiz-q-tag type">{{ _('TRUE / FALSE') }}</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PART II - Q') }} {{ q.index }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PART II - Q') }} {{ q.display_index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.question.get_difficulty_display() }}</span>
                             {% if q.orientation != 'Common' %}
                                 <span class="quiz-q-tag orient">{{ _('Orientation') }} {{ q.orientation }}</span>
@@ -233,7 +233,7 @@
                                 id="grid-btn-{{ q.index }}" 
                                 data-index="{{ q.index }}" 
                                 onclick="jumpToQuestion(this.dataset.index)">
-                            {{ q.index }}
+                            {{ q.display_index }}
                         </button>
                     {% endfor %}
                 </div>

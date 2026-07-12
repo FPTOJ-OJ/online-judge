@@ -418,6 +418,11 @@
     </script>
     <script src="{{ static('vendor/sweetalert2.all.min.js') }}"></script>
 
+    {% if site_config and site_config.custom_css %}
+    <style>
+        {{ site_config.custom_css|safe }}
+    </style>
+    {% endif %}
 </head>
 <body{% if perms.judge.test_site %} data-theme="{{ SITE_THEME_NAME }}" {% endif %}>
     <svg width="0" height="0" style="display: block">
@@ -662,13 +667,19 @@
         <footer>
             <span id="footer-content">
                 <br>
-                <a style="color: #808080" href="https://github.com/FPTOJ-OJ/online-judge">
-                    {{ _('Proudly powered by **DMOJ**, Forked by FPTOJ Team')|markdown('default', strip_paragraphs=True)
-                    }}
-                </a> |
-                {% if misc_config.footer %}
-                {{ misc_config.footer|safe }} |
+                {% if site_config and site_config.footer_text and site_config.footer_override %}
+                    {{ site_config.footer_text|safe }}
+                {% else %}
+                    <a style="color: #808080" href="https://github.com/FPTOJ-OJ/online-judge">
+                        {{ _('Proudly powered by **DMOJ**, Forked by FPTOJ Team')|markdown('default', strip_paragraphs=True) }}
+                    </a>
+                    {% if site_config and site_config.footer_text %}
+                        | {{ site_config.footer_text|safe }}
+                    {% elif misc_config.footer %}
+                        | {{ misc_config.footer|safe }}
+                    {% endif %}
                 {% endif %}
+                |
                 <form action="{{ url('set_language') }}" method="post" style="display: inline">
                     {% csrf_token %}
                     <input name="next" type="hidden" value="{{ request.get_full_path() }}">
@@ -820,6 +831,9 @@
         })();
     </script>
 
+    {% if site_config and site_config.custom_js %}
+    {{ site_config.custom_js|safe }}
+    {% endif %}
     </body>
 
 </html>

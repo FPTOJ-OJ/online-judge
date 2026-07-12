@@ -1,12 +1,12 @@
 
 
 {% if request.in_contest and request.participation.contest.logo_override_image %}
-    <img src="{{ request.participation.contest.logo_override_image|camo }}" alt="{{ SITE_NAME }}" height="44" style="border: none" class="logo">
+    <img src="{{ request.participation.contest.logo_override_image|camo }}" alt="{{ SITE_NAME }}" height="44" style="border: none; {% if site_config and site_config.logo_style %}{{ site_config.logo_style|safe }}{% endif %}" class="logo">
 {% elif logo_override_image is defined and logo_override_image %}
-    <img src="{{ logo_override_image|camo }}" alt="{{ SITE_NAME }}" height="44" style="border: none" class="logo">
+    <img src="{{ logo_override_image|camo }}" alt="{{ SITE_NAME }}" height="44" style="border: none; {% if site_config and site_config.logo_style %}{{ site_config.logo_style|safe }}{% endif %}" class="logo">
 {% elif site_config and site_config.logo %}
-    <img src="{{ site_config.logo.url }}" alt="{{ SITE_NAME }}" height="44" style="border: none; max-width: 160px; object-fit: contain;" class="logo">
+    <img src="{{ site_config.logo.url }}" alt="{{ SITE_NAME }}" height="44" style="border: none; {% if site_config.logo_style %}{{ site_config.logo_style|safe }}{% else %}max-width: 160px; object-fit: contain;{% endif %}" class="logo">
 {% else %}
     <img src="{{ static('icons/logo.svg') }}" alt="{{ SITE_NAME }}" width="160" height="44"
-         onerror="this.src=&quot;{{ static('icons/logo.png') }}&quot;; this.onerror=null" style="border: none" class="logo">
+         onerror="this.src=&quot;{{ static('icons/logo.png') }}&quot;; this.onerror=null" style="border: none; {% if site_config and site_config.logo_style %}{{ site_config.logo_style|safe }}{% endif %}" class="logo">
 {% endif %}

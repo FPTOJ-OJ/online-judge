@@ -22,6 +22,11 @@ class SiteConfiguration(models.Model):
     meta_description = models.TextField(blank=True, default='', verbose_name=_('Meta Description'))
     meta_keywords = models.CharField(max_length=255, blank=True, default='', verbose_name=_('Meta Keywords'))
     quiz_enabled = models.BooleanField(default=True, verbose_name=_('Enable Quiz/Exam Features'))
+    logo_style = models.CharField(max_length=255, blank=True, default='', verbose_name=_('Logo Custom Inline CSS'), help_text=_('Example: width: 120px; height: auto; margin-top: -2px;'))
+    custom_css = models.TextField(blank=True, default='', verbose_name=_('Custom CSS'), help_text=_('Custom CSS rules to apply across the site.'))
+    footer_text = models.TextField(blank=True, default='', verbose_name=_('Custom Footer HTML'), help_text=_('Custom HTML content to display in the footer.'))
+    footer_override = models.BooleanField(default=False, verbose_name=_('Override Default Footer'), help_text=_('If checked, only the Custom Footer HTML will be displayed, replacing the default footer text.'))
+    custom_js = models.TextField(blank=True, default='', verbose_name=_('Custom Javascript'), help_text=_('Custom JavaScript or script tags to inject before </body>.'))
 
     class Meta:
         verbose_name = _('Site Configuration')
@@ -30,10 +35,61 @@ class SiteConfiguration(models.Model):
     def __str__(self):
         return str(_("Site Configuration"))
 
+    def save(self, *args, **kwargs):
+        # Optimize logo if it's newly uploaded and not an SVG
+        if self.logo:
+            from django.core.files.uploadedfile import UploadedFile
+            if isinstance(self.logo.file, UploadedFile):
+                name = self.logo.name.lower()
+                if not name.endswith('.svg'):
+                    from PIL import Image
+                    import io
+                    from django.core.files.base import ContentFile
+                    import os
+                    try:
+                        img = Image.open(self.logo.file)
+                        if img.mode not in ('RGB', 'RGBA'):
+                            img = img.convert('RGBA')
+                        img.thumbnail((600, 150), Image.Resampling.LANCZOS)
+                        out_buf = io.BytesIO()
+                        img.save(out_buf, format='PNG', optimize=True)
+                        new_name = os.path.basename(self.logo.name)
+                        if not new_name.lower().endswith('.png'):
+                            new_name = os.path.splitext(new_name)[0] + '.png'
+                        self.logo.save(new_name, ContentFile(out_buf.getvalue()), save=False)
+                    except Exception as e:
+                        pass
+
+        if self.favicon:
+            from django.core.files.uploadedfile import UploadedFile
+            if isinstance(self.favicon.file, UploadedFile):
+                name = self.favicon.name.lower()
+                if not name.endswith('.svg') and not name.endswith('.ico'):
+                    from PIL import Image
+                    import io
+                    from django.core.files.base import ContentFile
+                    import os
+                    try:
+                        img = Image.open(self.favicon.file)
+                        if img.mode not in ('RGB', 'RGBA'):
+                            img = img.convert('RGBA')
+                        img.thumbnail((128, 128), Image.Resampling.LANCZOS)
+                        out_buf = io.BytesIO()
+                        img.save(out_buf, format='PNG', optimize=True)
+                        new_name = os.path.basename(self.favicon.name)
+                        if not new_name.lower().endswith('.png'):
+                            new_name = os.path.splitext(new_name)[0] + '.png'
+                        self.favicon.save(new_name, ContentFile(out_buf.getvalue()), save=False)
+                    except Exception as e:
+                        pass
+
+        super().save(*args, **kwargs)
+
     @classmethod
     def get_solo(cls):
         obj, created = cls.objects.get_or_create(id=1)
         return obj
+
 
 
 class MiscConfig(models.Model):
