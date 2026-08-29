@@ -107,6 +107,17 @@
                     editor.setFontSize(14);
                     editor.setPrintMarginColumn(100);
                     editor.focus();
+
+                    // Auto-detect language on Paste inside Ace Editor
+                    editor.on('paste', function(e) {
+                        setTimeout(function() {
+                            var text = editor.getSession().getValue();
+                            var detected = detectLanguage(text, null);
+                            if (detected) {
+                                applyAutoDetectedLanguage(detected, 'paste');
+                            }
+                        }, 120);
+                    });
                 });
 
                 $(window).resize(function () {
@@ -120,56 +131,250 @@
                         $('#problem_submit').find(':submit').attr('disabled', false);
                     }
                 });
-                $(document).ready(function() {
+
+                // --- Language Auto-Detection Engine ---
+                function detectLanguage(code, filename) {
+                    if (!code && !filename) return null;
+
+                    // 1. Detect by file extension first if available
+                    if (filename) {
+                        var ext = filename.split('.').pop().toLowerCase();
+                        if (['cpp', 'cc', 'cxx', 'c++', 'hpp', 'h'].indexOf(ext) !== -1) return 'cpp';
+                        if (['pas', 'pp', 'dpr', 'inc'].indexOf(ext) !== -1) return 'pascal';
+                        if (['py', 'py3', 'pyw'].indexOf(ext) !== -1) return 'python';
+                        if (ext === 'c') return 'c';
+                        if (ext === 'java') return 'java';
+                    }
+
+                    if (!code || code.trim().length === 0) return null;
+                    var text = code.trim();
+
+                    // 2. Pascal Detection (very distinct syntax: program, uses, :=, begin..end, writeln/readln)
+                    var isPascal = (
+                        /\bprogram\s+[a-zA-Z_]\w*\s*;/i.test(text) ||
+                        /\buses\s+[a-zA-Z0-9_,\s]+;/i.test(text) ||
+                        /\b(var|const|type)\b[\s\S]*?:\s*(integer|longint|int64|real|extended|double|string|char|boolean|array)\b/i.test(text) ||
+                        /\bbegin\b[\s\S]*?\bend[\.;]/i.test(text) ||
+                        /\b(writeln|readln|write|read)\s*\(/i.test(text) ||
+                        /:=/.test(text) ||
+                        /\b(procedure|function)\s+[a-zA-Z_]\w*/i.test(text)
+                    );
+                    if (isPascal) return 'pascal';
+
+                    // 3. Java Detection
+                    var isJava = (
+                        /public\s+class\s+\w+/i.test(text) ||
+                        /public\s+static\s+void\s+main\s*\(\s*String/i.test(text) ||
+                        /System\.(out|in|err)\./.test(text) ||
+                        /import\s+java\./.test(text)
+                    );
+                    if (isJava) return 'java';
+
+                    // 4. C++ Detection
+                    var isCpp = (
+                        /#include\s*<.*?(iostream|vector|algorithm|cmath|map|set|queue|stack|string|cstring|bits\/stdc\+\+\.h|cstdio|cstdlib|iomanip)>/i.test(text) ||
+                        /\busing\s+namespace\s+std\s*;/i.test(text) ||
+                        /\b(cin\s*>>|cout\s*<<|cerr\s*<<|std::|ios_base::)/.test(text) ||
+                        /\b(vector|map|set|pair|unordered_map|queue|stack|priority_queue)\s*<.*?>/.test(text) ||
+                        /\bclass\s+\w+\s*\{/i.test(text) ||
+                        /\btemplate\s*<.*?>/.test(text)
+                    );
+                    if (isCpp) return 'cpp';
+
+                    // 5. C Detection
+                    var isC = (
+                        /#include\s*<.*?(stdio\.h|stdlib\.h|string\.h|math\.h|ctype\.h)>/i.test(text) ||
+                        /\b(printf|scanf)\s*\(/.test(text) ||
+                        /\bint\s+main\s*\(/.test(text)
+                    );
+                    if (isC) return 'c';
+
+                    // 6. Python Detection
+                    if (!/#include/i.test(text)) {
+                        var hasPy = (
+                            /^\s*(import\s+(?!java\b|javax\b)[\w\.]+|from\s+[\w\.]+\s+import)/m.test(text) ||
+                            /^\s*def\s+[a-zA-Z_]\w*\s*\(.*?\)\s*:/m.test(text) ||
+                            /if\s+__name__\s*==\s*['"]__main__['"]\s*:/m.test(text) ||
+                            /^\s*elif\b/m.test(text) ||
+                            (/\b(print|input)\s*\(.*?\)/.test(text) && !/[;{}]$/m.test(text))
+                        );
+                        if (hasPy) return 'python';
+                    }
+
+                    return null;
+                }
+
+                function applyAutoDetectedLanguage(langType, sourceInfo) {
+                    if (!langType) return;
+                    var $select = $('#id_language');
+                    if (!$select.length) return;
+
+                    var currentOpt = $select.find('option:selected');
+                    var currentName = (currentOpt.attr('data-name') || currentOpt.text()).toLowerCase();
+                    var currentAce = currentOpt.attr('data-ace') || '';
+
+                    // Check if current selection already matches
+                    var alreadyMatches = false;
+                    if (langType === 'cpp' && (currentName.indexOf('c++') !== -1 || currentAce === 'c_cpp')) alreadyMatches = true;
+                    if (langType === 'python' && (currentName.indexOf('python') !== -1 || currentAce === 'python')) alreadyMatches = true;
+                    if (langType === 'pascal' && (currentName.indexOf('pascal') !== -1 || currentAce === 'pascal')) alreadyMatches = true;
+                    if (langType === 'c' && (currentName.indexOf('c11') !== -1 || currentName === 'c' || currentAce === 'c_cpp')) alreadyMatches = true;
+                    if (langType === 'java' && (currentName.indexOf('java') !== -1 || currentAce === 'java')) alreadyMatches = true;
+
+                    if (alreadyMatches) return;
+
+                    // Priority matching list
+                    var priorities = {
+                        'cpp': ['c++17', 'c++20', 'c++14', 'c++11', 'c++03', 'c++ themis', 'c++'],
+                        'python': ['python 3', 'py3', 'python 2', 'python'],
+                        'pascal': ['pascal themis', 'pascal', 'fpc'],
+                        'c': ['c11', 'c'],
+                        'java': ['java 8', 'java']
+                    };
+
+                    var targetList = priorities[langType] || [langType];
+                    var targetId = null;
+                    var targetName = '';
+
+                    for (var i = 0; i < targetList.length; i++) {
+                        var key = targetList[i];
+                        $select.find('option').each(function() {
+                            var name = ($(this).attr('data-name') || $(this).text()).toLowerCase();
+                            if (name.indexOf(key) !== -1 && !targetId) {
+                                targetId = $(this).val();
+                                targetName = $(this).attr('data-name') || $(this).text();
+                            }
+                        });
+                        if (targetId) break;
+                    }
+
+                    if (!targetId) {
+                        var aceMap = { 'cpp': 'c_cpp', 'python': 'python', 'pascal': 'pascal', 'c': 'c_cpp', 'java': 'java' };
+                        var targetAce = aceMap[langType];
+                        $select.find('option').each(function() {
+                            if ($(this).attr('data-ace') === targetAce && !targetId) {
+                                targetId = $(this).val();
+                                targetName = $(this).attr('data-name') || $(this).text();
+                            }
+                        });
+                    }
+
+                    if (targetId && targetId !== $select.val()) {
+                        $select.val(targetId).trigger('change');
+                        showAutoDetectToast(targetName, sourceInfo);
+                    }
+                }
+
+                var detectToastTimeout = null;
+                function showAutoDetectToast(langName, sourceFileName) {
+                    if (typeof Swal !== 'undefined') {
+                        var titleHtml = sourceFileName 
+                            ? '{{ _("Đã tải file thành công:") }} <strong>' + sourceFileName + '</strong><br><span style="color:#2563eb; font-size:0.85em;">💡 {{ _("Tự động chọn:") }} <b>' + langName + '</b></span>'
+                            : '💡 {{ _("Tự động nhận diện:") }} <b>' + langName + '</b>';
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: titleHtml,
+                            showConfirmButton: false,
+                            timer: 3500,
+                            timerProgressBar: true,
+                            background: 'var(--quiz-card-bg, #ffffff)',
+                            color: 'var(--quiz-text, #1e293b)'
+                        });
+                    } else {
+                        var $badge = $('#auto-lang-badge');
+                        if (!$badge.length) {
+                            $badge = $('<div id="auto-lang-badge" style="display:inline-flex; align-items:center; gap:5px; background:rgba(37,99,235,0.12); border:1px solid rgba(37,99,235,0.3); color:#2563eb; padding:3px 10px; border-radius:12px; font-size:0.78rem; font-weight:700; margin-left:10px; transition:opacity 0.3s ease;"></div>');
+                            if ($('.django-ace-toolbar').length) {
+                                $('.django-ace-toolbar').append($badge);
+                            } else {
+                                $('#submit-wrapper').prepend($badge);
+                            }
+                        }
+                        $badge.html('<span>💡 {{ _("Tự động chọn:") }} <strong>' + langName + '</strong></span>').stop(true, true).css('opacity', 1).show();
+                        if (detectToastTimeout) clearTimeout(detectToastTimeout);
+                        detectToastTimeout = setTimeout(function() { $badge.fadeOut(600); }, 4000);
+                    }
+                }
+
+                function processUploadedCodeFile(file) {
+                    if (!file) return;
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        var content = e.target.result;
+                        var textArea = $('#id_source');
+                        if (textArea.length) {
+                            textArea.val(content);
+                        }
+                        if (window.ace_source && window.ace_source.getSession) {
+                            window.ace_source.getSession().setValue(content);
+                        }
+                        var detected = detectLanguage(content, file.name);
+                        if (detected) {
+                            applyAutoDetectedLanguage(detected, file.name);
+                        } else if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'info',
+                                title: '{{ _("Đã tải file thành công:") }} <strong>' + file.name + '</strong>',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+
                     if ($('.django-ace-toolbar').length) {
                         $('.django-ace-toolbar').append(
-                            '<label for="fileInput" style="font-size: 16px;margin-left: 10px;font-style: italic;">{{ _("📂 Paste, Drag & Drop your code file here or upload from file:") }}</label> ' +
-                            '<input type="file" id="fileInput" accept="*.*" style="margin-left: 5px;margin-bottom: 10px;">'
+                            '<label for="fileInput" style="font-size: 14px; margin-left: 10px; font-style: italic; cursor: pointer;">{{ _("📂 Paste, Drag & Drop your code file here or upload from file:") }}</label> ' +
+                            '<input type="file" id="fileInput" accept=".cpp,.c,.pas,.pp,.py,.py3,.java,.txt,.cc,.cxx,.hpp,.h" style="margin-left: 5px; margin-bottom: 10px; cursor: pointer;">'
                         );
                     }
-                    $(document).on('dragover', function(e) {
-                        e.preventDefault();
-                    });
 
-                    $(document).on('drop', function(e) {
+                    var dragCounter = 0;
+                    $(window).on('dragenter', function(e) {
                         e.preventDefault();
-                        var file = e.originalEvent.dataTransfer.files[0];
-                        if (file) {
-                            var reader = new FileReader();
-                            reader.onload = function(e) {
-                                let textArea = $('#id_source');
-                                if (textArea.length) {
-                                    textArea.val(e.target.result);
-                                }
-                            
-                                if (window.ace_source && window.ace_source.getSession) {
-                                window.ace_source.getSession().setValue(e.target.result);
-                            }
-                            };
-                            reader.readAsText(file);
+                        dragCounter++;
+                        if (dragCounter === 1) {
+                            $('#drag-drop-overlay').css('display', 'flex');
                         }
                     });
 
-                    $('#fileInput').on('change', function(event) {
-                        let file = event.target.files[0];
-                        if (!file) return;
-                    
-                        let reader = new FileReader();
-                        reader.onload = function(e) {
-                            let textArea = $('#id_source');
-                            if (textArea.length) {
-                                textArea.val(e.target.result);
-                            }
-                        
-                            if (window.ace_source && window.ace_source.getSession) {
-                                window.ace_source.getSession().setValue(e.target.result);
-                            }
-                        };
-                    
-                        reader.readAsText(file);
+                    $(window).on('dragleave', function(e) {
+                        e.preventDefault();
+                        dragCounter--;
+                        if (dragCounter <= 0) {
+                            dragCounter = 0;
+                            $('#drag-drop-overlay').hide();
+                        }
+                    });
+
+                    $(window).on('dragover', function(e) {
+                        e.preventDefault();
+                    });
+
+                    $(window).on('drop', function(e) {
+                        e.preventDefault();
+                        dragCounter = 0;
+                        $('#drag-drop-overlay').hide();
+                        var file = e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files ? e.originalEvent.dataTransfer.files[0] : null;
+                        if (file) {
+                            processUploadedCodeFile(file);
+                        }
+                    });
+
+                    $(document).on('change', '#fileInput', function(event) {
+                        var file = event.target.files ? event.target.files[0] : null;
+                        if (file) {
+                            processUploadedCodeFile(file);
+                        }
                     });
                 });
-            });
         </script>
     {% endcompress %}
 {% endblock %}
@@ -179,6 +384,28 @@
 {% endblock %}
 
 {% block body %}
+    <!-- Modern Glassmorphism Drag & Drop Overlay Modal -->
+    <div id="drag-drop-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; pointer-events: none; transition: all 0.2s ease;">
+        <div style="background: rgba(30, 41, 59, 0.95); border: 3px dashed #3b82f6; border-radius: 20px; padding: 40px 50px; text-align: center; color: #ffffff; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); pointer-events: none;">
+            <div style="font-size: 3.8rem; line-height: 1; margin-bottom: 16px; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.5));">
+                📥
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 10px 0; color: #f8fafc; letter-spacing: -0.5px;">
+                {{ _("Thả file mã nguồn vào đây") }}
+            </h2>
+            <p style="font-size: 0.95rem; color: #94a3b8; margin: 0 0 18px 0; line-height: 1.5;">
+                {{ _("Hệ thống sẽ tự động đọc code và nhận diện ngôn ngữ phù hợp") }}
+            </p>
+            <div style="display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                <span style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">.cpp</span>
+                <span style="background: rgba(234, 179, 8, 0.2); border: 1px solid rgba(234, 179, 8, 0.4); color: #facc15; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">.py</span>
+                <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">.pas</span>
+                <span style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">.java</span>
+                <span style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">.c</span>
+            </div>
+        </div>
+    </div>
+
     <br>
     {% if not no_judges %}
         {% if default_lang not in form.fields.language.queryset %}

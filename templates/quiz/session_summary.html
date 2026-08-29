@@ -1,51 +1,107 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block title_row %}{% endblock %}
 {% block title_ruler %}{% endblock %}
 
 {% block body %}
-<div class="quiz-container" style="max-width: 600px; padding: 40px 20px;">
+<div class="quiz-container" style="max-width: 680px; margin: 30px auto; padding: 0 16px;">
     
-    <div class="quiz-summary-card">
-        <div style="font-size: 4rem; color: var(--quiz-success); margin-bottom: 24px;">
-            <i class="fa fa-trophy"></i>
+    <div style="background: var(--quiz-card-bg, #ffffff); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 16px; padding: 36px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
+        
+        <!-- Trophy / Performance Icon -->
+        <div style="font-size: 3.8rem; line-height: 1; margin-bottom: 16px;">
+            {% if score >= 8.0 %}
+                🏆
+            {% elif score >= 6.5 %}
+                🌟
+            {% elif score >= 5.0 %}
+                🎯
+            {% else %}
+                💪
+            {% endif %}
         </div>
         
-        <h1 class="quiz-summary-title">
-            {{ _('Hoàn thành luyện tập!') }}
+        <h1 style="font-size: 1.7rem; font-weight: 800; margin: 0 0 6px 0; color: var(--quiz-text, #1e293b);">
+            {{ _('Hoàn Thành Luyện Tập!') }}
         </h1>
-        <p class="quiz-summary-subtitle">
-            {{ _('Bạn đã hoàn thành phiên luyện tập trắc nghiệm THPT.') }}
+        <p style="color: var(--quiz-text-muted, #64748b); font-size: 0.95rem; margin: 0 0 24px 0;">
+            {% if score >= 8.0 %}
+                {{ _('Tuyệt vời! Bạn đã hoàn thành xuất sắc phiên luyện tập này.') }}
+            {% elif score >= 5.0 %}
+                {{ _('Tốt lắm! Bạn đã nắm được phần lớn kiến thức trọng tâm.') }}
+            {% else %}
+                {{ _('Hãy xem lại lời giải chi tiết bên dưới để củng cố các câu chưa đúng nhé!') }}
+            {% endif %}
         </p>
 
-        <!-- Stats Grid -->
-        <div class="quiz-summary-grid">
-            <div class="quiz-summary-box">
-                <span class="label">{{ _('Tổng số câu') }}</span>
-                <span class="value">{{ total_questions }}</span>
+        <!-- Big Score Highlight Box -->
+        <div style="background: linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(16,185,129,0.08) 100%); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 14px; padding: 22px; margin-bottom: 24px;">
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--quiz-text-muted, #64748b); letter-spacing: 1px; margin-bottom: 4px;">
+                {{ _('Tổng Điểm Đạt Được') }}
             </div>
-            <div class="quiz-summary-box">
-                <span class="label">{{ _('Đã trả lời') }}</span>
-                <span class="value">{{ answered_questions }}</span>
+            <div style="font-size: 3.2rem; font-weight: 900; line-height: 1.1; color: {% if score >= 8.0 %}#10b981{% elif score >= 5.0 %}var(--quiz-primary, #2563eb){% else %}#ef4444{% endif %};">
+                {{ "%.2f"|format(score) }} <span style="font-size: 1.4rem; font-weight: 600; color: var(--quiz-text-muted, #94a3b8);">/ 10</span>
             </div>
-            <div class="quiz-summary-box">
-                <span class="label">{{ _('Bỏ qua / Chưa làm') }}</span>
-                <span class="value">{{ skipped_questions }}</span>
-            </div>
-            <div class="quiz-summary-box score-box">
-                <span class="label">{{ _('Tổng điểm đạt được') }}</span>
-                <span class="value">{{ score }}</span>
+            <div style="margin-top: 8px;">
+                <span style="font-size: 0.82rem; font-weight: 700; padding: 3px 12px; border-radius: 12px;
+                    {% if score >= 8.5 %}
+                        background: rgba(16,185,129,0.15); color: #10b981;
+                    {% elif score >= 6.5 %}
+                        background: rgba(37,99,235,0.15); color: var(--quiz-primary, #2563eb);
+                    {% elif score >= 5.0 %}
+                        background: rgba(245,158,11,0.15); color: #d97706;
+                    {% else %}
+                        background: rgba(220,53,69,0.15); color: #dc3545;
+                    {% endif %}
+                ">
+                    {% if score >= 8.5 %}
+                        ✨ {{ _('Xuất sắc') }}
+                    {% elif score >= 6.5 %}
+                        ⭐ {{ _('Khá / Tốt') }}
+                    {% elif score >= 5.0 %}
+                        👍 {{ _('Đạt yêu cầu') }}
+                    {% else %}
+                        📖 {{ _('Cần ôn tập thêm') }}
+                    {% endif %}
+                </span>
             </div>
         </div>
 
-        <div>
-            <a href="{{ url('quiz_home') }}" class="quiz-btn-primary" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; box-sizing: border-box;">
-                {{ _('Quay lại Trang luyện tập') }} <i class="fa fa-arrow-right"></i>
-            </a>
+        <!-- Breakdown Stats Grid -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px;">
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 10px; padding: 14px 10px;">
+                <div style="font-size: 0.78rem; color: var(--quiz-text-muted, #64748b); font-weight: 600; margin-bottom: 4px;">{{ _('Tổng số câu') }}</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--quiz-text, #1e293b);">{{ total_questions }}</div>
+            </div>
+            <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 14px 10px;">
+                <div style="font-size: 0.78rem; color: #059669; font-weight: 600; margin-bottom: 4px;">{{ _('Đã trả lời') }}</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #059669;">{{ answered_questions }}</div>
+            </div>
+            <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px 10px;">
+                <div style="font-size: 0.78rem; color: #d97706; font-weight: 600; margin-bottom: 4px;">{{ _('Bỏ qua') }}</div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #d97706;">{{ skipped_questions }}</div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% if session and session.id %}
+                <a href="{{ url('quiz_session_review', session_id=session.id) }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 12px 20px; background: var(--quiz-primary, #2563eb); color: #fff; border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                    📋 {{ _('Xem Lời Giải & Chi Tiết Từng Câu') }} →
+                </a>
+            {% endif %}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <a href="{{ url('quiz_home') }}" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; background: rgba(0,0,0,0.04); color: var(--quiz-text, #334155); border: 1px solid var(--quiz-border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none;">
+                    🎯 {{ _('Luyện tập tiếp') }}
+                </a>
+                <a href="{{ url('quiz_hub') }}" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; background: rgba(0,0,0,0.04); color: var(--quiz-text, #334155); border: 1px solid var(--quiz-border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none;">
+                    🏫 {{ _('Về Lớp Học') }}
+                </a>
+            </div>
         </div>
     </div>
 

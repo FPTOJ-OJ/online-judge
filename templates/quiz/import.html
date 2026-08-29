@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block title_row %}{% endblock %}
@@ -11,13 +10,13 @@
 <div class="quiz-container" style="max-width: 800px;">
     
     <div class="quiz-header-card" style="margin-bottom: 24px;">
-        <h1 class="quiz-title"><i class="fa fa-upload"></i> {{ _('Bulk Import Questions') }}</h1>
-        <p class="quiz-subtitle">{{ _('Use a file or paste JSON data to quickly import multiple questions at once.') }}</p>
+        <h1 class="quiz-title"><i class="fa fa-upload"></i> {{ _('Nhập Câu Hỏi Hàng Loạt (Bulk Import JSON)') }}</h1>
+        <p class="quiz-subtitle">{{ _('Tải lên file .json hoặc dán nội dung JSON để nhập hàng loạt câu hỏi trắc nghiệm vào ngân hàng đề thi.') }}</p>
     </div>
 
     {% if error %}
         <div style="background-color: rgba(239, 68, 68, 0.15); border: 1px solid var(--quiz-danger); color: var(--quiz-danger); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-            <strong>{{ _('Error:') }}</strong> {{ error }}
+            <strong>{{ _('Lỗi:') }}</strong> {{ error }}
             {% if error_logs %}
                 <ul style="margin: 8px 0 0 20px; padding: 0;">
                     {% for log in error_logs %}
@@ -33,23 +32,23 @@
             {% csrf_token %}
             
             <div class="quiz-form-group" style="margin-bottom: 24px; border-bottom: 1px dashed var(--quiz-border); padding-bottom: 16px;">
-                <label class="quiz-form-label" for="json_file"><i class="fa fa-file-code-o"></i> {{ _('Upload JSON file (Optional):') }}</label>
+                <label class="quiz-form-label" for="json_file"><i class="fa fa-file-code-o"></i> {{ _('Tải lên tệp JSON (Tùy chọn):') }}</label>
                 <input type="file" id="json_file" name="json_file" accept=".json" class="quiz-select" style="padding: 8px; width: 100%;">
-                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Select a `.json` file containing your question list to upload directly.') }}</p>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Chọn tệp `.json` chứa mảng câu hỏi để tải lên trực tiếp.') }}</p>
             </div>
             
             <div class="quiz-form-group">
-                <label class="quiz-form-label" for="json_data"><i class="fa fa-code"></i> {{ _('Or paste JSON data:') }}</label>
-                <textarea id="json_data" name="json_data" rows="10" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder='{{ _("Paste JSON data here...") }}'>{{ json_data or '' }}</textarea>
-                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Paste a JSON array of questions if you do not upload a file.') }}</p>
+                <label class="quiz-form-label" for="json_data"><i class="fa fa-code"></i> {{ _('Hoặc dán nội dung JSON vào đây:') }}</label>
+                <textarea id="json_data" name="json_data" rows="10" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder='{{ _("Dán mảng JSON câu hỏi tại đây...") }}'>{{ json_data or '' }}</textarea>
+                <p style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-top: 6px;">{{ _('Dán danh sách mảng JSON nếu không chọn tệp.') }}</p>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 24px;">
                 <button type="submit" class="quiz-btn-primary" style="flex: 1;">
-                    <i class="fa fa-save"></i> {{ _('Execute Import') }}
+                    <i class="fa fa-save"></i> {{ _('Thực hiện Import') }}
                 </button>
                 <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-btn-secondary" style="text-align: center; text-decoration: none; line-height: 2.2;">
-                    {{ _('Go back') }}
+                    {{ _('Quay lại') }}
                 </a>
             </div>
         </form>
@@ -57,7 +56,7 @@
 
     <!-- Template Example -->
     <div class="quiz-q-card" style="margin-top: 24px;">
-        <h3 style="font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 12px 0;">{{ _('Valid JSON structure example:') }}</h3>
+        <h3 style="font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 12px 0;">{{ _('Cấu trúc JSON mẫu chuẩn:') }}</h3>
         <pre style="background-color: var(--quiz-card-bg); color: var(--quiz-text-muted); padding: 16px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin: 0;">[
   {
     "content": "Giao thức TCP thuộc tầng nào trong mô hình TCP/IP?",
@@ -84,40 +83,35 @@
       {"label": "c", "content": "IPv4 sử dụng 32 bit để biểu diễn địa chỉ mạng.", "is_correct": true},
       {"label": "d", "content": "IPv6 ra đời để giải quyết vấn đề cạn kiệt địa chỉ IPv4.", "is_correct": true}
     ],
-    "explanation": "IP là giao thức không tin cậy. Một thiết bị có thể có nhiều IP (ví dụ: máy tính vừa có IP Wifi vừa có IP mạng dây)."
+    "explanation": "IP là giao thức không tin cậy. Một thiết bị có thể có nhiều IP."
   }
 ]</pre>
     </div>
 
     <!-- Documentation helper -->
     <div class="quiz-q-card" style="margin-top: 24px; border: 1px solid rgba(255, 214, 10, 0.2); background: rgba(255, 214, 10, 0.02); padding: 24px;">
-        <h3 style="font-size: 1.25rem; color: var(--quiz-primary); margin: 0 0 16px 0;"><i class="fa fa-book"></i> {{ _('Formatting & import guide') }}</h3>
+        <h3 style="font-size: 1.25rem; color: var(--quiz-primary); margin: 0 0 16px 0;"><i class="fa fa-book"></i> {{ _('Hướng dẫn định dạng trường dữ liệu') }}</h3>
         <div style="font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text-muted);">
-            <p>{{ _('To import a complete exam (e.g., a 30-question structure including multiple choice and True/False), prepare a JSON data array with the following structure:') }}</p>
-            
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> {{ _('Field rules:') }}</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-info-circle"></i> {{ _('Quy tắc các trường:') }}</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li><strong>"content"</strong>: {{ _('Main question content (supports Markdown and LaTeX math using') }} <code>$ ... $</code> {{ _('or') }} <code>$$ ... $$</code>).</li>
-                <li><strong>"type"</strong>: {{ _('Accepts') }} <code>"choice"</code> {{ _('(Multiple choice with 4 options) or') }} <code>"tf"</code> {{ _('(True / False).') }}</li>
-                <li><strong>"difficulty"</strong>: {{ _('Question difficulty:') }} <code>"easy"</code> {{ _('(Easy)') }}, <code>"medium"</code> {{ _('(Medium)') }}, <code>"hard"</code> {{ _('(Hard)') }}.</li>
-                <li><strong>"explanation"</strong>: {{ _('Detailed explanation after submission (Supports Markdown).') }}</li>
-                <li><strong>"source"</strong>: {{ _('Name of the exam source (e.g.') }} <code>{{ _('"High School Graduation Exam 2025"') }}</code>). 
-                    <br><span style="color: var(--quiz-primary); font-weight: bold;">{{ _('*Tip: Using the same "source" name for all 30 questions will group them into one complete exam displayed in the Exam Library!') }}</span>
-                </li>
+                <li><strong>"content"</strong>: {{ _('Nội dung câu hỏi (hỗ trợ Markdown và công thức toán học LaTeX') }} <code>$ ... $</code> {{ _('hoặc') }} <code>$$ ... $$</code>).</li>
+                <li><strong>"type"</strong>: <code>"choice"</code> {{ _('(Trắc nghiệm 4 lựa chọn) hoặc') }} <code>"tf"</code> {{ _('(Trắc nghiệm Đúng / Sai).') }}</li>
+                <li><strong>"difficulty"</strong>: <code>"easy"</code> {{ _('(Dễ) /') }} <code>"medium"</code> {{ _('(Trung bình) /') }} <code>"hard"</code> {{ _('(Khó).') }}</li>
+                <li><strong>"explanation"</strong>: {{ _('Lời giải và giải thích chi tiết sau khi nộp bài.') }}</li>
+                <li><strong>"source"</strong>: {{ _('Tên đề thi / Nguồn đề (ví dụ:') }} <code>"Đề thi tốt nghiệp THPT 2025"</code>).</li>
             </ul>
 
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> {{ _('Configuring options for each question type:') }}</h4>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-check-square-o"></i> {{ _('Cấu hình các lựa chọn (options):') }}</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li><strong>{{ _('Multiple Choice') }}</strong>: {{ _('The') }} <code>"options"</code> {{ _('array must have exactly 4 choices with labels') }} <code>A, B, C, D</code>. {{ _('Set exactly 1 option with') }} <code>"is_correct": true</code>.</li>
-                <li><strong>{{ _('True/False (TF)') }}</strong>: {{ _('The') }} <code>"options"</code> {{ _('array has 4 statements with labels') }} <code>a, b, c, d</code>. {{ _('Set') }} <code>"is_correct": true</code> {{ _('if the statement is true and') }} <code>false</code> {{ _('if it is false.') }}</li>
+                <li><strong>{{ _('Trắc nghiệm (Choice)') }}</strong>: {{ _('Mảng') }} <code>"options"</code> {{ _('gồm 4 phần tử với nhãn') }} <code>A, B, C, D</code>. {{ _('Có chính xác 1 lựa chọn') }} <code>"is_correct": true</code>.</li>
+                <li><strong>{{ _('Đúng/Sai (TF)') }}</strong>: {{ _('Mảng') }} <code>"options"</code> {{ _('gồm 4 ý với nhãn') }} <code>a, b, c, d</code>. {{ _('Điền') }} <code>"is_correct": true</code> {{ _('nếu ý đó đúng và') }} <code>false</code> {{ _('nếu sai.') }}</li>
             </ul>
 
-            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> {{ _('Subject orientation (CS / IT section):') }}</h4>
-            <p style="margin: 0 0 8px 0;">{{ _('In the high school graduation exam, there are separate sections for Computer Science (CS) and Applied Information Technology (IT). To label questions for these sections:') }}</p>
+            <h4 style="color: var(--quiz-text); margin: 16px 0 8px 0; font-size: 1rem;"><i class="fa fa-compass"></i> {{ _('Phân chia định hướng môn học (KHMT / THUD):') }}</h4>
             <ul style="margin: 0 0 16px 20px; padding: 0;">
-                <li>{{ _('Add the tag') }} <code>"khmt"</code> {{ _('or') }} <code>"KHMT"</code> {{ _('to the') }} <code>"tags"</code> {{ _('array for CS questions (e.g.') }} <code>"tags": ["khmt", "Algorithm"]</code>).</li>
-                <li>{{ _('Add the tag') }} <code>"thud"</code> {{ _('or') }} <code>"THUD"</code> {{ _('to the') }} <code>"tags"</code> {{ _('array for IT questions (e.g.') }} <code>"tags": ["thud", "Database management"]</code>).</li>
-                <li>{{ _('Common section (both orientations): Do not add') }} <code>"khmt"</code> {{ _('or') }} <code>"thud"</code> {{ _('tags.') }}</li>
+                <li>{{ _('Thêm thẻ') }} <code>"khmt"</code> {{ _('vào mảng') }} <code>"tags"</code> {{ _('cho câu hỏi định hướng Khoa học máy tính.') }}</li>
+                <li>{{ _('Thêm thẻ') }} <code>"thud"</code> {{ _('vào mảng') }} <code>"tags"</code> {{ _('cho câu hỏi định hướng Tin học ứng dụng.') }}</li>
+                <li>{{ _('Phần chung cho cả 2 định hướng: Không cần thêm thẻ') }} <code>"khmt"</code> {{ _('hay') }} <code>"thud"</code>.</li>
             </ul>
         </div>
     </div>

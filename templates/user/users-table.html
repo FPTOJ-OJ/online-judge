@@ -37,10 +37,10 @@
     <td>{{ user.problem_count }}</td>
     {% if site_config.quiz_enabled %}
     <td style="text-align: center; font-weight: bold;">
-        {{ user.quiz_exams_completed or 0 }}
+        {{ user.quiz_exams_completed|default(0, true) }}
     </td>
     <td style="text-align: center; font-weight: bold; color: #10b981;">
-        {{ (user.quiz_points|floatformat(1)) or "0.0" }}
+        {{ (user.quiz_points|default(0.0, true))|floatformat(1) }}
     </td>
     {% endif %}
 {% endblock %}

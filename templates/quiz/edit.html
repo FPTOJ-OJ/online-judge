@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
     <link href="{{ static('plugins/css/ace.min.css') }}" type="text/css" rel="stylesheet">
     <link href="{{ static('plugins/css/semantic.css') }}" type="text/css" rel="stylesheet">
     <link href="{{ static('plugins/css/resizable.min.css') }}" type="text/css" rel="stylesheet">
@@ -19,14 +18,14 @@
     <div class="quiz-header-card" style="margin-bottom: 24px;">
         <div>
             <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">
-                {% if question %}{{ _('Edit question #') }}{{ question.id }}{% else %}{{ _('Create new question') }}{% endif %}
+                {% if question %}{{ _('Chỉnh sửa câu hỏi #') }}{{ question.id }}{% else %}{{ _('Thêm câu hỏi mới') }}{% endif %}
             </span>
-            <h1>{% if question %}{{ _('Edit question') }}{% else %}{{ _('Add multiple choice question') }}{% endif %}</h1>
-            <p>{{ _('Enter the question content, answer options, and detailed explanation below.') }}</p>
+            <h1>{% if question %}{{ _('Chỉnh Sửa Câu Hỏi') }}{% else %}{{ _('Thêm Mới Câu Hỏi Trắc Nghiệm') }}{% endif %}</h1>
+            <p>{{ _('Nhập nội dung câu hỏi, thiết lập các lựa chọn đáp án đúng và lời giải chi tiết bên dưới.') }}</p>
         </div>
         <div>
             <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none;">
-                {{ _('Back to management dashboard') }}
+                ← {{ _('Về danh sách câu hỏi') }}
             </a>
         </div>
     </div>
@@ -43,22 +42,22 @@
 
             <!-- Question Body Markdown -->
             <div class="quiz-form-group">
-                <label for="id_content">{{ _('Question content (Supports Markdown & LaTeX)') }}</label>
+                <label for="id_content">{{ _('Nội dung đề bài (Hỗ trợ định dạng Markdown & Công thức toán LaTeX)') }}</label>
                 {{ content_html|safe }}
             </div>
 
             <!-- Grid: Type, Difficulty, Source -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div class="quiz-form-group">
-                    <label for="type-select">{{ _('Question type') }}</label>
+                    <label for="type-select">{{ _('Loại câu hỏi') }}</label>
                     <select id="type-select" name="type" class="quiz-select" onchange="toggleOptionForms(this.value)">
-                        <option value="choice" {% if question and question.type == 'choice' %}selected{% endif %}>{{ _('Multiple choice A/B/C/D') }}</option>
-                        <option value="tf" {% if question and question.type == 'tf' %}selected{% endif %}>{{ _('True/False set (4 independent statements)') }}</option>
+                        <option value="choice" {% if question and question.type == 'choice' %}selected{% endif %}>🔘 {{ _('Trắc nghiệm nhiều lựa chọn (A/B/C/D)') }}</option>
+                        <option value="tf" {% if question and question.type == 'tf' %}selected{% endif %}>⚖️ {{ _('Trắc nghiệm Đúng / Sai (Bộ 4 ý)') }}</option>
                     </select>
                 </div>
 
                 <div class="quiz-form-group">
-                    <label for="difficulty-select">{{ _('Difficulty') }}</label>
+                    <label for="difficulty-select">{{ _('Mức độ nhận thức') }}</label>
                     <select id="difficulty-select" name="difficulty" class="quiz-select">
                         {% for code, label in difficulty_choices %}
                             <option value="{{ code }}" {% if question and question.difficulty == code %}selected{% endif %}>{{ label }}</option>
@@ -69,20 +68,20 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div class="quiz-form-group">
-                    <label for="source-select">{{ _('Exam / Source') }}</label>
+                    <label for="source-select">{{ _('Thuộc đề thi / Nguồn đề') }}</label>
                     <select id="source-select" name="source" class="quiz-select" style="margin-bottom: 8px;">
-                        <option value="">-- {{ _('Select saved exam') }} --</option>
+                        <option value="">-- {{ _('Chọn đề thi có sẵn') }} --</option>
                         {% for src in sources %}
                             <option value="{{ src.id }}" {% if question and question.source_id == src.id %}selected{% endif %}>{{ src.name }}</option>
                         {% endfor %}
                     </select>
-                    <input type="text" name="source_new" class="quiz-input" placeholder='{{ _("Or enter a new exam name...") }}'>
+                    <input type="text" name="source_new" class="quiz-input" placeholder='{{ _("Hoặc nhập tên đề thi mới...") }}'>
                 </div>
 
                 <div class="quiz-form-group">
-                    <label for="tags-input">{{ _('Topics (separate by commas)') }}</label>
-                    <input type="text" id="tags-input" class="quiz-input" placeholder='{{ _("e.g.: HTML/CSS, Artificial Intelligence, Computer Networks") }}' style="margin-bottom: 8px;">
-                    <div style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-bottom: 8px;">{{ _('Or select from list:') }}</div>
+                    <label for="tags-input">{{ _('Chuyên đề / Thẻ phân loại (Nhập phân cách bằng dấu phẩy)') }}</label>
+                    <input type="text" id="tags-input" class="quiz-input" placeholder='{{ _("VD: Mạng máy tính, khmt, thud, SQL...") }}' style="margin-bottom: 8px;">
+                    <div style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-bottom: 8px;">{{ _('Hoặc chọn thẻ có sẵn:') }}</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 100px; overflow-y: auto; padding: 6px; border: 1px solid var(--quiz-border); border-radius: 6px; background: var(--quiz-card-bg);">
                         {% for tag in tags %}
                             <label style="display: inline-flex; align-items: center; gap: 6px; margin: 0; padding: 2px 6px; background: var(--quiz-card-bg); border-radius: 4px; border: 1px solid var(--quiz-border); cursor: pointer; font-size: 0.8rem;">
@@ -95,7 +94,7 @@
 
             <!-- Dynamic Section: Standard Choices A/B/C/D Form -->
             <div id="choice-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01);">
-                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-list"></i> {{ _('Answer options (Multiple choice A/B/C/D)') }}</h4>
+                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-list"></i> {{ _('Các phương án lựa chọn (A, B, C, D)') }}</h4>
                 
                 {% set choice_options = {'A': '', 'B': '', 'C': '', 'D': ''} %}
                 {% set correct_choice = 'A' %}
@@ -112,11 +111,11 @@
                 {% endif %}
 
                 {% for label in ['A', 'B', 'C', 'D'] %}
-                    <div class="quiz-form-group" style="display: grid; grid-template-columns: 40px 1fr 100px; gap: 12px; align-items: center; margin-bottom: 12px;">
+                    <div class="quiz-form-group" style="display: grid; grid-template-columns: 40px 1fr 120px; gap: 12px; align-items: center; margin-bottom: 12px;">
                         <span style="font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--quiz-primary);">{{ label }}</span>
-                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="{{ _('Answer content') }} {{ label }}" value="{{ choice_options[label] }}">
-                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-size: 0.85rem;">
-                            <input type="radio" name="correct_choice" value="{{ label }}" {% if correct_choice == label %}checked{% endif %}> {{ _('Correct') }}
+                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="{{ _('Nội dung đáp án') }} {{ label }}" value="{{ choice_options[label] }}">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--quiz-success);">
+                            <input type="radio" name="correct_choice" value="{{ label }}" {% if correct_choice == label %}checked{% endif %}> {{ _('Đáp án đúng') }}
                         </label>
                     </div>
                 {% endfor %}
@@ -124,7 +123,7 @@
 
             <!-- Dynamic Section: True/False statements Form -->
             <div id="tf-options-section" style="margin-bottom: 24px; border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.01); display: none;">
-                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-check-square-o"></i> {{ _('True/False question set (4 statements)') }}</h4>
+                <h4 style="color: var(--quiz-text); margin: 0 0 16px 0; font-size: 1.05rem;"><i class="fa fa-check-square-o"></i> {{ _('Bộ 4 ý trắc nghiệm Đúng / Sai (a, b, c, d)') }}</h4>
                 
                 {% set tf_contents = {'a': '', 'b': '', 'c': '', 'd': ''} %}
                 {% set tf_corrects = {'a': True, 'b': True, 'c': True, 'd': True} %}
@@ -140,14 +139,14 @@
 
                 {% for label in ['a', 'b', 'c', 'd'] %}
                     <div class="quiz-form-group" style="display: grid; grid-template-columns: 40px 1fr 160px; gap: 12px; align-items: center; margin-bottom: 16px;">
-                        <span style="font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--quiz-accent);">{{ label }}</span>
-                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="{{ _('Statement') }} {{ label }}..." value="{{ tf_contents[label] }}">
-                        <div style="display: flex; gap: 8px;">
-                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.8rem; cursor: pointer;">
-                                <input type="radio" name="correct_tf_{{ label }}" value="true" {% if tf_corrects[label] == True %}checked{% endif %}> {{ _('True') }}
+                        <span style="font-weight: 700; font-size: 1.1rem; text-align: center; color: var(--quiz-accent);">{{ label }})</span>
+                        <input type="text" name="option_{{ label }}" class="quiz-input" placeholder="{{ _('Nội dung phát biểu') }} {{ label }}..." value="{{ tf_contents[label] }}">
+                        <div style="display: flex; gap: 10px;">
+                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; cursor: pointer; font-weight: 600; color: var(--quiz-success);">
+                                <input type="radio" name="correct_tf_{{ label }}" value="true" {% if tf_corrects[label] == True %}checked{% endif %}> {{ _('Đúng') }}
                             </label>
-                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.8rem; cursor: pointer;">
-                                <input type="radio" name="correct_tf_{{ label }}" value="false" {% if tf_corrects[label] == False %}checked{% endif %}> {{ _('False') }}
+                            <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0; font-size: 0.85rem; cursor: pointer; font-weight: 600; color: var(--quiz-danger);">
+                                <input type="radio" name="correct_tf_{{ label }}" value="false" {% if tf_corrects[label] == False %}checked{% endif %}> {{ _('Sai') }}
                             </label>
                         </div>
                     </div>
@@ -156,17 +155,17 @@
 
             <!-- Explanation / Solutions -->
             <div class="quiz-form-group">
-                <label for="id_explanation">{{ _('Detailed explanation / Solution guide (Supports Markdown & LaTeX)') }}</label>
+                <label for="id_explanation">{{ _('Lời giải chi tiết & Hướng dẫn phương pháp giải (Markdown & LaTeX)') }}</label>
                 {{ explanation_html|safe }}
             </div>
 
             <!-- Form buttons -->
             <div style="display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--quiz-border); padding-top: 20px;">
                 <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none;">
-                    {{ _('Cancel') }}
+                    {{ _('Hủy bỏ') }}
                 </a>
                 <button type="submit" class="quiz-btn-primary" style="padding: 10px 24px; font-size: 1rem; box-shadow: none;">
-                    {{ _('Save question') }} <i class="fa fa-save"></i>
+                    <i class="fa fa-save"></i> {{ _('Lưu câu hỏi') }}
                 </button>
             </div>
 

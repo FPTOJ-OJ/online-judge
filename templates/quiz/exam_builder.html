@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+
+{% block title_content %}
+    <title>{{ _('Trình tạo đề thi tùy biến') }} - {{ SITE_NAME }}</title>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<style>
+    .builder-container {
+        max-width: 1440px;
+        margin: 15px auto;
+        padding: 0 16px;
+    }
+    .builder-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1024px) {
+        .builder-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .builder-q-card {
+        background: var(--quiz-card-bg, #ffffff);
+        border: 1px solid var(--quiz-border, #e2e8f0);
+        border-radius: 10px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        position: relative;
+        min-height: auto !important;
+        margin-bottom: 10px;
+    }
+    .builder-q-card:hover {
+        border-color: var(--quiz-primary, #2563eb);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .builder-q-card.is-selected {
+        border-color: var(--quiz-primary, #2563eb);
+        background: rgba(37, 99, 235, 0.04);
+        box-shadow: 0 0 0 1px var(--quiz-primary, #2563eb);
+    }
+    .builder-q-checkbox {
+        width: 20px;
+        height: 20px;
+        margin-top: 3px;
+        cursor: pointer;
+        accent-color: var(--quiz-primary, #2563eb);
+        flex-shrink: 0;
+    }
+    .builder-filter-bar {
+        background: var(--quiz-card-bg, #ffffff);
+        border: 1px solid var(--quiz-border, #e2e8f0);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .builder-tab-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--quiz-text-muted, #64748b);
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .builder-tab-btn.active {
+        background: var(--quiz-primary, #2563eb);
+        color: #ffffff;
+    }
+    .builder-preset-pill {
+        padding: 4px 10px;
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--quiz-primary, #2563eb);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .builder-preset-pill:hover {
+        background: var(--quiz-primary, #2563eb);
+        color: #ffffff;
+    }
+    .opt-chip {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        font-size: 0.82rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--quiz-border, #e2e8f0);
+        color: var(--quiz-text, #334155);
+        line-height: 1.4;
+    }
+    .opt-chip.is-correct {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.4);
+        color: #047857;
+        font-weight: 600;
+    }
+    body.dark-mode .opt-chip.is-correct,
+    .dark .opt-chip.is-correct {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    .sidebar-card {
+        background: var(--quiz-card-bg, #ffffff);
+        border: 1px solid var(--quiz-border, #e2e8f0);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+        position: sticky;
+        top: 20px;
+    }
+    .stat-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+</style>
+
+<div class="builder-container">
+    
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h1 style="font-size: 1.45rem; font-weight: 700; margin: 0 0 4px 0; line-height: 1.4; letter-spacing: 0.15px; color: var(--quiz-text);">
+                {{ _('Trình Tạo Đề Thi') }}
+            </h1>
+            <p style="margin: 0; color: var(--quiz-text-muted); font-size: 0.88rem; line-height: 1.4;">
+                {{ _('Lựa chọn câu hỏi từ Ngân hàng đề, cấu hình ma trận đề thi và phân công cho các lớp học.') }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <a href="{{ url('quiz_exam_manage') }}" style="padding: 7px 12px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600;">
+                {{ _('Kho đề thi') }}
+            </a>
+            <a href="{{ url('quiz_hub') }}" style="padding: 7px 12px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 600;">
+                {{ _('Về Exam Hub') }}
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="examBuilderForm" onsubmit="return validateExamForm()">
+        {% csrf_token %}
+        <div class="builder-grid">
+            
+            <!-- Left Column: Question Bank & Selected Tabs -->
+            <div>
+                <!-- Top Tabs Navigation -->
+                <div style="display: flex; gap: 6px; margin-bottom: 12px; padding: 2px; border-radius: 6px; width: fit-content;">
+                    <button type="button" class="builder-tab-btn active" id="tabBtnAll" onclick="switchBuilderTab('all')">
+                        {{ _('Ngân hàng câu hỏi') }} (<span id="totalVisibleCount">{{ total_questions_found }}</span>)
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tabBtnSelected" onclick="switchBuilderTab('selected')">
+                        {{ _('Đã chọn') }} (<span id="tabSelectedCount">0</span>)
+                    </button>
+                </div>
+
+                <!-- Filter & Preset Bar -->
+                <div class="builder-filter-bar" id="builderFilterBar" style="border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; background: var(--quiz-card-bg); display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="text" id="builderSearch" placeholder="{{ _('Tìm nội dung câu hỏi, từ khóa...') }}" 
+                               oninput="filterQuestionsClient()"
+                               style="width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.85rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                    </div>
+
+                    <select id="builderTagFilter" onchange="filterQuestionsClient()" style="padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); max-width: 140px;">
+                        <option value="">-- {{ _('Tất cả chủ đề') }} --</option>
+                        {% for tag in tags %}
+                            <option value="{{ tag.name }}">#{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select id="builderDifficultyFilter" onchange="filterQuestionsClient()" style="padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                        <option value="">-- {{ _('Tất cả mức độ') }} --</option>
+                        <option value="easy">{{ _('Nhận biết') }}</option>
+                        <option value="medium">{{ _('Thông hiểu') }}</option>
+                        <option value="hard">{{ _('Vận dụng') }}</option>
+                        <option value="very_hard">{{ _('Vận dụng cao') }}</option>
+                    </select>
+
+                    <select id="builderTypeFilter" onchange="filterQuestionsClient()" style="padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                        <option value="">-- {{ _('Tất cả dạng câu') }} --</option>
+                        <option value="choice">{{ _('Trắc nghiệm') }}</option>
+                        <option value="tf">{{ _('Chùm Đúng/Sai') }}</option>
+                    </select>
+                </div>
+
+                <!-- Quick Action Presets -->
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 0.78rem; font-weight: 600; color: var(--quiz-text-muted);">{{ _('Chọn nhanh:') }}</span>
+                    <button type="button" class="builder-preset-pill" onclick="selectRandomQuestions(10)">
+                        {{ _('10 câu ngẫu nhiên') }}
+                    </button>
+                    <button type="button" class="builder-preset-pill" onclick="selectRandomQuestions(20)">
+                        {{ _('20 câu ngẫu nhiên') }}
+                    </button>
+                    <button type="button" class="builder-preset-pill" onclick="toggleSelectAllVisible(true)">
+                        {{ _('Chọn tất cả') }}
+                    </button>
+                    <button type="button" class="builder-preset-pill" style="background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border-color: var(--quiz-border);" onclick="toggleSelectAllVisible(false)">
+                        {{ _('Bỏ chọn tất cả') }}
+                    </button>
+                </div>
+
+                <!-- Questions List Container -->
+                <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for q in questions %}
+                        <div class="builder-q-card" id="qcard-{{ q.id }}" data-qid="{{ q.id }}" data-type="{{ q.type }}" data-difficulty="{{ q.difficulty }}" data-tags="{% for t in q.tags.all() %}{{ t.name|lower }} {% endfor %}" style="border: 1px solid var(--quiz-border); border-radius: 6px; padding: 12px; background: var(--quiz-card-bg);">
+                            <input type="checkbox" name="selected_questions" value="{{ q.id }}" id="cb-{{ q.id }}" class="builder-q-checkbox" onchange="onQuestionCheckChange('{{ q.id }}')">
+                            
+                            <div style="flex: 1; min-width: 0;" onclick="toggleCardCheckbox('{{ q.id }}')">
+                                <!-- Question Badges Header -->
+                                <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                                    <span style="font-size: 0.75rem; font-weight: 700; background: var(--quiz-card-bg-sub); color: var(--quiz-text); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--quiz-border);">
+                                        #{{ q.id }}
+                                    </span>
+                                    <span style="font-size: 0.72rem; background: var(--quiz-card-bg-sub); color: var(--quiz-primary); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--quiz-border); font-weight: 600;">
+                                        {{ q.get_type_display() }}
+                                    </span>
+                                    <span style="font-size: 0.72rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text-muted); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--quiz-border); font-weight: 600;">
+                                        {{ q.get_difficulty_display() }}
+                                    </span>
+
+                                    {% for tag in q.tags.all() %}
+                                        <span style="font-size: 0.7rem; color: var(--quiz-text-muted); padding: 1px 4px;">
+                                            #{{ tag.name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Question Content -->
+                                <div style="font-size: 0.9rem; color: var(--quiz-text); line-height: 1.5; font-weight: 600; margin-bottom: 8px;" class="q-content-text">
+                                    {{ q.content }}
+                                </div>
+
+                                <!-- Compact Options / Sub-items Preview -->
+                                {% if q.options.exists() %}
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px; margin-top: 4px;">
+                                        {% for opt in q.options.all() %}
+                                            <div class="opt-chip {% if opt.is_correct %}is-correct{% endif %}">
+                                                <strong style="min-width: 16px;">{{ opt.label }}.</strong>
+                                                <span style="flex: 1; word-break: break-word;">{{ opt.content }}</span>
+                                                {% if opt.is_correct %}
+                                                    <span style="font-size: 0.75rem; margin-left: auto;">✓</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 40px; background: var(--quiz-card-bg); border-radius: 6px; border: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
+                            <div style="font-weight: 600; font-size: 0.95rem; color: var(--quiz-text);">{{ _('Không tìm thấy câu hỏi nào phù hợp.') }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div>
+                <div class="sidebar-card" style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 16px; position: sticky; top: 15px;">
+                    
+                    <!-- Stats Summary Card -->
+                    <div style="margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--quiz-border);">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                            <span style="font-size: 0.9rem; font-weight: 700; color: var(--quiz-text);">{{ _('Ma trận đề thi') }}</span>
+                            <span style="font-size: 1.1rem; font-weight: 700; color: var(--quiz-primary);">
+                                <span id="summaryTotal">0</span> <small style="font-size: 0.78rem; font-weight: normal; color: var(--quiz-text-muted);">{{ _('câu đã chọn') }}</small>
+                            </span>
+                        </div>
+
+                        <!-- Difficulty breakdown chips -->
+                        <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; font-size: 0.76rem;">
+                            <span class="stat-badge-pill" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text);">
+                                Nhận biết: <b id="cntEasy">0</b>
+                            </span>
+                            <span class="stat-badge-pill" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text);">
+                                Thông hiểu: <b id="cntMed">0</b>
+                            </span>
+                            <span class="stat-badge-pill" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text);">
+                                Vận dụng: <b id="cntHard">0</b>
+                            </span>
+                            <span class="stat-badge-pill" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text);">
+                                VDC: <b id="cntVHard">0</b>
+                            </span>
+                        </div>
+
+                        <!-- Type breakdown -->
+                        <div style="display: flex; gap: 8px; font-size: 0.76rem; color: var(--quiz-text-muted);">
+                            <span>Trắc nghiệm: <b id="cntChoice" style="color: var(--quiz-text);">0</b></span>
+                            <span>|</span>
+                            <span>Đúng/Sai: <b id="cntTF" style="color: var(--quiz-text);">0</b></span>
+                        </div>
+                    </div>
+
+                    <!-- Exam Configuration Form Fields -->
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">
+                            {{ _('Tên đề thi / Bộ đề:') }} *
+                        </label>
+                        <input type="text" name="name" required placeholder="{{ _('VD: Đề kiểm tra 1 tiết - Môn Tin học 11') }}" 
+                               style="width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.85rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">
+                                {{ _('Thời gian (phút):') }}
+                            </label>
+                            <input type="number" name="default_duration" value="45" min="1" max="300" 
+                                   style="width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.85rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">
+                                {{ _('Hình thức:') }}
+                            </label>
+                            <select name="exam_type" style="width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                                <option value="in_class">{{ _('Kiểm tra tại lớp') }}</option>
+                                <option value="homework">{{ _('Bài tập về nhà') }}</option>
+                                <option value="practice">{{ _('Luyện tập tự do') }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <label style="font-size: 0.8rem; font-weight: 600; color: var(--quiz-text); margin: 0;">
+                                {{ _('Mã PIN vào thi (tùy chọn):') }}
+                            </label>
+                            <button type="button" onclick="generateRandomPin()" style="border: none; background: none; color: var(--quiz-primary); font-size: 0.75rem; font-weight: 600; cursor: pointer; padding: 0;">
+                                {{ _('Tạo PIN') }}
+                            </button>
+                        </div>
+                        <input type="text" name="access_code" id="examAccessCode" placeholder="{{ _('Để trống nếu không dùng PIN') }}" maxlength="20"
+                               style="width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.85rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); text-transform: uppercase;">
+                    </div>
+
+                    <!-- Direct Class Assignment -->
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">
+                            {{ _('Giao trực tiếp cho Lớp học (tùy chọn):') }}
+                        </label>
+                        <select name="target_classes" id="targetClassesSelect" multiple style="width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); min-height: 60px;">
+                            {% for c in teacher_classes %}
+                                <option value="{{ c.id }}">{{ c.name }} {% if c.organization %}({{ c.organization.short_name or c.organization.name }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--quiz-text);">
+                            {{ _('Mô tả / Ghi chú đề thi:') }}
+                        </label>
+                        <textarea name="description" rows="2" placeholder="{{ _('Ghi chú dặn dò...') }}" 
+                                  style="width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.82rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); resize: vertical;"></textarea>
+                    </div>
+
+                    <!-- Toggles -->
+                    <div style="margin-bottom: 14px; padding: 8px 10px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="shuffle_questions" checked style="cursor: pointer;">
+                            <span style="color: var(--quiz-text);">{{ _('Đảo thứ tự câu hỏi khi làm bài') }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="shuffle_options" checked style="cursor: pointer;">
+                            <span style="color: var(--quiz-text);">{{ _('Đảo thứ tự đáp án') }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="is_strict_anti_cheat" style="cursor: pointer;">
+                            <span style="color: var(--quiz-danger); font-weight: 600;">{{ _('Bật giám sát gian lận (Anti-Cheat)') }}</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="is_visible" checked style="cursor: pointer;">
+                            <span style="color: var(--quiz-text);">{{ _('Hiển thị trong Thư viện đề') }}</span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="btnSubmitExam" style="width: 100%; padding: 10px; background: var(--quiz-primary); color: #ffffff; border: 1px solid var(--quiz-primary); border-radius: 6px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+                        {{ _('Lưu & Tạo Đề Thi') }} (<span id="btnSelectedCount">0</span>)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+
+<script>
+    let activeTab = 'all';
+
+    function toggleCardCheckbox(qid) {
+        const cb = document.getElementById('cb-' + qid);
+        if (cb) {
+            cb.checked = !cb.checked;
+            onQuestionCheckChange(qid);
+        }
+    }
+
+    function onQuestionCheckChange(qid) {
+        const card = document.getElementById('qcard-' + qid);
+        const cb = document.getElementById('cb-' + qid);
+        if (card && cb) {
+            if (cb.checked) {
+                card.classList.add('is-selected');
+            } else {
+                card.classList.remove('is-selected');
+            }
+        }
+        updateSelectedStats();
+        if (activeTab === 'selected') {
+            filterSelectedTabOnly();
+        }
+    }
+
+    function updateSelectedStats() {
+        const checkedBoxes = document.querySelectorAll('input[name="selected_questions"]:checked');
+        const count = checkedBoxes.length;
+        
+        document.getElementById('summaryTotal').innerText = count;
+        document.getElementById('tabSelectedCount').innerText = count;
+        document.getElementById('btnSelectedCount').innerText = count;
+
+        let cntEasy = 0, cntMed = 0, cntHard = 0, cntVHard = 0;
+        let cntChoice = 0, cntTF = 0;
+
+        checkedBoxes.forEach(cb => {
+            const card = document.getElementById('qcard-' + cb.value);
+            if (card) {
+                const diff = card.getAttribute('data-difficulty');
+                const type = card.getAttribute('data-type');
+                if (diff === 'easy') cntEasy++;
+                else if (diff === 'medium') cntMed++;
+                else if (diff === 'hard') cntHard++;
+                else if (diff === 'very_hard') cntVHard++;
+
+                if (type === 'choice') cntChoice++;
+                else if (type === 'tf') cntTF++;
+            }
+        });
+
+        document.getElementById('cntEasy').innerText = cntEasy;
+        document.getElementById('cntMed').innerText = cntMed;
+        document.getElementById('cntHard').innerText = cntHard;
+        document.getElementById('cntVHard').innerText = cntVHard;
+        document.getElementById('cntChoice').innerText = cntChoice;
+        document.getElementById('cntTF').innerText = cntTF;
+    }
+
+    function switchBuilderTab(tab) {
+        activeTab = tab;
+        document.getElementById('tabBtnAll').classList.toggle('active', tab === 'all');
+        document.getElementById('tabBtnSelected').classList.toggle('active', tab === 'selected');
+        
+        const filterBar = document.getElementById('builderFilterBar');
+        if (tab === 'selected') {
+            filterBar.style.display = 'none';
+            filterSelectedTabOnly();
+        } else {
+            filterBar.style.display = 'flex';
+            filterQuestionsClient();
+        }
+    }
+
+    function filterSelectedTabOnly() {
+        const cards = document.querySelectorAll('#questionsContainer .builder-q-card');
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const cb = card.querySelector('input[name="selected_questions"]');
+            if (cb && cb.checked) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        const emptyState = document.getElementById('emptySelectedState');
+        if (emptyState) {
+            emptyState.style.display = (visibleCount === 0) ? 'block' : 'none';
+        }
+    }
+
+    function filterQuestionsClient() {
+        if (activeTab === 'selected') return;
+        const emptyState = document.getElementById('emptySelectedState');
+        if (emptyState) emptyState.style.display = 'none';
+
+        const query = document.getElementById('builderSearch').value.toLowerCase().trim();
+        const tag = document.getElementById('builderTagFilter').value.toLowerCase().trim();
+        const diff = document.getElementById('builderDifficultyFilter').value;
+        const qtype = document.getElementById('builderTypeFilter').value;
+        const cards = document.querySelectorAll('#questionsContainer .builder-q-card');
+        
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const content = card.querySelector('.q-content-text') ? card.querySelector('.q-content-text').innerText.toLowerCase() : '';
+            const cardDiff = card.getAttribute('data-difficulty') || '';
+            const cardType = card.getAttribute('data-type') || '';
+            const cardTags = card.getAttribute('data-tags') || '';
+            
+            const matchQuery = !query || content.includes(query);
+            const matchTag = !tag || cardTags.includes(tag);
+            const matchDiff = !diff || cardDiff === diff;
+            const matchType = !qtype || cardType === qtype;
+            
+            if (matchQuery && matchTag && matchDiff && matchType) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        document.getElementById('totalVisibleCount').innerText = visibleCount;
+    }
+
+    function toggleSelectAllVisible(selectState) {
+        const visibleCards = Array.from(document.querySelectorAll('#questionsContainer .builder-q-card')).filter(el => el.style.display !== 'none');
+        visibleCards.forEach(card => {
+            const cb = card.querySelector('input[name="selected_questions"]');
+            if (cb) {
+                cb.checked = selectState;
+                if (selectState) card.classList.add('is-selected');
+                else card.classList.remove('is-selected');
+            }
+        });
+        updateSelectedStats();
+        if (activeTab === 'selected') filterSelectedTabOnly();
+    }
+
+    function selectRandomQuestions(count) {
+        const visibleCards = Array.from(document.querySelectorAll('#questionsContainer .builder-q-card')).filter(el => el.style.display !== 'none');
+        if (!visibleCards.length) return;
+
+        // Shuffle visible cards
+        const shuffled = visibleCards.sort(() => 0.5 - Math.random());
+        const selectedSlice = shuffled.slice(0, count);
+
+        // Clear existing selection in visible cards
+        visibleCards.forEach(card => {
+            const cb = card.querySelector('input[name="selected_questions"]');
+            if (cb) {
+                cb.checked = false;
+                card.classList.remove('is-selected');
+            }
+        });
+
+        // Check selected slice
+        selectedSlice.forEach(card => {
+            const cb = card.querySelector('input[name="selected_questions"]');
+            if (cb) {
+                cb.checked = true;
+                card.classList.add('is-selected');
+            }
+        });
+
+        updateSelectedStats();
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '{{ _("Đã chọn ngẫu nhiên:") }} ' + selectedSlice.length + ' {{ _("câu hỏi") }}',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true
+            });
+        }
+    }
+
+    function generateRandomPin() {
+        const pin = Math.floor(100000 + Math.random() * 900000);
+        document.getElementById('examAccessCode').value = pin;
+    }
+
+    function validateExamForm() {
+        const checked = document.querySelectorAll('input[name="selected_questions"]:checked');
+        if (checked.length === 0) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '{{ _("Chưa chọn câu hỏi!") }}',
+                    text: '{{ _("Vui lòng chọn ít nhất 1 câu hỏi từ ngân hàng để tạo đề thi.") }}',
+                    confirmButtonText: '{{ _("Đã hiểu") }}'
+                });
+            } else {
+                alert('{{ _("Vui lòng chọn ít nhất 1 câu hỏi từ ngân hàng để tạo đề thi.") }}');
+            }
+            return false;
+        }
+        return true;
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedStats();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,1503 @@
+{% extends "base.html" %}
+
+{% block title_content %}
+    <title>{{ title }} - {{ SITE_NAME }}</title>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container" style="max-width: 1400px; margin: 15px auto; padding: 0 16px;">
+    
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <h1 style="font-size: 1.45rem; font-weight: 700; margin: 0; line-height: 1.3; color: var(--quiz-text); letter-spacing: 0.15px;">
+                    {{ class_obj.name }}
+                </h1>
+                <span style="font-size: 0.8rem; background: var(--quiz-card-bg-sub); color: var(--quiz-primary); padding: 2px 10px; border-radius: 6px; font-weight: 600; border: 1px solid var(--quiz-border);">
+                    {{ class_obj.organization.name }}
+                </span>
+            </div>
+            <p style="margin: 0; color: var(--quiz-text-muted); font-size: 0.88rem;">
+                {{ _('Sổ điểm điện tử, quản lý giao đề và theo dõi kết quả học tập của học sinh.') }}
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="openAssignExamModal()" style="padding: 7px 14px; background: #10b981; color: #fff; border: 1px solid #059669; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                {{ _('Giao đề thi cho lớp') }}
+            </button>
+            <button type="button" onclick="bulkAddStudentsPrompt()" style="padding: 7px 14px; background: var(--quiz-primary); color: #fff; border: 1px solid var(--quiz-primary); border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                {{ _('Thêm học sinh') }}
+            </button>
+            <button type="button" onclick="openEditClassModal()" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                {{ _('Cài đặt lớp') }}
+            </button>
+            <a href="{{ url('quiz_class_gradebook_export', class_id=class_obj.id) }}" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
+                {{ _('Xuất Excel') }}
+            </a>
+            <a href="{{ url('quiz_hub') }}" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">
+                {{ _('Quay lại Lớp Học') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards Banner -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 18px;">
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 14px 16px;">
+            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ _('Sĩ số lớp') }}</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--quiz-text); margin-top: 4px;">
+                <span id="stat-total-students">{{ student_records|length }}</span> <small style="font-size: 0.8rem; font-weight: normal; color: var(--quiz-text-muted);">{{ _('học sinh') }}</small>
+            </div>
+        </div>
+
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 14px 16px;">
+            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ _('Đề thi đã giao') }}</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--quiz-text); margin-top: 4px;">
+                {{ assigned_exams|length }} <small style="font-size: 0.8rem; font-weight: normal; color: var(--quiz-text-muted);">{{ _('bài') }}</small>
+            </div>
+        </div>
+
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 14px 16px;">
+            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ _('Điểm TB lớp') }}</div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--quiz-primary); margin-top: 4px;">
+                {% set total_all_scores = [] %}
+                {% for row in student_records %}
+                    {% if row.completed_count > 0 %}
+                        {% do total_all_scores.append(row.average_score) %}
+                    {% endif %}
+                {% endfor %}
+                {% if total_all_scores %}
+                    {{ "%.2f"|format(total_all_scores|sum / total_all_scores|length) }} <small style="font-size: 0.8rem; font-weight: normal; color: var(--quiz-text-muted);">/ 10</small>
+                {% else %}
+                    <span style="color: var(--quiz-text-muted); font-size: 1rem;">—</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 14px 16px;">
+            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ _('Mã vào lớp') }}</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                <span id="class-code-badge" style="font-size: 1.2rem; font-weight: 700; letter-spacing: 1.5px; color: var(--quiz-primary); font-family: monospace;">{{ access_code }}</span>
+                <button type="button" onclick="copyText('{{ access_code }}', this)" style="padding: 2px 8px; font-size: 0.75rem; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 4px; cursor: pointer; color: var(--quiz-text);">{{ _('Sao chép') }}</button>
+                <button type="button" onclick="regenerateCode()" style="padding: 2px 8px; font-size: 0.75rem; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 4px; cursor: pointer; color: var(--quiz-text-muted);">{{ _('Đổi mã') }}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement & Direct Invite Link Box -->
+    <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 0.88rem; color: var(--quiz-text); display: flex; align-items: center; gap: 8px;">
+            <strong style="color: var(--quiz-text);">{{ _('Thông báo:') }}</strong>
+            <span id="class-announcement-display" style="color: var(--quiz-text-muted);">
+                {% if class_obj.description %}{{ class_obj.description }}{% else %}<i style="color: var(--quiz-text-muted);">{{ _('Chưa có thông báo.') }}</i>{% endif %}
+            </span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" onclick="editClassAnnouncementPrompt()" style="padding: 4px 10px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                {{ _('Sửa thông báo') }}
+            </button>
+            <div style="height: 14px; width: 1px; background: var(--quiz-border);"></div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.78rem; color: var(--quiz-text-muted);">{{ _('Link mời:') }}</span>
+                <input type="text" id="class-join-url-input" readonly value="{{ join_url }}" style="font-size: 0.78rem; padding: 3px 8px; border-radius: 4px; width: 170px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                <button type="button" onclick="copyJoinUrl(this)" style="padding: 3px 8px; font-size: 0.78rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; cursor: pointer; font-weight: 600;">
+                    {{ _('Sao chép') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Requests Section (If any) -->
+    {% if pending_requests %}
+        <div style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="font-size: 0.9rem; font-weight: 700; margin: 0; color: var(--quiz-text); display: flex; align-items: center; gap: 6px;">
+                    {{ _('Yêu cầu vào lớp chờ duyệt') }} ({{ pending_requests|length }})
+                </h3>
+                <button type="button" onclick="handleMemberAction('approve_all', null)" style="padding: 4px 10px; background: var(--quiz-primary); color: #fff; border: none; border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                    {{ _('Duyệt tất cả') }}
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px;">
+                {% for req in pending_requests %}
+                    <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="min-width: 0;">
+                            <div style="font-weight: 600; color: var(--quiz-text); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ req.user.display_name or req.user.user.username }}
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--quiz-text-muted);">
+                                @{{ req.user.user.username }}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                            <button type="button" onclick="handleMemberAction('approve', {{ req.id }})" style="padding: 3px 8px; background: #10b981; color: #fff; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                {{ _('Duyệt') }}
+                            </button>
+                            <button type="button" onclick="handleMemberAction('reject', {{ req.id }})" style="padding: 3px 6px; background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 6px; border-bottom: 1px solid var(--quiz-border); margin-bottom: 18px; overflow-x: auto;">
+        <button type="button" id="tab-btn-gradebook" class="gradebook-tab-btn active" onclick="switchClassTab('gradebook')">
+            {{ _('Bảng Điểm Matrix') }}
+        </button>
+        <button type="button" id="tab-btn-exams" class="gradebook-tab-btn" onclick="switchClassTab('exams')">
+            {{ _('Đề Thi Của Lớp') }}
+            <span class="tab-badge">{{ assigned_exams|length }}</span>
+        </button>
+        <button type="button" id="tab-btn-students" class="gradebook-tab-btn" onclick="switchClassTab('students')">
+            {{ _('Danh Sách Học Sinh') }}
+            <span class="tab-badge">{{ student_records|length }}</span>
+        </button>
+    </div>
+
+    <!-- TAB 1: Gradebook Matrix -->
+    <div id="tab-content-gradebook" class="gradebook-tab-content">
+        <!-- Search & Filter Bar -->
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="flex: 1; min-width: 220px; max-width: 360px;">
+                <input type="text" id="gradebook-search-input" oninput="filterGradebookTable()" placeholder="{{ _('Tìm học sinh theo tên hoặc @username...') }}" style="width: 100%; box-sizing: border-box; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); font-size: 0.85rem;">
+            </div>
+
+            <!-- Filter Chips -->
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.78rem; color: var(--quiz-text-muted);">{{ _('Lọc:') }}</span>
+                <button type="button" class="filter-chip active" data-filter="all" onclick="setGradebookFilter('all', this)">
+                    {{ _('Tất cả') }} ({{ student_records|length }})
+                </button>
+                <button type="button" class="filter-chip" data-filter="completed_all" onclick="setGradebookFilter('completed_all', this)">
+                    {{ _('Đã nộp đủ') }}
+                </button>
+                <button type="button" class="filter-chip" data-filter="none_done" onclick="setGradebookFilter('none_done', this)">
+                    {{ _('Chưa nộp bài') }}
+                </button>
+                <button type="button" class="filter-chip" data-filter="low_score" onclick="setGradebookFilter('low_score', this)">
+                    {{ _('Điểm < 5.0') }}
+                </button>
+                <button type="button" class="filter-chip" data-filter="has_violations" onclick="setGradebookFilter('has_violations', this)">
+                    {{ _('Có vi phạm') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Gradebook Table with Responsive Sticky Column -->
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 30px;">
+            <div style="overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch;">
+                <table id="main-gradebook-table" style="width: 100%; min-width: 800px; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--quiz-card-bg-sub); border-bottom: 2px solid var(--quiz-border);">
+                            <th style="padding: 10px 12px; font-weight: 600; width: 45px; position: sticky; left: 0; z-index: 3; background: var(--quiz-card-bg); color: var(--quiz-text-muted);">#</th>
+                            <th style="padding: 10px 12px; font-weight: 600; min-width: 180px; position: sticky; left: 45px; z-index: 3; background: var(--quiz-card-bg); border-right: 2px solid var(--quiz-border); color: var(--quiz-text);">{{ _('Học sinh') }}</th>
+                            {% for ex in assigned_exams %}
+                                <th style="padding: 10px 12px; font-weight: 600; min-width: 140px; text-align: center; color: var(--quiz-text); border-left: 1px solid var(--quiz-border);">
+                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                        <span style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;" title="{{ ex.name }}">
+                                            {{ ex.name }}
+                                        </span>
+                                        <div style="display: flex; gap: 6px; font-size: 0.72rem; font-weight: normal;">
+                                            <a href="{{ url('quiz_exam_analytics', exam_id=ex.id) }}?class_id={{ class_obj.id }}" style="color: var(--quiz-primary); text-decoration: none;">
+                                                {{ _('Phổ điểm') }}
+                                            </a>
+                                            <span>•</span>
+                                            <a href="{{ url('quiz_exam_monitor', exam_id=ex.id) }}" style="color: var(--quiz-text-muted); text-decoration: none;">
+                                                {{ _('Giám sát') }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </th>
+                            {% endfor %}
+                            <th style="padding: 10px 12px; font-weight: 600; text-align: center; width: 90px; color: var(--quiz-text); border-left: 2px solid var(--quiz-border);">{{ _('Đã làm') }}</th>
+                            <th style="padding: 10px 12px; font-weight: 600; text-align: center; width: 100px; color: var(--quiz-text); border-left: 1px solid var(--quiz-border);">{{ _('Điểm TB') }}</th>
+                            <th style="padding: 10px 12px; font-weight: 600; text-align: center; width: 55px; color: var(--quiz-text-muted);">{{ _('Xóa') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradebook-tbody">
+                        {% for row in student_records %}
+                            {% set total_violations = [] %}
+                            {% for ex in assigned_exams %}
+                                {% set sc = row.scores.get(ex.id) %}
+                                {% if sc and sc.violations > 0 %}
+                                    {% do total_violations.append(sc.violations) %}
+                                {% endif %}
+                            {% endfor %}
+                            <tr class="gradebook-row" data-name="{{ (row.profile.display_name or row.user.username)|lower }}" data-username="{{ row.user.username|lower }}" data-completed="{{ row.completed_count }}" data-total-exams="{{ assigned_exams|length }}" data-avg="{{ row.average_score }}" data-violations="{{ total_violations|sum }}" style="border-bottom: 1px solid var(--quiz-border); transition: background 0.15s;">
+                                <td style="padding: 10px 12px; color: var(--quiz-text-muted);">{{ loop.index }}</td>
+                                <td style="padding: 10px 12px; position: sticky; left: 45px; background: var(--quiz-card-bg); border-right: 2px solid var(--quiz-border);">
+                                    <div style="font-weight: 600; color: var(--quiz-text);">
+                                        {{ row.profile.display_name or row.user.username }}
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">
+                                        @{{ row.user.username }}
+                                    </div>
+                                </td>
+
+                                {% for ex in assigned_exams %}
+                                    {% set sc = row.scores.get(ex.id) %}
+                                    <td style="padding: 10px 14px; text-align: center; border-left: 1px solid var(--quiz-border);">
+                                        {% if sc and sc.completed %}
+                                            <div style="display: inline-flex; flex-direction: column; align-items: center;">
+                                                <a href="{{ url('quiz_session_review', session_id=sc.session_id) }}" style="text-decoration: none;" title="Xem lại bài làm">
+                                                    <span style="font-size: 0.92rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; display: inline-block;
+                                                        {% if sc.score >= 8.0 %}
+                                                            background: rgba(22,163,74,0.15); color: var(--quiz-success);
+                                                        {% elif sc.score >= 6.5 %}
+                                                            background: var(--quiz-primary-light); color: var(--quiz-primary);
+                                                        {% elif sc.score >= 5.0 %}
+                                                            background: rgba(217,119,6,0.15); color: var(--quiz-warning);
+                                                        {% else %}
+                                                            background: rgba(220,38,38,0.15); color: var(--quiz-danger);
+                                                        {% endif %}
+                                                    ">
+                                                        {{ "%.2f"|format(sc.score) }}
+                                                    </span>
+                                                </a>
+                                                {% if sc.violations > 0 %}
+                                                    <span style="font-size: 0.68rem; color: var(--quiz-danger); font-weight: 700; margin-top: 2px;" title="Số lần vi phạm chuyển tab/thoát màn hình">
+                                                        ⚠️ {{ sc.violations }} vi phạm
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--quiz-text-muted); font-size: 0.85rem;">—</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+
+                                <td style="padding: 10px 14px; text-align: center; border-left: 2px solid var(--quiz-border); font-weight: 600; color: var(--quiz-text);">
+                                    {{ row.completed_count }}/{{ assigned_exams|length }}
+                                </td>
+                                <td style="padding: 10px 14px; text-align: center; border-left: 1px solid var(--quiz-border);">
+                                    {% if row.completed_count > 0 %}
+                                        <strong style="font-size: 0.95rem; color: var(--quiz-primary);">
+                                            {{ "%.2f"|format(row.average_score) }}
+                                        </strong>
+                                    {% else %}
+                                        <span style="color: var(--quiz-text-muted);">—</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 10px 14px; text-align: center;">
+                                    <button type="button" onclick="removeStudent({{ row.profile.id }}, '{{ row.profile.display_name or row.user.username }}')" style="background: none; border: none; color: var(--quiz-danger); cursor: pointer; opacity: 0.7; font-size: 0.85rem;" title="{{ _('Xóa khỏi lớp') }}" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr id="gradebook-no-students-row">
+                                <td colspan="{{ assigned_exams|length + 5 }}" style="padding: 40px; text-align: center; color: var(--quiz-text-muted);">
+                                    <div style="font-size: 1.5rem; margin-bottom: 6px;">👥</div>
+                                    <div>{{ _('Lớp học chưa có học sinh nào.') }}</div>
+                                    <button type="button" onclick="bulkAddStudentsPrompt()" style="margin-top: 10px; padding: 8px 16px; background: var(--quiz-primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                                        + {{ _('Thêm học sinh ngay') }}
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <!-- Class Averages Footer -->
+                    {% if assigned_exams and student_records %}
+                        <tfoot>
+                            <tr style="background: var(--quiz-card-bg-sub); border-top: 2px solid var(--quiz-border); font-weight: 700;">
+                                <td colspan="2" style="padding: 12px 14px; color: var(--quiz-text); position: sticky; left: 0; background: var(--quiz-card-bg); z-index: 2;">
+                                    {{ _('Điểm Trung Bình Cả Lớp:') }}
+                                </td>
+                                {% for st in exam_stats %}
+                                    <td style="padding: 12px 14px; text-align: center; border-left: 1px solid var(--quiz-border);">
+                                        {% if st.average_score is not none %}
+                                            <div style="color: var(--quiz-primary); font-size: 0.95rem;">
+                                                {{ "%.2f"|format(st.average_score) }}
+                                            </div>
+                                            <div style="font-size: 0.7rem; color: var(--quiz-text-muted); font-weight: normal;">
+                                                ({{ st.submitted_count }}/{{ student_records|length }} {{ _('đã nộp') }})
+                                            </div>
+                                        {% else %}
+                                            <span style="color: var(--quiz-text-muted); font-weight: normal;">—</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                                <td colspan="3" style="border-left: 2px solid var(--quiz-border);"></td>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: Assigned Exams List -->
+    <div id="tab-content-exams" class="gradebook-tab-content" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2 style="font-weight: 700; font-size: 1.1rem; color: var(--quiz-text); margin: 0 0 2px 0; letter-spacing: 0.15px;">
+                    {{ _('Tổ Chức Thi & Quản Lý Bài Tập Của Lớp') }} ({{ assigned_exams|length }})
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--quiz-text-muted);">
+                    {{ _('Theo dõi trạng thái mở phòng, phân phối mã PIN, giám sát trực tiếp và nhắc nhở học sinh chưa nộp bài.') }}
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a href="{{ url('quiz_exam_builder') }}" style="padding: 7px 12px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; font-weight: 600; font-size: 0.82rem; text-decoration: none;">
+                    {{ _('Tạo đề mới') }}
+                </a>
+                <button type="button" onclick="openAssignExamModal()" style="padding: 7px 14px; background: #10b981; color: #fff; border: 1px solid #059669; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                    {{ _('Giao bài tập / đề thi') }}
+                </button>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            {% for ex in assigned_exams %}
+                {% set st = exam_stats|selectattr('exam.id', 'equalto', ex.id)|first %}
+                {% set sub_cnt = st.submitted_count if st else 0 %}
+                {% set total_stu = student_records|length %}
+                {% set pct = ((sub_cnt / total_stu) * 100)|round|int if total_stu > 0 else 0 %}
+                <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+                    <div>
+                        <!-- Header: Title & Room Status Toggle -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                                <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;
+                                    {% if ex.exam_type == 'homework' %}
+                                        background: var(--quiz-primary-light); color: var(--quiz-primary); border: 1px solid var(--quiz-border);
+                                    {% else %}
+                                        background: rgba(220,38,38,0.08); color: var(--quiz-danger); border: 1px solid var(--quiz-border);
+                                    {% endif %}
+                                ">
+                                    {{ _('Bài tập') if ex.exam_type == 'homework' else _('Kiểm tra tại lớp') }}
+                                </span>
+
+                                <!-- Room Status Button -->
+                                <button type="button" onclick="toggleClassExamStatus({{ ex.id }}, this)" 
+                                        id="btn-room-status-{{ ex.id }}"
+                                        style="padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; border: 1px solid var(--quiz-border); cursor: pointer;
+                                        {% if ex.is_active %}
+                                            background: rgba(22,163,74,0.1); color: var(--quiz-success);
+                                        {% else %}
+                                            background: var(--quiz-card-bg-sub); color: var(--quiz-text-muted);
+                                        {% endif %}
+                                " title="{{ _('Bấm để Đóng/Mở phòng thi') }}">
+                                    {% if ex.is_active %}
+                                        ● {{ _('Đang mở') }}
+                                    {% else %}
+                                        ○ {{ _('Đang đóng') }}
+                                    {% endif %}
+                                </button>
+                            </div>
+                            
+                            <h3 style="font-size: 1rem; font-weight: 700; margin: 0; color: var(--quiz-text); line-height: 1.4;">
+                                {{ ex.name }}
+                            </h3>
+                        </div>
+
+                        <!-- PIN & Direct Link Strip -->
+                        <div style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+                                <span style="font-weight: 600; color: var(--quiz-text-muted);">{{ _('Mã PIN:') }}</span>
+                                <span id="pin-badge-{{ ex.id }}" style="font-weight: 700; font-family: monospace; font-size: 0.95rem; letter-spacing: 1px; color: var(--quiz-primary);">
+                                    {{ ex.access_code or _('CHƯA CÓ') }}
+                                </span>
+                                {% if ex.access_code %}
+                                    <button type="button" onclick="copyText('{{ ex.access_code }}', this)" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); cursor: pointer;">{{ _('Copy') }}</button>
+                                {% endif %}
+                                <button type="button" onclick="quickUpdateExamPin({{ ex.id }})" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); cursor: pointer; color: var(--quiz-text-muted);" title="{{ _('Sinh PIN mới') }}">{{ _('Đổi PIN') }}</button>
+                            </div>
+                            <button type="button" onclick="copyClassExamDirectLink({{ ex.id }}, '{{ ex.access_code or '' }}', this)" style="padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); cursor: pointer; font-weight: 600;">
+                                {{ _('Copy link thi') }}
+                            </button>
+                        </div>
+
+                        <!-- Exam Specifications -->
+                        <div style="font-size: 0.76rem; color: var(--quiz-text-muted); display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+                            <span>{{ _('Số câu:') }} <strong style="color: var(--quiz-text);">{{ ex.questions.count() }}</strong></span>
+                            <span>{{ _('Thời lượng:') }} <strong style="color: var(--quiz-text);">{{ ex.default_duration }}p</strong></span>
+                            {% if ex.is_strict_anti_cheat %}
+                                <span style="color: var(--quiz-danger);">Anti-Cheat ({{ ex.max_violations }})</span>
+                            {% endif %}
+                            {% if ex.end_time %}
+                                <span style="color: var(--quiz-primary);">{{ _('Hạn:') }} {{ ex.end_time.strftime('%H:%M %d/%m') }}</span>
+                            {% else %}
+                                <span>{{ _('Không giới hạn hạn') }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Progress Bar for Submissions & Unsubmitted Button -->
+                        <div style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 600; color: var(--quiz-text); margin-bottom: 6px;">
+                                <span>{{ _('Tiến độ nộp bài:') }}</span>
+                                <span>{{ sub_cnt }}/{{ total_stu }} ({{ pct }}%)</span>
+                            </div>
+                            <div style="height: 6px; background: var(--quiz-border); border-radius: 3px; overflow: hidden; margin-bottom: 6px;">
+                                <div style="height: 100%; width: {{ pct }}%; background: var(--quiz-primary); border-radius: 3px;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                                {% if st and st.average_score is not none %}
+                                    <span style="color: var(--quiz-text-muted);">
+                                        {{ _('Điểm TB:') }} <strong style="color: var(--quiz-primary); font-size: 0.85rem;">{{ "%.2f"|format(st.average_score) }}</strong>
+                                    </span>
+                                {% else %}
+                                    <span style="color: var(--quiz-text-muted);">{{ _('Chưa có học sinh nộp') }}</span>
+                                {% endif %}
+
+                                {% if total_stu > sub_cnt %}
+                                    <button type="button" onclick="viewUnsubmittedStudents({{ ex.id }}, '{{ ex.name|escapejs }}')" style="padding: 2px 6px; background: var(--quiz-card-bg); color: var(--quiz-warning); border: 1px solid var(--quiz-border); border-radius: 4px; font-weight: 600; font-size: 0.72rem; cursor: pointer;">
+                                        {{ _('Chưa nộp:') }} {{ total_stu - sub_cnt }}
+                                    </button>
+                                {% else %}
+                                    <span style="color: var(--quiz-success); font-weight: 600; font-size: 0.72rem;">{{ _('Đã nộp đủ') }} 100%</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions for this assigned exam -->
+                    <div style="display: flex; gap: 6px; border-top: 1px solid var(--quiz-border); padding-top: 12px; flex-wrap: wrap;">
+                        <a href="{{ url('quiz_exam_monitor', exam_id=ex.id) }}" style="flex: 1; text-align: center; padding: 6px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.76rem; font-weight: 600; text-decoration: none;">
+                            {{ _('Giám sát') }}
+                        </a>
+                        <a href="{{ url('quiz_exam_analytics', exam_id=ex.id) }}?class_id={{ class_obj.id }}" style="flex: 1; text-align: center; padding: 6px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.76rem; font-weight: 600; text-decoration: none;">
+                            {{ _('Phổ điểm') }}
+                        </a>
+                        <button type="button" onclick="openAssignConfig({{ ex.id }}, '{{ ex.name|escapejs }}', '{{ ex.exam_type }}', {{ ex.default_duration }}, {{ 'true' if ex.is_strict_anti_cheat else 'false' }}, {{ 'true' if ex.shuffle_questions else 'false' }}, {{ 'true' if ex.shuffle_options else 'false' }}, {{ ex.max_violations or 5 }})" style="padding: 6px 10px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.76rem; font-weight: 600; cursor: pointer;">
+                            {{ _('Cài đặt') }}
+                        </button>
+                        <a href="{{ url('quiz_exam_export', exam_id=ex.id) }}" style="padding: 6px 10px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.76rem; font-weight: 600; text-decoration: none;">
+                            {{ _('Xuất điểm') }}
+                        </a>
+                        <button type="button" onclick="unassignExamConfirm({{ ex.id }}, '{{ ex.name|escapejs }}')" style="padding: 6px 10px; background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.76rem; font-weight: 600; cursor: pointer;">
+                            {{ _('Hủy') }}
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <div style="grid-column: 1 / -1; padding: 30px; text-align: center; background: var(--quiz-card-bg); border-radius: 8px; border: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
+                    <div style="font-weight: 600; color: var(--quiz-text); font-size: 0.95rem;">{{ _('Lớp học chưa được giao bài tập hay đề thi nào.') }}</div>
+                    <div style="font-size: 0.85rem; margin-top: 4px; color: var(--quiz-text-muted);">{{ _('Chọn một đề thi có sẵn từ kho hoặc tạo đề mới từ ngân hàng câu hỏi.') }}</div>
+                    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
+                        <button type="button" onclick="openAssignExamModal()" style="padding: 7px 14px; background: #10b981; color: #fff; border: 1px solid #059669; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                            {{ _('Giao đề thi từ kho') }}
+                        </button>
+                        <a href="{{ url('quiz_exam_builder') }}" style="padding: 7px 14px; background: var(--quiz-primary); color: #fff; border-radius: 6px; font-weight: 600; text-decoration: none; display: inline-block;">
+                            {{ _('Tạo đề mới') }}
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- TAB 3: Student Roster -->
+    <div id="tab-content-students" class="gradebook-tab-content" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div style="font-weight: 700; font-size: 1.05rem; color: var(--quiz-text); letter-spacing: 0.15px;">
+                {{ _('Danh Sách Thành Viên Lớp') }} ({{ student_records|length }})
+            </div>
+            <button type="button" onclick="bulkAddStudentsPrompt()" style="padding: 7px 14px; background: var(--quiz-primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                {{ _('Thêm học sinh') }}
+            </button>
+        </div>
+
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                <thead>
+                    <tr style="background: var(--quiz-card-bg-sub); border-bottom: 1px solid var(--quiz-border);">
+                        <th style="padding: 10px 14px; width: 45px; color: var(--quiz-text-muted);">#</th>
+                        <th style="padding: 10px 14px; font-weight: 700; color: var(--quiz-text);">{{ _('Học sinh') }}</th>
+                        <th style="padding: 10px 14px; text-align: center; font-weight: 700; color: var(--quiz-text);">{{ _('Bài đã nộp') }}</th>
+                        <th style="padding: 10px 14px; text-align: center; font-weight: 700; color: var(--quiz-text);">{{ _('Điểm Trung Bình') }}</th>
+                        <th style="padding: 10px 14px; text-align: right; color: var(--quiz-text-muted);">{{ _('Thao tác') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in student_records %}
+                        <tr style="border-bottom: 1px solid var(--quiz-border); transition: background 0.15s;">
+                            <td style="padding: 10px 14px; color: var(--quiz-text-muted);">{{ loop.index }}</td>
+                            <td style="padding: 10px 14px;">
+                                <div style="font-weight: 600; color: var(--quiz-text);">
+                                    {{ row.profile.display_name or row.user.username }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">
+                                    @{{ row.user.username }}
+                                </div>
+                            </td>
+                            <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: var(--quiz-text);">
+                                {{ row.completed_count }} / {{ assigned_exams|length }}
+                            </td>
+                            <td style="padding: 10px 14px; text-align: center;">
+                                {% if row.completed_count > 0 %}
+                                    <span style="font-weight: 700; color: var(--quiz-primary);">{{ "%.2f"|format(row.average_score) }}</span>
+                                {% else %}
+                                    <span style="color: var(--quiz-text-muted);">—</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 10px 14px; text-align: right;">
+                                <button type="button" onclick="removeStudent({{ row.profile.id }}, '{{ row.profile.display_name or row.user.username }}')" style="padding: 4px 8px; background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                                    {{ _('Xóa khỏi lớp') }}
+                                </button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="padding: 30px; text-align: center; color: var(--quiz-text-muted);">
+                                {{ _('Chưa có học sinh nào trong lớp.') }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal Assign Exam with Deep Customization -->
+<div id="assign-exam-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closeAssignExamModal()">
+    <div class="modal-card" style="max-width: 680px; max-height: 90vh; overflow-y: auto; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 20px;">
+        
+        <!-- Step 1: Select Exam to Assign -->
+        <div id="assign-step-1">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--quiz-border); padding-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--quiz-text);">
+                    {{ _('Giao Bài Tập & Đề Thi Cho Lớp') }}
+                </h3>
+                <button type="button" onclick="closeAssignExamModal()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--quiz-text-muted);">×</button>
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <input type="text" id="assign-exam-search" oninput="filterAssignExams(this.value)" placeholder="{{ _('Tìm kiếm đề thi theo tên...') }}" style="width: 100%; box-sizing: border-box; padding: 8px 12px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); font-size: 0.85rem;">
+            </div>
+
+            <div id="assign-exam-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+                {% for ex in all_available_exams %}
+                    <div class="assign-exam-item" data-name="{{ ex.name|lower }}" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 0.9rem; color: var(--quiz-text);">
+                                {{ ex.name }}
+                            </div>
+                            <div style="font-size: 0.76rem; color: var(--quiz-text-muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                <span>{{ ex.questions.count() }} {{ _('câu') }}</span>
+                                <span>{{ ex.default_duration }} {{ _('phút') }}</span>
+                                {% if ex.exam_type == 'homework' %}
+                                    <span style="color: var(--quiz-primary);">Bài tập</span>
+                                {% else %}
+                                    <span style="color: var(--quiz-danger);">Kiểm tra</span>
+                                {% endif %}
+                                {% if ex.is_strict_anti_cheat %}
+                                    <span style="color: var(--quiz-danger);">Anti-Cheat</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <button type="button" onclick="openAssignConfig({{ ex.id }}, '{{ ex.name|escapejs }}', '{{ ex.exam_type }}', {{ ex.default_duration }}, {{ 'true' if ex.is_strict_anti_cheat else 'false' }}, {{ 'true' if ex.shuffle_questions else 'false' }}, {{ 'true' if ex.shuffle_options else 'false' }}, {{ ex.max_violations or 5 }})" style="padding: 6px 12px; background: var(--quiz-primary); color: #fff; border: 1px solid var(--quiz-primary); border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                                {{ _('Tùy biến & Giao') }}
+                            </button>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 24px; color: var(--quiz-text-muted); font-size: 0.85rem;">
+                        {{ _('Tất cả đề thi hiện có đã được giao cho lớp này.') }}
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--quiz-border); padding-top: 12px;">
+                <a href="{{ url('quiz_exam_builder') }}" style="font-size: 0.82rem; color: var(--quiz-primary); text-decoration: none; font-weight: 600;">
+                    + {{ _('Tạo đề thi mới từ ngân hàng...') }}
+                </a>
+                <button type="button" onclick="closeAssignExamModal()" style="padding: 6px 14px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); font-weight: 600; cursor: pointer; font-size: 0.82rem;">
+                    {{ _('Đóng') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Deep Customization Form for Selected Exam -->
+        <div id="assign-step-2" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--quiz-border); padding-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" onclick="backToAssignStep1()" style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); padding: 4px 8px; border-radius: 4px; cursor: pointer; color: var(--quiz-text); font-weight: 600; font-size: 0.8rem;">
+                        ← {{ _('Chọn đề khác') }}
+                    </button>
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--quiz-text);">{{ _('Cấu Hình Giao Bài Chi Tiết') }}</h3>
+                </div>
+                <button type="button" onclick="closeAssignExamModal()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--quiz-text-muted);">×</button>
+            </div>
+
+            <!-- Target Exam Name Banner -->
+            <div style="background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 8px 12px; margin-bottom: 14px;">
+                <div style="font-size: 0.75rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Đề thi đang cấu hình:') }}</div>
+                <div id="cfg-exam-name" style="font-weight: 700; font-size: 0.95rem; color: var(--quiz-text); margin-top: 2px;"></div>
+                <input type="hidden" id="cfg-exam-id" value="">
+            </div>
+
+            <!-- Setting Group 1: Exam Type / Purpose -->
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--quiz-text); display: block; margin-bottom: 6px;">
+                    {{ _('Hình thức giao bài:') }}
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <label style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border: 1px solid var(--quiz-border); border-radius: 6px; cursor: pointer; background: var(--quiz-card-bg-sub);">
+                        <input type="radio" name="cfg-exam-type" value="homework" id="cfg-type-homework" style="margin-top: 3px;" onchange="onExamTypeChanged()">
+                        <div>
+                            <strong style="color: var(--quiz-text); font-size: 0.85rem;">{{ _('Bài tập về nhà / Tự luyện') }}</strong>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 2px;">{{ _('Làm bài tự do, xem đáp án & lời giải sau khi nộp.') }}</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border: 1px solid var(--quiz-border); border-radius: 6px; cursor: pointer; background: var(--quiz-card-bg-sub);">
+                        <input type="radio" name="cfg-exam-type" value="in_class" id="cfg-type-inclass" style="margin-top: 3px;" onchange="onExamTypeChanged()">
+                        <div>
+                            <strong style="color: var(--quiz-text); font-size: 0.85rem;">{{ _('Bài kiểm tra / Thi thử') }}</strong>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 2px;">{{ _('Giới hạn thời gian, giám sát tập trung.') }}</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Setting Group 2: Track / Orientation Selection -->
+            <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--quiz-text); display: block; margin-bottom: 6px;">
+                    {{ _('Định hướng môn Tin học (KHMT / THUD):') }}
+                </label>
+                <select id="cfg-orientation-select" style="width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.85rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text);">
+                    <option value="ALL">{{ _('Tự do (Học sinh tự chọn CS/ICT hoặc làm toàn bộ)') }}</option>
+                    <option value="KHMT">{{ _('Khoa học máy tính (CS)') }}</option>
+                    <option value="THUD">{{ _('Tin học ứng dụng (ICT)') }}</option>
+                </select>
+            </div>
+
+            <!-- Setting Group 3: Time & Schedule -->
+            <div style="margin-bottom: 14px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 12px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--quiz-text); display: block; margin-bottom: 6px;">
+                    {{ _('Thời gian làm bài & Lịch trình:') }}
+                </label>
+                
+                <!-- Duration presets -->
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                    <span style="font-size: 0.78rem; color: var(--quiz-text-muted);">{{ _('Thời lượng:') }}</span>
+                    <button type="button" class="cfg-dur-btn" onclick="setCfgDuration(15, this)" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); font-size: 0.78rem; cursor: pointer;">15p</button>
+                    <button type="button" class="cfg-dur-btn" onclick="setCfgDuration(30, this)" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); font-size: 0.78rem; cursor: pointer;">30p</button>
+                    <button type="button" class="cfg-dur-btn" onclick="setCfgDuration(45, this)" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); font-size: 0.78rem; cursor: pointer;">45p</button>
+                    <button type="button" class="cfg-dur-btn" onclick="setCfgDuration(60, this)" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); font-size: 0.78rem; cursor: pointer;">60p</button>
+                    <button type="button" class="cfg-dur-btn" onclick="setCfgDuration(90, this)" style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); font-size: 0.78rem; cursor: pointer;">90p</button>
+                    <div style="display: inline-flex; align-items: center; gap: 4px;">
+                        <input type="number" id="cfg-duration-input" min="1" max="300" style="width: 55px; padding: 3px 6px; border-radius: 4px; border: 1px solid var(--quiz-border); font-size: 0.8rem; background: var(--quiz-card-bg); color: var(--quiz-text);">
+                        <span style="font-size: 0.78rem; color: var(--quiz-text-muted);">{{ _('phút') }}</span>
+                    </div>
+                </div>
+
+                <!-- Schedule: Start Time and Deadline -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
+                        <label style="font-size: 0.76rem; color: var(--quiz-text-muted); display: block; margin-bottom: 3px;">
+                            {{ _('Thời gian mở đề (để trống nếu mở ngay):') }}
+                        </label>
+                        <input type="datetime-local" id="cfg-start-time" style="width: 100%; box-sizing: border-box; padding: 5px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); font-size: 0.8rem; background: var(--quiz-card-bg); color: var(--quiz-text);">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.76rem; color: var(--quiz-text-muted); display: block; margin-bottom: 3px;">
+                            {{ _('Hạn chót nộp bài (Deadline):') }}
+                        </label>
+                        <input type="datetime-local" id="cfg-end-time" style="width: 100%; box-sizing: border-box; padding: 5px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); font-size: 0.8rem; background: var(--quiz-card-bg); color: var(--quiz-text);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setting Group 4: Anti-Cheat & Rules -->
+            <div style="margin-bottom: 16px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 12px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--quiz-text); display: block; margin-bottom: 6px;">
+                    {{ _('Quy chế làm bài:') }}
+                </label>
+                
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.82rem; color: var(--quiz-text);">
+                        <input type="checkbox" id="cfg-shuffle-q" checked>
+                        <span>{{ _('Đảo ngẫu nhiên thứ tự câu hỏi') }}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.82rem; color: var(--quiz-text);">
+                        <input type="checkbox" id="cfg-shuffle-opt" checked>
+                        <span>{{ _('Đảo ngẫu nhiên thứ tự đáp án (A, B, C, D)') }}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.82rem; color: var(--quiz-text);">
+                        <input type="checkbox" id="cfg-strict-anticheat" onchange="document.getElementById('cfg-violation-wrap').style.display = this.checked ? 'flex' : 'none'">
+                        <span style="color: var(--quiz-danger); font-weight: 600;">{{ _('Bật giám sát Anti-Cheat nghiêm ngặt') }}</span>
+                    </label>
+                    
+                    <div id="cfg-violation-wrap" style="display: none; align-items: center; gap: 6px; margin-left: 20px; font-size: 0.78rem; color: var(--quiz-text-muted);">
+                        <span>{{ _('Số lần vi phạm tối đa trước khi tự thu bài:') }}</span>
+                        <select id="cfg-max-violations" style="padding: 3px 6px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); font-size: 0.78rem;">
+                            <option value="3">3 lần</option>
+                            <option value="5" selected>5 lần</option>
+                            <option value="10">10 lần</option>
+                            <option value="0">{{ _('Chỉ cảnh báo, không tự nộp') }}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--quiz-border); padding-top: 12px;">
+                <button type="button" onclick="backToAssignStep1()" style="padding: 7px 14px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); font-weight: 600; cursor: pointer; font-size: 0.82rem;">
+                    ← {{ _('Quay lại') }}
+                </button>
+                <button type="button" onclick="submitCustomAssignExam()" style="padding: 7px 18px; background: var(--quiz-primary); color: #fff; border: 1px solid var(--quiz-primary); border-radius: 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                    {{ _('Xác nhận giao cho lớp') }}
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function switchClassTab(tab) {
+        document.querySelectorAll('.gradebook-tab-btn').forEach(b => {
+            b.style.color = 'var(--quiz-text-muted, #64748b)';
+            b.style.borderBottom = 'none';
+            b.style.fontWeight = '600';
+        });
+        document.querySelectorAll('.gradebook-tab-content').forEach(c => c.style.display = 'none');
+
+        const activeBtn = document.getElementById('tab-btn-' + tab);
+        if (activeBtn) {
+            activeBtn.style.color = 'var(--quiz-primary, #2563eb)';
+            activeBtn.style.borderBottom = '3px solid var(--quiz-primary, #2563eb)';
+            activeBtn.style.fontWeight = '700';
+        }
+        const activeContent = document.getElementById('tab-content-' + tab);
+        if (activeContent) {
+            activeContent.style.display = 'block';
+        }
+        if (window.location.hash !== '#' + tab) {
+            history.replaceState(null, null, '#' + tab);
+        }
+    }
+
+    // Check hash on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const hash = window.location.hash.replace('#', '');
+        if (['gradebook', 'exams', 'students'].includes(hash)) {
+            switchClassTab(hash);
+        }
+    });
+
+    let currentGradeFilter = 'all';
+
+    function setGradebookFilter(filterType, btn) {
+        currentGradeFilter = filterType;
+        document.querySelectorAll('.filter-chip').forEach(b => {
+            b.style.background = 'var(--quiz-card-bg)';
+            b.style.color = 'var(--quiz-text)';
+            b.style.borderColor = 'var(--quiz-border)';
+            b.style.fontWeight = '600';
+        });
+        btn.style.background = 'var(--quiz-primary)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'var(--quiz-primary)';
+        btn.style.fontWeight = '700';
+        filterGradebookTable();
+    }
+
+    function filterGradebookTable() {
+        const q = (document.getElementById('gradebook-search-input').value || '').trim().toLowerCase();
+        const rows = document.querySelectorAll('.gradebook-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name') || '';
+            const username = row.getAttribute('data-username') || '';
+            const completed = parseInt(row.getAttribute('data-completed') || '0', 10);
+            const totalExams = parseInt(row.getAttribute('data-total-exams') || '0', 10);
+            const avg = parseFloat(row.getAttribute('data-avg') || '0');
+            const violations = parseInt(row.getAttribute('data-violations') || '0', 10);
+
+            let matchesQuery = !q || name.includes(q) || username.includes(q);
+            let matchesFilter = true;
+
+            if (currentGradeFilter === 'completed_all') {
+                matchesFilter = (totalExams > 0 && completed >= totalExams);
+            } else if (currentGradeFilter === 'none_done') {
+                matchesFilter = (completed === 0);
+            } else if (currentGradeFilter === 'low_score') {
+                matchesFilter = (completed > 0 && avg < 5.0);
+            } else if (currentGradeFilter === 'has_violations') {
+                matchesFilter = (violations > 0);
+            }
+
+            if (matchesQuery && matchesFilter) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function copyText(txt, btn) {
+        navigator.clipboard.writeText(txt).then(() => {
+            const old = btn.innerText;
+            btn.innerText = 'Đã chép! ✓';
+            setTimeout(() => btn.innerText = old, 2000);
+        });
+    }
+
+    function copyJoinUrl(btn) {
+        const inp = document.getElementById('class-join-url-input');
+        copyText(inp.value, btn);
+    }
+
+    function regenerateCode() {
+        Swal.fire({
+            title: "{{ _('Đổi mã vào lớp mới?') }}",
+            text: "{{ _('Mã cũ sẽ không còn hiệu lực. Học sinh mới tham gia sẽ dùng mã mới.') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Đổi mã ngay') }}",
+            cancelButtonText: "{{ _('Hủy') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'regen_code');
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('class-code-badge').innerText = data.access_code;
+                        document.getElementById('class-join-url-input').value = data.join_url;
+                        Swal.fire("{{ _('Thành công') }}", "{{ _('Đã cập nhật mã vào lớp mới: ') }}" + data.access_code, "success");
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể đổi mã.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function handleMemberAction(action, reqId) {
+        const formData = new FormData();
+        formData.append('action', action);
+        if (reqId) formData.append('request_id', reqId);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("{{ _('Thành công') }}", data.message, "success")
+                    .then(() => location.reload());
+            } else {
+                Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể thực hiện.') }}", "error");
+            }
+        });
+    }
+
+    function bulkAddStudentsPrompt() {
+        Swal.fire({
+            title: "{{ _('Thêm học sinh vào lớp') }}",
+            html: `
+                <div style="text-align: left;">
+                    <div style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.83rem;">
+                        <div style="font-weight: 700; color: var(--quiz-primary, #2563eb); margin-bottom: 4px;">💡 Hướng dẫn:</div>
+                        <div style="color: var(--quiz-text, #334155); line-height: 1.5;">
+                            Nhập <strong>username tài khoản FPTOJ</strong> (tên đăng nhập trên trang này, không phải email).
+                            Ví dụ: nếu link hồ sơ là <code>/user/nguyenvana/</code> thì username là <code>nguyenvana</code>.
+                        </div>
+                    </div>
+                    <label style="font-size: 0.85rem; font-weight: bold; color: var(--quiz-text); display: block; margin-bottom: 6px;">{{ _('Danh sách username (phân cách bằng dấu phẩy, cách, hoặc xuống dòng):') }}</label>
+                    <textarea id="swal-usernames" rows="5" style="width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); font-family: monospace; font-size: 0.9rem;" placeholder="username1&#10;username2&#10;username3"></textarea>
+                    <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 6px;">Mỗi dòng một username, hoặc ngăn cách bằng dấu phẩy/cách.</div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Thêm vào lớp') }}",
+            cancelButtonText: "{{ _('Hủy') }}",
+            preConfirm: () => {
+                const val = document.getElementById('swal-usernames').value.trim();
+                if (!val) {
+                    Swal.showValidationMessage("{{ _('Vui lòng nhập ít nhất một username.') }}");
+                    return false;
+                }
+                return val;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                const formData = new FormData();
+                formData.append('action', 'add_students');
+                formData.append('usernames', result.value);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        let msg = data.message;
+                        if (data.not_found && data.not_found.length > 0) {
+                            msg += "<br><small style='color:#dc3545'>Không tìm thấy tài khoản: " + data.not_found.join(', ') + "</small>";
+                        }
+                        Swal.fire({
+                            title: "{{ _('Kết quả thêm học sinh') }}",
+                            html: msg,
+                            icon: 'success'
+                        }).then(() => location.reload());
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể thêm học sinh.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function removeStudent(profileId, name) {
+        Swal.fire({
+            title: "{{ _('Xóa học sinh khỏi lớp?') }}",
+            text: "{{ _('Bạn có chắc muốn xóa học sinh ') }}" + name + "{{ _(' khỏi lớp học này?') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Xóa ngay') }}",
+            confirmButtonColor: '#dc3545',
+            cancelButtonText: "{{ _('Hủy') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'remove_student');
+                formData.append('user_id', profileId);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("{{ _('Thành công') }}", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể xóa.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function unassignExamConfirm(examId, examName) {
+        Swal.fire({
+            title: "{{ _('Hủy giao đề thi?') }}",
+            text: "{{ _('Bạn có chắc muốn hủy giao đề ') }}" + examName + "{{ _(' khỏi lớp học này? Dữ liệu bài làm trước đó của học sinh vẫn được lưu.') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Hủy giao') }}",
+            confirmButtonColor: '#dc3545',
+            cancelButtonText: "{{ _('Quay lại') }}"
+        }).then((res) => {
+            if (res.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'unassign_exam');
+                formData.append('exam_id', examId);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("{{ _('Thành công') }}", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể hủy giao đề.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function openAssignExamModal() {
+        document.getElementById('assign-step-1').style.display = 'block';
+        document.getElementById('assign-step-2').style.display = 'none';
+        document.getElementById('assign-exam-modal').style.display = 'flex';
+    }
+
+    function closeAssignExamModal() {
+        document.getElementById('assign-exam-modal').style.display = 'none';
+    }
+
+    function filterAssignExams(q) {
+        q = (q || '').toLowerCase();
+        document.querySelectorAll('.assign-exam-item').forEach(el => {
+            const name = el.getAttribute('data-name');
+            el.style.display = name.includes(q) ? 'flex' : 'none';
+        });
+    }
+
+    function openAssignConfig(examId, examName, examType, duration, isStrict, shuffleQ, shuffleOpt, maxViol) {
+        document.getElementById('cfg-exam-id').value = examId;
+        document.getElementById('cfg-exam-name').innerText = examName;
+        
+        if (examType === 'homework') {
+            document.getElementById('cfg-type-homework').checked = true;
+        } else {
+            document.getElementById('cfg-type-inclass').checked = true;
+        }
+
+        document.getElementById('cfg-duration-input').value = duration || 45;
+        document.querySelectorAll('.cfg-dur-btn').forEach(b => {
+            if (parseInt(b.innerText) === duration) {
+                b.style.background = 'var(--quiz-primary)';
+                b.style.color = '#fff';
+            } else {
+                b.style.background = 'var(--quiz-card-bg)';
+                b.style.color = 'inherit';
+            }
+        });
+
+        document.getElementById('cfg-shuffle-q').checked = (shuffleQ !== false);
+        document.getElementById('cfg-shuffle-opt').checked = (shuffleOpt !== false);
+        document.getElementById('cfg-strict-anticheat').checked = isStrict;
+        document.getElementById('cfg-violation-wrap').style.display = isStrict ? 'flex' : 'none';
+        document.getElementById('cfg-max-violations').value = maxViol || 5;
+
+        document.getElementById('assign-step-1').style.display = 'none';
+        document.getElementById('assign-step-2').style.display = 'block';
+        document.getElementById('assign-exam-modal').style.display = 'flex';
+    }
+
+    function backToAssignStep1() {
+        document.getElementById('assign-step-2').style.display = 'none';
+        document.getElementById('assign-step-1').style.display = 'block';
+    }
+
+    function setCfgDuration(min, btn) {
+        document.getElementById('cfg-duration-input').value = min;
+        document.querySelectorAll('.cfg-dur-btn').forEach(b => {
+            b.style.background = 'var(--quiz-card-bg)';
+            b.style.color = 'inherit';
+            b.style.borderColor = 'var(--quiz-border)';
+        });
+        btn.style.background = 'var(--quiz-primary)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'var(--quiz-primary)';
+    }
+
+    function onExamTypeChanged() {
+        const isHomework = document.getElementById('cfg-type-homework').checked;
+        if (isHomework) {
+            document.getElementById('cfg-strict-anticheat').checked = false;
+            document.getElementById('cfg-violation-wrap').style.display = 'none';
+        } else {
+            document.getElementById('cfg-strict-anticheat').checked = true;
+            document.getElementById('cfg-violation-wrap').style.display = 'flex';
+        }
+    }
+
+    function submitCustomAssignExam() {
+        const examId = document.getElementById('cfg-exam-id').value;
+        const examType = document.querySelector('input[name="cfg-exam-type"]:checked').value;
+        const duration = document.getElementById('cfg-duration-input').value;
+        const orientation = document.getElementById('cfg-orientation-select').value;
+        const startTime = document.getElementById('cfg-start-time').value;
+        const endTime = document.getElementById('cfg-end-time').value;
+        const shuffleQ = document.getElementById('cfg-shuffle-q').checked ? 'true' : 'false';
+        const shuffleOpt = document.getElementById('cfg-shuffle-opt').checked ? 'true' : 'false';
+        const isStrict = document.getElementById('cfg-strict-anticheat').checked ? 'true' : 'false';
+        const maxViol = document.getElementById('cfg-max-violations').value;
+
+        const formData = new FormData();
+        formData.append('action', 'assign_exam');
+        formData.append('exam_id', examId);
+        formData.append('exam_type', examType);
+        formData.append('duration', duration);
+        formData.append('orientation', orientation);
+        if (startTime) formData.append('start_time', startTime);
+        if (endTime) formData.append('end_time', endTime);
+        formData.append('shuffle_questions', shuffleQ);
+        formData.append('shuffle_options', shuffleOpt);
+        formData.append('is_strict_anti_cheat', isStrict);
+        formData.append('max_violations', maxViol);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        Swal.fire({
+            title: "{{ _('Đang giao bài...') }}",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "{{ _('Giao bài thành công') }}",
+                    text: data.message,
+                    icon: 'success'
+                }).then(() => location.reload());
+            } else {
+                Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể giao đề.') }}", "error");
+            }
+        })
+        .catch(() => {
+            Swal.fire("{{ _('Lỗi') }}", "{{ _('Đã xảy ra lỗi khi gửi yêu cầu.') }}", "error");
+        });
+    }
+
+    function editClassAnnouncementPrompt() {
+        const currentText = document.getElementById('class-announcement-display').innerText.trim();
+        Swal.fire({
+            title: "{{ _('📢 Đăng / Sửa Thông Báo Cho Lớp') }}",
+            html: `
+                <div style="text-align: left;">
+                    <label style="font-size: 0.85rem; font-weight: bold; color: var(--quiz-text); display: block; margin-bottom: 6px;">{{ _('Nội dung thông báo (học sinh sẽ nhìn thấy khi vào lớp):') }}</label>
+                    <textarea id="swal-announcement-input" rows="4" style="width: 100%; box-sizing: border-box; padding: 10px; border-radius: 6px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); font-size: 0.9rem;" placeholder="{{ _('VD: Nhắc các em hoàn thành bài kiểm tra số 2 trước 22h Chủ nhật...') }}">${currentText.includes('Chưa có thông báo') ? '' : currentText}</textarea>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Lưu Thông Báo') }}",
+            cancelButtonText: "{{ _('Hủy') }}",
+            preConfirm: () => {
+                return document.getElementById('swal-announcement-input').value.trim();
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'set_announcement');
+                formData.append('announcement', result.value);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("{{ _('Thành công') }}", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể lưu thông báo.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function openEditClassModal() {
+        Swal.fire({
+            title: "{{ _('Cài đặt & Tùy chỉnh lớp học') }}",
+            html: `
+                <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 700; color: var(--quiz-text); display: block; margin-bottom: 4px;">{{ _('Tên lớp học:') }}</label>
+                        <input id="swal-edit-class-name" type="text" class="swal2-input" value="{{ class_obj.name }}" style="width: 100%; margin: 0; box-sizing: border-box; height: 38px; font-size: 0.9rem;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 700; color: var(--quiz-text); display: block; margin-bottom: 4px;">{{ _('Tổ chức / Trường học:') }}</label>
+                        <select id="swal-edit-class-org" class="swal2-select" style="width: 100%; margin: 0; box-sizing: border-box; height: 38px; font-size: 0.9rem; padding: 4px 8px;">
+                            {% for org in all_organizations %}
+                                <option value="{{ org.id }}" {% if class_obj.organization_id == org.id %}selected{% endif %}>{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 700; color: var(--quiz-text); display: block; margin-bottom: 4px;">{{ _('Mã / Mật khẩu vào lớp:') }}</label>
+                        <input id="swal-edit-class-code" type="text" class="swal2-input" value="{{ class_obj.access_code or '' }}" style="width: 100%; margin: 0; box-sizing: border-box; height: 38px; font-size: 0.9rem; text-transform: uppercase;">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; font-weight: 700; color: var(--quiz-text); display: block; margin-bottom: 4px;">{{ _('Mô tả / Thông báo lớp:') }}</label>
+                        <textarea id="swal-edit-class-desc" class="swal2-textarea" style="width: 100%; margin: 0; box-sizing: border-box; font-size: 0.85rem; height: 60px;">{{ class_obj.description }}</textarea>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="swal-edit-class-active" {% if class_obj.is_active %}checked{% endif %} style="width: 18px; height: 18px;">
+                        <label for="swal-edit-class-active" style="font-size: 0.85rem; color: var(--quiz-text); font-weight: 600;">{{ _('Lớp học đang hoạt động (cho phép tham gia)') }}</label>
+                    </div>
+                    <div style="border-top: 1px solid var(--quiz-border); padding-top: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.8rem; color: var(--quiz-text-muted);">{{ _('Khu vực nguy hiểm:') }}</span>
+                        <button type="button" onclick="deleteClassConfirm()" style="background: rgba(220, 53, 69, 0.1); color: #dc3545 !important; border: 1px solid rgba(220, 53, 69, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+                            🗑️ {{ _('Xóa vĩnh viễn lớp học này') }}
+                        </button>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Lưu thay đổi') }}",
+            cancelButtonText: "{{ _('Hủy') }}",
+            preConfirm: () => {
+                const name = document.getElementById('swal-edit-class-name').value.trim();
+                const orgId = document.getElementById('swal-edit-class-org').value;
+                const code = document.getElementById('swal-edit-class-code').value.trim().toUpperCase();
+                const desc = document.getElementById('swal-edit-class-desc').value.trim();
+                const active = document.getElementById('swal-edit-class-active').checked;
+
+                if (!name) {
+                    Swal.showValidationMessage("{{ _('Vui lòng nhập tên lớp học.') }}");
+                    return false;
+                }
+                return { name, organization_id: orgId, access_code: code, description: desc, is_active: active ? 'true' : 'false' };
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                const formData = new FormData();
+                formData.append('name', result.value.name);
+                formData.append('organization_id', result.value.organization_id);
+                formData.append('access_code', result.value.access_code);
+                formData.append('description', result.value.description);
+                formData.append('is_active', result.value.is_active);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_edit_ajax', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("{{ _('Thành công') }}", data.message, "success")
+                            .then(() => location.reload());
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể cập nhật.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function deleteClassConfirm() {
+        Swal.fire({
+            title: "{{ _('Xác nhận xóa lớp học?') }}",
+            text: "{{ _('Thao tác này sẽ xóa lớp học và không thể hoàn tác!') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ _('Xóa Vĩnh Viễn') }}",
+            confirmButtonColor: '#dc3545',
+            cancelButtonText: "{{ _('Hủy') }}"
+        }).then((res) => {
+            if (res.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'delete');
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_edit_ajax', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire("{{ _('Đã xóa') }}", data.message, "success")
+                            .then(() => window.location.href = "{{ url('quiz_hub') }}");
+                    } else {
+                        Swal.fire("{{ _('Lỗi') }}", data.error || "{{ _('Không thể xóa lớp.') }}", "error");
+                    }
+                });
+            }
+        });
+    }
+
+    function toggleClassExamStatus(examId, btn) {
+        const formData = new FormData();
+        formData.append('action', 'toggle_exam_status');
+        formData.append('exam_id', examId);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (data.is_active) {
+                    btn.innerHTML = '🟢 ' + '{{ _("Đang mở phòng") }}';
+                    btn.style.background = 'rgba(16,185,129,0.15)';
+                    btn.style.color = '#047857';
+                } else {
+                    btn.innerHTML = '🔴 ' + '{{ _("Đang đóng phòng") }}';
+                    btn.style.background = 'rgba(239,68,68,0.15)';
+                    btn.style.color = '#dc2626';
+                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            } else {
+                Swal.fire('{{ _("Lỗi") }}', data.error || '{{ _("Không thể cập nhật trạng thái phòng thi.") }}', 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire('{{ _("Lỗi") }}', '{{ _("Lỗi kết nối máy chủ.") }}', 'error');
+        });
+    }
+
+    function quickUpdateExamPin(examId) {
+        Swal.fire({
+            title: '🎲 ' + '{{ _("Đổi / Sinh Mã PIN Mới") }}',
+            text: '{{ _("Bạn có muốn sinh ngẫu nhiên mã PIN mới 6 số cho đề thi này?") }}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Sinh PIN mới") }}',
+            cancelButtonText: '{{ _("Hủy") }}'
+        }).then(res => {
+            if (res.isConfirmed) {
+                const formData = new FormData();
+                formData.append('action', 'update_exam_pin');
+                formData.append('exam_id', examId);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.getElementById('pin-badge-' + examId);
+                        if (badge) badge.innerText = data.access_code;
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ _("Thành công") }}',
+                            text: data.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire('{{ _("Lỗi") }}', data.error, 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    function copyClassExamDirectLink(examId, accessCode, btn) {
+        let directUrl = window.location.origin + '/quiz/exams/' + examId + '/start/';
+        if (accessCode) {
+            directUrl = window.location.origin + '/quiz/join/' + accessCode + '/';
+        }
+        navigator.clipboard.writeText(directUrl).then(() => {
+            if (btn) {
+                const oldText = btn.innerText;
+                btn.innerText = '✓ ' + '{{ _("Đã Copy Link!") }}';
+                setTimeout(() => { btn.innerText = oldText; }, 2000);
+            }
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '{{ _("Đã copy link thi:") }} ' + directUrl,
+                showConfirmButton: false,
+                timer: 2500
+            });
+        });
+    }
+
+    function viewUnsubmittedStudents(examId, examName) {
+        const formData = new FormData();
+        formData.append('action', 'get_unsubmitted_students');
+        formData.append('exam_id', examId);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        Swal.fire({
+            title: '{{ _("Đang tải danh sách...") }}',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch("{{ url('quiz_class_member_action', class_id=class_obj.id) }}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const students = data.unsubmitted_students || [];
+                if (students.length === 0) {
+                    Swal.fire('{{ _("Thông báo") }}', '{{ _("Tất cả học sinh trong lớp đã nộp bài đầy đủ.") }}', 'success');
+                    return;
+                }
+
+                let listHtml = students.map((s, idx) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--quiz-border); font-size: 0.85rem;">
+                        <div>
+                            <b>${idx + 1}. ${s.display_name}</b>
+                            <span style="color: var(--quiz-text-muted); font-size: 0.78rem;">(@${s.username})</span>
+                        </div>
+                        <span style="color: #dc2626; font-size: 0.75rem; font-weight: 700;">Chưa nộp</span>
+                    </div>
+                `).join('');
+
+                const namesForCopy = students.map(s => `${s.display_name} (@${s.username})`).join(', ');
+
+                Swal.fire({
+                    title: `⚠️ {{ _("Danh sách chưa nộp bài") }} (${students.length} {{ _("em") }})`,
+                    html: `
+                        <div style="text-align: left; margin-bottom: 10px; font-size: 0.85rem;">
+                            <b>{{ _("Đề thi:") }}</b> <span style="color: var(--quiz-primary);">${examName}</span>
+                        </div>
+                        <div style="max-height: 250px; overflow-y: auto; text-align: left; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; margin-bottom: 12px;">
+                            ${listHtml}
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '📋 {{ _("Copy danh sách gửi Zalo / Lớp") }}',
+                    cancelButtonText: '{{ _("Đóng") }}'
+                }).then(res => {
+                    if (res.isConfirmed) {
+                        const copyTextContent = `📢 Nhắc nhở nộp bài "${examName}" (${students.length} bạn chưa nộp):\n${namesForCopy}`;
+                        navigator.clipboard.writeText(copyTextContent).then(() => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '{{ _("Đã copy!") }}',
+                                text: '{{ _("Đã copy danh sách học sinh chưa nộp vào Clipboard. Bạn có thể dán (Ctrl+V) vào nhóm lớp.") }}',
+                                timer: 3000
+                            });
+                        });
+                    }
+                });
+            } else {
+                Swal.fire('{{ _("Lỗi") }}', data.error || '{{ _("Không thể tải danh sách.") }}', 'error');
+            }
+        })
+        .catch(() => {
+            Swal.fire('{{ _("Lỗi") }}', '{{ _("Lỗi kết nối máy chủ.") }}', 'error');
+        });
+    }
+</script>
+{% endblock %}

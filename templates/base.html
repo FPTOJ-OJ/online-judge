@@ -541,13 +541,15 @@
                 {% endfor %}
                 {% if site_config.quiz_enabled %}
                 <li>
-                    <a href="{{ url('quiz_home') }}"
+                    <a href="{{ url('quiz_hub') }}"
                         class="nav-quiz{% if request.path.startswith('/quiz') %} active{% endif %}">
-                        {{ _("Exam Practice") }} <div class="nav-expand">&gt;</div>
+                        {{ _("Quiz & Lớp Học") }} <div class="nav-expand">&gt;</div>
                     </a>
                     <ul>
-                        <li><a href="{{ url('quiz_home') }}">{{ _("Practice") }}</a></li>
-                        <li><a href="{{ url('quiz_exams_list') }}">{{ _("Exams") }}</a></li>
+                        <li><a href="{{ url('quiz_hub') }}">🏫 {{ _("Lớp Học & Kết Quả") }}</a></li>
+                        <li><a href="{{ url('quiz_join_pin') }}">🔑 {{ _("Vào Thi Bằng PIN") }}</a></li>
+                        <li><a href="{{ url('quiz_exams_list') }}">📚 {{ _("Thư Viện Đề Thi") }}</a></li>
+                        <li><a href="{{ url('quiz_home') }}">🎯 {{ _("Luyện Tập Trắc Nghiệm") }}</a></li>
                     </ul>
                 </li>
                 {% endif %}

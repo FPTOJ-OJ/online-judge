@@ -25,6 +25,7 @@ build_style() {
       sass_processed/featherlight.css \
       sass_processed/martor-description.css \
       sass_processed/select2-dmoj.css \
+      sass_processed/quiz.css \
       sass_processed/style.css \
       --verbose --use autoprefixer -d "$2"
   rm resources/vars.scss

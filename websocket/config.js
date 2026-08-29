@@ -6,4 +6,5 @@ module.exports = {
     http_host: '127.0.0.1',
     http_port: 15102,
     long_poll_timeout: 29000,
+    max_queue: 5000,
 };

@@ -8625,6 +8625,24 @@ msgstr "Mã nguồn của bạn chỉ được chứa tối đa 65536 kí tự."
 msgid "📂 Paste, Drag & Drop your code file here or upload from file:"
 msgstr "📂 Dán, Kéo & Thả file mã của bạn vào đây hoặc tải lên từ file:"
 
+msgid "Chọn file..."
+msgstr "Chọn file..."
+
+msgid "Thả file mã nguồn vào đây"
+msgstr "Thả file mã nguồn vào đây"
+
+msgid "Hệ thống sẽ tự động đọc code và nhận diện ngôn ngữ phù hợp"
+msgstr "Hệ thống sẽ tự động đọc code và nhận diện ngôn ngữ phù hợp"
+
+msgid "Đã tải file thành công:"
+msgstr "Đã tải file thành công:"
+
+msgid "Tự động nhận diện:"
+msgstr "Tự động nhận diện:"
+
+msgid "Tự động chọn:"
+msgstr "Tự động chọn:"
+
 #: templates/problem/submit.html:187
 msgid "Warning!"
 msgstr "Cảnh báo!"
@@ -11629,3 +11647,148 @@ msgstr "Chọn tất cả"
 #~ msgid ""
 #~ "You cannot change the subject orientation after answering any question."
 #~ msgstr "Bạn không thể đổi định hướng môn học sau khi đã trả lời câu hỏi."
+
+msgid "Strict Anti-Cheat / Proctored Mode"
+msgstr "Chế độ thi nghiêm ngặt (Chống gian lận)"
+
+msgid "Anti-Cheat Mode"
+msgstr "Chế độ chống gian lận"
+
+msgid "Anti-Cheat"
+msgstr "Chống gian lận"
+
+msgid "Maximum allowed violations"
+msgstr "Số lần vi phạm tối đa cho phép"
+
+msgid "Forces Fullscreen, blocks tab switching/blur, blocks DevTools/shortcuts, records realtime violations and can auto-submit on limit exceeded."
+msgstr "Bắt buộc toàn màn hình, phát hiện chuyển tab/thu nhỏ, chặn phím tắt/F12, ghi nhận vi phạm thời gian thực và tự động nộp bài khi vượt ngưỡng."
+
+msgid "Set to 0 to only warn and log violations without auto-submitting."
+msgstr "Đặt bằng 0 để chỉ cảnh báo và ghi log vi phạm mà không tự động nộp bài."
+
+msgid "Detailed score statistics, item analysis, weakest questions breakdown, and student proctoring logs."
+msgstr "Thống kê điểm số chi tiết, phân tích từng câu hỏi, tổng hợp câu hay sai và nhật ký giám sát thí sinh."
+
+msgid "Live Monitor"
+msgstr "Giám sát trực tiếp"
+
+msgid "Filter by Class / School:"
+msgstr "Lọc theo Lớp / Trường:"
+
+msgid "All Classes"
+msgstr "Tất cả các Lớp"
+
+msgid "All Organizations"
+msgstr "Tất cả các Trường / Tổ chức"
+
+msgid "Clear Filter"
+msgstr "Xóa bộ lọc"
+
+msgid "Showing: %(count)s submissions"
+msgstr "Đang hiển thị: %(count)s bài nộp"
+
+msgid "Score range: %(range)s"
+msgstr "Khoảng điểm: %(range)s"
+
+msgid "Avg. Time Spent"
+msgstr "Thời gian TB"
+
+msgid "Exam limit: %(dur)s min"
+msgstr "Thời gian đề: %(dur)s phút"
+
+msgid "Anti-Cheat Flags"
+msgstr "Cảnh báo vi phạm"
+
+msgid "sessions with flags"
+msgstr "bài thi có vi phạm"
+
+msgid "Score Distribution"
+msgstr "Phổ điểm phân bố"
+
+msgid "No exam attempts found for current filter."
+msgstr "Chưa có bài thi nào phù hợp với bộ lọc hiện tại."
+
+msgid "Top Weakest Questions"
+msgstr "Top Câu Hỏi Hay Bị Làm Sai"
+
+msgid "Use for targeted practice"
+msgstr "Dùng để giao bài tập củng cố"
+
+msgid "Question %(idx)s"
+msgstr "Câu %(idx)s"
+
+msgid "Accuracy"
+msgstr "Tỉ lệ đúng"
+
+msgid "Data will appear once students submit their exams."
+msgstr "Dữ liệu sẽ xuất hiện khi có học sinh nộp bài thi."
+
+msgid "Topic Mastery Heatmap"
+msgstr "Mức Độ Nắm Vững Kiến Thức Theo Chuyên Đề"
+
+msgid "No topic data available yet."
+msgstr "Chưa có dữ liệu chuyên đề."
+
+msgid "Orientation Breakdown"
+msgstr "Phân Ban Định Hướng"
+
+msgid "Applied Informatics"
+msgstr "Tin học ứng dụng"
+
+msgid "/10 avg score"
+msgstr "/10 điểm TB"
+
+msgid "Item Analysis Matrix"
+msgstr "Ma Trận Phân Tích Từng Câu Hỏi"
+
+msgid "Distractor Breakdown"
+msgstr "Phân bố đáp án"
+
+msgid "True/False"
+msgstr "Đúng/Sai"
+
+msgid "Skip:"
+msgstr "Bỏ:"
+
+msgid "Student Submissions"
+msgstr "Danh Sách Bài Nộp Của Học Sinh"
+
+msgid "Violation Alerts"
+msgstr "Cảnh báo vi phạm"
+
+msgid "Submission Time"
+msgstr "Thời điểm nộp"
+
+msgid "violations"
+msgstr "vi phạm"
+
+msgid "Clean"
+msgstr "Sạch"
+
+msgid "This student has no violation logs."
+msgstr "Học sinh này không có nhật ký vi phạm."
+
+msgid "Violation Log"
+msgstr "Nhật ký vi phạm"
+
+msgid "Class Exams & Assignments"
+msgstr "Bài kiểm tra & Đề thi của Lớp"
+
+msgid "Active Desks"
+msgstr "Bàn thi đang làm"
+
+msgid "Completed Today"
+msgstr "Đã nộp hôm nay"
+
+msgid "Auto-refreshing every 4s"
+msgstr "Tự động làm mới mỗi 4s"
+
+msgid "No active students taking this exam right now."
+msgstr "Hiện tại chưa có học sinh nào đang làm đề thi này."
+
+msgid "Waiting for students to join room..."
+msgstr "Đang chờ thí sinh vào phòng thi..."
+
+msgid "Student Audit Log"
+msgstr "Nhật ký sự kiện thí sinh"
+

@@ -41,7 +41,7 @@ from judge.utils.infinite_paginator import InfinitePaginationMixin
 from judge.utils.mail import send_mail
 from judge.utils.problems import contest_completed_ids, user_completed_ids
 from judge.utils.pwned import PwnedPasswordsValidator
-from judge.utils.ranker import ranker
+from judge.utils.ranker import attach_quiz_stats, ranker
 from judge.utils.subscription import Subscription
 from judge.utils.unicode import utf8text
 from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, TitleMixin, add_file_response, generic_message
@@ -530,9 +530,13 @@ class UserList(QueryStringSortMixin, InfinitePaginationMixin, DiggPaginatorMixin
     default_sort = '-performance_points'
 
     def get_queryset(self):
-        return (Profile.objects.filter(is_unlisted=False).order_by(self.order, 'id').select_related('user')
-                .only('display_rank', 'user__username', 'username_display_override', 'points', 'rating',
-                      'performance_points', 'problem_count'))
+        qs = (Profile.objects.filter(is_unlisted=False).order_by(self.order, 'id').select_related('user')
+              .only('display_rank', 'user__username', 'username_display_override', 'points', 'rating',
+                    'performance_points', 'problem_count'))
+        class_id = self.request.GET.get('class')
+        if class_id and class_id.isdigit():
+            qs = qs.filter(class__id=int(class_id))
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(UserList, self).get_context_data(**kwargs)
@@ -541,43 +545,34 @@ class UserList(QueryStringSortMixin, InfinitePaginationMixin, DiggPaginatorMixin
             key=attrgetter('performance_points', 'problem_count'),
             rank=self.paginate_by * (context['page_obj'].number - 1),
         ))
-        
-        user_ids = [p.user_id for rank, p in users if p.user_id]
-        if user_ids:
-            from judge.models.quiz import QuizSession
-            sessions = QuizSession.objects.filter(
-                user_id__in=user_ids,
-                completed=True,
-                answers__has_key='__meta__'
-            )
-            
-            user_exam_scores = {}
-            for sess in sessions:
-                uid = sess.user_id
-                meta = sess.answers.get('__meta__', {})
-                source_id = meta.get('source_id')
-                if not source_id:
-                    continue
-                if uid not in user_exam_scores:
-                    user_exam_scores[uid] = {}
-                current_best = user_exam_scores[uid].get(source_id, 0.0)
-                user_exam_scores[uid][source_id] = max(current_best, sess.score)
-                
-            for rank, p in users:
-                uid = p.user_id
-                if uid in user_exam_scores:
-                    p.quiz_exams_completed = len(user_exam_scores[uid])
-                    p.quiz_points = sum(user_exam_scores[uid].values())
-                else:
-                    p.quiz_exams_completed = 0
-                    p.quiz_points = 0.0
-        else:
-            for rank, p in users:
-                p.quiz_exams_completed = 0
-                p.quiz_points = 0.0
-
+        attach_quiz_stats(users)
         context['users'] = users
         context['first_page_href'] = '.'
+
+        from judge.models import Class
+        user = self.request.user
+        available_classes = []
+        if user.is_authenticated:
+            if user.is_superuser:
+                available_classes = Class.objects.filter(is_active=True).select_related('organization').order_by('name')
+            elif hasattr(user, 'profile'):
+                available_classes = Class.objects.filter(
+                    Q(admins=user.profile) | Q(organization__admins=user.profile) | Q(members=user.profile),
+                    is_active=True
+                ).distinct().select_related('organization').order_by('name')
+
+        class_id = self.request.GET.get('class')
+        current_class = None
+        if class_id and class_id.isdigit():
+            try:
+                current_class = Class.objects.get(id=int(class_id))
+            except Class.DoesNotExist:
+                pass
+
+        context['available_classes'] = available_classes
+        context['current_class_id'] = int(class_id) if class_id and class_id.isdigit() else None
+        context['current_class'] = current_class
+
         context.update(self.get_sort_context())
         context.update(self.get_sort_paginate_context())
         return context

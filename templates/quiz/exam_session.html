@@ -1,64 +1,77 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ static('event.js') }}"></script>
 {% endblock %}
 
 {% block body %}
 <div class="quiz-container">
-    <!-- Header portal -->
+    <!-- Header portal with Smart Scaling -->
     <div class="quiz-session-header">
-        <div class="header-actions">
-            <button type="button" class="quiz-session-btn" onclick="exitExam()" style="border-color: var(--quiz-danger); color: var(--quiz-danger);">
-                <i class="fa fa-arrow-left"></i> {{ _('Exit') }}
+        <!-- Left cluster: Exit, View Mode, Navigation -->
+        <div class="header-cluster">
+            <button type="button" class="quiz-session-btn" onclick="exitExam()" style="color: var(--quiz-danger); border-color: var(--quiz-border);" title="{{ _('Thoát khỏi bài thi') }}">
+                <i class="fa fa-arrow-left"></i>
+                <span class="btn-text-label">{{ _('Thoát') }}</span>
             </button>
             <div class="view-mode-tabs">
-                <div class="view-mode-tab active" id="mode-tab-single" onclick="setViewMode('single')">{{ _('Single question') }}</div>
-                <div class="view-mode-tab" id="mode-tab-list" onclick="setViewMode('list')">{{ _('List') }}</div>
+                <div class="view-mode-tab active" id="mode-tab-single" onclick="setViewMode('single')" title="{{ _('Làm từng câu một') }}">{{ _('Từng câu') }}</div>
+                <div class="view-mode-tab" id="mode-tab-list" onclick="setViewMode('list')" title="{{ _('Xem toàn bộ danh sách câu hỏi') }}">{{ _('Danh sách') }}</div>
+            </div>
+            <button type="button" class="quiz-session-btn" id="nav-btn-prev" onclick="jumpPrevQuestion()" title="{{ _('Câu trước') }}">
+                <i class="fa fa-chevron-left"></i>
+                <span class="btn-text-nav">{{ _('Trước') }}</span>
+            </button>
+            <button type="button" class="quiz-session-btn" id="nav-btn-next" onclick="jumpNextQuestion()" title="{{ _('Câu tiếp theo') }}">
+                <span class="btn-text-nav">{{ _('Tiếp') }}</span>
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- Center cluster: Anti-Cheat status & Orientation Track -->
+        <div class="header-cluster-center">
+            {% if is_strict_anti_cheat %}
+                <div class="anticheat-badge" id="anticheat-hud" title="{{ _('Số lần vi phạm phát hiện bởi giám sát phòng thi') }}">
+                    <span>{{ _('Giám sát') }}: <span id="violation-count-badge">{{ violation_count }}</span>/{{ max_violations if max_violations > 0 else '∞' }} {{ _('vi phạm') }}</span>
+                </div>
+            {% endif %}
+            <div class="orient-switch-group">
+                <button type="button" class="orient-tab-btn" id="btn-orient-khmt" onclick="switchOrientationTrack('KHMT')" title="{{ _('Khoa học máy tính (CS)') }}" style="background: {% if selected_orientation == 'KHMT' or selected_orientation == 'ALL' or not selected_orientation %}var(--quiz-primary){% else %}transparent{% endif %}; color: {% if selected_orientation == 'KHMT' or selected_orientation == 'ALL' or not selected_orientation %}#ffffff{% else %}var(--quiz-text-muted){% endif %};">
+                    <span class="orient-long-label">{{ _('Khoa học máy tính (CS)') }}</span>
+                    <span class="orient-short-label">CS</span>
+                </button>
+                <button type="button" class="orient-tab-btn" id="btn-orient-thud" onclick="switchOrientationTrack('THUD')" title="{{ _('Tin học ứng dụng (ICT)') }}" style="background: {% if selected_orientation == 'THUD' %}var(--quiz-primary){% else %}transparent{% endif %}; color: {% if selected_orientation == 'THUD' %}#ffffff{% else %}var(--quiz-text-muted){% endif %};">
+                    <span class="orient-long-label">{{ _('Tin học ứng dụng (ICT)') }}</span>
+                    <span class="orient-short-label">ICT</span>
+                </button>
             </div>
         </div>
 
-        <div class="header-actions">
-            <button type="button" class="quiz-session-btn" id="nav-btn-prev" onclick="jumpPrevQuestion()">
-                <i class="fa fa-chevron-left"></i> {{ _('Previous') }}
-            </button>
-            <button type="button" class="quiz-session-btn" id="nav-btn-next" onclick="jumpNextQuestion()">
-                {{ _('Next') }} <i class="fa fa-chevron-right"></i>
-            </button>
-        </div>
-
-        <div class="orient-toggles">
-            <div class="orient-badge-locked" title="{{ _('Orientation is locked during exam. You selected this before starting.') }}">
-                <i class="fa fa-lock" style="margin-right: 5px; font-size: 0.75rem;"></i>
-                {% if selected_orientation == 'KHMT' %}
-                    {{ _('CS (Computer Science)') }}
-                {% else %}
-                    {{ _('IT (Applied Informatics)') }}
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="header-actions">
-            <div class="timer-badge">
+        <!-- Right cluster: Timer, Tools, Submit -->
+        <div class="header-cluster">
+            <div class="timer-badge" title="{{ _('Thời gian còn lại') }}">
                 <i class="fa fa-clock-o"></i>
                 <span id="timer-display">{{ time_left_str }}</span>
             </div>
             
             <div class="tools-dropdown">
-                <button type="button" class="quiz-session-btn" id="btn-tools-trigger" onclick="toggleToolsMenu()">
-                    <i class="fa fa-wrench"></i> {{ _('Tools') }} <i class="fa fa-caret-down"></i>
+                <button type="button" class="quiz-session-btn" id="btn-tools-trigger" onclick="toggleToolsMenu()" title="{{ _('Công cụ vẽ và ghi chú') }}">
+                    <i class="fa fa-wrench"></i>
+                    <span class="btn-text-label">{{ _('Công cụ') }}</span>
+                    <i class="fa fa-caret-down"></i>
                 </button>
                 <div class="tools-menu" id="tools-dropdown-menu">
-                    <div class="tools-item{% if not enable_scratchpad %} disabled-item{% endif %}" onclick="{% if enable_scratchpad %}openScratchpad(){% endif %}" {% if not enable_scratchpad %}style="opacity: 0.4; cursor: not-allowed;"{% endif %}><i class="fa fa-pencil"></i> {{ _('Scratchpad') }}</div>
-                    <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">{{ _('Draw on question') }}</span></div>
-                    <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> {{ _('Highlight') }}</div>
-                    <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> {{ _('Clear highlight') }}</div>
-                    <div class="tools-item" onclick="clearDrawingOnCurrentQuestion()"><i class="fa fa-trash-o"></i> {{ _('Clear drawings') }}</div>
+                    <div class="tools-item{% if not enable_scratchpad %} disabled-item{% endif %}" onclick="handleScratchpadClick()" {% if not enable_scratchpad %}style="opacity: 0.4; cursor: not-allowed;"{% endif %}><i class="fa fa-pencil"></i> {{ _('Bảng nháp & Ghi chú') }}</div>
+                    <div class="tools-item" onclick="toggleDrawingOnQuestion()"><i class="fa fa-paint-brush"></i> <span id="draw-mode-label">{{ _('Vẽ lên đề bài') }}</span></div>
+                    <div class="tools-item" id="highlight-toggle-btn" onclick="toggleHighlightMode()"><i class="fa fa-font"></i> {{ _('Đánh dấu từ khóa (Highlight)') }}</div>
+                    <div class="tools-item" onclick="clearHighlightsText()"><i class="fa fa-eraser"></i> {{ _('Xóa đánh dấu') }}</div>
+                    <div class="tools-item" onclick="clearDrawingOnCurrentQuestion()"><i class="fa fa-trash-o"></i> {{ _('Xóa nét vẽ') }}</div>
                 </div>
             </div>
 
-            <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="background: var(--quiz-success); color: #ffffff;">
-                <i class="fa fa-paper-plane"></i> {{ _('Submit') }}
+            <button type="button" class="quiz-btn-primary" onclick="submitExam()" style="padding: 5px 14px; font-size: 0.82rem; font-weight: 600; background: #10b981; color: #ffffff; border: 1px solid #059669; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;">
+                <i class="fa fa-paper-plane"></i>
+                <span>{{ _('Nộp bài thi') }}</span>
             </button>
         </div>
     </div>
@@ -74,11 +87,11 @@
                     <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">{{ _('MULTIPLE CHOICE') }}</span>
-                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">{{ _('PART I - Q%(index)s', index=q.index) }}</span>
+                            <span class="quiz-q-tag type">{{ _('TRẮC NGHIỆM') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">{{ _('PHẦN I - CÂU %(index)s', index=q.index) }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">{{ _('Orientation %(orientation)s', orientation=q.orientation) }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Định hướng %(orientation)s', orientation=q.orientation) }}</span>
                             {% endif %}
                         </div>
                         <div class="quiz-q-body text-content-body">
@@ -105,11 +118,11 @@
                     <canvas class="drawing-canvas-overlay" id="draw-overlay-{{ q.id }}"></canvas>
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">{{ _('TRUE / FALSE') }}</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PART II - Q%(index)s', index=q.display_index) }}</span>
+                            <span class="quiz-q-tag type">{{ _('ĐÚNG / SAI') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PHẦN II - CÂU %(index)s', index=q.display_index) }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.difficulty }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">{{ _('Orientation %(orientation)s', orientation=q.orientation) }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Định hướng %(orientation)s', orientation=q.orientation) }}</span>
                             {% endif %}
                         </div>
                         <div class="quiz-q-body text-content-body">
@@ -124,8 +137,8 @@
                                         <div class="quiz-tf-text">{{ opt.content|markdown('problem') }}</div>
                                     </div>
                                     <div class="quiz-tf-buttons">
-                                        <button type="button" class="quiz-tf-btn true-btn {% if q.user_answer and q.user_answer[opt.label] == True %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', true)">{{ _('True') }}</button>
-                                        <button type="button" class="quiz-tf-btn false-btn {% if q.user_answer and q.user_answer[opt.label] == False %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', false)">{{ _('False') }}</button>
+                                        <button type="button" class="quiz-tf-btn true-btn {% if q.user_answer and q.user_answer[opt.label] == True %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', true)">{{ _('Đúng') }}</button>
+                                        <button type="button" class="quiz-tf-btn false-btn {% if q.user_answer and q.user_answer[opt.label] == False %}active{% endif %}" onclick="selectTF(this, '{{ q.id }}', '{{ opt.label }}', false)">{{ _('Sai') }}</button>
                                     </div>
                                 </div>
                             {% endfor %}
@@ -139,10 +152,10 @@
         <!-- Right Sidebar -->
         <div class="quiz-right-pane">
             <div class="sidebar-card">
-                <h3 style="padding-bottom: 12px;">{{ _('Question list') }}</h3>
+                <h3 style="padding-bottom: 12px;">{{ _('Danh sách câu hỏi') }}</h3>
                 <div class="part-tabs">
-                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PART I') }}</div>
-                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PART II') }}</div>
+                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PHẦN I') }}</div>
+                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PHẦN II') }}</div>
                 </div>
                 
                 <!-- Part I Grid -->
@@ -165,39 +178,39 @@
             </div>
             
             <div class="quiz-legend-card">
-                <h4>{{ _('Legend') }}</h4>
+                <h4>{{ _('Chú thích trạng thái') }}</h4>
                 <div class="legend-content">
                     <div class="legend-item">
                         <span class="legend-swatch correct"></span>
-                        <span>{{ _('Answered') }}</span>
+                        <span>{{ _('Đã trả lời') }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-swatch unanswered"></span>
-                        <span>{{ _('Unanswered') }}</span>
+                        <span>{{ _('Chưa trả lời') }}</span>
                     </div>
                 </div>
             </div>
             
             <div class="learning-help-card">
-                <h4><i class="fa fa-info-circle"></i> {{ _('Learning tools') }}</h4>
+                <h4><i class="fa fa-info-circle"></i> {{ _('Công cụ học tập & Tiện ích') }}</h4>
                 <div class="help-content">
                     <div{% if not enable_scratchpad %} style="opacity: 0.4;"{% endif %}>
-                        <strong><i class="fa fa-pencil"></i> {{ _('Scratchpad:') }}</strong>
-                        {{ _('Click') }} <em>{{ _('Tools') }}</em> &gt; <em>{{ _('Scratchpad') }}</em> {{ _('to open the drawing board.') }}
+                        <strong><i class="fa fa-pencil"></i> {{ _('Bảng nháp:') }}</strong>
+                        {{ _('Nhấn') }} <em>{{ _('Công cụ') }}</em> &gt; <em>{{ _('Bảng nháp') }}</em> {{ _('để mở không gian vẽ và ghi chú.') }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-paint-brush"></i> {{ _('Draw directly:') }}</strong>
-                        {{ _('Select') }} <em>{{ _('Draw on question') }}</em> {{ _('to sketch with mouse or touch directly on the question content.') }}
+                        <strong><i class="fa fa-paint-brush"></i> {{ _('Vẽ trực tiếp:') }}</strong>
+                        {{ _('Chọn') }} <em>{{ _('Vẽ lên đề bài') }}</em> {{ _('để phác thảo trực tiếp trên nội dung câu hỏi.') }}
                     </div>
                     <div>
-                        <strong><i class="fa fa-font"></i> {{ _('Highlight:') }}</strong>
-                        {{ _('Select any text in the question, then choose') }} <em>{{ _('Highlight') }}</em> {{ _('to save annotations.') }}
+                        <strong><i class="fa fa-font"></i> {{ _('Đánh dấu:') }}</strong>
+                        {{ _('Bôi đen văn bản trong câu hỏi để đánh dấu highlight từ khóa quan trọng.') }}
                     </div>
                     {% if show_score_per_question or show_feedback %}
                         <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--quiz-border);">
-                            <strong><i class="fa fa-cog"></i> {{ _('Exam config') }}:</strong>
-                            {% if show_score_per_question %}<span class="quiz-q-tag type" style="margin: 2px; font-size: 0.65rem;">{{ _('Show score') }}</span>{% endif %}
-                            {% if show_feedback %}<span class="quiz-q-tag source" style="margin: 2px; font-size: 0.65rem;">{{ _('Show explanations') }}</span>{% endif %}
+                            <strong><i class="fa fa-cog"></i> {{ _('Cấu hình đề') }}:</strong>
+                            {% if show_score_per_question %}<span class="quiz-q-tag type" style="margin: 2px; font-size: 0.65rem;">{{ _('Hiện điểm số') }}</span>{% endif %}
+                            {% if show_feedback %}<span class="quiz-q-tag source" style="margin: 2px; font-size: 0.65rem;">{{ _('Hiện lời giải') }}</span>{% endif %}
                         </div>
                     {% endif %}
                 </div>
@@ -207,20 +220,20 @@
 </div>
 
 <!-- Scratchpad Modal overlay -->
-<div id="quiz-scratchpad-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 750px; height: 500px; background: var(--quiz-card-bg); border: 2px solid var(--quiz-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 10000; flex-direction: column; overflow: hidden; font-family: 'Outfit', sans-serif;">
+<div id="quiz-scratchpad-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 750px; height: 500px; background: var(--quiz-card-bg); border: 2px solid var(--quiz-border); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 10000; flex-direction: column; overflow: hidden; font-family: inherit;">
     <div class="scratchpad-header" style="background: var(--quiz-card-bg); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--quiz-border);">
-        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> {{ _('Student scratchpad') }}</h3>
+        <h3 style="color: var(--quiz-text); margin: 0; font-size: 1.05rem;"><i class="fa fa-pencil"></i> {{ _('Bảng Nháp & Ghi Chú Học Sinh') }}</h3>
         <div style="display: flex; gap: 8px; align-items: center;">
             <button type="button" class="quiz-session-btn" id="scratchpad-tool-pen" onclick="setScratchpadTool('pen')" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-info) !important; border-color: var(--quiz-info) !important; color: #fff !important;">
-                <i class="fa fa-pencil"></i> {{ _('Pen') }}
+                <i class="fa fa-pencil"></i> {{ _('Bút vẽ') }}
             </button>
             <button type="button" class="quiz-session-btn" id="scratchpad-tool-eraser" onclick="setScratchpadTool('eraser')" style="padding: 4px 10px; font-size: 0.75rem; background: transparent; border-color: var(--quiz-border); color: var(--quiz-text-muted);">
-                <i class="fa fa-eraser"></i> {{ _('Eraser') }}
+                <i class="fa fa-eraser"></i> {{ _('Tẩy') }}
             </button>
             <span style="width: 1px; height: 16px; background: var(--quiz-border); margin: 0 4px;"></span>
-            <button type="button" class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Clear canvas') }}</button>
-            <button type="button" class="quiz-session-btn" onclick="clearScratchpadText()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Clear notes') }}</button>
-            <button type="button" class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important;">{{ _('Close') }}</button>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpad()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Xóa hình vẽ') }}</button>
+            <button type="button" class="quiz-session-btn" onclick="clearScratchpadText()" style="padding: 4px 10px; font-size: 0.75rem;">{{ _('Xóa ghi chú') }}</button>
+            <button type="button" class="quiz-session-btn" onclick="closeScratchpad()" style="padding: 4px 10px; font-size: 0.75rem; background: var(--quiz-danger) !important; border-color: var(--quiz-danger) !important; color: #fff !important;">{{ _('Đóng') }}</button>
         </div>
     </div>
     <div class="scratchpad-body" style="display: flex; gap: 16px; padding: 16px; height: calc(100% - 50px); box-sizing: border-box; background: var(--quiz-card-bg);">
@@ -245,8 +258,13 @@
     var timeLeft = parseInt('{{ time_left_seconds }}');
     var tickCounter = 0;
 
+    var isExamPaused = false;
+    var lastWarningId = null;
+
     // Timer logic
     var timerInterval = setInterval(function() {
+        if (isExamPaused) return; // Do not count down when paused by teacher
+
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             autoSubmitExam();
@@ -261,11 +279,110 @@
         document.getElementById('timer-display').innerText = 
             (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 
-        // Persist time left to server every 15 seconds
-        if (tickCounter % 15 === 0) {
+        // Persist time left to server every 10 seconds & check for teacher actions
+        if (tickCounter % 10 === 0) {
             persistTimeLeft();
         }
     }, 1000);
+
+    function handleServerProctorState(data) {
+        if (!data) return;
+
+        // 1. Force submitted by teacher
+        if (data.force_submitted) {
+            Swal.fire({
+                title: '{{ _("Bài thi đã bị thu hồi") }}',
+                text: '{{ _("Giám thị đã yêu cầu nộp bài của bạn ngay lập tức.") }}',
+                icon: 'warning',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                timer: 2500
+            }).then(() => {
+                performSubmission();
+            });
+            return;
+        }
+
+        // 2. Paused by teacher
+        if (data.is_paused && !isExamPaused) {
+            isExamPaused = true;
+            Swal.fire({
+                title: '⏸️ {{ _("Bài thi đang tạm dừng") }}',
+                text: '{{ _("Giám thị đang tạm dừng bài thi của bạn. Đồng hồ đếm ngược đã dừng lại. Vui lòng giữ nguyên màn hình và chờ giám thị mở lại.") }}',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                customClass: { popup: 'proctor-pause-modal' }
+            });
+        } else if (!data.is_paused && isExamPaused) {
+            isExamPaused = false;
+            Swal.close();
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'success',
+                title: '▶️ {{ _("Bài thi đã được tiếp tục!") }}'
+            });
+        }
+
+        // 3. Proctor Warning Message
+        if (data.proctor_warning && data.proctor_warning.id !== lastWarningId) {
+            lastWarningId = data.proctor_warning.id;
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e) {}
+
+            Swal.fire({
+                title: '⚠️ {{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
+                html: `<div style="font-size: 1.05rem; padding: 12px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; border-radius: 4px; color: #b91c1c; text-align: left;">
+                    <b>[${data.proctor_warning.time}]</b> ${data.proctor_warning.message}
+                </div>`,
+                icon: 'warning',
+                confirmButtonText: '{{ _("Tôi đã hiểu và tập trung làm bài") }}',
+                confirmButtonColor: 'var(--quiz-primary)'
+            }).then(() => {
+                var ackForm = new FormData();
+                ackForm.append('action', 'ack_warning');
+                ackForm.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                fetch('/quiz/exams/session/{{ session.id }}/action/', {
+                    method: 'POST',
+                    body: ackForm
+                });
+            });
+        }
+
+        // 4. Extra time added
+        if (data.time_left && data.time_left > timeLeft + 60) {
+            timeLeft = data.time_left;
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'info',
+                title: '⏱️ {{ _("Bạn vừa được giám thị cộng thêm thời gian làm bài!") }}'
+            });
+        }
+    }
 
     function persistTimeLeft() {
         var formData = new FormData();
@@ -275,8 +392,31 @@
         fetch('/quiz/exams/session/{{ session.id }}/action/', {
             method: 'POST',
             body: formData
-        });
+        })
+        .then(res => res.json())
+        .then(data => {
+            handleServerProctorState(data);
+        })
+        .catch(err => {});
     }
+
+    // WebSocket listener for live instant proctor push
+    try {
+        var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var host = window.location.hostname;
+        var wsSession = new WebSocket(protocol + '//' + host + ':15100');
+        wsSession.onopen = function() {
+            wsSession.send(JSON.stringify({
+                command: 'set_filter',
+                filter: ['quiz_session_{{ session.id }}']
+            }));
+        };
+        wsSession.onmessage = function(event) {
+            try {
+                persistTimeLeft();
+            } catch(e) {}
+        };
+    } catch(e) {}
 
     // View logic
     function setViewMode(mode) {
@@ -393,6 +533,33 @@
     }
 
     // Orientation Logic
+    function switchOrientationTrack(orient) {
+        applyOrientationUI(orient);
+        var btnKhmt = document.getElementById('btn-orient-khmt');
+        var btnThud = document.getElementById('btn-orient-thud');
+        if (btnKhmt && btnThud) {
+            if (orient === 'KHMT') {
+                btnKhmt.style.background = 'var(--quiz-primary)';
+                btnKhmt.style.color = '#ffffff';
+                btnThud.style.background = 'transparent';
+                btnThud.style.color = 'var(--quiz-text-muted)';
+            } else {
+                btnThud.style.background = 'var(--quiz-primary)';
+                btnThud.style.color = '#ffffff';
+                btnKhmt.style.background = 'transparent';
+                btnKhmt.style.color = 'var(--quiz-text-muted)';
+            }
+        }
+        
+        var fd = new FormData();
+        fd.append('action', 'change_orientation');
+        fd.append('orientation', orient);
+        fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        fetch("{{ url('quiz_exam_action', session_id=session.id) }}", {
+            method: 'POST',
+            body: fd
+        });
+    }
 
     function applyOrientationUI(orient) {
         activeOrientation = orient;
@@ -443,10 +610,21 @@
         updateActiveQuestionUI();
     }
 
+    // Local offline buffer & answer saving
+    function cacheAnswerLocally(qid, ansType, ansVal) {
+        try {
+            var localKey = 'quiz_offline_{{ session.id }}';
+            var curr = JSON.parse(localStorage.getItem(localKey) || '{}');
+            curr[qid] = { type: ansType, val: ansVal, timestamp: Date.now() };
+            localStorage.setItem(localKey, JSON.stringify(curr));
+        } catch(e) {}
+    }
+
     // Question Selection logic
     function selectChoice(el, qid, label) {
         var card = el.closest('.question-card');
         if (card.classList.contains('orientation-inactive')) return;
+        if (isExamPaused) return;
 
         // Visual select
         card.querySelectorAll('.quiz-option-card').forEach(opt => opt.classList.remove('selected'));
@@ -455,6 +633,9 @@
         // Update sidebar grid
         var qIdx = card.getAttribute('data-index');
         document.getElementById('grid-btn-' + qIdx).classList.add('answered');
+
+        // Save locally first
+        cacheAnswerLocally(qid, 'choice', label);
 
         // AJAX POST to save answer
         var formData = new FormData();
@@ -467,12 +648,20 @@
         fetch('/quiz/exams/session/{{ session.id }}/action/', {
             method: 'POST',
             body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            handleServerProctorState(data);
+        })
+        .catch(err => {
+            console.warn('Answer saved to offline cache, will sync automatically:', err);
         });
     }
 
     function selectTF(btn, qid, label, val) {
         var card = btn.closest('.question-card');
         if (card.classList.contains('orientation-inactive')) return;
+        if (isExamPaused) return;
 
         var row = btn.closest('.quiz-tf-row');
         row.querySelectorAll('.quiz-tf-btn').forEach(b => b.classList.remove('active'));
@@ -492,6 +681,8 @@
             }
         }, 10);
 
+        cacheAnswerLocally(qid + '_' + label, 'tf', val ? 'true' : 'false');
+
         // AJAX POST to save T/F subanswer
         var formData = new FormData();
         formData.append('action', 'save_answer');
@@ -503,6 +694,13 @@
         fetch('/quiz/exams/session/{{ session.id }}/action/', {
             method: 'POST',
             body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            handleServerProctorState(data);
+        })
+        .catch(err => {
+            console.warn('T/F answer saved to offline cache, will sync automatically:', err);
         });
     }
 
@@ -905,11 +1103,393 @@
         }
     }
 
+    var scratchpadEnabled = ("{{ enable_scratchpad }}" === "True");
+    function handleScratchpadClick() {
+        if (scratchpadEnabled) openScratchpad();
+    }
+
+    // ==========================================
+    // ANTI-CHEAT & PROCTORING ENGINE
+    // ==========================================
+    var isStrictAntiCheat = ("{{ is_strict_anti_cheat }}" === "True");
+    var maxViolations = parseInt('{{ max_violations }}');
+    var currentViolations = parseInt('{{ violation_count }}');
+    var antiCheatActive = false;
+    var hasUsedGrace = (currentViolations > 0); // If already has violations from earlier session, grace is consumed
+    var lastViolationTime = 0;
+    var examSubmitted = false;
+    var blurTimer = null;
+    var mouseLeaveTimeout = null;
+
+    function requestExamFullscreen() {
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => console.log('Fullscreen error:', err));
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
+    function playWarningBeep() {
+        try {
+            var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+            osc.stop(audioCtx.currentTime + 0.4);
+        } catch(e) {}
+    }
+
+    function handleViolation(vType, vDetail) {
+        if (!isStrictAntiCheat || !antiCheatActive || examSubmitted) return;
+
+        var now = Date.now();
+        // Debounce to prevent multiple logs within 3 seconds
+        if (now - lastViolationTime < 3000) {
+            return;
+        }
+        lastViolationTime = now;
+
+        playWarningBeep();
+        antiCheatActive = false; // Pause monitoring while modal is open
+
+        // Send violation event to server immediately
+        var formData = new FormData();
+        formData.append('action', 'log_violation');
+        formData.append('v_type', vType);
+        formData.append('v_detail', vDetail);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('/quiz/exams/session/{{ session.id }}/action/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                currentViolations = data.violation_count;
+                var badge = document.getElementById('violation-count-badge');
+                if (badge) badge.innerText = currentViolations;
+
+                if (data.force_submitted) {
+                    examSubmitted = true;
+                    Swal.fire({
+                        title: '{{ _("ĐÃ ĐÌNH CHỈ THI & TỰ ĐỘNG NỘP BÀI") }}',
+                        html: `Bạn đã vi phạm quy chế thi <b>${data.violation_count}/${data.max_violations} lần</b>.<br>Bài thi của bạn đã tự động được thu hồi và chấm điểm.`,
+                        icon: 'error',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: true,
+                        confirmButtonText: '{{ _("Xem kết quả bài thi") }}',
+                    }).then(() => {
+                        window.location.href = data.redirect || '/quiz/exams/session/{{ session.id }}/review/';
+                    });
+                } else {
+                    Swal.fire({
+                        title: '{{ _("Cảnh báo vi phạm quy chế thi") }}',
+                        html: `
+                            <div style="text-align: center;">
+                                <p style="font-size: 1rem; font-weight: 600; color: var(--quiz-danger); margin-bottom: 8px;">
+                                    ${vDetail}
+                                </p>
+                                <p style="font-size: 0.92rem; color: var(--quiz-text); margin-bottom: 8px;">
+                                    Số lần vi phạm đã ghi nhận: <b style="color: var(--quiz-danger); font-size: 1.15rem;">${data.violation_count}</b> / ${data.max_violations > 0 ? data.max_violations : '∞'}
+                                </p>
+                                <small style="color: var(--quiz-text-muted);">
+                                    Hành vi này đã được gửi trực tiếp đến màn hình giám sát của giám thị / giáo viên. Vui lòng giữ nguyên màn hình làm bài!
+                                </small>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        confirmButtonText: '{{ _("Tôi cam kết quay lại làm bài") }}',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                    }).then(() => {
+                        requestExamFullscreen();
+                        setTimeout(function() {
+                            antiCheatActive = true;
+                        }, 1500);
+                    });
+                }
+            } else {
+                antiCheatActive = true;
+            }
+        })
+        .catch(() => {
+            antiCheatActive = true;
+        });
+    }
+
+    function initAntiCheatEngine() {
+        if (!isStrictAntiCheat) return;
+
+        // Pre-Exam Rules & Honor Pledge Modal
+        Swal.fire({
+            title: '🏛️ QUY CHẾ PHÒNG THI TRỰC TUYẾN',
+            html: `
+                <div style="text-align: left; font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text);">
+                    <div style="padding: 10px 14px; background: rgba(37,99,235,0.08); border-left: 4px solid var(--quiz-primary); border-radius: 4px; margin-bottom: 14px; font-weight: 600;">
+                        Thí sinh vui lòng đọc kỹ nội quy trước khi bắt đầu làm bài:
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                        <div style="display: flex; gap: 8px;">
+                            <span style="font-size: 1.1rem;">🖥️</span>
+                            <div><b>1. Toàn màn hình (Fullscreen):</b> Làm bài liên tục ở chế độ toàn màn hình. Tránh ấn phím <code>ESC</code> hoặc <code>F11</code>.</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="font-size: 1.1rem;">🚫</span>
+                            <div><b>2. Tập trung làm bài:</b> Không chuyển đổi tab trình duyệt, không thu nhỏ cửa sổ hoặc mở ứng dụng khác.</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="font-size: 1.1rem;">🔒</span>
+                            <div><b>3. Vô hiệu hóa công cụ:</b> Chuột phải, phím tắt sao chép (Ctrl+C/V) và DevTools (F12) đã bị khóa.</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="font-size: 1.1rem;">📶</span>
+                            <div><b>4. Xử lý sự cố mạng:</b> Khi mất kết nối, hệ thống tự lưu đệm an toàn và tự đồng bộ khi có mạng lại.</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <span style="font-size: 1.1rem;">💡</span>
+                            <div><b>5. Cơ chế nhắc nhở:</b> Hệ thống có <b>1 lần nhắc nhở sơ suất miễn phí</b>. Nếu vi phạm quá <b>${maxViolations > 0 ? maxViolations + ' lần' : 'quy định'}</b>, bài thi sẽ bị đình chỉ và thu bài tự động.</div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px dashed #10b981; border-radius: 6px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0; font-weight: 600; color: #065f46;">
+                            <input type="checkbox" id="pledge-agree-checkbox" style="width: 18px; height: 18px; cursor: pointer;" onchange="togglePledgeSubmit(this.checked)">
+                            <span>Em xin cam đoan làm bài trung thực, nghiêm túc và tuân thủ đúng nội quy phòng thi.</span>
+                        </label>
+                    </div>
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: '🚀 Bật toàn màn hình & Bắt đầu làm bài',
+            confirmButtonColor: 'var(--quiz-primary)',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                var confirmBtn = Swal.getConfirmButton();
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.5';
+                confirmBtn.style.cursor = 'not-allowed';
+            }
+        }).then(() => {
+            requestExamFullscreen();
+            setTimeout(function() {
+                antiCheatActive = true;
+            }, 1500);
+        });
+
+        window.togglePledgeSubmit = function(isChecked) {
+            var confirmBtn = Swal.getConfirmButton();
+            if (confirmBtn) {
+                confirmBtn.disabled = !isChecked;
+                confirmBtn.style.opacity = isChecked ? '1' : '0.5';
+                confirmBtn.style.cursor = isChecked ? 'pointer' : 'not-allowed';
+            }
+        };
+
+        // 1. Page Visibility (Tab switch / minimize)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && antiCheatActive) {
+                handleViolation('tab_switch', 'Chuyển tab hoặc thu nhỏ trình duyệt');
+            }
+        });
+
+        // 2. Window Blur (Focus lost / switching application with 2.0s accidental tolerance)
+        window.addEventListener('blur', function() {
+            if (!document.hidden && antiCheatActive) {
+                blurTimer = setTimeout(function() {
+                    handleViolation('blur', 'Mất tiêu điểm (click ra ngoài cửa sổ thi hoặc đổi ứng dụng)');
+                }, 2000);
+            }
+        });
+
+        window.addEventListener('focus', function() {
+            if (blurTimer) {
+                clearTimeout(blurTimer);
+                blurTimer = null;
+            }
+        });
+
+        // 3. Fullscreen Exit (Cross-browser event listener)
+        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(function(evt) {
+            document.addEventListener(evt, function() {
+                var isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+                if (!isFs && antiCheatActive && !examSubmitted) {
+                    handleViolation('fullscreen_exit', 'Thoát chế độ toàn màn hình');
+                }
+            });
+        });
+
+        // 4. Cursor leaves examination window (4.0s accidental tolerance)
+        document.documentElement.addEventListener('mouseleave', function(e) {
+            if (antiCheatActive && !examSubmitted) {
+                mouseLeaveTimeout = setTimeout(function() {
+                    handleViolation('window_leave', 'Con trỏ chuột di chuyển ra khỏi màn hình làm bài');
+                }, 4000);
+            }
+        });
+        document.documentElement.addEventListener('mouseenter', function() {
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+                mouseLeaveTimeout = null;
+            }
+        });
+
+        // 5. Blocked Shortcut Keys, Copy/Paste & DevTools
+        window.addEventListener('keydown', function(e) {
+            // Block F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
+                (e.ctrlKey && ['U', 'u', 'S', 's', 'P', 'p'].includes(e.key))
+            ) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleViolation('blocked_key', `Bấm phím tắt bị cấm (${e.key})`);
+                return false;
+            }
+
+            // Block Clipboard Copy/Paste
+            if ((e.ctrlKey || e.metaKey) && ['c', 'C', 'v', 'V', 'x', 'X', 'a', 'A'].includes(e.key)) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleViolation('clipboard_attempt', 'Cố gắng sao chép hoặc dán nội dung');
+                return false;
+            }
+
+            // Block PrintScreen
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+                handleViolation('screenshot_attempt', 'Cố gắng chụp ảnh màn hình');
+                return false;
+            }
+        });
+
+        // 6. Disable Right-Click Context Menu & Text Dragging
+        window.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        window.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // 7. Network Reconnection & Auto-Sync Offline Answers
+        window.addEventListener('online', function() {
+            try {
+                var localKey = 'quiz_offline_{{ session.id }}';
+                var cached = JSON.parse(localStorage.getItem(localKey) || '{}');
+                var count = Object.keys(cached).length;
+                if (count > 0) {
+                    persistTimeLeft();
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({
+                        icon: 'success',
+                        title: '📶 {{ _("Đã kết nối lại mạng & đồng bộ dữ liệu an toàn!") }}'
+                    });
+                }
+            } catch(e) {}
+        });
+
+        window.addEventListener('offline', function() {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'warning',
+                title: '⚠️ {{ _("Mất kết nối mạng! Các câu trả lời đang được lưu đệm an toàn trên máy.") }}'
+            });
+        });
+    }
+
+    function initSessionWebSocket() {
+        if (typeof EventReceiver !== 'undefined') {
+            try {
+                var receiver = new EventReceiver(
+                    "{{ EVENT_DAEMON_LOCATION }}", "{{ EVENT_DAEMON_POLL_LOCATION }}",
+                    ['quiz_session_{{ session.id }}'], {{ last_msg|default(0) }},
+                    function(message) {
+                        if (!message) return;
+                        if (message.action === 'warning' || message.action === 'send_warning') {
+                            playWarningBeep();
+                            var warnText = message.warning ? message.warning.message : '{{ _("Giám thị nhắc nhở bạn tập trung làm bài thi nghiêm túc!") }}';
+                            Swal.fire({
+                                title: '📢 {{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
+                                text: warnText,
+                                icon: 'warning',
+                                confirmButtonText: '{{ _("Tôi đã hiểu và tiếp tục") }}',
+                            });
+                        } else if (message.action === 'pause') {
+                            pauseExamLocally();
+                        } else if (message.action === 'resume') {
+                            resumeExamLocally();
+                        } else if (message.action === 'add_time') {
+                            var mins = message.extra_minutes || 5;
+                            examSecondsLeft += mins * 60;
+                            updateTimerHUD();
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true
+                            });
+                            Toast.fire({
+                                icon: 'info',
+                                title: `⏱️ Giám thị đã cộng thêm +${mins} phút làm bài!`
+                            });
+                        } else if (message.action === 'force_submit') {
+                            examSubmitted = true;
+                            Swal.fire({
+                                title: '{{ _("ĐÃ THU BÀI THI") }}',
+                                text: '{{ _("Giám thị đã thu bài làm của bạn. Hệ thống đang chấm điểm...") }}',
+                                icon: 'info',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                timer: 2500,
+                            }).then(() => {
+                                window.location.href = '/quiz/exams/session/{{ session.id }}/review/';
+                            });
+                        } else if (message.action === 'reset_session') {
+                            window.location.reload();
+                        }
+                    }
+                );
+            } catch(e) {
+                console.log('Session websocket init err:', e);
+            }
+        }
+    }
+
     // Initialization
     document.addEventListener("DOMContentLoaded", function() {
         applyOrientationUI(activeOrientation);
         updateActiveQuestionUI();
         wrapQuestionCodeBlocks();
+        initAntiCheatEngine();
+        initSessionWebSocket();
     });
 </script>
 {% endblock %}

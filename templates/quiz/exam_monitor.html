@@ -1,0 +1,1013 @@
+{% extends "base.html" %}
+
+{% block media %}
+    <script type="text/javascript" src="{{ static('event.js') }}"></script>
+    <style>
+        .monitor-stat-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .monitor-stat-box {
+            background: var(--quiz-card-bg);
+            border: 1px solid var(--quiz-border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .monitor-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .pulse-live-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 1.5s infinite;
+        }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Live Quiz Student Desk Card */
+        .live-quiz-desk-card {
+            background: var(--quiz-card-bg);
+            border: 1px solid var(--quiz-border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .live-quiz-desk-card:hover {
+            border-color: var(--quiz-border-strong);
+        }
+        .live-quiz-desk-card.has-violation {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.03) 0%, var(--quiz-card-bg) 100%);
+        }
+        .live-quiz-desk-card.critical-violation {
+            border-color: var(--quiz-danger);
+            animation: pulse-danger-border 2s infinite;
+        }
+        @keyframes pulse-danger-border {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .live-quiz-desk-card.is-completed {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, var(--quiz-card-bg) 100%);
+        }
+
+        .student-avatar-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--quiz-card-bg-sub);
+            border: 1px solid var(--quiz-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--quiz-primary);
+            flex-shrink: 0;
+        }
+
+        .desk-progress-bar {
+            height: 8px;
+            background: var(--quiz-card-bg-sub);
+            border: 1px solid var(--quiz-border);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .desk-progress-fill {
+            height: 100%;
+            background: var(--quiz-primary);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+        .desk-progress-fill.completed {
+            background: #10b981;
+        }
+
+        .filter-tab-pill {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--quiz-border);
+            background: var(--quiz-card-bg-sub);
+            color: var(--quiz-text-muted);
+            transition: all 0.15s ease;
+        }
+        .filter-tab-pill.active {
+            background: var(--quiz-primary);
+            color: #ffffff;
+            border-color: var(--quiz-primary);
+        }
+
+        /* Live Activity Log Ticker */
+        .live-activity-log-box {
+            background: var(--quiz-card-bg-sub);
+            border: 1px solid var(--quiz-border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.82rem;
+            overflow: hidden;
+        }
+        .live-activity-feed {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            flex-grow: 1;
+        }
+        .live-activity-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--quiz-text);
+            padding: 2px 8px;
+            background: var(--quiz-card-bg);
+            border: 1px solid var(--quiz-border);
+            border-radius: 4px;
+        }
+    </style>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    
+    <!-- Top Room Header -->
+    <div class="quiz-header-card" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                    <span class="pulse-live-dot"></span>
+                    <span class="quiz-q-tag" style="background: rgba(16,185,129,0.1); color: var(--quiz-success); border-color: var(--quiz-success); font-size: 0.76rem; font-weight: 700;">
+                        {{ _('TRỰC TIẾP PHÒNG THI') }}
+                    </span>
+                    {% if exam.is_strict_anti_cheat %}
+                        <span class="quiz-q-tag" style="background: rgba(220, 53, 69, 0.12); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.76rem; font-weight: 600;">
+                            {{ _('Giám sát chống gian lận') }} (Tối đa: {{ exam.max_violations }} lần)
+                        </span>
+                    {% endif %}
+                </div>
+                <h1 style="font-size: 1.45rem !important; line-height: 1.3 !important; margin: 4px 0 !important; font-weight: 700 !important; color: var(--quiz-text) !important;">
+                    {{ exam.name }}
+                </h1>
+                <div style="font-size: 0.82rem; color: var(--quiz-text-muted);">
+                    {{ _('Giám sát tiến độ làm bài, cảnh báo chuyển tab và hỗ trợ học sinh theo thời gian thực.') }}
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="quiz-session-btn" id="btn-sound-toggle" onclick="toggleSoundNotification()" title="{{ _('Bật/Tắt âm báo khi phát hiện vi phạm') }}">
+                    <i class="fa fa-bell" id="sound-icon"></i> <span id="sound-status-text">{{ _('Âm báo: BẬT') }}</span>
+                </button>
+                <button type="button" class="quiz-session-btn" onclick="toggleFullscreenProjector()" title="{{ _('Trình chiếu toàn màn hình cho lớp học') }}">
+                    <i class="fa fa-arrows-alt"></i> {{ _('Trình chiếu') }}
+                </button>
+                <button type="button" class="quiz-session-btn" onclick="pollLiveMonitor()" title="{{ _('Làm mới dữ liệu ngay') }}">
+                    <i class="fa fa-refresh" id="refresh-icon"></i> {{ _('Làm mới') }}
+                </button>
+                <a href="{{ url('quiz_exam_analytics', exam_id=exam.id) }}" class="quiz-session-btn" style="text-decoration: none;">
+                    <i class="fa fa-bar-chart"></i> {{ _('Phổ điểm') }}
+                </a>
+                <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="text-decoration: none;">
+                    <i class="fa fa-arrow-left"></i> {{ _('Quay lại') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Summary Row -->
+    <div class="monitor-stat-row">
+        <div class="monitor-stat-box">
+            <div class="monitor-stat-icon" style="background: rgba(37,99,235,0.08); color: var(--quiz-primary); border: 1px solid rgba(37,99,235,0.2);">
+                <i class="fa fa-users"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.76rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600;">{{ _('Tổng thí sinh') }}</div>
+                <div id="stat-total-count" style="font-size: 1.5rem; font-weight: 700; color: var(--quiz-text); line-height: 1.2;">0</div>
+            </div>
+        </div>
+
+        <div class="monitor-stat-box">
+            <div class="monitor-stat-icon" style="background: rgba(37,99,235,0.1); color: var(--quiz-primary); border: 1px solid rgba(37,99,235,0.25);">
+                <i class="fa fa-pencil-square-o"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.76rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600;">{{ _('Đang làm bài') }}</div>
+                <div id="stat-active-count" style="font-size: 1.5rem; font-weight: 700; color: var(--quiz-primary); line-height: 1.2;">0</div>
+            </div>
+        </div>
+
+        <div class="monitor-stat-box">
+            <div class="monitor-stat-icon" style="background: rgba(16,185,129,0.1); color: var(--quiz-success); border: 1px solid rgba(16,185,129,0.25);">
+                <i class="fa fa-check-circle-o"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.76rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600;">{{ _('Đã nộp bài') }}</div>
+                <div id="stat-completed-count" style="font-size: 1.5rem; font-weight: 700; color: var(--quiz-success); line-height: 1.2;">0</div>
+            </div>
+        </div>
+
+        <div class="monitor-stat-box">
+            <div class="monitor-stat-icon" style="background: rgba(220,53,69,0.1); color: var(--quiz-danger); border: 1px solid rgba(220,53,69,0.25);">
+                <i class="fa fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.76rem; color: var(--quiz-text-muted); text-transform: uppercase; font-weight: 600;">{{ _('Cảnh báo vi phạm') }}</div>
+                <div id="stat-violations-count" style="font-size: 1.5rem; font-weight: 700; color: var(--quiz-danger); line-height: 1.2;">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Activity Ticker Bar -->
+    <div class="live-activity-log-box">
+        <span style="font-weight: 700; color: var(--quiz-text); white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+            <i class="fa fa-bolt" style="color: #f59e0b;"></i> {{ _('Sự kiện phòng thi:') }}
+        </span>
+        <div class="live-activity-feed" id="live-activity-feed">
+            <span style="color: var(--quiz-text-muted); font-size: 0.8rem;">{{ _('Đang theo dõi hoạt động phòng thi...') }}</span>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Box -->
+    <div class="quiz-q-card" style="padding: 20px;">
+        
+        <!-- Controls & Filter Toolbar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--quiz-border); padding-bottom: 14px; flex-wrap: wrap; gap: 12px;">
+            
+            <!-- Left: View Mode Switcher -->
+            <div style="display: flex; gap: 4px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 4px; padding: 2px;">
+                <button type="button" class="view-mode-tab active" id="btn-view-grid" onclick="setDashboardViewMode('grid')">
+                    <i class="fa fa-th-large"></i> {{ _('Trình chiếu lớp học') }}
+                </button>
+                <button type="button" class="view-mode-tab" id="btn-view-table" onclick="setDashboardViewMode('table')">
+                    <i class="fa fa-table"></i> {{ _('Bảng giám sát chi tiết') }}
+                </button>
+            </div>
+
+            <!-- Center/Right: Filters & Search -->
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 4px;">
+                    <div class="filter-tab-pill active" id="pill-filter-all" onclick="setFilterStatus('all')">{{ _('Tất cả') }} (<span id="count-all">0</span>)</div>
+                    <div class="filter-tab-pill" id="pill-filter-active" onclick="setFilterStatus('active')">{{ _('Đang thi') }} (<span id="count-active">0</span>)</div>
+                    <div class="filter-tab-pill" id="pill-filter-completed" onclick="setFilterStatus('completed')">{{ _('Đã nộp') }} (<span id="count-completed">0</span>)</div>
+                    <div class="filter-tab-pill" id="pill-filter-flagged" onclick="setFilterStatus('flagged')">{{ _('Có vi phạm') }} (<span id="count-flagged">0</span>)</div>
+                </div>
+                <input type="text" id="filter-search-input" onkeyup="renderCurrentData()" placeholder="{{ _('Tìm học sinh, lớp...') }}"
+                       style="padding: 5px 10px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 4px; color: var(--quiz-text); font-size: 0.82rem; width: 180px;">
+            </div>
+        </div>
+
+        <!-- Mode 1: Live Projector Grid Container -->
+        <div id="view-container-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px;">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Mode 2: Detailed Proctoring Table Container -->
+        <div id="view-container-table" style="display: none; overflow-x: auto;">
+            <table class="quiz-table" id="proctor-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">#</th>
+                        <th>{{ _('Học sinh') }}</th>
+                        <th>{{ _('Lớp') }}</th>
+                        <th>{{ _('Bắt đầu') }}</th>
+                        <th>{{ _('Tiến độ làm bài') }}</th>
+                        <th style="text-align: center;">{{ _('Thời gian còn') }}</th>
+                        <th style="text-align: center;">{{ _('Trạng thái') }}</th>
+                        <th style="text-align: center;">{{ _('Vi phạm') }}</th>
+                        <th style="text-align: center; width: 220px;">{{ _('Thao tác giám thị') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="proctor-table-body">
+                    <!-- Rendered by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State Placeholder -->
+        <div id="empty-state" style="display: none; text-align: center; padding: 50px 20px;">
+            <div style="font-size: 1.1rem; font-weight: 600; color: var(--quiz-text); margin-bottom: 6px;">
+                {{ _('Chưa có học sinh nào tham gia phòng thi') }}
+            </div>
+            <p style="color: var(--quiz-text-muted); margin: 0; font-size: 0.85rem;">
+                {{ _('Khi học sinh bấm bắt đầu làm bài, tiến độ trực tiếp sẽ xuất hiện tại đây.') }}
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    var soundEnabled = true;
+    var lastKnownViolations = {};
+    var lastKnownSubmissions = {};
+    var maxAllowedViolations = parseInt('{{ exam.max_violations }}') || 5;
+    var cachedData = null;
+    var currentViewMode = 'table'; // Start with table as user prefers table view
+    var currentFilterStatus = 'all';
+    var pollTimer = null;
+    var activityLog = [];
+
+    function toggleSoundNotification() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('sound-status-text').innerText = soundEnabled ? '{{ _("Âm báo: BẬT") }}' : '{{ _("Âm báo: TẮT") }}';
+        var icon = document.getElementById('sound-icon');
+        if (icon) {
+            icon.className = soundEnabled ? 'fa fa-bell' : 'fa fa-bell-slash';
+        }
+    }
+
+    function toggleFullscreenProjector() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => console.log(err));
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    function playAlertChime() {
+        if (!soundEnabled) return;
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+            osc.stop(ctx.currentTime + 0.5);
+        } catch(e) {}
+    }
+
+    function addActivityEvent(htmlContent) {
+        var nowStr = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+        activityLog.unshift(`[${nowStr}] ${htmlContent}`);
+        if (activityLog.length > 15) activityLog.pop();
+
+        var feed = document.getElementById('live-activity-feed');
+        if (feed) {
+            feed.innerHTML = activityLog.map(item => `<div class="live-activity-item">${item}</div>`).join('');
+        }
+    }
+
+    function setDashboardViewMode(mode) {
+        currentViewMode = mode;
+        document.getElementById('btn-view-grid').classList.toggle('active', mode === 'grid');
+        document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
+        document.getElementById('view-container-grid').style.display = (mode === 'grid') ? 'grid' : 'none';
+        document.getElementById('view-container-table').style.display = (mode === 'table') ? 'block' : 'none';
+        renderCurrentData();
+    }
+
+    function setFilterStatus(status) {
+        currentFilterStatus = status;
+        document.querySelectorAll('.filter-tab-pill').forEach(el => el.classList.remove('active'));
+        var activePill = document.getElementById('pill-filter-' + status);
+        if (activePill) activePill.classList.add('active');
+        renderCurrentData();
+    }
+
+    function pollLiveMonitor() {
+        var refreshIcon = document.getElementById('refresh-icon');
+        if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+        fetch('{{ url("quiz_exam_monitor_ajax", exam_id=exam.id) }}')
+            .then(res => res.json())
+            .then(data => {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                if (data.success) {
+                    cachedData = data;
+                    renderLiveDashboard(data);
+                }
+            })
+            .catch(err => {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                console.error("Live monitor polling error:", err);
+            });
+    }
+
+    function renderLiveDashboard(data) {
+        document.getElementById('stat-total-count').innerText = data.total_students_count || 0;
+        document.getElementById('stat-active-count').innerText = data.active_count || 0;
+        document.getElementById('stat-completed-count').innerText = data.completed_count || 0;
+        document.getElementById('stat-violations-count').innerText = data.total_violations_all || 0;
+
+        document.getElementById('count-all').innerText = data.students ? data.students.length : 0;
+        document.getElementById('count-active').innerText = data.active_students ? data.active_students.length : 0;
+        document.getElementById('count-completed').innerText = data.completed_students ? data.completed_students.length : 0;
+        
+        var flaggedCount = data.students ? data.students.filter(s => s.violation_count > 0).length : 0;
+        document.getElementById('count-flagged').innerText = flaggedCount;
+
+        // Check real-time events for SweetAlert2 dynamic toasts
+        if (data.students) {
+            data.students.forEach(function(s) {
+                var prevV = lastKnownViolations[s.session_id];
+                var prevSub = lastKnownSubmissions[s.session_id];
+
+                // 1. New Violation Alert
+                if (prevV !== undefined && s.violation_count > prevV) {
+                    var latestV = s.latest_violation || { detail: 'Vi phạm quy chế thi', time: '' };
+                    playAlertChime();
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: `⚠️ ${s.display_name} (@${s.username})`,
+                        html: `<b style="color:var(--quiz-danger)">${latestV.detail}</b><br><small style="color:var(--quiz-text-muted)">Lần thứ ${s.violation_count} • Lúc ${latestV.time || s.updated_at}</small>`,
+                        showConfirmButton: false,
+                        timer: 6000,
+                        timerProgressBar: true,
+                    });
+
+                    addActivityEvent(`<b style="color:var(--quiz-danger)">⚠️ ${s.display_name}</b>: ${latestV.detail} (Lần ${s.violation_count})`);
+                }
+
+                // 2. New Submission Alert
+                if (prevSub === false && s.is_completed === true) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `✅ ${s.display_name} vừa nộp bài!`,
+                        html: `Điểm số: <b style="color:#10b981; font-size:1.1rem;">${s.score !== null ? s.score + 'đ' : 'Đã nộp'}</b>`,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                    });
+
+                    addActivityEvent(`<b style="color:#10b981">✓ ${s.display_name}</b>: Nộp bài thi (${s.score !== null ? s.score + 'đ' : 'Xong'})`);
+                }
+
+                lastKnownViolations[s.session_id] = s.violation_count;
+                lastKnownSubmissions[s.session_id] = s.is_completed;
+            });
+        }
+
+        renderCurrentData();
+    }
+
+    function renderCurrentData() {
+        if (!cachedData || !cachedData.students) {
+            document.getElementById('empty-state').style.display = 'block';
+            return;
+        }
+
+        var keyword = (document.getElementById('filter-search-input').value || '').trim().toLowerCase();
+        var students = cachedData.students.filter(function(s) {
+            var matchSearch = true;
+            if (keyword) {
+                var name = (s.display_name || '').toLowerCase();
+                var user = (s.username || '').toLowerCase();
+                var cls = (s.class_name || '').toLowerCase();
+                matchSearch = name.includes(keyword) || user.includes(keyword) || cls.includes(keyword);
+            }
+            if (!matchSearch) return false;
+
+            if (currentFilterStatus === 'active') return !s.is_completed;
+            if (currentFilterStatus === 'completed') return s.is_completed;
+            if (currentFilterStatus === 'flagged') return s.violation_count > 0;
+            return true;
+        });
+
+        var emptyState = document.getElementById('empty-state');
+        if (students.length === 0) {
+            document.getElementById('view-container-grid').innerHTML = '';
+            document.getElementById('proctor-table-body').innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        if (currentViewMode === 'grid') {
+            renderGridView(students);
+        } else {
+            renderTableView(students);
+        }
+    }
+
+    function renderGridView(students) {
+        var grid = document.getElementById('view-container-grid');
+        var html = '';
+
+        students.forEach(function(s) {
+            var cardClass = 'live-quiz-desk-card';
+            if (s.is_completed) {
+                cardClass += ' is-completed';
+            } else if (s.violation_count >= maxAllowedViolations && maxAllowedViolations > 0) {
+                cardClass += ' critical-violation';
+            } else if (s.violation_count > 0) {
+                cardClass += ' has-violation';
+            }
+
+            var initialLetter = (s.display_name || s.username || 'K').charAt(0).toUpperCase();
+
+            // Status Badge
+            var statusBadge = '';
+            if (s.is_completed) {
+                statusBadge = `<span style="background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+                    ✓ Đã nộp (${s.score !== null ? s.score + 'đ' : 'Xong'})
+                </span>`;
+            } else if (s.is_paused) {
+                statusBadge = `<span style="background: rgba(234,179,8,0.15); color: #d97706; border: 1px solid rgba(234,179,8,0.35); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+                    Tạm dừng
+                </span>`;
+            } else {
+                statusBadge = `<span style="background: rgba(37,99,235,0.08); color: var(--quiz-primary); border: 1px solid rgba(37,99,235,0.25); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                    Đang thi
+                </span>`;
+            }
+
+            // Violation Badge
+            var violationBadge = '';
+            if (s.violation_count > 0) {
+                violationBadge = `<span style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border: 1px solid var(--quiz-danger); padding: 2px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"
+                                        onclick="showStudentLogs('${s.display_name}', ${encodeURIComponent(JSON.stringify(s.violations_log))})">
+                    ⚠️ ${s.violation_count} vi phạm
+                </span>`;
+            }
+
+            var progressFillClass = s.is_completed ? 'desk-progress-fill completed' : 'desk-progress-fill';
+
+            html += `
+                <div class="${cardClass}">
+                    <!-- Top Student Identity Row -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                        <div style="display: flex; gap: 10px; align-items: center; min-width: 0;">
+                            <div class="student-avatar-badge">${initialLetter}</div>
+                            <div style="min-width: 0;">
+                                <div style="font-weight: 600; font-size: 0.92rem; color: var(--quiz-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    ${s.display_name}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--quiz-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    @${s.username} ${s.class_name ? '&bull; ' + s.class_name : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 4px; flex-direction: column; align-items: flex-end;">
+                            ${statusBadge}
+                            ${violationBadge}
+                        </div>
+                    </div>
+
+                    <!-- Live Progress Row -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--quiz-text-muted); margin-bottom: 4px;">
+                            <span>Tiến độ: <b style="color: var(--quiz-text);">${s.answered_count}/${s.total_questions}</b> câu</span>
+                            <span><b style="color: var(--quiz-text);">${s.progress_pct}%</b></span>
+                        </div>
+                        <div class="desk-progress-bar">
+                            <div class="${progressFillClass}" style="width: ${s.progress_pct}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Info & Teacher Interventions -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--quiz-border); font-size: 0.78rem;">
+                        <div style="color: var(--quiz-text-muted);">
+                            ${s.is_completed ? 'Nộp lúc: ' + s.updated_at : 'Còn lại: <b style="color:' + (s.time_left_seconds < 300 ? 'var(--quiz-danger)' : 'var(--quiz-text)') + '">' + s.time_left_str + '</b>'}
+                        </div>
+                        
+                        <div style="display: flex; gap: 4px;">
+                            <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem;" title="Xem chi tiết bài làm" onclick="inspectStudentLive(${s.session_id}, '${s.display_name}')">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            ${!s.is_completed ? `
+                                <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem;" title="Gửi nhắc nhở" onclick="sendStudentWarning(${s.session_id}, '${s.display_name}')">
+                                    Nhắc
+                                </button>
+                                <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem;" title="Cộng thêm 5 phút" onclick="addTimeToStudent(${s.session_id}, '${s.display_name}')">
+                                    +5p
+                                </button>
+                                <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem; color: #d97706;" title="${s.is_paused ? 'Tiếp tục làm bài' : 'Tạm dừng thi'}" onclick="togglePauseStudent(${s.session_id}, '${s.display_name}', ${s.is_paused})">
+                                    ${s.is_paused ? 'Tiếp' : 'Dừng'}
+                                </button>
+                                <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem; color: var(--quiz-danger);" title="Buộc nộp bài" onclick="forceSubmitStudent(${s.session_id}, '${s.display_name}')">
+                                    Thu bài
+                                </button>
+                            ` : `
+                                <a href="/quiz/exams/session/${s.session_id}/review/" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem; text-decoration: none;" target="_blank">
+                                    Xem bài
+                                </a>
+                                <button type="button" class="quiz-session-btn" style="padding: 2px 6px; font-size: 0.72rem; color: #3b82f6;" title="Cho phép học sinh thi lại" onclick="resetStudentSession(${s.session_id}, '${s.display_name}')">
+                                    Thi lại
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = html;
+    }
+
+    function renderTableView(students) {
+        var tbody = document.getElementById('proctor-table-body');
+        var html = '';
+
+        students.forEach(function(s, idx) {
+            var violationCell = '';
+            if (s.violation_count === 0) {
+                violationCell = '<span style="color: var(--quiz-success); font-weight: 600; font-size: 0.78rem;">✓ 0</span>';
+            } else {
+                violationCell = `<span class="quiz-q-tag" style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.74rem; font-weight: 700; cursor: pointer;"
+                                       onclick="showStudentLogs('${s.display_name}', ${encodeURIComponent(JSON.stringify(s.violations_log))})">
+                    ⚠️ ${s.violation_count}
+                </span>`;
+            }
+
+            var statusText = s.is_completed ? '<span style="color: #10b981; font-weight: 600;">Đã nộp (' + (s.score !== null ? s.score + 'đ' : '') + ')</span>' : (s.is_paused ? '<span style="color: #d97706; font-weight: 600;">Tạm dừng</span>' : '<span style="color: var(--quiz-primary); font-weight: 600;">Đang thi</span>');
+
+            html += `
+                <tr>
+                    <td style="text-align: center; font-weight: 600; color: var(--quiz-text-muted);">${idx + 1}</td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--quiz-text);">${s.display_name}</div>
+                        <small style="color: var(--quiz-text-muted);">@${s.username}</small>
+                    </td>
+                    <td>${s.class_name || '–'}</td>
+                    <td style="color: var(--quiz-text-muted); font-size: 0.8rem;">${s.started_at}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 80px;" class="desk-progress-bar">
+                                <div class="${s.is_completed ? 'desk-progress-fill completed' : 'desk-progress-fill'}" style="width: ${s.progress_pct}%;"></div>
+                            </div>
+                            <span style="font-size: 0.78rem; color: var(--quiz-text); font-weight: 600;">${s.answered_count}/${s.total_questions} (${s.progress_pct}%)</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center; font-family: monospace; font-size: 0.85rem; color: ${s.time_left_seconds < 300 && !s.is_completed ? 'var(--quiz-danger)' : 'var(--quiz-text)'};">
+                        ${s.is_completed ? '–' : s.time_left_str}
+                    </td>
+                    <td style="text-align: center; font-size: 0.8rem;">${statusText}</td>
+                    <td style="text-align: center;">${violationCell}</td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <div style="display: flex; gap: 4px; justify-content: center; align-items: center;">
+                            <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem;" title="Xem chi tiết câu trả lời" onclick="inspectStudentLive(${s.session_id}, '${s.display_name}')">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            ${!s.is_completed ? `
+                                <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem;" title="Gửi lời nhắc" onclick="sendStudentWarning(${s.session_id}, '${s.display_name}')">Nhắc</button>
+                                <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem;" title="Cộng thêm 5 phút" onclick="addTimeToStudent(${s.session_id}, '${s.display_name}')">+5p</button>
+                                <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem; color: #d97706;" title="${s.is_paused ? 'Tiếp tục bài thi' : 'Tạm dừng bài thi'}" onclick="togglePauseStudent(${s.session_id}, '${s.display_name}', ${s.is_paused})">
+                                    ${s.is_paused ? 'Tiếp' : 'Dừng'}
+                                </button>
+                                <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem; color: var(--quiz-danger);" title="Đình chỉ & Nộp bài ngay" onclick="forceSubmitStudent(${s.session_id}, '${s.display_name}')">Thu bài</button>
+                            ` : `
+                                <a href="/quiz/exams/session/${s.session_id}/review/" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem; text-decoration: none;" target="_blank">Xem bài</a>
+                                <button type="button" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.74rem; color: #3b82f6;" title="Cho phép học sinh thi lại" onclick="resetStudentSession(${s.session_id}, '${s.display_name}')">Thi lại</button>
+                            `}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function showStudentLogs(studentName, logsJson) {
+        var logs = [];
+        try {
+            logs = typeof logsJson === 'string' ? JSON.parse(decodeURIComponent(logsJson)) : logsJson;
+        } catch(e) {
+            logs = logsJson || [];
+        }
+
+        if (!logs || logs.length === 0) {
+            Swal.fire({
+                title: '{{ _("Nhật ký giám sát") }}',
+                text: studentName + ' {{ _("chưa có vi phạm nào được ghi nhận.") }}',
+                icon: 'info',
+                confirmButtonText: '{{ _("Đóng") }}'
+            });
+            return;
+        }
+
+        var logItems = logs.map((l, i) => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--quiz-border); font-size: 0.84rem;">
+                <div>
+                    <b style="color: var(--quiz-danger);">#${l.count || (i+1)}</b>
+                    <span style="margin-left: 6px; color: var(--quiz-text); font-weight: 500;">${l.detail || l.type}</span>
+                </div>
+                <span style="color: var(--quiz-text-muted); font-size: 0.76rem;">${l.time}</span>
+            </div>
+        `).join('');
+
+        Swal.fire({
+            title: '{{ _("Chi tiết vi phạm:") }} ' + studentName,
+            html: `
+                <div style="max-height: 280px; overflow-y: auto; text-align: left; margin-top: 8px;">
+                    ${logItems}
+                </div>
+            `,
+            confirmButtonText: '{{ _("Đã hiểu") }}'
+        });
+    }
+
+    function inspectStudentLive(sessionId, studentName) {
+        var formData = new FormData();
+        formData.append('session_id', sessionId);
+        formData.append('action', 'inspect_session');
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('{{ url("quiz_exam_proctor_action", exam_id=exam.id) }}', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                var ansEntries = Object.entries(data.answers || {});
+                var ansHtml = ansEntries.length > 0 ? ansEntries.map(([k, v]) => {
+                    var valStr = typeof v === 'object' ? JSON.stringify(v) : v;
+                    return `<div style="padding: 4px 8px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.8rem;">
+                        <b>Câu ${k}:</b> <span style="color: var(--quiz-primary); font-weight: 600;">${valStr}</span>
+                    </div>`;
+                }).join('') : '<div style="color: var(--quiz-text-muted); font-size: 0.85rem;">Thí sinh chưa chọn câu trả lời nào.</div>';
+
+                Swal.fire({
+                    title: '📝 ' + studentName + ' (Chi tiết bài làm)',
+                    html: `
+                        <div style="text-align: left; font-size: 0.88rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 8px 12px; background: var(--quiz-card-bg-sub); border-radius: 6px;">
+                                <div>Tiến độ: <b>${data.answered_count}/${data.total_questions}</b> câu</div>
+                                <div>Trạng thái: <b>${data.is_completed ? 'Đã nộp (' + data.score + 'đ)' : (data.is_paused ? 'Đang tạm dừng' : 'Đang làm bài')}</b></div>
+                                <div>Vi phạm: <b style="color: ${data.violation_count > 0 ? 'var(--quiz-danger)' : 'var(--quiz-success)'}">${data.violation_count}</b></div>
+                            </div>
+                            <div style="font-weight: 600; margin-bottom: 6px;">Các câu đã hoàn thành:</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; max-height: 200px; overflow-y: auto;">
+                                ${ansHtml}
+                            </div>
+                        </div>
+                    `,
+                    width: 580,
+                    confirmButtonText: '{{ _("Đóng") }}'
+                });
+            } else {
+                Swal.fire('{{ _("Lỗi") }}', data.error || '{{ _("Không thể tải thông tin bài làm.") }}', 'error');
+            }
+        });
+    }
+
+    function executeProctorAction(sessionId, action, extraData, callback) {
+        var formData = new FormData();
+        formData.append('session_id', sessionId);
+        formData.append('action', action);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        if (extraData) {
+            for (var k in extraData) {
+                formData.append(k, extraData[k]);
+            }
+        }
+
+        fetch('{{ url("quiz_exam_proctor_action", exam_id=exam.id) }}', {
+            method: 'POST',
+            body: formData,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                pollLiveMonitor();
+                if (callback) callback(data);
+            } else {
+                Swal.fire('{{ _("Lỗi") }}', data.error || '{{ _("Không thể thực hiện hành động.") }}', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Proctor action error:', err);
+        });
+    }
+
+    function sendStudentWarning(sessionId, name) {
+        Swal.fire({
+            title: '{{ _("Nhắc nhở học sinh") }}',
+            text: '{{ _("Nhập nội dung cảnh báo gửi đến thí sinh:") }} ' + name,
+            input: 'text',
+            inputValue: '{{ _("Thầy/Cô nhắc nhở em tập trung làm bài, không chuyển tab trình duyệt!") }}',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Gửi cảnh báo") }}',
+            cancelButtonText: '{{ _("Hủy") }}',
+            inputValidator: (value) => {
+                if (!value) return '{{ _("Vui lòng nhập nội dung nhắc nhở!") }}';
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeProctorAction(sessionId, 'send_warning', { warning_text: result.value }, function() {
+                    Swal.fire('{{ _("Đã gửi") }}', '{{ _("Đã phát cảnh báo trực tiếp đến màn hình thí sinh.") }}', 'success');
+                    addActivityEvent(`Đã gửi nhắc nhở đến thí sinh <b>${name}</b>`);
+                });
+            }
+        });
+    }
+
+    function addTimeToStudent(sessionId, name) {
+        Swal.fire({
+            title: '{{ _("Cộng thêm thời gian thi") }}',
+            text: '{{ _("Cộng thêm bao nhiêu phút cho thí sinh:") }} ' + name + '?',
+            input: 'select',
+            inputOptions: {
+                '5': '+5 {{ _("phút") }}',
+                '10': '+10 {{ _("phút") }}',
+                '15': '+15 {{ _("phút") }}',
+                '20': '+20 {{ _("phút") }}'
+            },
+            inputValue: '5',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Cộng thời gian") }}',
+            cancelButtonText: '{{ _("Hủy") }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeProctorAction(sessionId, 'add_time', { minutes: result.value }, function() {
+                    Swal.fire('{{ _("Thành công") }}', '{{ _("Đã cộng thêm thời gian thi cho thí sinh.") }}', 'success');
+                    addActivityEvent(`Đã cộng +${result.value} phút cho thí sinh <b>${name}</b>`);
+                });
+            }
+        });
+    }
+
+    function togglePauseStudent(sessionId, name, isPaused) {
+        var nextAction = isPaused ? 'resume' : 'pause';
+        var actionTitle = isPaused ? 'Tiếp tục bài thi' : 'Tạm dừng bài thi';
+        var actionPrompt = isPaused ? 'Mở lại màn hình làm bài cho thí sinh: ' + name + '?' : 'Tạm dừng và khóa màn hình làm bài của thí sinh: ' + name + '?';
+
+        Swal.fire({
+            title: actionTitle,
+            text: actionPrompt,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: actionTitle,
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeProctorAction(sessionId, nextAction, {}, function() {
+                    Swal.fire('Thành công', isPaused ? 'Đã mở lại bài thi.' : 'Đã tạm dừng bài thi của học sinh.', 'success');
+                    addActivityEvent(`Giám thị đã ${isPaused ? 'tiếp tục' : 'tạm dừng'} bài thi của <b>${name}</b>`);
+                });
+            }
+        });
+    }
+
+    function forceSubmitStudent(sessionId, name) {
+        Swal.fire({
+            title: '{{ _("Đình chỉ thi & Thu bài") }}',
+            text: '{{ _("Bạn có chắc chắn muốn thu bài và đình chỉ thi của thí sinh:") }} ' + name + '?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Đình chỉ & Nộp bài") }}',
+            cancelButtonText: '{{ _("Hủy") }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeProctorAction(sessionId, 'force_submit', {}, function() {
+                    Swal.fire('{{ _("Đã thu bài") }}', '{{ _("Bài thi đã được chấm điểm và kết thúc.") }}', 'success');
+                    addActivityEvent(`Giám thị đã <b>đình chỉ thi & thu bài</b> của thí sinh <b>${name}</b>`);
+                });
+            }
+        });
+    }
+
+    function resetStudentSession(sessionId, name) {
+        Swal.fire({
+            title: '{{ _("Cho phép học sinh thi lại?") }}',
+            text: '{{ _("Hành động này sẽ xóa kết quả và đặt lại lượt thi mới cho:") }} ' + name + '. Bạn có chắc chắn?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Xác nhận thi lại") }}',
+            cancelButtonText: '{{ _("Hủy") }}'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                executeProctorAction(sessionId, 'reset_session', {}, function() {
+                    Swal.fire('{{ _("Thành công") }}', '{{ _("Đã đặt lại phiên thi. Học sinh có thể vào làm bài lại.") }}', 'success');
+                    addActivityEvent(`Đã reset phiên thi cho thí sinh <b>${name}</b>`);
+                });
+            }
+        });
+    }
+
+    function initExamMonitorWebSocket() {
+        if (typeof EventReceiver !== 'undefined') {
+            try {
+                var receiver = new EventReceiver(
+                    "{{ EVENT_DAEMON_LOCATION }}", "{{ EVENT_DAEMON_POLL_LOCATION }}",
+                    ['quiz_exam_{{ exam.id }}'], {{ last_msg|default(0) }},
+                    function(msg) {
+                        if (!msg) return;
+                        handleRealtimeExamEvent(msg);
+                    }
+                );
+            } catch(e) {
+                console.log('Monitor websocket init err:', e);
+            }
+        }
+    }
+
+    function handleRealtimeExamEvent(msg) {
+        if (msg.type === 'violation') {
+            var prevV = lastKnownViolations[msg.session_id];
+            if (prevV === undefined || msg.violation_count > prevV) {
+                lastKnownViolations[msg.session_id] = msg.violation_count;
+                playAlertChime();
+                var vDetail = msg.latest_violation ? msg.latest_violation.detail : 'Vi phạm quy chế thi';
+                var vTime = msg.latest_violation ? msg.latest_violation.time : '';
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: `⚠️ ${msg.display_name} (@${msg.username})`,
+                    html: `<b style="color:var(--quiz-danger)">${vDetail}</b><br><small style="color:var(--quiz-text-muted)">Lần thứ ${msg.violation_count} • Lúc ${vTime}</small>`,
+                    showConfirmButton: false,
+                    timer: 6000,
+                    timerProgressBar: true,
+                });
+                addActivityEvent(`<b style="color:var(--quiz-danger)">⚠️ ${msg.display_name}</b>: ${vDetail} (Lần ${msg.violation_count})`);
+            }
+            pollLiveMonitor();
+        } else if (msg.type === 'submission') {
+            var prevSub = lastKnownSubmissions[msg.session_id];
+            if (prevSub !== true) {
+                lastKnownSubmissions[msg.session_id] = true;
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: `✅ ${msg.display_name} vừa nộp bài!`,
+                    html: `Điểm số: <b style="color:#10b981; font-size:1.1rem;">${msg.score !== null ? msg.score + 'đ' : 'Đã nộp'}</b>`,
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true,
+                });
+                addActivityEvent(`<b style="color:#10b981">✓ ${msg.display_name}</b>: Nộp bài thi (${msg.score !== null ? msg.score + 'đ' : 'Xong'})`);
+            }
+            pollLiveMonitor();
+        } else if (msg.type === 'student_joined') {
+            addActivityEvent(`<b style="color:var(--quiz-primary)">🟢 ${msg.display_name}</b>: Bắt đầu làm bài thi`);
+            pollLiveMonitor();
+        } else if (msg.type === 'progress_update') {
+            if (cachedData && cachedData.students) {
+                var st = cachedData.students.find(x => x.session_id == msg.session_id);
+                if (st) {
+                    st.answered_count = msg.answered_count;
+                    st.progress_pct = msg.progress_pct;
+                    renderCurrentData();
+                } else {
+                    pollLiveMonitor();
+                }
+            }
+        } else if (msg.type === 'proctor_action') {
+            pollLiveMonitor();
+        }
+    }
+
+    // Initialize Auto-Polling & WebSocket Real-time receiver
+    document.addEventListener('DOMContentLoaded', function() {
+        setDashboardViewMode('table'); // Default to table view
+        pollLiveMonitor();
+        initExamMonitorWebSocket();
+        pollTimer = setInterval(pollLiveMonitor, 3000); // 3s background fallback sync
+    });
+</script>
+{% endblock %}

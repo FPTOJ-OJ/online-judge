@@ -15,6 +15,12 @@ class QuizTag(models.Model):
 
 
 class QuizSource(models.Model):
+    EXAM_TYPE_CHOICES = (
+        ('in_class', _('Kiểm tra tại lớp')),
+        ('homework', _('Bài tập về nhà')),
+        ('practice', _('Luyện tập tự do')),
+    )
+
     name = models.CharField(max_length=200, verbose_name=_('source name'), unique=True)
     is_visible = models.BooleanField(default=True, verbose_name=_('visible to users'),
                                      help_text=_('Whether this exam appears in the exam list.'))
@@ -25,14 +31,55 @@ class QuizSource(models.Model):
     is_featured = models.BooleanField(default=False, verbose_name=_('featured'),
                                       help_text=_('Show as featured exam.'))
     is_organization_only = models.BooleanField(default=False, verbose_name=_('organization only'),
-                                               help_text=_('Only members of selected organizations can view and start this exam.'))
+                                               help_text=_('Only members of selected organizations or classes can view and start this exam.'))
     organizations = models.ManyToManyField('Organization', verbose_name=_('organizations'), blank=True,
                                            help_text=_('Organizations that can access this exam (empty = all if unchecked).'))
+    target_classes = models.ManyToManyField('Class', verbose_name=_('target classes'), blank=True,
+                                            related_name='assigned_quiz_sources',
+                                            help_text=_('Specific classes assigned to take this exam.'))
+    access_code = models.CharField(max_length=20, verbose_name=_('access code / PIN'), blank=True, null=True, unique=True,
+                                   help_text=_('6-character PIN code for quick student join.'))
+    exam_type = models.CharField(max_length=20, choices=EXAM_TYPE_CHOICES, default='in_class', verbose_name=_('exam type'))
+    start_time = models.DateTimeField(verbose_name=_('start time'), null=True, blank=True,
+                                      help_text=_('Exam becomes accessible from this time.'))
+    end_time = models.DateTimeField(verbose_name=_('end time'), null=True, blank=True,
+                                    help_text=_('Exam closes after this time.'))
+    is_active = models.BooleanField(default=True, verbose_name=_('is active / open for submission'),
+                                    help_text=_('Teacher can toggle this to open or close the exam room anytime.'))
+    shuffle_questions = models.BooleanField(default=False, verbose_name=_('shuffle questions'),
+                                            help_text=_('Randomize question order for each student attempt.'))
+    shuffle_options = models.BooleanField(default=False, verbose_name=_('shuffle options'),
+                                          help_text=_('Randomize choice options (A,B,C,D) order.'))
     description = models.TextField(verbose_name=_('description'), blank=True, default='')
     default_duration = models.IntegerField(default=45, verbose_name=_('default duration (minutes)'))
+    is_strict_anti_cheat = models.BooleanField(default=False, verbose_name=_('strict anti-cheat mode'),
+                                              help_text=_('Require fullscreen, detect tab switching, and log violations realtime.'))
+    max_violations = models.IntegerField(default=5, verbose_name=_('max violations'),
+                                         help_text=_('Maximum violations before auto submit (0 = warning only).'))
     created_by = models.ForeignKey(User, verbose_name=_('created by'), on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name=_('updated at'), auto_now=True)
+
+    @classmethod
+    def generate_unique_pin(cls):
+        import random
+        for _ in range(20):
+            pin = f"{random.randint(100000, 999999)}"
+            if not cls.objects.filter(access_code=pin).exists():
+                return pin
+        import uuid
+        return str(uuid.uuid4())[:8].upper()
+
+    def is_currently_open(self):
+        from django.utils import timezone
+        if not self.is_active or self.is_locked:
+            return False
+        now = timezone.now()
+        if self.start_time and now < self.start_time:
+            return False
+        if self.end_time and now > self.end_time:
+            return False
+        return True
 
     def __str__(self):
         return self.name

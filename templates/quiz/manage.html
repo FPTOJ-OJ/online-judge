@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block title_row %}{% endblock %}
@@ -13,22 +12,22 @@
     <!-- Management Header -->
     <div class="quiz-header-card">
         <div>
-            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Teacher Panel') }}</span>
-            <h1>{{ _('Manage Multiple Choice Questions') }}</h1>
-            <p>{{ _('Create, edit, or delete high school graduation exam practice questions.') }}</p>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Bảng Quản Trị Giáo Viên') }}</span>
+            <h1>{{ _('Quản Lý Ngân Hàng Câu Hỏi Trắc Nghiệm') }}</h1>
+            <p>{{ _('Thêm mới, chỉnh sửa, xóa và nhập hàng loạt câu hỏi trắc nghiệm Tin học.') }}</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
             <a href="{{ url('quiz_question_add') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
-                <i class="fa fa-plus"></i> {{ _('Add new question') }}
+                <i class="fa fa-plus"></i> {{ _('Thêm câu hỏi mới') }}
             </a>
             <a href="{{ url('quiz_bulk_import') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
-                <i class="fa fa-upload"></i> {{ _('Bulk Import (JSON)') }}
+                <i class="fa fa-upload"></i> {{ _('Nhập JSON hàng loạt') }}
             </a>
             <a href="{{ url('quiz_exam_manage') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
-                <i class="fa fa-book"></i> {{ _('Manage exams') }}
+                <i class="fa fa-book"></i> {{ _('Quản lý đề thi') }}
             </a>
             <a href="{{ url('quiz_home') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px; background-color: transparent; border-color: rgba(255,255,255,0.15);">
-                {{ _('Practice Portal') }}
+                {{ _('Về cổng luyện thi') }}
             </a>
         </div>
     </div>
@@ -36,7 +35,7 @@
     <!-- Questions Table / Grid -->
     <div class="quiz-q-card" style="padding: 24px;">
         <h3 style="font-size: 1.1rem; margin: 0 0 16px 0; color: var(--quiz-text); border-bottom: 1px solid var(--quiz-border); padding-bottom: 12px;">
-            {{ _('Question list you manage') }} ({{ questions|length }} {{ _('questions') }})
+            {{ _('Danh sách câu hỏi bạn quản lý') }} ({{ questions|length }} {{ _('câu') }})
         </h3>
 
         {% if questions %}
@@ -45,11 +44,11 @@
                     <thead>
                         <tr style="border-bottom: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
                             <th style="padding: 12px 8px; width: 60px;">ID</th>
-                            <th style="padding: 12px 8px; width: 140px;">{{ _('Type') }}</th>
-                            <th style="padding: 12px 8px; width: 120px;">{{ _('Difficulty') }}</th>
-                            <th style="padding: 12px 8px;">{{ _('Summary') }}</th>
-                            <th style="padding: 12px 8px; width: 160px;">{{ _('Source / Exam') }}</th>
-                            <th style="padding: 12px 8px; width: 150px; text-align: center;">{{ _('Actions') }}</th>
+                            <th style="padding: 12px 8px; width: 140px;">{{ _('Loại câu') }}</th>
+                            <th style="padding: 12px 8px; width: 120px;">{{ _('Mức độ') }}</th>
+                            <th style="padding: 12px 8px;">{{ _('Nội dung tóm tắt') }}</th>
+                            <th style="padding: 12px 8px; width: 160px;">{{ _('Đề thi / Nguồn') }}</th>
+                            <th style="padding: 12px 8px; width: 150px; text-align: center;">{{ _('Thao tác') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,12 +70,12 @@
                                 <td style="padding: 12px 8px; text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
                                         <a href="{{ url('quiz_question_edit', question_id=q.id) }}" class="quiz-session-btn" style="padding: 4px 10px; font-size: 0.8rem; text-decoration: none;">
-                                            {{ _('Edit') }}
+                                            {{ _('Sửa') }}
                                         </a>
-                                        <form method="post" action="{{ url('quiz_question_delete', question_id=q.id) }}" onsubmit="return confirm('{{ _("Are you sure you want to delete this question?") }}')">
+                                        <form method="post" action="{{ url('quiz_question_delete', question_id=q.id) }}" onsubmit="return confirm('{{ _('Bạn có chắc chắn muốn xóa câu hỏi này không?') }}')">
                                             {% csrf_token %}
                                             <button type="submit" class="quiz-session-btn" style="padding: 4px 10px; font-size: 0.8rem; border-color: var(--quiz-danger); color: var(--quiz-danger);">
-                                                {{ _('Delete') }}
+                                                {{ _('Xóa') }}
                                             </button>
                                         </form>
                                     </div>
@@ -88,7 +87,7 @@
             </div>
         {% else %}
             <div style="text-align: center; padding: 40px; color: var(--quiz-text-muted);">
-                {{ _('No questions yet. Click') }} <b>{{ _('Add new question') }}</b> {{ _('to get started.') }}
+                {{ _('Chưa có câu hỏi nào. Hãy bấm') }} <b>{{ _('Thêm câu hỏi mới') }}</b> {{ _('hoặc Import JSON để bắt đầu.') }}
             </div>
         {% endif %}
     </div>

@@ -145,6 +145,9 @@ class Class(models.Model):
 
 
 class Profile(models.Model):
+    quiz_points = 0.0
+    quiz_exams_completed = 0
+
     user = models.OneToOneField(User, verbose_name=_('user associated'), on_delete=models.CASCADE)
     about = models.TextField(verbose_name=_('self-description'), null=True, blank=True)
     timezone = models.CharField(max_length=50, verbose_name=_('time zone'), choices=TIMEZONE,

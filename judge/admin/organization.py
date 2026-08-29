@@ -25,7 +25,7 @@ class ClassAdmin(VersionAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        if not request.user.has_perm('judge.edit_all_organization'):
+        if not (request.user.is_superuser or request.user.has_perm('judge.edit_all_organization')):
             queryset = queryset.filter(
                 Q(admins__id=request.profile.id) |
                 Q(organization__admins__id=request.profile.id),
@@ -33,13 +33,15 @@ class ClassAdmin(VersionAdmin):
         return queryset
 
     def has_add_permission(self, request):
+        if request.user.is_superuser or request.user.has_perm('judge.edit_all_organization'):
+            return True
         return (request.user.has_perm('judge.add_class') and
                 Organization.objects.filter(admins__id=request.profile.id).exists())
 
     def has_change_permission(self, request, obj=None):
         if not request.user.has_perm('judge.change_class'):
             return False
-        if request.user.has_perm('judge.edit_all_organization') or obj is None:
+        if request.user.is_superuser or request.user.has_perm('judge.edit_all_organization') or obj is None:
             return True
         return (obj.admins.filter(id=request.profile.id).exists() or
                 obj.organization.admins.filter(id=request.profile.id).exists())
@@ -48,14 +50,17 @@ class ClassAdmin(VersionAdmin):
         fields = []
         if obj:
             fields.append('organization')
-            if not obj.organization.admins.filter(id=request.profile.id).exists():
+            if not (request.user.is_superuser or request.user.has_perm('judge.edit_all_organization') or obj.organization.admins.filter(id=request.profile.id).exists()):
                 fields.append('admins')
         return fields
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
         if 'organization' in form.base_fields:
-            form.base_fields['organization'].queryset = Organization.objects.filter(admins__id=request.profile.id)
+            if not (request.user.is_superuser or request.user.has_perm('judge.edit_all_organization')):
+                form.base_fields['organization'].queryset = Organization.objects.filter(admins__id=request.profile.id)
+            else:
+                form.base_fields['organization'].queryset = Organization.objects.all()
         return form
 
 

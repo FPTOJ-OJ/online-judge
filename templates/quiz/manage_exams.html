@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block title_content %}
+    <title>{{ _('Quản lý Đề thi & Ngân hàng đề') }} - {{ SITE_NAME }}</title>
 {% endblock %}
 
 {% block title_row %}{% endblock %}
@@ -12,112 +15,117 @@
     
     <div class="quiz-header-card">
         <div>
-            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Teacher Panel') }}</span>
-            <h1>{{ _('Manage Exams') }}</h1>
-            <p>{{ _('Create, edit, and manage exam settings including visibility, access control, and organization restrictions.') }}</p>
+            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Bảng Quản Trị Giáo Viên') }}</span>
+            <h1>{{ _('Quản Lý Ngân Hàng Đề Thi & Học Liệu') }}</h1>
+            <p>{{ _('Tạo và biên tập đề thi trong Kho học liệu. Để giao bài hoặc mở ca thi cho lớp học, hãy vào Quản lý Lớp học.') }}</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-            <a href="{{ url('quiz_exam_add') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
-                <i class="fa fa-plus"></i> {{ _('Add new exam') }}
+            <a href="{{ url('quiz_exam_builder') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px; background: var(--quiz-primary);">
+                {{ _('Tạo đề từ Ngân hàng câu hỏi') }}
             </a>
-            <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.9rem; padding: 8px 16px;">
-                <i class="fa fa-arrow-left"></i> {{ _('Back to questions') }}
+            <a href="{{ url('quiz_exam_add') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px;">
+                {{ _('Thêm đề mới') }}
+            </a>
+            <a href="{{ url('quiz_hub') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px;">
+                {{ _('Về Exam Hub') }}
             </a>
         </div>
     </div>
 
     {% if messages %}
         {% for message in messages %}
-            <div class="quiz-q-card" style="padding: 16px; margin-bottom: 16px; background: var(--quiz-success-bg, #d4edda); color: var(--quiz-success-text, #155724);">
+            <div class="quiz-q-card" style="padding: 12px 16px; margin-bottom: 16px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 6px;">
                 {{ message }}
             </div>
         {% endfor %}
     {% endif %}
 
-    <div class="quiz-q-card" style="padding: 24px;">
-        <h3 style="font-size: 1.1rem; margin: 0 0 16px 0; color: var(--quiz-text); border-bottom: 1px solid var(--quiz-border); padding-bottom: 12px;">
-            {{ _('Exam list') }} ({{ exams|length }} {{ _('exams') }})
+    <div class="quiz-q-card" style="padding: 20px; border: 1px solid var(--quiz-border); border-radius: 8px;">
+        <h3 style="font-size: 1.05rem; margin: 0 0 14px 0; color: var(--quiz-text); border-bottom: 1px solid var(--quiz-border); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+            <span>{{ _('Kho đề thi hệ thống') }}</span>
+            <span style="background: var(--quiz-card-bg-sub); color: var(--quiz-primary); border: 1px solid var(--quiz-border); padding: 2px 10px; border-radius: 12px; font-size: 0.82rem; font-weight: 600;">{{ exams|length }}</span>
         </h3>
 
         {% if exams %}
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
                     <thead>
-                        <tr style="border-bottom: 1px solid var(--quiz-border); color: var(--quiz-text-muted);">
-                            <th style="padding: 10px 8px;">ID</th>
-                            <th style="padding: 10px 8px;">{{ _('Name') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Questions') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Visible') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Featured') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Login req.') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Locked') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Org only') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Duration') }}</th>
-                            <th style="padding: 10px 8px;">{{ _('Created by') }}</th>
-                            <th style="padding: 10px 8px; text-align: center;">{{ _('Actions') }}</th>
+                        <tr style="border-bottom: 1px solid var(--quiz-border); color: var(--quiz-text-muted); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <th style="padding: 8px 6px;">ID</th>
+                            <th style="padding: 8px 6px;">{{ _('Tên Đề Thi') }}</th>
+                            <th style="padding: 8px 6px; text-align: center;">{{ _('Số Câu') }}</th>
+                            <th style="padding: 8px 6px; text-align: center;">{{ _('Thời Lượng') }}</th>
+                            <th style="padding: 8px 6px; text-align: center;">{{ _('Hiển Thị') }}</th>
+                            <th style="padding: 8px 6px; text-align: center;">{{ _('Lớp Được Giao') }}</th>
+                            <th style="padding: 8px 6px;">{{ _('Người Tạo') }}</th>
+                            <th style="padding: 8px 6px; text-align: center;">{{ _('Thao Tác') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for exam in exams %}
-                            <tr style="border-bottom: 1px solid var(--quiz-border);">
-                                <td style="padding: 10px 8px; font-weight: 700; color: var(--quiz-primary);">#{{ exam.id }}</td>
-                                <td style="padding: 10px 8px;">
-                                    <a href="{{ url('quiz_exam_edit', exam_id=exam.id) }}" style="color: var(--quiz-primary); font-weight: 600; text-decoration: none;">
+                            <tr style="border-bottom: 1px solid var(--quiz-border); transition: background 0.15s;">
+                                <td style="padding: 8px 6px; font-weight: 700; color: var(--quiz-primary); white-space: nowrap;">#{{ exam.id }}</td>
+                                <td style="padding: 8px 6px;">
+                                    <a href="{{ url('quiz_exam_edit', exam_id=exam.id) }}" style="color: var(--quiz-text); font-weight: 600; text-decoration: none; display: block;">
                                         {{ exam.name }}
                                     </a>
+                                    {% if exam.description %}
+                                        <div style="font-size: 0.75rem; color: var(--quiz-text-muted); margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 320px;">
+                                            {{ exam.description|truncate(80) }}
+                                        </div>
+                                    {% endif %}
                                 </td>
-                                <td style="padding: 10px 8px; text-align: center; font-weight: 600;">{{ exam.total_questions }}</td>
-                                <td style="padding: 10px 8px; text-align: center;">
+                                <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: var(--quiz-text);">{{ exam.total_questions }}</td>
+                                <td style="padding: 8px 6px; text-align: center; font-weight: 600; color: var(--quiz-text-muted); white-space: nowrap;">{{ exam.default_duration }}p</td>
+                                <td style="padding: 8px 6px; text-align: center;">
                                     {% if exam.is_visible %}
-                                        <span style="color: var(--quiz-success);">✓</span>
-                                    {% else %}
-                                        <span style="color: var(--quiz-danger);">✗</span>
-                                    {% endif %}
-                                </td>
-                                <td style="padding: 10px 8px; text-align: center;">
-                                    {% if exam.is_featured %}
-                                        <span style="color: var(--quiz-accent);">★</span>
+                                        <span style="color: #10b981; font-weight: 700;">✓</span>
                                     {% else %}
                                         <span style="color: var(--quiz-text-muted);">–</span>
                                     {% endif %}
                                 </td>
-                                <td style="padding: 10px 8px; text-align: center;">
-                                    {% if exam.require_login %}
-                                        <span style="color: var(--quiz-warning);">🔒</span>
+                                <td style="padding: 8px 6px; text-align: center;">
+                                    {% set cls_count = exam.target_classes.count() %}
+                                    {% if cls_count > 0 %}
+                                        <span style="background: var(--quiz-card-bg-sub); color: var(--quiz-primary); border: 1px solid var(--quiz-border); padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">
+                                            {{ cls_count }} {{ _('lớp') }}
+                                        </span>
                                     {% else %}
-                                        <span style="color: var(--quiz-text-muted);">–</span>
+                                        <span style="color: var(--quiz-text-muted); font-size: 0.8rem;">{{ _('Chưa giao') }}</span>
                                     {% endif %}
                                 </td>
-                                <td style="padding: 10px 8px; text-align: center;">
-                                    {% if exam.is_locked %}
-                                        <span style="color: var(--quiz-danger);">🔐</span>
-                                    {% else %}
-                                        <span style="color: var(--quiz-text-muted);">–</span>
-                                    {% endif %}
-                                </td>
-                                <td style="padding: 10px 8px; text-align: center;">
-                                    {% if exam.is_organization_only %}
-                                        <span style="color: var(--quiz-warning);">🏫</span>
-                                    {% else %}
-                                        <span style="color: var(--quiz-text-muted);">–</span>
-                                    {% endif %}
-                                </td>
-                                <td style="padding: 10px 8px; text-align: center;">{{ exam.default_duration }}'</td>
-                                <td style="padding: 10px 8px; color: var(--quiz-text-muted);">
+                                <td style="padding: 8px 6px; color: var(--quiz-text-muted); font-size: 0.82rem;">
                                     {% if exam.created_by %}{{ exam.created_by.username }}{% else %}-{% endif %}
                                 </td>
-                                <td style="padding: 10px 8px; text-align: center;">
-                                    <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
-                                        <a href="{{ url('quiz_exam_edit', exam_id=exam.id) }}" class="quiz-session-btn" style="padding: 3px 8px; font-size: 0.75rem; text-decoration: none;">
-                                            {{ _('Edit') }}
+                                <td style="padding: 8px 6px; text-align: center; white-space: nowrap;">
+                                    <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                                        <button type="button" class="quiz-session-btn btn-assign-classes" 
+                                                data-exam-id="{{ exam.id }}" 
+                                                data-exam-name="{{ exam.name }}" 
+                                                data-class-ids="[{% for c in exam.target_classes.all() %}{{ c.id }}{% if not loop.last %},{% endif %}{% endfor %}]"
+                                                title="{{ _('Phân công đề thi cho các lớp học') }}" 
+                                                style="padding: 3px 8px; font-size: 0.75rem; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); font-weight: 600; cursor: pointer; border-radius: 4px;">
+                                            {{ _('Giao lớp') }}
+                                        </button>
+                                        <a href="{{ url('quiz_exam_analytics', exam_id=exam.id) }}" class="quiz-session-btn" title="{{ _('Thống kê & Phân tích phổ điểm') }}" style="padding: 3px 6px; font-size: 0.75rem; text-decoration: none; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 4px;">
+                                            {{ _('Phổ điểm') }}
                                         </a>
-                                        <a href="{{ url('quiz_exam_questions', exam_id=exam.id) }}" class="quiz-session-btn" style="padding: 3px 8px; font-size: 0.75rem; text-decoration: none;">
-                                            {{ _('Questions') }}
+                                        <a href="{{ url('quiz_exam_monitor', exam_id=exam.id) }}" class="quiz-session-btn" title="{{ _('Giám sát phòng thi trực tiếp') }}" style="padding: 3px 6px; font-size: 0.75rem; text-decoration: none; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 4px;">
+                                            {{ _('Giám sát') }}
                                         </a>
-                                        <form method="post" action="{{ url('quiz_exam_delete', exam_id=exam.id) }}" onsubmit="return confirm('{{ _("Are you sure you want to delete this exam? All associated questions will be unlinked.") }}')">
+                                        <a href="{{ url('quiz_exam_questions', exam_id=exam.id) }}" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.75rem; text-decoration: none; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 4px;" title="{{ _('Quản lý câu hỏi') }}">
+                                            {{ _('Câu hỏi') }}
+                                        </a>
+                                        <a href="{{ url('quiz_exam_edit', exam_id=exam.id) }}" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.75rem; text-decoration: none; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 4px;">
+                                            {{ _('Sửa') }}
+                                        </a>
+                                        <a href="{{ url('quiz_exam_export', exam_id=exam.id) }}" class="quiz-session-btn" title="{{ _('Xuất bảng điểm CSV') }}" style="padding: 3px 6px; font-size: 0.75rem; text-decoration: none; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 4px;">
+                                            {{ _('Xuất') }}
+                                        </a>
+                                        <form method="post" action="{{ url('quiz_exam_delete', exam_id=exam.id) }}" onsubmit="return confirm('Xóa đề thi này?');" style="margin: 0;">
                                             {% csrf_token %}
-                                            <button type="submit" class="quiz-session-btn" style="padding: 3px 8px; font-size: 0.75rem; border-color: var(--quiz-danger); color: var(--quiz-danger);">
-                                                {{ _('Delete') }}
+                                            <button type="submit" class="quiz-session-btn" style="padding: 3px 6px; font-size: 0.75rem; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border-radius: 4px;">
+                                                {{ _('Xóa') }}
                                             </button>
                                         </form>
                                     </div>
@@ -128,11 +136,111 @@
                 </table>
             </div>
         {% else %}
-            <div style="text-align: center; padding: 40px; color: var(--quiz-text-muted);">
-                {{ _('No exams yet. Click') }} <b>{{ _('Add new exam') }}</b> {{ _('to get started.') }}
+            <div style="text-align: center; padding: 40px 20px; color: var(--quiz-text-muted);">
+                <div style="font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--quiz-text);">{{ _('Kho đề thi còn trống') }}</div>
+                <div style="font-size: 0.85rem; margin-bottom: 16px;">{{ _('Nhấn vào nút bên dưới để tạo đề thi đầu tiên từ Ngân hàng câu hỏi.') }}</div>
+                <a href="{{ url('quiz_exam_builder') }}" class="quiz-btn-primary" style="text-decoration: none; display: inline-block; padding: 7px 14px; background: var(--quiz-primary);">
+                    {{ _('Tạo Đề Thi Đầu Tiên') }}
+                </a>
             </div>
         {% endif %}
     </div>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btn-assign-classes').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var examId = this.getAttribute('data-exam-id');
+                var examName = this.getAttribute('data-exam-name');
+                var classIds = [];
+                try {
+                    classIds = JSON.parse(this.getAttribute('data-class-ids') || '[]');
+                } catch(e) {}
+                openBulkAssignClassesModal(examId, examName, classIds);
+            });
+        });
+    });
+
+    var availableTeacherClasses = [
+        {% for c in teacher_classes %}
+            { id: {{ c.id }}, name: "{{ c.name }}", org: "{% if c.organization %}{{ c.organization.short_name or c.organization.name }}{% endif %}" },
+        {% endfor %}
+    ];
+
+    function openBulkAssignClassesModal(examId, examName, currentClassIds) {
+        if (!availableTeacherClasses.length) {
+            Swal.fire({
+                icon: 'info',
+                title: '{{ _("Chưa có lớp học nào") }}',
+                text: '{{ _("Bạn chưa phụ trách lớp học nào. Hãy vào Exam Hub để tạo lớp trước khi giao bài.") }}',
+                confirmButtonText: '{{ _("Đã hiểu") }}'
+            });
+            return;
+        }
+
+        var checkboxesHtml = availableTeacherClasses.map(function(c) {
+            var isChecked = currentClassIds.includes(c.id) ? 'checked' : '';
+            return '<label style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--quiz-border); border-radius: 6px; cursor: pointer; margin-bottom: 6px; background: var(--quiz-card-bg-sub); transition: all 0.15s;">' +
+                   '<input type="checkbox" name="swal_class_ids" value="' + c.id + '" ' + isChecked + ' style="width: 16px; height: 16px; cursor: pointer;">' +
+                   '<div style="text-align: left;">' +
+                   '<div style="font-weight: 600; font-size: 0.88rem; color: var(--quiz-text);">' + c.name + '</div>' +
+                   (c.org ? '<div style="font-size: 0.75rem; color: var(--quiz-text-muted);">' + c.org + '</div>' : '') +
+                   '</div></label>';
+        }).join('');
+
+        Swal.fire({
+            title: '{{ _("Giao Đề Cho Lớp") }}',
+            html: '<div style="text-align: left; margin-bottom: 12px; font-size: 0.85rem;">' +
+                  '<div><b>' + '{{ _("Đề thi:") }}' + '</b> <span style="color: var(--quiz-primary);">' + examName + '</span></div>' +
+                  '<div style="margin-top: 4px; color: var(--quiz-text-muted); font-size: 0.8rem;">' +
+                  '{{ _("Chọn các lớp học bạn muốn giao bài tập / đề thi này:") }}' +
+                  '</div></div>' +
+                  '<div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">' +
+                  checkboxesHtml +
+                  '</div>',
+            showCancelButton: true,
+            confirmButtonText: '{{ _("Lưu phân công") }}',
+            cancelButtonText: '{{ _("Hủy") }}',
+            preConfirm: function() {
+                var checkedNodes = document.querySelectorAll('input[name="swal_class_ids"]:checked');
+                var selected = [];
+                for (var i = 0; i < checkedNodes.length; i++) {
+                    selected.push(checkedNodes[i].value);
+                }
+                return selected;
+            }
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+                result.value.forEach(function(cid) { formData.append('class_ids', cid); });
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                fetch('/quiz/manage/exams/' + examId + '/assign-classes/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ _("Thành công!") }}',
+                            text: data.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(function() { location.reload(); });
+                    } else {
+                        Swal.fire('{{ _("Lỗi") }}', data.error || '{{ _("Không thể phân công đề thi.") }}', 'error');
+                    }
+                })
+                .catch(function(err) {
+                    Swal.fire('{{ _("Lỗi") }}', '{{ _("Lỗi kết nối máy chủ.") }}', 'error');
+                });
+            }
+        });
+    }
+</script>
 {% endblock %}

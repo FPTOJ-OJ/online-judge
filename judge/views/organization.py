@@ -21,7 +21,7 @@ from reversion import revisions
 
 from judge.forms import EditOrganizationForm
 from judge.models import Class, Organization, OrganizationRequest, Profile
-from judge.utils.ranker import ranker
+from judge.utils.ranker import attach_quiz_stats, ranker
 from judge.utils.views import DiggPaginatorMixin, QueryStringSortMixin, TitleMixin, generic_message
 
 __all__ = ['OrganizationList', 'OrganizationHome', 'OrganizationUsers', 'OrganizationMembershipChange',
@@ -31,8 +31,10 @@ __all__ = ['OrganizationList', 'OrganizationHome', 'OrganizationUsers', 'Organiz
 
 
 def users_for_template(users, order):
-    return ranker(users.filter(is_unlisted=False).order_by(order)
-                  .select_related('user').defer('about', 'user_script', 'notes'))
+    res = list(ranker(users.filter(is_unlisted=False).order_by(order)
+                  .select_related('user').defer('about', 'user_script', 'notes')))
+    attach_quiz_stats(res)
+    return res
 
 
 class OrganizationMixin(object):
@@ -139,7 +141,9 @@ class OrganizationUsers(QueryStringSortMixin, DiggPaginatorMixin, BaseOrganizati
     def get_context_data(self, **kwargs):
         context = super(OrganizationUsers, self).get_context_data(**kwargs)
         context['title'] = _('%s Members') % self.object.name
-        context['users'] = ranker(context['users'])
+        users = list(ranker(context['users']))
+        attach_quiz_stats(users)
+        context['users'] = users
         context['partial'] = True
         context['is_admin'] = self.can_edit_organization()
         context['kick_url'] = reverse('organization_user_kick', args=[self.object.id, self.object.slug])
@@ -443,6 +447,17 @@ class ClassHome(QueryStringSortMixin, ClassMixin, DetailView):
         context['users'] = users_for_template(self.object.members, self.order)
         context['is_admin'] = False  # Don't allow kicking here
         context.update(self.get_sort_context())
+
+        from judge.models.quiz import QuizSource
+        from judge.views.quiz import is_teacher
+        from django.db.models import Q
+        org = self.object.organization
+        class_exams = QuizSource.objects.filter(
+            Q(organizations=org) | Q(is_organization_only=False),
+            is_visible=True
+        ).distinct().order_by('-created_at')[:6]
+        context['class_exams'] = class_exams
+        context['is_teacher'] = is_teacher(self.request.user) if self.request.user.is_authenticated else False
         return context
 
     def get_content_title(self):

@@ -328,3 +328,34 @@ math {
         padding: 0 5px;
     }
 }
+
+/* Custom Global Vertical & Horizontal Scrollbar strictly matching theme palette */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: $color_primary50 $color_pageBg;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: $color_pageBg;
+    border-left: 1px solid $color_primary25;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $color_primary50;
+    border-radius: 5px;
+    border: 2px solid $color_pageBg;
+    min-height: 40px;
+
+    &:hover {
+        background: $color_primary75;
+    }
+
+    &:active {
+        background: $color_primary100;
+    }
+}

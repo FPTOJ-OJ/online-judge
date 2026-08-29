@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block media %}
-    <link href="{{ static('vendor/fonts/outfit/outfit.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block block_title %}{{ _('Review submitted exam') }}{% endblock %}
@@ -12,68 +11,174 @@
     <div class="quiz-session-header">
         <div>
             <a href="{{ url('quiz_exams_list') }}" class="quiz-session-btn" style="border-color: var(--quiz-text-muted); color: var(--quiz-text-muted);">
-                <i class="fa fa-arrow-left"></i> {{ _('Exit') }}
+                <i class="fa fa-arrow-left"></i> {{ _('Thoát') }}
             </a>
         </div>
         
         <div class="review-mode-title">
-            {{ _('REVIEW MODE: QUESTION LIST') }}
+            {{ _('CHẾ ĐỘ XEM LẠI BÀI THI & LỜI GIẢI CHI TIẾT') }}
         </div>
 
         <div class="header-actions">
             <button type="button" class="quiz-session-btn" id="nav-btn-prev" onclick="jumpPrevQuestion()">
-                <i class="fa fa-chevron-left"></i> {{ _('Previous') }}
+                <i class="fa fa-chevron-left"></i> {{ _('Câu trước') }}
             </button>
             <button type="button" class="quiz-session-btn" id="nav-btn-next" onclick="jumpNextQuestion()">
-                {{ _('Next') }} <i class="fa fa-chevron-right"></i>
+                {{ _('Câu tiếp') }} <i class="fa fa-chevron-right"></i>
             </button>
         </div>
         
         <div>
             <div class="timer-badge">
                 <i class="fa fa-clock-o"></i>
-                <span>{{ _('Submitted at:') }} {{ attempt_date }}</span>
+                <span>{{ _('Nộp bài lúc:') }} {{ attempt_date }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Summary Banner Card (Image 4) -->
+    <!-- Summary Banner Card -->
     <div class="summary-banner-card">
         <div class="summary-score-info">
-            <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">{{ _('Exam Results') }}</div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+                <span class="quiz-q-tag type" style="font-size: 0.8rem;">{{ _('KẾT QUẢ BÀI THI') }}</span>
+                <span class="quiz-q-tag orient" style="font-size: 0.8rem;">{{ _('Định hướng') }}: {{ orientation }}</span>
+                {% if is_strict_anti_cheat %}
+                    {% if violation_count == 0 %}
+                        <span class="quiz-q-tag" style="background: rgba(16,185,129,0.15); color: var(--quiz-success); border-color: var(--quiz-success); font-size: 0.8rem;">
+                            🛡️ 100% {{ _('Trung thực') }}
+                        </span>
+                    {% else %}
+                        <span class="quiz-q-tag" style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.8rem;">
+                            ⚠️ {{ violation_count }} {{ _('vi phạm ghi nhận') }}
+                        </span>
+                    {% endif %}
+                {% endif %}
+            </div>
             <h2 style="font-size: 1.6rem; margin: 4px 0 6px 0;">{{ meta.source_name }}</h2>
             <div class="summary-score-details">
-                {{ part1_total }} {{ _('multiple choice questions') }} &bull; 
-                {{ part2_total }} {{ _('true/false questions') }} &bull; 
-                {{ _('SCORING') }} {{ orientation }} &bull; 
-                {{ _('CORRECT') }} {{ part1_correct + part2_correct_full }}/{{ part1_total + part2_total }} {{ _('QUESTIONS') }}
+                {{ part1_total }} {{ _('câu trắc nghiệm nhiều lựa chọn') }} &bull; 
+                {{ part2_total }} {{ _('câu đúng/sai') }} &bull; 
+                {{ _('Hoàn thành lúc') }}: {{ attempt_date }}
             </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 32px;">
-            <div style="text-align: center;">
-                <div class="summary-score-value {% if session.score >= 5.0 %}score-pass{% else %}score-fail{% endif %}">{{ "%.1f"|format(session.score) }}/10.0</div>
-                <div style="font-size: 0.75rem; text-transform: uppercase; margin-top: 4px; font-weight: bold; letter-spacing: 0.5px;">{{ _('Your Score') }}</div>
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <div style="text-align: center; background: rgba(0,0,0,0.15); padding: 12px 24px; border-radius: 12px; border: 1px solid var(--quiz-border);">
+                <div class="summary-score-value {% if total_score >= 5.0 %}score-pass{% else %}score-fail{% endif %}" style="font-size: 2.4rem; font-weight: 800; line-height: 1;">
+                    {{ "%.2f"|format(total_score) }}<span style="font-size: 1.2rem; color: var(--quiz-text-muted);">/10.0</span>
+                </div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px; color: var(--quiz-text-muted);">
+                    {% if total_score >= 9.0 %}🏆 {{ _('Xuất sắc') }}
+                    {% elif total_score >= 8.0 %}🌟 {{ _('Giỏi') }}
+                    {% elif total_score >= 6.5 %}👍 {{ _('Khá') }}
+                    {% elif total_score >= 5.0 %}✓ {{ _('Đạt') }}
+                    {% else %}⚠️ {{ _('Chưa đạt') }}{% endif %}
+                </div>
             </div>
             
-            <form method="post" action="{{ url('quiz_start_exam', meta.source_id) }}">
-                {% csrf_token %}
-                <input type="hidden" name="duration" value="{{ meta.duration }}">
-                <input type="hidden" name="orientation" value="{{ orientation }}">
-                <button type="submit" class="quiz-btn-primary" style="padding: 12px 28px; font-size: 1rem;">
-                    <i class="fa fa-refresh"></i> {{ _('Retake this exam') }}
-                </button>
-            </form>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <form method="post" action="{{ url('quiz_start_exam', meta.source_id) }}" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="duration" value="{{ meta.duration }}">
+                    <input type="hidden" name="orientation" value="{{ orientation }}">
+                    <button type="submit" class="quiz-btn-primary" style="padding: 10px 20px; font-size: 0.95rem; width: 100%;">
+                        <i class="fa fa-refresh"></i> {{ _('Làm lại đề này') }}
+                    </button>
+                </form>
+                <a href="{{ url('quiz_exams_list') }}" class="quiz-session-btn" style="text-align: center; text-decoration: none; padding: 8px 16px; font-size: 0.9rem;">
+                    {{ _('Xem danh sách đề thi') }}
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Notes Card (Image 4) -->
-    <div class="notes-banner-card">
-        <div class="notes-content">
-            <i class="fa fa-sticky-note-o" style="font-size: 1.2rem;"></i>
-            <span><b>{{ _('NOTE FOR THIS ATTEMPT:') }}</b> {{ _('Notes are saved to help you review later.') }}</span>
+    <!-- Detailed Performance KPI Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 2rem; background: rgba(37,99,235,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--quiz-primary);">
+                ⏱️
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Thời gian làm bài') }}</div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--quiz-text); margin-top: 2px;">{{ time_spent_str }}</div>
+                <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('Giới hạn') }}: {{ duration_min }} {{ _('phút') }}</div>
+            </div>
         </div>
-        <button type="button" class="quiz-session-btn" onclick="addNote()" style="border-color: var(--quiz-primary); color: var(--quiz-primary);">{{ _('Add note') }}</button>
+
+        <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 2rem; background: rgba(16,185,129,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #10b981;">
+                🎯
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Độ chính xác') }}</div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: #10b981; margin-top: 2px;">{{ accuracy_pct }}%</div>
+                <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('Đúng') }} <b>{{ part1_correct + part2_correct_full }}</b>/{{ part1_total + part2_total }} {{ _('câu') }}</div>
+            </div>
+        </div>
+
+        <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 2rem; background: rgba(139,92,246,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
+                📝
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Phần I: Nhiều lựa chọn') }}</div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--quiz-text); margin-top: 2px;">{{ "%.2f"|format(part1_score) }} <span style="font-size: 0.85rem; color: var(--quiz-text-muted);">/ 6.0 điểm</span></div>
+                <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('Đúng') }} <b>{{ part1_correct }}</b>/{{ part1_total }} {{ _('câu (0.25đ/câu)') }}</div>
+            </div>
+        </div>
+
+        <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 2rem; background: rgba(236,72,153,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ec4899;">
+                🧩
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Phần II: Đúng / Sai') }}</div>
+                <div style="font-size: 1.15rem; font-weight: 700; color: var(--quiz-text); margin-top: 2px;">{{ "%.2f"|format(part2_score) }} <span style="font-size: 0.85rem; color: var(--quiz-text-muted);">/ 4.0 điểm</span></div>
+                <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">{{ _('Đúng toàn vẹn') }} <b>{{ part2_correct_full }}</b>/{{ part2_total }} {{ _('câu') }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if violation_count > 0 or (violations_log and violations_log|length > 0) %}
+        <div class="sidebar-card" style="padding: 16px 20px; margin-bottom: 20px; border-left: 4px solid var(--quiz-danger); background: rgba(220, 53, 69, 0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-weight: 700; color: var(--quiz-danger); font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    <span>{{ _('Nhật ký giám sát & Vi phạm quy chế thi') }} ({{ violation_count }} {{ _('lần') }})</span>
+                </div>
+                {% if force_submitted_by_cheat %}
+                    <span class="quiz-q-tag" style="background: rgba(220, 53, 69, 0.2); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.75rem; font-weight: 700;">
+                        {{ _('ĐÃ ĐÌNH CHỈ THI') }}
+                    </span>
+                {% endif %}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                {% for vlog in violations_log %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.84rem;">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="color: var(--quiz-danger); font-weight: 700;">#{{ vlog.count if vlog.count else loop.index }}</span>
+                            <span style="color: var(--quiz-text);">{{ vlog.detail }}</span>
+                        </div>
+                        <span style="color: var(--quiz-text-muted); font-size: 0.78rem;">{{ vlog.time }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- View Mode Switcher -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div style="font-weight: 700; color: var(--quiz-text); font-size: 1.05rem;">
+            📖 {{ _('Xem lại bài thi & Lời giải chi tiết') }}
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <button type="button" class="quiz-session-btn active" id="view-mode-single-btn" onclick="setReviewViewMode('single')">
+                <i class="fa fa-file-text-o"></i> {{ _('Từng câu') }}
+            </button>
+            <button type="button" class="quiz-session-btn" id="view-mode-list-btn" onclick="setReviewViewMode('list')">
+                <i class="fa fa-list"></i> {{ _('Toàn bộ đề thi') }}
+            </button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -86,20 +191,20 @@
                 <div class="question-card{% if not q.is_graded %} orientation-inactive{% endif %}" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}">
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">{{ _('MULTIPLE CHOICE') }}</span>
-                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">{{ _('PART I - Q') }} {{ q.index }}</span>
+                            <span class="quiz-q-tag type">{{ _('TRẮC NGHIỆM') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">{{ _('PHẦN I - CÂU') }} {{ q.index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.question.get_difficulty_display() }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">{{ _('Orientation') }} {{ q.orientation }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Định hướng') }} {{ q.orientation }}</span>
                             {% endif %}
                             {% if q.is_graded %}
                                 {% if q.is_correct %}
-                                    <span class="quiz-q-tag type" style="background: rgba(16,185,129,0.15); color: var(--quiz-success); border-color: var(--quiz-success);"><i class="fa fa-check"></i> {{ _('CORRECT') }}</span>
+                                    <span class="quiz-q-tag type" style="background: rgba(16,185,129,0.15); color: var(--quiz-success); border-color: var(--quiz-success);"><i class="fa fa-check"></i> {{ _('ĐÚNG') }}</span>
                                 {% else %}
-                                    <span class="quiz-q-tag type" style="background: rgba(239,68,68,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger);"><i class="fa fa-times"></i> {{ _('WRONG') }}</span>
+                                    <span class="quiz-q-tag type" style="background: rgba(239,68,68,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger);"><i class="fa fa-times"></i> {{ _('SAI') }}</span>
                                 {% endif %}
                             {% else %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">{{ _('NOT SCORED') }}</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">{{ _('KHÔNG TÍNH ĐIỂM') }}</span>
                             {% endif %}
                         </div>
 
@@ -125,7 +230,7 @@
                         
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">{{ _('Detailed explanation:') }}</h4>
+                                <h4 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">💡 {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}
@@ -138,16 +243,16 @@
                 <div class="question-card{% if not q.is_graded %} orientation-inactive{% endif %}" id="q-card-{{ q.index }}" data-index="{{ q.index }}" data-orientation="{{ q.orientation }}">
                     <div>
                         <div class="quiz-q-tags">
-                            <span class="quiz-q-tag type">{{ _('TRUE / FALSE') }}</span>
-                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PART II - Q') }} {{ q.display_index }}</span>
+                            <span class="quiz-q-tag type">{{ _('ĐÚNG / SAI') }}</span>
+                            <span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">{{ _('PHẦN II - CÂU') }} {{ q.display_index }}</span>
                             <span class="quiz-q-tag difficulty">{{ q.question.get_difficulty_display() }}</span>
                             {% if q.orientation != 'Common' %}
-                                <span class="quiz-q-tag orient">{{ _('Orientation') }} {{ q.orientation }}</span>
+                                <span class="quiz-q-tag orient">{{ _('Định hướng') }} {{ q.orientation }}</span>
                             {% endif %}
                             {% if q.is_graded %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,214,10,0.1); color: var(--quiz-primary); border-color: rgba(255,214,10,0.3);">{{ _('Correct:') }} {{ q.correct_count }}/4 {{ _('statements') }}</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,214,10,0.1); color: var(--quiz-primary); border-color: rgba(255,214,10,0.3);">{{ _('Đúng:') }} {{ q.correct_count }}/4 {{ _('ý') }}</span>
                             {% else %}
-                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">{{ _('NOT SCORED') }}</span>
+                                <span class="quiz-q-tag type" style="background: rgba(255,255,255,0.05); color: var(--quiz-text-muted); border-color: rgba(255,255,255,0.1);">{{ _('KHÔNG TÍNH ĐIỂM') }}</span>
                             {% endif %}
                         </div>
 
@@ -171,12 +276,12 @@
                                         <span class="quiz-tf-btn true-btn 
                                               {% if user_val == True %}active{% endif %}
                                               {% if correct_val == True %}correct-ans{% endif %}">
-                                            {{ _('True') }}
+                                            {{ _('Đúng') }}
                                         </span>
                                         <span class="quiz-tf-btn false-btn 
                                               {% if user_val == False %}active{% endif %}
                                               {% if correct_val == False %}correct-ans{% endif %}">
-                                            {{ _('False') }}
+                                            {{ _('Sai') }}
                                         </span>
                                     </div>
                                 </div>
@@ -185,7 +290,7 @@
 
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 class="quiz-explanation-title">{{ _('Detailed explanation:') }}</h4>
+                                <h4 class="quiz-explanation-title">💡 {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}
@@ -198,10 +303,10 @@
         <!-- Right Sidebar Grid -->
         <div class="quiz-right-pane">
             <div class="sidebar-card">
-                <h3 style="padding-bottom: 12px;">{{ _('Question list') }}</h3>
+                <h3 style="padding-bottom: 12px;">{{ _('Danh sách câu hỏi') }}</h3>
                 <div class="part-tabs">
-                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PART I') }}</div>
-                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PART II') }}</div>
+                    <div class="part-tab active" id="part-tab-1" onclick="showPartGrid(1)">{{ _('PHẦN I') }}</div>
+                    <div class="part-tab" id="part-tab-2" onclick="showPartGrid(2)">{{ _('PHẦN II') }}</div>
                 </div>
                 
                 <!-- Part I Grid -->
@@ -240,19 +345,19 @@
             </div>
             
             <div class="quiz-legend-card">
-                <h4>{{ _('Legend') }}</h4>
+                <h4>{{ _('Chú thích kết quả') }}</h4>
                 <div class="legend-content">
                     <div class="legend-item">
                         <span class="legend-swatch correct"></span>
-                        <span>{{ _('Fully correct') }}</span>
+                        <span>{{ _('Làm đúng hoàn toàn') }}</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-swatch incorrect"></span>
-                        <span>{{ _('Wrong / Incomplete') }}</span>
+                        <span>{{ _('Làm sai / Chưa đủ ý') }}</span>
                     </div>
                     <div class="legend-item disabled">
                         <span class="legend-swatch disabled"></span>
-                        <span>{{ _('Orientation section not scored') }}</span>
+                        <span>{{ _('Câu thuộc định hướng khác') }}</span>
                     </div>
                 </div>
             </div>
@@ -299,6 +404,22 @@
         }
     }
 
+    var reviewViewMode = 'single';
+
+    function setReviewViewMode(mode) {
+        reviewViewMode = mode;
+        document.getElementById('view-mode-single-btn').classList.toggle('active', mode === 'single');
+        document.getElementById('view-mode-list-btn').classList.toggle('active', mode === 'list');
+        
+        var vp = document.getElementById('questions-viewport');
+        if (mode === 'single') {
+            vp.className = 'questions-container view-single';
+        } else {
+            vp.className = 'questions-container view-list';
+        }
+        updateActiveQuestionUI();
+    }
+
     function jumpToQuestion(index) {
         var gridBtn = document.getElementById('grid-btn-' + index);
         if (gridBtn.classList.contains('orientation-disabled')) {
@@ -306,6 +427,13 @@
         }
         currentIndex = parseInt(index);
         updateActiveQuestionUI();
+
+        if (reviewViewMode === 'list') {
+            var target = document.getElementById('q-card-' + index);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     }
 
     function jumpPrevQuestion() {
@@ -315,6 +443,10 @@
             if (gridBtn && !gridBtn.classList.contains('orientation-disabled')) {
                 currentIndex = idx;
                 updateActiveQuestionUI();
+                if (reviewViewMode === 'list') {
+                    var target = document.getElementById('q-card-' + idx);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 break;
             }
             idx--;
@@ -328,6 +460,10 @@
             if (gridBtn && !gridBtn.classList.contains('orientation-disabled')) {
                 currentIndex = idx;
                 updateActiveQuestionUI();
+                if (reviewViewMode === 'list') {
+                    var target = document.getElementById('q-card-' + idx);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 break;
             }
             idx++;
