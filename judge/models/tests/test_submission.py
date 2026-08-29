@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from judge.models import ContestSubmission, Language, Submission, SubmissionSource
 from judge.models.tests.util import CommonDataMixin, create_contest, create_contest_participation, \
@@ -97,24 +97,26 @@ class SubmissionTestCase(CommonDataMixin, TestCase):
         )
 
     def test_basic_submission(self):
-        self.assertEqual(self.basic_submission.result_class, '_AC')
-        self.assertEqual(self.basic_submission.memory_bytes, 20 * 1024)
-        self.assertEqual(self.basic_submission.short_status, 'AC')
-        self.assertEqual(self.basic_submission.long_status, 'Accepted')
-        self.assertTrue(self.basic_submission.is_graded)
-        self.assertIsNone(self.basic_submission.contest_key)
-        self.assertIsNone(self.basic_submission.contest_or_none)
-        self.assertEqual(len(self.basic_submission.id_secret), 24)
-        self.assertFalse(self.basic_submission.is_locked)
+        with translation.override('en'):
+            self.assertEqual(self.basic_submission.result_class, '_AC')
+            self.assertEqual(self.basic_submission.memory_bytes, 20 * 1024)
+            self.assertEqual(self.basic_submission.short_status, 'AC')
+            self.assertEqual(self.basic_submission.long_status, 'Accepted')
+            self.assertTrue(self.basic_submission.is_graded)
+            self.assertIsNone(self.basic_submission.contest_key)
+            self.assertIsNone(self.basic_submission.contest_or_none)
+            self.assertEqual(len(self.basic_submission.id_secret), 24)
+            self.assertFalse(self.basic_submission.is_locked)
 
     def test_full_ac_submission(self):
-        self.assertEqual(self.full_ac_submission.result_class, 'AC')
-        self.assertEqual(self.full_ac_submission.short_status, 'AC')
+        with translation.override('en'):
+            self.assertEqual(self.full_ac_submission.result_class, 'AC')
+            self.assertEqual(self.full_ac_submission.short_status, 'AC')
 
-        self.assertEqual(
-            str(self.full_ac_submission_source),
-            'Source of Submission %d of full_ac by normal' % self.full_ac_submission.id,
-        )
+            self.assertEqual(
+                str(self.full_ac_submission_source),
+                'Source of Submission %d of full_ac by normal' % self.full_ac_submission.id,
+            )
 
     def test_submission_lock(self):
         self.assertTrue(self.locked_submission.is_locked)
@@ -128,17 +130,18 @@ class SubmissionTestCase(CommonDataMixin, TestCase):
         self.ie_submission.update_contest()
 
     def test_queued_submission(self):
-        self.assertIsNone(self.queued_submission.result_class)
-        self.assertEqual(self.queued_submission.memory_bytes, 0)
-        self.assertEqual(self.queued_submission.short_status, 'QU')
-        self.assertEqual(self.queued_submission.long_status, 'Queued')
-        self.assertFalse(self.queued_submission.is_graded)
+        with translation.override('en'):
+            self.assertIsNone(self.queued_submission.result_class)
+            self.assertEqual(self.queued_submission.memory_bytes, 0)
+            self.assertEqual(self.queued_submission.short_status, 'QU')
+            self.assertEqual(self.queued_submission.long_status, 'Queued')
+            self.assertFalse(self.queued_submission.is_graded)
 
-        self.assertEqual(self.queued_submission.contest_key, 'queued')
-        self.assertIsNotNone(self.queued_submission.contest_or_none)
-        self.queued_contest_submission.points = -1000
-        self.queued_submission.update_contest()
-        self.assertEqual(self.queued_contest_submission.points, 0)
+            self.assertEqual(self.queued_submission.contest_key, 'queued')
+            self.assertIsNotNone(self.queued_submission.contest_or_none)
+            self.queued_contest_submission.points = -1000
+            self.queued_submission.update_contest()
+            self.assertEqual(self.queued_contest_submission.points, 0)
 
     def test_basic_submission_methods(self):
         data = {

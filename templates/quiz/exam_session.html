@@ -1112,10 +1112,9 @@
     // ANTI-CHEAT & PROCTORING ENGINE
     // ==========================================
     var isStrictAntiCheat = ("{{ is_strict_anti_cheat }}" === "True");
-    var maxViolations = parseInt('{{ max_violations }}');
-    var currentViolations = parseInt('{{ violation_count }}');
-    var antiCheatActive = false;
-    var hasUsedGrace = (currentViolations > 0); // If already has violations from earlier session, grace is consumed
+    var maxViolations = parseInt('{{ max_violations }}') || 0;
+    var currentViolations = parseInt('{{ violation_count }}') || 0;
+    var antiCheatActive = !isStrictAntiCheat; // Non-strict exams active immediately; strict active after pledge
     var lastViolationTime = 0;
     var examSubmitted = false;
     var blurTimer = null;
@@ -1149,17 +1148,16 @@
     }
 
     function handleViolation(vType, vDetail) {
-        if (!isStrictAntiCheat || !antiCheatActive || examSubmitted) return;
+        if (examSubmitted) return;
 
         var now = Date.now();
-        // Debounce to prevent multiple logs within 3 seconds
-        if (now - lastViolationTime < 3000) {
+        // Debounce to prevent multiple triggers within 1 second for the same action
+        if (now - lastViolationTime < 1000) {
             return;
         }
         lastViolationTime = now;
 
         playWarningBeep();
-        antiCheatActive = false; // Pause monitoring while modal is open
 
         // Send violation event to server immediately
         var formData = new FormData();
@@ -1192,7 +1190,8 @@
                     }).then(() => {
                         window.location.href = data.redirect || '/quiz/exams/session/{{ session.id }}/review/';
                     });
-                } else {
+                } else if (isStrictAntiCheat) {
+                    antiCheatActive = false;
                     Swal.fire({
                         title: '{{ _("Cảnh báo vi phạm quy chế thi") }}',
                         html: `
@@ -1216,78 +1215,90 @@
                         requestExamFullscreen();
                         setTimeout(function() {
                             antiCheatActive = true;
-                        }, 1500);
+                        }, 500);
+                    });
+                } else {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    Toast.fire({
+                        icon: 'warning',
+                        title: `Cảnh báo: ${vDetail} (Lần ${data.violation_count})`
                     });
                 }
-            } else {
-                antiCheatActive = true;
             }
         })
-        .catch(() => {
-            antiCheatActive = true;
+        .catch(err => {
+            console.log('Violation log error:', err);
         });
     }
 
     function initAntiCheatEngine() {
-        if (!isStrictAntiCheat) return;
+        if (isStrictAntiCheat) {
+            // Pre-Exam Rules & Honor Pledge Modal
+            Swal.fire({
+                title: '🏛️ QUY CHẾ PHÒNG THI TRỰC TUYẾN',
+                html: `
+                    <div style="text-align: left; font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text);">
+                        <div style="padding: 10px 14px; background: rgba(37,99,235,0.08); border-left: 4px solid var(--quiz-primary); border-radius: 4px; margin-bottom: 14px; font-weight: 600;">
+                            Thí sinh vui lòng đọc kỹ nội quy trước khi bắt đầu làm bài:
+                        </div>
 
-        // Pre-Exam Rules & Honor Pledge Modal
-        Swal.fire({
-            title: '🏛️ QUY CHẾ PHÒNG THI TRỰC TUYẾN',
-            html: `
-                <div style="text-align: left; font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text);">
-                    <div style="padding: 10px 14px; background: rgba(37,99,235,0.08); border-left: 4px solid var(--quiz-primary); border-radius: 4px; margin-bottom: 14px; font-weight: 600;">
-                        Thí sinh vui lòng đọc kỹ nội quy trước khi bắt đầu làm bài:
-                    </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                            <div style="display: flex; gap: 8px;">
+                                <span style="font-size: 1.1rem;">🖥️</span>
+                                <div><b>1. Toàn màn hình (Fullscreen):</b> Làm bài liên tục ở chế độ toàn màn hình. Tránh ấn phím <code>ESC</code> hoặc <code>F11</code>.</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <span style="font-size: 1.1rem;">🚫</span>
+                                <div><b>2. Tập trung làm bài:</b> Không chuyển đổi tab trình duyệt, không thu nhỏ cửa sổ hoặc mở ứng dụng khác.</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <span style="font-size: 1.1rem;">🔒</span>
+                                <div><b>3. Vô hiệu hóa công cụ:</b> Chuột phải, phím tắt sao chép (Ctrl+C/V) và DevTools (F12) đã bị khóa.</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <span style="font-size: 1.1rem;">📶</span>
+                                <div><b>4. Xử lý sự cố mạng:</b> Khi mất kết nối, hệ thống tự lưu đệm an toàn và tự đồng bộ khi có mạng lại.</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <span style="font-size: 1.1rem;">💡</span>
+                                <div><b>5. Cơ chế nhắc nhở:</b> Hệ thống có <b>1 lần nhắc nhở sơ suất miễn phí</b>. Nếu vi phạm quá <b>${maxViolations > 0 ? maxViolations + ' lần' : 'quy định'}</b>, bài thi sẽ bị đình chỉ và thu bài tự động.</div>
+                            </div>
+                        </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                        <div style="display: flex; gap: 8px;">
-                            <span style="font-size: 1.1rem;">🖥️</span>
-                            <div><b>1. Toàn màn hình (Fullscreen):</b> Làm bài liên tục ở chế độ toàn màn hình. Tránh ấn phím <code>ESC</code> hoặc <code>F11</code>.</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span style="font-size: 1.1rem;">🚫</span>
-                            <div><b>2. Tập trung làm bài:</b> Không chuyển đổi tab trình duyệt, không thu nhỏ cửa sổ hoặc mở ứng dụng khác.</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span style="font-size: 1.1rem;">🔒</span>
-                            <div><b>3. Vô hiệu hóa công cụ:</b> Chuột phải, phím tắt sao chép (Ctrl+C/V) và DevTools (F12) đã bị khóa.</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span style="font-size: 1.1rem;">📶</span>
-                            <div><b>4. Xử lý sự cố mạng:</b> Khi mất kết nối, hệ thống tự lưu đệm an toàn và tự đồng bộ khi có mạng lại.</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <span style="font-size: 1.1rem;">💡</span>
-                            <div><b>5. Cơ chế nhắc nhở:</b> Hệ thống có <b>1 lần nhắc nhở sơ suất miễn phí</b>. Nếu vi phạm quá <b>${maxViolations > 0 ? maxViolations + ' lần' : 'quy định'}</b>, bài thi sẽ bị đình chỉ và thu bài tự động.</div>
+                        <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px dashed #10b981; border-radius: 6px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0; font-weight: 600; color: #065f46;">
+                                <input type="checkbox" id="pledge-agree-checkbox" style="width: 18px; height: 18px; cursor: pointer;" onchange="togglePledgeSubmit(this.checked)">
+                                <span>Em xin cam đoan làm bài trung thực, nghiêm túc và tuân thủ đúng nội quy phòng thi.</span>
+                            </label>
                         </div>
                     </div>
-
-                    <div style="padding: 12px; background: rgba(16,185,129,0.08); border: 1px dashed #10b981; border-radius: 6px;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0; font-weight: 600; color: #065f46;">
-                            <input type="checkbox" id="pledge-agree-checkbox" style="width: 18px; height: 18px; cursor: pointer;" onchange="togglePledgeSubmit(this.checked)">
-                            <span>Em xin cam đoan làm bài trung thực, nghiêm túc và tuân thủ đúng nội quy phòng thi.</span>
-                        </label>
-                    </div>
-                </div>
-            `,
-            icon: 'info',
-            confirmButtonText: '🚀 Bật toàn màn hình & Bắt đầu làm bài',
-            confirmButtonColor: 'var(--quiz-primary)',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                var confirmBtn = Swal.getConfirmButton();
-                confirmBtn.disabled = true;
-                confirmBtn.style.opacity = '0.5';
-                confirmBtn.style.cursor = 'not-allowed';
-            }
-        }).then(() => {
-            requestExamFullscreen();
-            setTimeout(function() {
-                antiCheatActive = true;
-            }, 1500);
-        });
+                `,
+                icon: 'info',
+                confirmButtonText: '🚀 Bật toàn màn hình & Bắt đầu làm bài',
+                confirmButtonColor: 'var(--quiz-primary)',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    var confirmBtn = Swal.getConfirmButton();
+                    confirmBtn.disabled = true;
+                    confirmBtn.style.opacity = '0.5';
+                    confirmBtn.style.cursor = 'not-allowed';
+                }
+            }).then(() => {
+                requestExamFullscreen();
+                setTimeout(function() {
+                    antiCheatActive = true;
+                }, 1000);
+            });
+        } else {
+            antiCheatActive = true;
+        }
 
         window.togglePledgeSubmit = function(isChecked) {
             var confirmBtn = Swal.getConfirmButton();
@@ -1300,17 +1311,17 @@
 
         // 1. Page Visibility (Tab switch / minimize)
         document.addEventListener('visibilitychange', function() {
-            if (document.hidden && antiCheatActive) {
+            if (document.hidden && antiCheatActive && !examSubmitted) {
                 handleViolation('tab_switch', 'Chuyển tab hoặc thu nhỏ trình duyệt');
             }
         });
 
-        // 2. Window Blur (Focus lost / switching application with 2.0s accidental tolerance)
+        // 2. Window Blur (Focus lost / switching application with 1.5s accidental tolerance)
         window.addEventListener('blur', function() {
-            if (!document.hidden && antiCheatActive) {
+            if (!document.hidden && antiCheatActive && !examSubmitted) {
                 blurTimer = setTimeout(function() {
                     handleViolation('blur', 'Mất tiêu điểm (click ra ngoài cửa sổ thi hoặc đổi ứng dụng)');
-                }, 2000);
+                }, 1500);
             }
         });
 
@@ -1325,18 +1336,24 @@
         ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(function(evt) {
             document.addEventListener(evt, function() {
                 var isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-                if (!isFs && antiCheatActive && !examSubmitted) {
+                if (!isFs && antiCheatActive && !examSubmitted && isStrictAntiCheat) {
                     handleViolation('fullscreen_exit', 'Thoát chế độ toàn màn hình');
                 }
             });
         });
 
-        // 4. Cursor leaves examination window (4.0s accidental tolerance)
+        // 4. Cursor leaves examination window (3.0s accidental tolerance)
         document.documentElement.addEventListener('mouseleave', function(e) {
-            if (antiCheatActive && !examSubmitted) {
+            if (antiCheatActive && !examSubmitted && isStrictAntiCheat) {
                 mouseLeaveTimeout = setTimeout(function() {
                     handleViolation('window_leave', 'Con trỏ chuột di chuyển ra khỏi màn hình làm bài');
-                }, 4000);
+                }, 3000);
+            }
+        });
+        document.documentElement.addEventListener('mouseenter', function() {
+            if (mouseLeaveTimeout) {
+                clearTimeout(mouseLeaveTimeout);
+                mouseLeaveTimeout = null;
             }
         });
         document.documentElement.addEventListener('mouseenter', function() {

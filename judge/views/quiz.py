@@ -1068,6 +1068,15 @@ class QuizStartExamView(View):
             'violations_log': [],
         }
         
+        # Mark previous open sessions for this user on this exam as completed/abandoned
+        if request.user.is_authenticated:
+            prev_open = QuizSession.objects.filter(user=request.user, completed=False)
+            for ps in prev_open:
+                if ps.answers.get('__meta__', {}).get('source_id') == source.id:
+                    ps.completed = True
+                    ps.answers.setdefault('__meta__', {})['abandoned'] = True
+                    ps.save()
+
         session = QuizSession.objects.create(
             user=request.user if request.user.is_authenticated else None,
             session_key=request.session.session_key if not request.user.is_authenticated else None,
@@ -1247,193 +1256,201 @@ class QuizExamSessionView(LoginRequiredMixin, View):
 
 class QuizExamActionView(LoginRequiredMixin, View):
     def post(self, request, session_id):
-        session = get_object_or_404(QuizSession, id=session_id)
-        
-        if session.user and session.user != request.user:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
-        if not session.user and session.session_key != request.session.session_key:
-            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        with transaction.atomic():
+            session = get_object_or_404(QuizSession.objects.select_for_update(), id=session_id)
             
-        action = request.POST.get('action')
+            if session.user and session.user != request.user:
+                return JsonResponse({'error': 'Unauthorized'}, status=403)
+            if not session.user and session.session_key != request.session.session_key:
+                return JsonResponse({'error': 'Unauthorized'}, status=403)
+                
+            action = request.POST.get('action')
 
-        if session.completed:
-            if action == 'submit_exam':
-                from django.urls import reverse
+            if session.completed:
+                if action == 'submit_exam':
+                    from django.urls import reverse
+                    return JsonResponse({
+                        'success': True,
+                        'redirect': request.build_absolute_uri(reverse('quiz_exam_review', kwargs={'session_id': session.id}))
+                    })
+                return JsonResponse({'error': 'Exam session already completed.'}, status=400)
+            
+            if action == 'tick_timer':
+                time_left = request.POST.get('time_left')
+                if time_left is not None:
+                    try:
+                        tl = int(time_left)
+                        if '__meta__' in session.answers:
+                            old_tl = session.answers['__meta__'].get('time_left', 0)
+                            if abs(old_tl - tl) >= 5 or tl <= 0:
+                                session.answers['__meta__']['time_left'] = max(0, tl)
+                                session.answers = dict(session.answers)
+                                session.save(update_fields=['answers', 'updated_at'])
+                    except ValueError:
+                        pass
+                meta = session.answers.get('__meta__', {})
                 return JsonResponse({
                     'success': True,
-                    'redirect': request.build_absolute_uri(reverse('quiz_exam_review', kwargs={'session_id': session.id}))
+                    'is_paused': meta.get('is_paused', False),
+                    'proctor_warning': meta.get('proctor_warning'),
+                    'extra_time_added': meta.get('extra_time_added', 0),
+                    'time_left': meta.get('time_left', 0),
+                    'force_submitted': meta.get('force_submitted_by_teacher', False) or session.completed,
                 })
-            return JsonResponse({'error': 'Exam session already completed.'}, status=400)
-        
-        if action == 'tick_timer':
-            time_left = request.POST.get('time_left')
-            if time_left is not None:
-                try:
-                    tl = int(time_left)
-                    if '__meta__' in session.answers:
-                        session.answers['__meta__']['time_left'] = max(0, tl)
-                        session.save()
-                except ValueError:
-                    pass
-            meta = session.answers.get('__meta__', {})
-            return JsonResponse({
-                'success': True,
-                'is_paused': meta.get('is_paused', False),
-                'proctor_warning': meta.get('proctor_warning'),
-                'extra_time_added': meta.get('extra_time_added', 0),
-                'time_left': meta.get('time_left', 0),
-                'force_submitted': meta.get('force_submitted_by_teacher', False) or session.completed,
-            })
 
-        if action == 'ack_warning':
-            if '__meta__' in session.answers:
-                session.answers['__meta__'].pop('proctor_warning', None)
-                session.save()
-            return JsonResponse({'success': True})
-            
-        if action == 'save_answer':
-            qid = request.POST.get('qid')
-            q_type = request.POST.get('q_type', 'choice')
-            
-            if not qid:
-                return JsonResponse({'error': 'Missing qid'}, status=400)
+            if action == 'ack_warning':
+                if '__meta__' in session.answers:
+                    session.answers['__meta__'].pop('proctor_warning', None)
+                    session.answers = dict(session.answers)
+                    session.save(update_fields=['answers', 'updated_at'])
+                return JsonResponse({'success': True})
                 
-            if q_type == 'choice':
-                val = request.POST.get('answer')
-                if val:
-                    session.answers[str(qid)] = val
+            if action == 'save_answer':
+                qid = request.POST.get('qid')
+                q_type = request.POST.get('q_type', 'choice')
+                
+                if not qid:
+                    return JsonResponse({'error': 'Missing qid'}, status=400)
+                    
+                if q_type == 'choice':
+                    val = request.POST.get('answer')
+                    if val:
+                        session.answers[str(qid)] = val
+                    else:
+                        session.answers.pop(str(qid), None)
                 else:
-                    session.answers.pop(str(qid), None)
-            else:
-                curr_ans = session.answers.get(str(qid))
-                if not isinstance(curr_ans, dict):
-                    curr_ans = {}
-                for lbl in ['a', 'b', 'c', 'd']:
-                    val = request.POST.get(f'tf_{lbl}')
-                    if val == 'true':
-                        curr_ans[lbl] = True
-                    elif val == 'false':
-                        curr_ans[lbl] = False
-                session.answers[str(qid)] = curr_ans
+                    curr_ans = session.answers.get(str(qid))
+                    if not isinstance(curr_ans, dict):
+                        curr_ans = {}
+                    for lbl in ['a', 'b', 'c', 'd']:
+                        val = request.POST.get(f'tf_{lbl}')
+                        if val == 'true':
+                            curr_ans[lbl] = True
+                        elif val == 'false':
+                            curr_ans[lbl] = False
+                    session.answers[str(qid)] = curr_ans
+                    
+                session.answers = dict(session.answers)
+                session.save(update_fields=['answers', 'updated_at'])
+                meta = session.answers.get('__meta__', {})
+
+                # Broadcast progress update via WebSocket
+                exam_id = meta.get('source_id')
+                if exam_id:
+                    try:
+                        answered_keys = [k for k in session.answers.keys() if k != '__meta__']
+                        total_q = len(session.questions) if session.questions else 0
+                        pct = round((len(answered_keys) / total_q) * 100) if total_q > 0 else 0
+                        event.post(f"quiz_exam_{exam_id}", {
+                            'type': 'progress_update',
+                            'session_id': session.id,
+                            'username': session.user.username if session.user else 'Khách',
+                            'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
+                            'answered_count': len(answered_keys),
+                            'total_questions': total_q,
+                            'progress_pct': pct,
+                            'time_left': meta.get('time_left', 0),
+                        })
+                    except Exception:
+                        pass
+
+                return JsonResponse({
+                    'success': True,
+                    'is_paused': meta.get('is_paused', False),
+                    'proctor_warning': meta.get('proctor_warning'),
+                    'extra_time_added': meta.get('extra_time_added', 0),
+                    'time_left': meta.get('time_left', 0),
+                    'force_submitted': meta.get('force_submitted_by_teacher', False) or session.completed,
+                })
                 
-            session.save()
-            meta = session.answers.get('__meta__', {})
+            if action == 'change_orientation':
+                new_orient = request.POST.get('orientation', 'KHMT').upper()
+                if new_orient in ('KHMT', 'THUD', 'ALL'):
+                    meta = session.answers.setdefault('__meta__', {})
+                    meta['orientation'] = new_orient
+                    session.answers = dict(session.answers)
+                    session.save(update_fields=['answers', 'updated_at'])
+                    return JsonResponse({'success': True, 'orientation': new_orient})
+                return JsonResponse({'error': 'Invalid orientation'}, status=400)
+                
+            if action == 'log_violation':
+                v_type = request.POST.get('v_type', 'unknown')
+                v_detail = request.POST.get('v_detail', '')
 
-            # Broadcast progress update via WebSocket
-            exam_id = meta.get('source_id')
-            if exam_id:
-                try:
-                    answered_keys = [k for k in session.answers.keys() if k != '__meta__']
-                    total_q = len(session.questions) if session.questions else 0
-                    pct = round((len(answered_keys) / total_q) * 100) if total_q > 0 else 0
-                    event.post(f"quiz_exam_{exam_id}", {
-                        'type': 'progress_update',
-                        'session_id': session.id,
-                        'username': session.user.username if session.user else 'Khách',
-                        'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
-                        'answered_count': len(answered_keys),
-                        'total_questions': total_q,
-                        'progress_pct': pct,
-                        'time_left': meta.get('time_left', 0),
-                    })
-                except Exception:
-                    pass
-
-            return JsonResponse({
-                'success': True,
-                'is_paused': meta.get('is_paused', False),
-                'proctor_warning': meta.get('proctor_warning'),
-                'extra_time_added': meta.get('extra_time_added', 0),
-                'time_left': meta.get('time_left', 0),
-                'force_submitted': meta.get('force_submitted_by_teacher', False) or session.completed,
-            })
-            
-        if action == 'change_orientation':
-            new_orient = request.POST.get('orientation', 'KHMT').upper()
-            if new_orient in ('KHMT', 'THUD', 'ALL'):
                 meta = session.answers.setdefault('__meta__', {})
-                meta['orientation'] = new_orient
-                session.save()
-                return JsonResponse({'success': True, 'orientation': new_orient})
-            return JsonResponse({'error': 'Invalid orientation'}, status=400)
-            
-        if action == 'log_violation':
-            v_type = request.POST.get('v_type', 'unknown')
-            v_detail = request.POST.get('v_detail', '')
+                violation_count = meta.get('violation_count', 0) + 1
+                meta['violation_count'] = violation_count
 
-            meta = session.answers.setdefault('__meta__', {})
-            violation_count = meta.get('violation_count', 0) + 1
-            meta['violation_count'] = violation_count
+                violations_log = meta.setdefault('violations_log', [])
+                violations_log.append({
+                    'time': timezone.now().strftime('%H:%M:%S'),
+                    'type': v_type,
+                    'detail': v_detail,
+                    'count': violation_count,
+                })
 
-            violations_log = meta.setdefault('violations_log', [])
-            violations_log.append({
-                'time': timezone.now().strftime('%H:%M:%S'),
-                'type': v_type,
-                'detail': v_detail,
-                'count': violation_count,
-            })
+                is_strict = meta.get('is_strict_anti_cheat', False)
+                max_violations = meta.get('max_violations', 5)
 
-            is_strict = meta.get('is_strict_anti_cheat', False)
-            max_violations = meta.get('max_violations', 5)
+                force_submitted = False
+                if is_strict and max_violations > 0 and violation_count >= max_violations:
+                    grade_exam_session(session)
+                    force_submitted = True
+                else:
+                    session.answers = dict(session.answers)
+                    session.save(update_fields=['answers', 'updated_at'])
 
-            force_submitted = False
-            if is_strict and max_violations > 0 and violation_count >= max_violations:
+                # Broadcast violation via WebSocket
+                exam_id = meta.get('source_id')
+                if exam_id:
+                    try:
+                        event.post(f"quiz_exam_{exam_id}", {
+                            'type': 'violation',
+                            'session_id': session.id,
+                            'username': session.user.username if session.user else 'Khách',
+                            'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
+                            'violation_count': violation_count,
+                            'latest_violation': {
+                                'time': timezone.now().strftime('%H:%M:%S'),
+                                'type': v_type,
+                                'detail': v_detail,
+                                'count': violation_count,
+                            },
+                            'force_submitted': force_submitted,
+                        })
+                    except Exception:
+                        pass
+
+                return JsonResponse({
+                    'success': True,
+                    'violation_count': violation_count,
+                    'max_violations': max_violations,
+                    'force_submitted': force_submitted,
+                    'redirect': request.build_absolute_uri(redirect('quiz_exam_review', session_id=session.id).url) if force_submitted else None,
+                })
+                
+            if action == 'submit_exam':
                 grade_exam_session(session)
-                force_submitted = True
-            else:
-                session.save()
+                meta = session.answers.get('__meta__', {})
+                exam_id = meta.get('source_id')
+                if exam_id:
+                    try:
+                        event.post(f"quiz_exam_{exam_id}", {
+                            'type': 'submission',
+                            'session_id': session.id,
+                            'username': session.user.username if session.user else 'Khách',
+                            'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
+                            'score': round(session.score, 2),
+                        })
+                    except Exception:
+                        pass
 
-            # Broadcast violation via WebSocket
-            exam_id = meta.get('source_id')
-            if exam_id:
-                try:
-                    event.post(f"quiz_exam_{exam_id}", {
-                        'type': 'violation',
-                        'session_id': session.id,
-                        'username': session.user.username if session.user else 'Khách',
-                        'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
-                        'violation_count': violation_count,
-                        'latest_violation': {
-                            'time': timezone.now().strftime('%H:%M:%S'),
-                            'type': v_type,
-                            'detail': v_detail,
-                            'count': violation_count,
-                        },
-                        'force_submitted': force_submitted,
-                    })
-                except Exception:
-                    pass
-
-            return JsonResponse({
-                'success': True,
-                'violation_count': violation_count,
-                'max_violations': max_violations,
-                'force_submitted': force_submitted,
-                'redirect': request.build_absolute_uri(redirect('quiz_exam_review', session_id=session.id).url) if force_submitted else None,
-            })
-            
-        if action == 'submit_exam':
-            grade_exam_session(session)
-            meta = session.answers.get('__meta__', {})
-            exam_id = meta.get('source_id')
-            if exam_id:
-                try:
-                    event.post(f"quiz_exam_{exam_id}", {
-                        'type': 'submission',
-                        'session_id': session.id,
-                        'username': session.user.username if session.user else 'Khách',
-                        'display_name': (session.user.profile.display_name if session.user and hasattr(session.user, 'profile') and session.user.profile.display_name else (session.user.username if session.user else 'Khách')),
-                        'score': round(session.score, 2),
-                    })
-                except Exception:
-                    pass
-
-            return JsonResponse({
-                'success': True,
-                'redirect': request.build_absolute_uri(redirect('quiz_exam_review', session_id=session.id).url)
-            })
-            
-        return JsonResponse({'error': 'Invalid action'}, status=400)
+                return JsonResponse({
+                    'success': True,
+                    'redirect': request.build_absolute_uri(redirect('quiz_exam_review', session_id=session.id).url)
+                })
+                
+            return JsonResponse({'error': 'Invalid action'}, status=400)
 
 
 class QuizExamReviewView(LoginRequiredMixin, View):
@@ -2044,30 +2061,7 @@ class QuizExamLiveMonitorAjaxView(View):
 
         total_questions = exam.questions.count()
 
-        # DEDUPLICATION BY USER: Exactly 1 row/card per student
-        # Priority: Active (in-progress) session > Completed session; then newest updated_at
-        user_sessions = {}
-        for s in exam_sessions:
-            uid = s.user_id if s.user_id else f"guest_{s.id}"
-            if uid not in user_sessions:
-                user_sessions[uid] = s
-            else:
-                curr_best = user_sessions[uid]
-                if curr_best.completed and not s.completed:
-                    user_sessions[uid] = s
-                elif curr_best.completed == s.completed and s.updated_at > curr_best.updated_at:
-                    user_sessions[uid] = s
-
-        deduped_sessions = list(user_sessions.values())
-        # Sort so active students appear first, then sorted by updated_at descending
-        deduped_sessions.sort(key=lambda s: (not s.completed, s.updated_at), reverse=True)
-
-        live_students = []
-        completed_students = []
-        total_violations_active = 0
-        total_violations_all = 0
-
-        for s in deduped_sessions:
+        def get_student_info(s):
             meta = s.answers.get('__meta__', {})
             duration = meta.get('duration', exam.default_duration)
             time_left = meta.get('time_left', duration * 60)
@@ -2084,7 +2078,7 @@ class QuizExamLiveMonitorAjaxView(View):
                 cls_list = [c.name for c in s.user.profile.classes.all()[:2]]
                 classes_str = ", ".join(cls_list)
 
-            student_info = {
+            return {
                 'session_id': s.id,
                 'username': s.user.username if s.user else 'Khách',
                 'display_name': (s.user.profile.display_name if s.user and hasattr(s.user, 'profile') and s.user.profile.display_name else (s.user.username if s.user else 'Khách')),
@@ -2107,26 +2101,50 @@ class QuizExamLiveMonitorAjaxView(View):
                 'proctor_warning': meta.get('proctor_warning'),
             }
 
-            total_violations_all += v_count
-            if not s.completed:
-                total_violations_active += v_count
-                live_students.append(student_info)
-            else:
-                completed_students.append(student_info)
+        active_sessions_raw = [s for s in exam_sessions if not s.completed]
+        completed_sessions_raw = [s for s in exam_sessions if s.completed]
+
+        active_users = {}
+        for s in active_sessions_raw:
+            uid = s.user_id if s.user_id else f"guest_{s.id}"
+            if uid not in active_users or s.id > active_users[uid].id:
+                active_users[uid] = s
+
+        completed_users = {}
+        for s in completed_sessions_raw:
+            uid = s.user_id if s.user_id else f"guest_{s.id}"
+            if uid not in completed_users or s.id > completed_users[uid].id:
+                completed_users[uid] = s
+
+        live_students = [get_student_info(s) for s in active_users.values()]
+        completed_students = [get_student_info(s) for s in completed_users.values()]
+
+        # Latest session per user for main list
+        user_latest = {}
+        for s in exam_sessions:
+            uid = s.user_id if s.user_id else f"guest_{s.id}"
+            if uid not in user_latest or s.id > user_latest[uid].id:
+                user_latest[uid] = s
+
+        students_all = [get_student_info(s) for s in user_latest.values()]
+        students_all.sort(key=lambda x: (not x['is_completed'], x['updated_at']), reverse=True)
+
+        total_violations_active = sum(st['violation_count'] for st in live_students)
+        total_violations_all = sum(s.answers.get('__meta__', {}).get('violation_count', 0) for s in exam_sessions)
 
         return JsonResponse({
             'success': True,
             'exam_name': exam.name,
             'max_violations': exam.max_violations,
             'is_strict_anti_cheat': exam.is_strict_anti_cheat,
-            'active_count': len(live_students),
-            'completed_count': len(completed_students),
-            'total_students_count': len(deduped_sessions),
+            'active_count': len(active_sessions_raw),
+            'completed_count': len(completed_sessions_raw),
+            'total_students_count': len(user_latest),
             'total_violations_active': total_violations_active,
             'total_violations_all': total_violations_all,
             'active_students': live_students,
             'completed_students': completed_students,
-            'students': live_students + completed_students,
+            'students': students_all,
         })
 
 
