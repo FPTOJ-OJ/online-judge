@@ -2780,7 +2780,7 @@ class QuizJoinByPinView(View):
             pin_code = request.GET.get('pin', '').strip()
 
         if pin_code:
-            return self._handle_code(request, pin_code)
+            return self._handle_code(request, pin_code, is_post=False)
 
         context = {
             'pin_code': '',
@@ -2796,9 +2796,9 @@ class QuizJoinByPinView(View):
                 'title': _('Vào lớp học hoặc phòng thi bằng mã'),
             })
 
-        return self._handle_code(request, pin)
+        return self._handle_code(request, pin, is_post=True)
 
-    def _handle_code(self, request, code_raw):
+    def _handle_code(self, request, code_raw, is_post=True):
         from judge.models import Class, OrganizationRequest
         code = code_raw.strip().upper()
 
@@ -2831,7 +2831,13 @@ class QuizJoinByPinView(View):
                     'error': error,
                     'title': _("Vào lớp học hoặc phòng thi bằng mã"),
                 })
-            return redirect('quiz_start_exam', exam_id=exam.id)
+            if is_post:
+                return redirect('quiz_start_exam', exam_id=exam.id)
+            return render(request, 'quiz/join_pin.html', {
+                'pin_code': code,
+                'exam': exam,
+                'title': _("Vào lớp học hoặc phòng thi bằng mã"),
+            })
 
         # 3. Neither matched
         return render(request, 'quiz/join_pin.html', {

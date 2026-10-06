@@ -143,6 +143,7 @@ urlpatterns = [
     path('quiz/hub/', quiz_views.QuizHubView.as_view(), name='quiz_hub'),
     path('quiz/join/', quiz_views.QuizJoinByPinView.as_view(), name='quiz_join_pin'),
     path('quiz/join/<str:pin_code>/', quiz_views.QuizJoinByPinView.as_view(), name='quiz_join_pin_code'),
+    path('quiz/class/<int:class_id>/', quiz_views.QuizClassDetailView.as_view(), name='quiz_class_detail'),
     path('quiz/class/<int:class_id>/gradebook/', quiz_views.QuizClassGradebookView.as_view(), name='quiz_class_gradebook'),
     path('quiz/class/<int:class_id>/gradebook/export/', quiz_views.QuizClassGradebookExportView.as_view(), name='quiz_class_gradebook_export'),
     path('quiz/class/<int:class_id>/join/', quiz_views.QuizClassJoinDirectView.as_view(), name='quiz_class_join_direct'),

@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
@@ -65,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='quizsource',
             name='created_at',
-            field=models.DateTimeField(auto_now_add=True, default='2026-01-01', verbose_name='created at'),
+            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='created at'),
             preserve_default=False,
         ),
         migrations.AddField(
