@@ -10,7 +10,7 @@ COPY resources/ ./resources/
 RUN ./make_style.sh
 
 # Giai đoạn 2: Tạo Docker Image ứng dụng chính
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bookworm
 WORKDIR /app
 
 # Đặt các tham số tối ưu hóa cho Python
