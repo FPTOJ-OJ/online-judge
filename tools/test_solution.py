@@ -9,19 +9,22 @@ import shutil
 import yaml
 
 # Add site directory to python path for django imports
-sys.path.append("/home/kien/site")
+SITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if SITE not in sys.path:
+    sys.path.insert(0, SITE)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dmoj.settings")
 import django
 django.setup()
 
+from django.conf import settings
 from judge.models import Problem, Solution
 
 def find_zip_file(problem_code):
     """Tìm tệp zip testcase của bài tập trên hệ thống"""
     search_dirs = [
-        "/home/kien/site/tmp_problems",
-        "/home/kien/site/uploads",
-        "/data/problems"
+        os.path.join(SITE, "uploads"),
+        getattr(settings, "DMOJ_PROBLEM_DATA_ROOT", "/data/problems"),
+        "/data/problems",
     ]
     for directory in search_dirs:
         for root, dirs, files in os.walk(directory):

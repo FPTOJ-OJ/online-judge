@@ -14,9 +14,9 @@ import sys
 import django
 from django.core.management import call_command
 
-SITE = "/home/kien/site"
+SITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if SITE not in sys.path:
-    sys.path.append(SITE)
+    sys.path.insert(0, SITE)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dmoj.settings")
 django.setup()
 

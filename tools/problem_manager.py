@@ -4,12 +4,16 @@ import sys
 import subprocess
 import argparse
 
-SITE = "/home/kien/site"
+SITE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VENV_PY = os.path.join(SITE, "dmojsite/bin/python3")
+if not os.path.exists(VENV_PY):
+    VENV_PY = sys.executable
 
 # Automatically configure environment variables
 ENV = os.environ.copy()
-ENV["LD_PRELOAD"] = "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+_libstdcpp = "/usr/lib/x86_64-linux-gnu/libstdc++.so.6"
+if os.path.exists(_libstdcpp):
+    ENV["LD_PRELOAD"] = _libstdcpp
 
 def run_script(script_path):
     """Chạy một script python tạo bài tập hoặc đồng bộ với môi trường DMOJ chuẩn"""

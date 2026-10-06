@@ -26,7 +26,8 @@ done
 REAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo "~$REAL_USER")
 if [ -z "$USER_HOME" ] || [ "$USER_HOME" = "~" ]; then
-  USER_HOME="/home/kien"
+  USER_HOME=$(getent passwd "$REAL_USER" 2>/dev/null | cut -d: -f6)
+  [ -z "$USER_HOME" ] && USER_HOME="$HOME"
 fi
 
 SITE_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -1074,7 +1075,7 @@ echo "[✓] Đã ghi các file cấu hình Supervisor (site, bridged, wsevent, c
 # 14. CẤU HÌNH DỊCH VỤ XUẤT PDF (html-to-pdf-flask)
 echo ""
 echo "=== 7. CẤU HÌNH DỊCH VỤ XUẤT PDF ==="
-PDF_DIR="/home/$REAL_USER/html-to-pdf-flask"
+PDF_DIR="$USER_HOME/html-to-pdf-flask"
 if [ ! -d "$PDF_DIR" ]; then
   echo "[i] Đang tải mã nguồn html-to-pdf-flask từ Github..."
   git clone https://github.com/FPTOJ-OJ/html-to-pdf-flask.git "$PDF_DIR"
@@ -1261,7 +1262,7 @@ read -p "[?] Bạn có muốn cài đặt và chạy máy chấm (Judge Server) 
 setup_judge_ans=${setup_judge_ans:-y}
 
 if [ "$setup_judge_ans" = "y" ] || [ "$setup_judge_ans" = "Y" ]; then
-  JUDGE_DIR="/home/$REAL_USER/judge"
+  JUDGE_DIR="$USER_HOME/judge"
   if [ ! -d "$JUDGE_DIR" ]; then
     echo "[i] Đang tải mã nguồn máy chấm..."
     git clone --recursive https://github.com/FPTOJ-OJ/judge-server.git "$JUDGE_DIR"
