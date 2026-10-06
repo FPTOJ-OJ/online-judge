@@ -28,7 +28,9 @@ def run_script(script_path):
 
 def test_problem(problem_code):
     """Chạy công cụ kiểm thử test_solution.py trên bài tập chỉ định"""
-    test_script = os.path.join(SITE, "tmp_problems/test_solution.py")
+    test_script = os.path.join(SITE, "tools/test_solution.py")
+    if not os.path.exists(test_script):
+        test_script = os.path.join(SITE, "tmp_problems/test_solution.py")
     if not os.path.exists(test_script):
         print(f"❌ Lỗi: Không tìm thấy công cụ kiểm thử '{test_script}'")
         return False
