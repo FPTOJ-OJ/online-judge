@@ -307,7 +307,7 @@
         if (data.is_paused && !isExamPaused) {
             isExamPaused = true;
             Swal.fire({
-                title: '⏸️ {{ _("Bài thi đang tạm dừng") }}',
+                title: '{{ _("Bài thi đang tạm dừng") }}',
                 text: '{{ _("Giám thị đang tạm dừng bài thi của bạn. Đồng hồ đếm ngược đã dừng lại. Vui lòng giữ nguyên màn hình và chờ giám thị mở lại.") }}',
                 icon: 'info',
                 allowOutsideClick: false,
@@ -326,7 +326,7 @@
             });
             Toast.fire({
                 icon: 'success',
-                title: '▶️ {{ _("Bài thi đã được tiếp tục!") }}'
+                title: '{{ _("Bài thi đã được tiếp tục!") }}'
             });
         }
 
@@ -349,7 +349,7 @@
             } catch(e) {}
 
             Swal.fire({
-                title: '⚠️ {{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
+                title: '{{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
                 html: `<div style="font-size: 1.05rem; padding: 12px; background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; border-radius: 4px; color: #b91c1c; text-align: left;">
                     <b>[${data.proctor_warning.time}]</b> ${data.proctor_warning.message}
                 </div>`,
@@ -379,7 +379,7 @@
             });
             Toast.fire({
                 icon: 'info',
-                title: '⏱️ {{ _("Bạn vừa được giám thị cộng thêm thời gian làm bài!") }}'
+                title: '{{ _("Bạn vừa được giám thị cộng thêm thời gian làm bài!") }}'
             });
         }
     }
@@ -1241,7 +1241,7 @@
         if (isStrictAntiCheat) {
             // Pre-Exam Rules & Honor Pledge Modal
             Swal.fire({
-                title: '🏛️ QUY CHẾ PHÒNG THI TRỰC TUYẾN',
+                title: '{{ _("QUY CHẾ PHÒNG THI TRỰC TUYẾN") }}',
                 html: `
                     <div style="text-align: left; font-size: 0.92rem; line-height: 1.6; color: var(--quiz-text);">
                         <div style="padding: 10px 14px; background: rgba(37,99,235,0.08); border-left: 4px solid var(--quiz-primary); border-radius: 4px; margin-bottom: 14px; font-weight: 600;">
@@ -1249,24 +1249,24 @@
                         </div>
 
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                            <div style="display: flex; gap: 8px;">
-                                <span style="font-size: 1.1rem;">🖥️</span>
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <span style="font-size: 1.1rem; color: var(--quiz-primary); width: 20px;"><i class="fa fa-television"></i></span>
                                 <div><b>1. Toàn màn hình (Fullscreen):</b> Làm bài liên tục ở chế độ toàn màn hình. Tránh ấn phím <code>ESC</code> hoặc <code>F11</code>.</div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <span style="font-size: 1.1rem;">🚫</span>
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <span style="font-size: 1.1rem; color: var(--quiz-danger); width: 20px;"><i class="fa fa-ban"></i></span>
                                 <div><b>2. Tập trung làm bài:</b> Không chuyển đổi tab trình duyệt, không thu nhỏ cửa sổ hoặc mở ứng dụng khác.</div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <span style="font-size: 1.1rem;">🔒</span>
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <span style="font-size: 1.1rem; color: var(--quiz-warning); width: 20px;"><i class="fa fa-lock"></i></span>
                                 <div><b>3. Vô hiệu hóa công cụ:</b> Chuột phải, phím tắt sao chép (Ctrl+C/V) và DevTools (F12) đã bị khóa.</div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <span style="font-size: 1.1rem;">📶</span>
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <span style="font-size: 1.1rem; color: var(--quiz-success); width: 20px;"><i class="fa fa-wifi"></i></span>
                                 <div><b>4. Xử lý sự cố mạng:</b> Khi mất kết nối, hệ thống tự lưu đệm an toàn và tự đồng bộ khi có mạng lại.</div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <span style="font-size: 1.1rem;">💡</span>
+                            <div style="display: flex; gap: 10px; align-items: flex-start;">
+                                <span style="font-size: 1.1rem; color: var(--quiz-primary); width: 20px;"><i class="fa fa-info-circle"></i></span>
                                 <div><b>5. Cơ chế nhắc nhở:</b> Hệ thống có <b>1 lần nhắc nhở sơ suất miễn phí</b>. Nếu vi phạm quá <b>${maxViolations > 0 ? maxViolations + ' lần' : 'quy định'}</b>, bài thi sẽ bị đình chỉ và thu bài tự động.</div>
                             </div>
                         </div>
@@ -1280,7 +1280,7 @@
                     </div>
                 `,
                 icon: 'info',
-                confirmButtonText: '🚀 Bật toàn màn hình & Bắt đầu làm bài',
+                confirmButtonText: '<i class="fa fa-arrows-alt"></i> {{ _("Bật toàn màn hình & Bắt đầu làm bài") }}',
                 confirmButtonColor: 'var(--quiz-primary)',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -1420,7 +1420,7 @@
                     });
                     Toast.fire({
                         icon: 'success',
-                        title: '📶 {{ _("Đã kết nối lại mạng & đồng bộ dữ liệu an toàn!") }}'
+                        title: '{{ _("Đã kết nối lại mạng & đồng bộ dữ liệu an toàn!") }}'
                     });
                 }
             } catch(e) {}
@@ -1436,7 +1436,7 @@
             });
             Toast.fire({
                 icon: 'warning',
-                title: '⚠️ {{ _("Mất kết nối mạng! Các câu trả lời đang được lưu đệm an toàn trên máy.") }}'
+                title: '{{ _("Mất kết nối mạng! Các câu trả lời đang được lưu đệm an toàn trên máy.") }}'
             });
         });
     }
@@ -1453,7 +1453,7 @@
                             playWarningBeep();
                             var warnText = message.warning ? message.warning.message : '{{ _("Giám thị nhắc nhở bạn tập trung làm bài thi nghiêm túc!") }}';
                             Swal.fire({
-                                title: '📢 {{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
+                                title: '{{ _("NHẮC NHỞ TỪ GIÁM THỊ") }}',
                                 text: warnText,
                                 icon: 'warning',
                                 confirmButtonText: '{{ _("Tôi đã hiểu và tiếp tục") }}',
@@ -1475,7 +1475,7 @@
                             });
                             Toast.fire({
                                 icon: 'info',
-                                title: `⏱️ Giám thị đã cộng thêm +${mins} phút làm bài!`
+                                title: `Giám thị đã cộng thêm +${mins} phút làm bài!`
                             });
                         } else if (message.action === 'force_submit') {
                             examSubmitted = true;

@@ -393,6 +393,65 @@ python manage.py quiz_cli exam detail 5
 python manage.py quiz_cli exam question list 5 --json
 ```
 
+### 2.5 AI Import from PDF, Images, or Text (`import-ai`)
+
+Tự động nhận diện đề thi từ tệp PDF (kể cả PDF scan), ảnh chụp đề thi (.png, .jpg, .webp) hoặc văn bản thô. Tích hợp OpenAI-compatible Vision AI để bóc tách câu hỏi, công thức toán LaTeX, và tự động đối soát chính xác 100% bảng đáp án (Answer Key ở cuối đề hoặc đánh dấu).
+
+```bash
+# Nhập từ file PDF
+python manage.py quiz_cli import-ai /path/to/exam.pdf --exam "Đề Thi Khảo Sát 2026"
+
+# Nhập từ ảnh chụp đề thi (hỗ trợ Vision AI)
+python manage.py quiz_cli import-ai /path/to/exam_photo.jpg --exam "Đề Kiểm Tra 1 Tiết"
+
+# Tùy chỉnh mô hình và API key (OpenAI, OpenRouter, DeepSeek, vLLM, Ollama)
+python manage.py quiz_cli import-ai /path/to/de_thi.pdf \
+    --api-key "sk-..." \
+    --base-url "https://openrouter.ai/api/v1" \
+    --model "qwen/qwen-2.5-vl-72b-instruct" \
+    --duration 45 \
+    --tag "khmt"
+
+# Chỉ trích xuất text (không dùng vision)
+python manage.py quiz_cli import-ai /path/to/exam.txt --no-vision
+
+# Xuất kết quả dạng JSON
+python manage.py quiz_cli import-ai /path/to/exam.pdf --json
+```
+
+### 2.6 Cấu hình AI trong `settings.py` / `local_settings.py`
+
+Hệ thống cho phép cấu hình cố định Endpoint AI, API Key, Model, và Custom HTTP Headers trong `dmoj/local_settings.py` (hoặc `settings.py`) để không cần nhập lại trên web hay CLI:
+
+```python
+# dmoj/local_settings.py
+
+## ======== Quiz AI Configuration ========
+# 1. API Base URL (OpenAI-compatible)
+OPENAI_BASE_URL = 'https://api.openai.com/v1'
+# Ví dụ OpenRouter: 'https://openrouter.ai/api/v1'
+# Ví dụ DeepSeek:   'https://api.deepseek.com/v1'
+# Ví dụ Ollama:     'http://localhost:11434/v1'
+
+# 2. API Key (để trống nếu dùng Ollama/Local)
+OPENAI_API_KEY = 'sk-...'
+
+# 3. Model mặc định
+OPENAI_MODEL = 'gpt-4o-mini'
+# Ví dụ OpenRouter Vision: 'qwen/qwen-2.5-vl-72b-instruct'
+
+# 4. Custom HTTP Headers (Dictionary)
+# Cần thiết khi dùng OpenRouter (yêu cầu HTTP-Referer, X-Title), Helicone, Cloudflare Gateway hoặc proxy nội bộ
+OPENAI_DEFAULT_HEADERS = {
+    'HTTP-Referer': 'https://fptoj.com',
+    'X-Title': 'FPTOJ Quiz AI',
+    # 'Helicone-Auth': 'Bearer ...',
+    # 'Custom-Auth-Header': '...',
+}
+```
+
+Hệ thống cũng hỗ trợ alias `QUIZ_AI_API_KEY`, `QUIZ_AI_BASE_URL`, `QUIZ_AI_MODEL`, `QUIZ_AI_DEFAULT_HEADERS`, hoặc các biến môi trường cùng tên tương ứng.
+
 ---
 
 ## 3. Bulk JSON Import
@@ -670,6 +729,8 @@ python manage.py makemessages -l vi
 | Delete tag | `python manage.py quiz_cli tag delete <slug>` |
 | Bulk import exams | `python manage.py quiz_cli bulk <json_file>` |
 | Bulk import (dry-run) | `python manage.py quiz_cli bulk <json_file> --dry-run` |
+| Import AI (PDF/Ảnh) | `python manage.py quiz_cli import-ai <file> --exam "Exam Name"` |
+| Import AI (Vision) | `python manage.py quiz_cli import-ai <file> --model "gpt-4o-mini"` |
 
 ### Other
 

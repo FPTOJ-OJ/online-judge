@@ -45,11 +45,11 @@
                 {% if is_strict_anti_cheat %}
                     {% if violation_count == 0 %}
                         <span class="quiz-q-tag" style="background: rgba(16,185,129,0.15); color: var(--quiz-success); border-color: var(--quiz-success); font-size: 0.8rem;">
-                            🛡️ 100% {{ _('Trung thực') }}
+                            <i class="fa fa-shield"></i> 100% {{ _('Trung thực') }}
                         </span>
                     {% else %}
                         <span class="quiz-q-tag" style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.8rem;">
-                            ⚠️ {{ violation_count }} {{ _('vi phạm ghi nhận') }}
+                            <i class="fa fa-exclamation-triangle"></i> {{ violation_count }} {{ _('vi phạm ghi nhận') }}
                         </span>
                     {% endif %}
                 {% endif %}
@@ -68,11 +68,11 @@
                     {{ "%.2f"|format(total_score) }}<span style="font-size: 1.2rem; color: var(--quiz-text-muted);">/10.0</span>
                 </div>
                 <div style="font-size: 0.75rem; text-transform: uppercase; margin-top: 6px; font-weight: 700; letter-spacing: 0.5px; color: var(--quiz-text-muted);">
-                    {% if total_score >= 9.0 %}🏆 {{ _('Xuất sắc') }}
-                    {% elif total_score >= 8.0 %}🌟 {{ _('Giỏi') }}
-                    {% elif total_score >= 6.5 %}👍 {{ _('Khá') }}
-                    {% elif total_score >= 5.0 %}✓ {{ _('Đạt') }}
-                    {% else %}⚠️ {{ _('Chưa đạt') }}{% endif %}
+                    {% if total_score >= 9.0 %}<i class="fa fa-trophy" style="color: #f59e0b;"></i> {{ _('Xuất sắc') }}
+                    {% elif total_score >= 8.0 %}<i class="fa fa-star" style="color: #3b82f6;"></i> {{ _('Giỏi') }}
+                    {% elif total_score >= 6.5 %}<i class="fa fa-thumbs-up" style="color: #10b981;"></i> {{ _('Khá') }}
+                    {% elif total_score >= 5.0 %}<i class="fa fa-check" style="color: #10b981;"></i> {{ _('Đạt') }}
+                    {% else %}<i class="fa fa-exclamation-triangle" style="color: #ef4444;"></i> {{ _('Chưa đạt') }}{% endif %}
                 </div>
             </div>
             
@@ -95,8 +95,8 @@
     <!-- Detailed Performance KPI Cards Grid -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
         <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
-            <div style="font-size: 2rem; background: rgba(37,99,235,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--quiz-primary);">
-                ⏱️
+            <div style="font-size: 1.8rem; background: rgba(37,99,235,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--quiz-primary);">
+                <i class="fa fa-clock-o"></i>
             </div>
             <div>
                 <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Thời gian làm bài') }}</div>
@@ -106,8 +106,8 @@
         </div>
 
         <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
-            <div style="font-size: 2rem; background: rgba(16,185,129,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #10b981;">
-                🎯
+            <div style="font-size: 1.8rem; background: rgba(16,185,129,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #10b981;">
+                <i class="fa fa-bullseye"></i>
             </div>
             <div>
                 <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Độ chính xác') }}</div>
@@ -117,8 +117,8 @@
         </div>
 
         <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
-            <div style="font-size: 2rem; background: rgba(139,92,246,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
-                📝
+            <div style="font-size: 1.8rem; background: rgba(139,92,246,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #8b5cf6;">
+                <i class="fa fa-tasks"></i>
             </div>
             <div>
                 <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Phần I: Nhiều lựa chọn') }}</div>
@@ -128,8 +128,8 @@
         </div>
 
         <div class="sidebar-card" style="padding: 16px; margin: 0; display: flex; align-items: center; gap: 14px;">
-            <div style="font-size: 2rem; background: rgba(236,72,153,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ec4899;">
-                🧩
+            <div style="font-size: 1.8rem; background: rgba(236,72,153,0.1); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #ec4899;">
+                <i class="fa fa-check-square-o"></i>
             </div>
             <div>
                 <div style="font-size: 0.8rem; color: var(--quiz-text-muted); font-weight: 600; text-transform: uppercase;">{{ _('Phần II: Đúng / Sai') }}</div>
@@ -169,7 +169,7 @@
     <!-- View Mode Switcher -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
         <div style="font-weight: 700; color: var(--quiz-text); font-size: 1.05rem;">
-            📖 {{ _('Xem lại bài thi & Lời giải chi tiết') }}
+            <i class="fa fa-book"></i> {{ _('Xem lại bài thi & Lời giải chi tiết') }}
         </div>
         <div style="display: flex; gap: 6px;">
             <button type="button" class="quiz-session-btn active" id="view-mode-single-btn" onclick="setReviewViewMode('single')">
@@ -230,7 +230,7 @@
                         
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">💡 {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
+                                <h4 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}
@@ -290,7 +290,7 @@
 
                         {% if q.question.explanation %}
                             <div class="quiz-explanation-panel">
-                                <h4 class="quiz-explanation-title">💡 {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
+                                <h4 class="quiz-explanation-title"><i class="fa fa-lightbulb-o"></i> {{ _('Lời giải & Phân tích chi tiết:') }}</h4>
                                 <div class="quiz-explanation-body">{{ q.question.explanation|markdown('problem') }}</div>
                             </div>
                         {% endif %}

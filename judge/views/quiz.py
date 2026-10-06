@@ -502,16 +502,72 @@ class QuizManageDashboardView(View):
             return HttpResponseForbidden("Bạn không có quyền truy cập trang quản lý câu hỏi.")
 
         # List questions created by the teacher (or all questions for admins)
-        if request.user.is_superuser:
+        view_scope = request.GET.get('scope', 'all' if request.user.is_superuser else 'my')
+
+        if request.user.is_superuser or view_scope == 'all':
             questions = QuizQuestion.objects.all()
         else:
             questions = QuizQuestion.objects.filter(created_by=request.user)
 
-        questions = questions.prefetch_related('tags').select_related('source').order_by('-created_at')
+        # Filters
+        search_query = request.GET.get('q', '').strip()
+        q_type = request.GET.get('type', '').strip()
+        difficulty = request.GET.get('difficulty', '').strip()
+        source_id = request.GET.get('source', '').strip()
+        tag_slug = request.GET.get('tag', '').strip()
+
+        if search_query:
+            if search_query.isdigit():
+                questions = questions.filter(
+                    Q(id=int(search_query)) |
+                    Q(content__icontains=search_query) |
+                    Q(explanation__icontains=search_query)
+                )
+            else:
+                questions = questions.filter(
+                    Q(content__icontains=search_query) |
+                    Q(explanation__icontains=search_query)
+                )
+
+        if q_type:
+            questions = questions.filter(type=q_type)
+        if difficulty:
+            questions = questions.filter(difficulty=difficulty)
+        if source_id:
+            questions = questions.filter(source_id=source_id)
+        if tag_slug:
+            questions = questions.filter(tags__slug=tag_slug)
+
+        total_questions = questions.count()
+
+        # Pagination
+        from django.core.paginator import Paginator
+        page_num = request.GET.get('page', 1)
+        per_page = int(request.GET.get('per_page', 25))
+        paginator = Paginator(
+            questions.prefetch_related('tags', 'options').select_related('source', 'created_by').order_by('-id'),
+            per_page
+        )
+        page_obj = paginator.get_page(page_num)
+
+        sources = QuizSource.objects.all().order_by('name')
+        tags = QuizTag.objects.all().order_by('name')
 
         context = {
             'title': 'Quản lý câu hỏi trắc nghiệm',
-            'questions': questions,
+            'questions': page_obj.object_list,
+            'page_obj': page_obj,
+            'total_questions': total_questions,
+            'sources': sources,
+            'tags': tags,
+            'search_query': search_query,
+            'selected_type': q_type,
+            'selected_difficulty': difficulty,
+            'selected_source': source_id,
+            'selected_tag': tag_slug,
+            'view_scope': view_scope,
+            'difficulty_choices': QuizQuestion.DIFFICULTY_CHOICES,
+            'question_types': QuizQuestion.QUESTION_TYPES,
         }
         return render(request, 'quiz/manage.html', context)
 
@@ -608,14 +664,23 @@ class QuizQuestionCreateEditView(View):
 
             # Handle Tags
             question.tags.clear()
+            tags_text = request.POST.get('tags_text', '').strip()
+            if tags_text:
+                for t_name in tags_text.split(','):
+                    t_name = t_name.strip()
+                    if t_name and t_name not in tags_raw:
+                        tags_raw.append(t_name)
+
             for tag_val in tags_raw:
-                if tag_val.isdigit():
+                if isinstance(tag_val, str) and tag_val.isdigit():
                     t = QuizTag.objects.filter(id=int(tag_val)).first()
                     if t: question.tags.add(t)
                 else:
-                    slug = slugify(tag_val)
-                    t, _ = QuizTag.objects.get_or_create(name=tag_val, defaults={'slug': slug})
-                    question.tags.add(t)
+                    tag_str = str(tag_val).strip()
+                    if tag_str:
+                        slug = slugify(tag_str)
+                        t, _ = QuizTag.objects.get_or_create(name=tag_str, defaults={'slug': slug})
+                        question.tags.add(t)
 
             # Handle Options
             # Remove old options
@@ -844,6 +909,190 @@ class QuizBulkImportView(View):
             })
 
         return redirect('quiz_manage_dashboard')
+
+
+class QuizAIImportView(View):
+    def get(self, request):
+        if not is_teacher(request.user):
+            return HttpResponseForbidden("Bạn không có quyền truy cập tính năng AI Import.")
+
+        from judge.quiz_ai import get_default_ai_config
+        ai_cfg = get_default_ai_config()
+
+        sources = QuizSource.objects.all().order_by('-created_at')
+        tags = QuizTag.objects.all().order_by('name')
+        preselected_exam = request.GET.get('exam', '')
+        custom_headers_default = json.dumps(ai_cfg.get('custom_headers') or {}, indent=2) if ai_cfg.get('custom_headers') else ''
+
+        session_base_url = request.session.get('quiz_ai_base_url')
+        session_model = request.session.get('quiz_ai_model')
+        session_api_key = request.session.get('quiz_ai_api_key')
+
+        default_base_url = session_base_url if (session_base_url and session_base_url != 'https://api.openai.com/v1') else ai_cfg['base_url']
+        default_model = session_model if (session_model and session_model != 'gpt-4o-mini') else ai_cfg['model']
+        default_api_key = session_api_key or ai_cfg['api_key']
+
+        context = {
+            'title': 'Nhập Đề Thi Thông Minh Bằng AI (PDF / Ảnh)',
+            'sources': sources,
+            'tags': tags,
+            'preselected_exam': preselected_exam,
+            'default_api_key': default_api_key,
+            'default_base_url': default_base_url,
+            'default_model': default_model,
+            'default_custom_headers': custom_headers_default,
+        }
+        return render(request, 'quiz/ai_import.html', context)
+
+    def post(self, request):
+        if not is_teacher(request.user):
+            return JsonResponse({'success': False, 'error': 'Bạn không có quyền truy cập.'}, status=403)
+
+        action = request.POST.get('action', 'analyze')
+
+        if action == 'test_connection':
+            from judge.quiz_ai import test_ai_connection
+            api_key = request.POST.get('api_key', '').strip()
+            base_url = request.POST.get('base_url', '').strip()
+            model = request.POST.get('model', '').strip()
+            custom_headers_raw = request.POST.get('custom_headers', '').strip()
+            custom_headers = None
+            if custom_headers_raw:
+                try:
+                    custom_headers = json.loads(custom_headers_raw)
+                except Exception:
+                    pass
+
+            res = test_ai_connection(api_key=api_key, base_url=base_url, model=model, custom_headers=custom_headers)
+            if res.get('success') and api_key:
+                request.session['quiz_ai_api_key'] = api_key
+                request.session['quiz_ai_base_url'] = base_url
+                request.session['quiz_ai_model'] = model
+            return JsonResponse(res)
+
+        elif action == 'analyze':
+            from judge.quiz_ai import parse_exam_with_ai
+            api_key = request.POST.get('api_key', '').strip()
+            base_url = request.POST.get('base_url', '').strip()
+            model = request.POST.get('model', '').strip()
+            use_vision = request.POST.get('use_vision', 'true') == 'true'
+            orientation = request.POST.get('orientation', '').strip()
+            raw_text = request.POST.get('raw_text', '').strip()
+            custom_headers_raw = request.POST.get('custom_headers', '').strip()
+            custom_headers = None
+            if custom_headers_raw:
+                try:
+                    custom_headers = json.loads(custom_headers_raw)
+                except Exception:
+                    pass
+
+            if api_key:
+                request.session['quiz_ai_api_key'] = api_key
+            if base_url:
+                request.session['quiz_ai_base_url'] = base_url
+            if model:
+                request.session['quiz_ai_model'] = model
+
+            uploaded_files = request.FILES.getlist('exam_files')
+            files_payload = []
+            for f in uploaded_files:
+                files_payload.append((f.name, f.read()))
+
+            if not files_payload and not raw_text:
+                return JsonResponse({'success': False, 'error': 'Vui lòng chọn ít nhất 1 tệp tin (PDF/Ảnh) hoặc nhập văn bản đề thi.'})
+
+            try:
+                result = parse_exam_with_ai(
+                    files=files_payload if files_payload else None,
+                    raw_text=raw_text if raw_text else None,
+                    api_key=api_key,
+                    base_url=base_url,
+                    model=model,
+                    use_vision=use_vision,
+                    orientation_hint=orientation,
+                    custom_headers=custom_headers,
+                )
+                return JsonResponse({'success': True, 'data': result})
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': str(e)})
+
+        elif action in ('commit', 'save'):
+            from judge.quiz_ai import save_extracted_quiz_to_db
+            try:
+                data_json = request.POST.get('verified_data')
+                if not data_json:
+                    return JsonResponse({'success': False, 'error': 'Dữ liệu câu hỏi bị trống.'})
+
+                extracted_data = json.loads(data_json)
+                target_mode = request.POST.get('target_mode', 'new_exam')
+                exam_name = request.POST.get('exam_name', '').strip()
+                exam_duration = int(request.POST.get('exam_duration', 45) or 45)
+                exam_id = None
+                create_new_exam = False
+
+                if target_mode == 'new_exam':
+                    create_new_exam = True
+                elif target_mode == 'existing_exam':
+                    exam_id_raw = request.POST.get('existing_exam_id')
+                    if exam_id_raw and exam_id_raw.isdigit():
+                        exam_id = int(exam_id_raw)
+
+                default_tags = request.POST.getlist('default_tags')
+
+                source, q_count, opt_count = save_extracted_quiz_to_db(
+                    extracted_data=extracted_data,
+                    user=request.user,
+                    exam_id=exam_id,
+                    create_new_exam=create_new_exam,
+                    exam_name=exam_name,
+                    exam_duration=exam_duration,
+                    default_tags=default_tags,
+                )
+
+                target_desc = f"đề thi '{source.name}'" if source else "ngân hàng câu hỏi"
+                messages.success(
+                    request,
+                    f"Đã lưu thành công {q_count} câu hỏi ({opt_count} phương án) vào {target_desc}."
+                )
+
+                if source:
+                    redirect_url = reverse('quiz_exam_questions', kwargs={'exam_id': source.id})
+                else:
+                    redirect_url = reverse('quiz_manage_dashboard')
+
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': redirect_url,
+                    'count': q_count,
+                    'exam_id': source.id if source else None,
+                })
+            except Exception as e:
+                return JsonResponse({'success': False, 'error': f"Lỗi lưu dữ liệu: {str(e)}"})
+
+        return JsonResponse({'success': False, 'error': 'Hành động không hợp lệ.'})
+
+
+class QuizAITestConnectionView(View):
+    def post(self, request):
+        if not is_teacher(request.user):
+            return JsonResponse({'success': False, 'error': 'Bạn không có quyền truy cập.'}, status=403)
+        from judge.quiz_ai import test_ai_connection
+        api_key = request.POST.get('api_key', '').strip()
+        base_url = request.POST.get('base_url', '').strip()
+        model = request.POST.get('model', '').strip()
+        custom_headers_raw = request.POST.get('custom_headers', '').strip()
+        custom_headers = None
+        if custom_headers_raw:
+            try:
+                custom_headers = json.loads(custom_headers_raw)
+            except Exception:
+                pass
+        res = test_ai_connection(api_key=api_key, base_url=base_url, model=model, custom_headers=custom_headers)
+        if res.get('success') and api_key:
+            request.session['quiz_ai_api_key'] = api_key
+            request.session['quiz_ai_base_url'] = base_url
+            request.session['quiz_ai_model'] = model
+        return JsonResponse(res)
 
 
 def can_access_exam(user, source):
@@ -1604,13 +1853,30 @@ class QuizExamManageView(View):
         if not is_teacher(request.user):
             return HttpResponseForbidden("Bạn không có quyền truy cập trang quản lý đề thi.")
 
-        # Superusers see all; teachers see their own
+        search_query = request.GET.get('q', '').strip()
+        status_filter = request.GET.get('status', '').strip()
+
+        # Superusers see all; teachers see their own or public
         if request.user.is_superuser:
-            exams = QuizSource.objects.annotate(total_questions=Count('questions')).prefetch_related('target_classes').order_by('-created_at')
+            exams_qs = QuizSource.objects.all()
         else:
-            exams = QuizSource.objects.filter(
+            exams_qs = QuizSource.objects.filter(
                 Q(created_by=request.user) | Q(created_by__isnull=True)
-            ).annotate(total_questions=Count('questions')).prefetch_related('target_classes').order_by('-created_at')
+            )
+
+        if search_query:
+            exams_qs = exams_qs.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
+
+        if status_filter == 'active':
+            exams_qs = exams_qs.filter(is_active=True, is_locked=False)
+        elif status_filter == 'locked':
+            exams_qs = exams_qs.filter(is_locked=True)
+        elif status_filter == 'visible':
+            exams_qs = exams_qs.filter(is_visible=True)
+        elif status_filter == 'hidden':
+            exams_qs = exams_qs.filter(is_visible=False)
+
+        exams = exams_qs.annotate(total_questions=Count('questions')).prefetch_related('target_classes', 'created_by').order_by('-created_at')
 
         from judge.models import Class
         if request.user.is_superuser:
@@ -1622,6 +1888,9 @@ class QuizExamManageView(View):
             'title': 'Quản lý đề thi trắc nghiệm',
             'exams': exams,
             'teacher_classes': teacher_classes,
+            'search_query': search_query,
+            'status_filter': status_filter,
+            'total_exams': exams.count(),
         }
         return render(request, 'quiz/manage_exams.html', context)
 
@@ -2505,25 +2774,17 @@ def get_exam_access_error_message(user, exam):
 
 
 class QuizJoinByPinView(View):
-    """Students join an exam directly using a 6-digit PIN or direct link."""
+    """Universal Join for Exams (PIN) and Classes (Code)."""
     def get(self, request, pin_code=None):
         if not pin_code:
             pin_code = request.GET.get('pin', '').strip()
 
-        exam = None
-        error = None
         if pin_code:
-            exam = QuizSource.objects.filter(access_code__iexact=pin_code).first()
-            if not exam:
-                error = _("Mã PIN không chính xác hoặc đề thi không tồn tại.")
-            elif not can_access_exam(request.user, exam):
-                error = get_exam_access_error_message(request.user, exam)
+            return self._handle_code(request, pin_code)
 
         context = {
-            'pin_code': pin_code,
-            'exam': exam,
-            'error': error,
-            'title': _("Tham gia thi bằng mã PIN"),
+            'pin_code': '',
+            'title': _("Vào lớp học hoặc phòng thi bằng mã"),
         }
         return render(request, 'quiz/join_pin.html', context)
 
@@ -2531,28 +2792,54 @@ class QuizJoinByPinView(View):
         pin = request.POST.get('pin_code', '').strip().upper()
         if not pin:
             return render(request, 'quiz/join_pin.html', {
-                'error': _('Vui lòng nhập mã PIN đề thi.'),
-                'title': _('Tham gia thi bằng mã PIN'),
+                'error': _('Vui lòng nhập mã lớp học hoặc mã PIN đề thi.'),
+                'title': _('Vào lớp học hoặc phòng thi bằng mã'),
             })
 
-        exam = QuizSource.objects.filter(access_code__iexact=pin).first()
-        if not exam:
-            return render(request, 'quiz/join_pin.html', {
-                'pin_code': pin,
-                'error': _('Mã PIN không chính xác hoặc đề thi không tồn tại.'),
-                'title': _('Tham gia thi bằng mã PIN'),
-            })
+        return self._handle_code(request, pin)
 
-        if not can_access_exam(request.user, exam):
-            err = get_exam_access_error_message(request.user, exam)
-            return render(request, 'quiz/join_pin.html', {
-                'pin_code': pin,
-                'exam': exam,
-                'error': err,
-                'title': _('Tham gia thi bằng mã PIN'),
-            })
+    def _handle_code(self, request, code_raw):
+        from judge.models import Class, OrganizationRequest
+        code = code_raw.strip().upper()
 
-        return redirect('quiz_start_exam', exam_id=exam.id)
+        # 1. Check if matches active Class access_code
+        class_match = Class.objects.filter(access_code__iexact=code, is_active=True).first()
+        if class_match:
+            if not request.user.is_authenticated:
+                return redirect(f"{reverse('auth_login')}?next={reverse('quiz_class_detail', args=[class_match.id])}")
+
+            profile = getattr(request.user, 'profile', None)
+            if profile:
+                if not class_match.members.filter(id=profile.id).exists():
+                    with transaction.atomic():
+                        class_match.members.add(profile)
+                        class_match.organization.members.add(profile)
+                        OrganizationRequest.objects.filter(user=profile, request_class=class_match, state='P').update(state='A')
+                    messages.success(request, _('Chúc mừng bạn đã tham gia thành công lớp học %s!') % class_match.name)
+                else:
+                    messages.info(request, _('Bạn đang ở trong lớp học %s.') % class_match.name)
+            return redirect('quiz_class_detail', class_id=class_match.id)
+
+        # 2. Check if matches QuizSource access_code
+        exam = QuizSource.objects.filter(access_code__iexact=code).first()
+        if exam:
+            if not can_access_exam(request.user, exam):
+                error = get_exam_access_error_message(request.user, exam)
+                return render(request, 'quiz/join_pin.html', {
+                    'pin_code': code,
+                    'exam': exam,
+                    'error': error,
+                    'title': _("Vào lớp học hoặc phòng thi bằng mã"),
+                })
+            return redirect('quiz_start_exam', exam_id=exam.id)
+
+        # 3. Neither matched
+        return render(request, 'quiz/join_pin.html', {
+            'pin_code': code,
+            'error': _("Mã '%s' không chính xác hoặc không tồn tại. Vui lòng kiểm tra lại mã lớp hoặc mã bài thi do giáo viên cung cấp.") % code,
+            'title': _("Vào lớp học hoặc phòng thi bằng mã"),
+        })
+
 
 
 class QuizHubView(View):
@@ -2693,6 +2980,133 @@ class QuizHubView(View):
         return render(request, 'quiz/hub.html', context)
 
 
+class QuizClassDetailView(View):
+    """Unified Class Detail View for both Teachers and Students."""
+    def get(self, request, class_id):
+        from judge.models import Class
+        class_obj = get_object_or_404(Class, id=class_id)
+
+        if not request.user.is_authenticated:
+            return redirect(f"{reverse('auth_login')}?next={request.get_full_path()}")
+
+        profile = getattr(request.user, 'profile', None)
+        if not profile:
+            return HttpResponseForbidden("Không tìm thấy hồ sơ người dùng.")
+
+        # Check if user is a teacher/admin of this class
+        is_class_teacher = (
+            request.user.is_superuser or
+            class_obj.admins.filter(id=profile.id).exists() or
+            profile.admin_of.filter(id=class_obj.organization_id).exists()
+        )
+
+        if is_class_teacher:
+            if request.GET.get('view_as') == 'student':
+                return self.render_student_view(request, class_obj, profile)
+            return QuizClassGradebookView().get(request, class_id)
+
+        # Check if student member
+        if class_obj.members.filter(id=profile.id).exists():
+            return self.render_student_view(request, class_obj, profile)
+
+        # Neither teacher nor member: redirect to join page
+        return redirect('quiz_class_join_direct', class_id=class_obj.id)
+
+    def render_student_view(self, request, class_obj, profile):
+        assigned_exams_qs = QuizSource.objects.filter(
+            Q(target_classes=class_obj) | Q(organizations=class_obj.organization),
+            is_visible=True
+        ).distinct().order_by('-created_at')
+
+        user_sessions = QuizSession.objects.filter(
+            user=request.user,
+            completed=True,
+            answers__has_key='__meta__'
+        ).order_by('-created_at')
+
+        exam_session_map = {}
+        for s in user_sessions:
+            meta = s.answers.get('__meta__', {}) if isinstance(s.answers, dict) else {}
+            src_id = meta.get('source_id')
+            if src_id:
+                try:
+                    src_id_int = int(src_id)
+                    if src_id_int not in exam_session_map:
+                        exam_session_map[src_id_int] = {
+                            'session_id': s.id,
+                            'score': meta.get('score', 0),
+                            'completed_at': s.created_at,
+                        }
+                except (ValueError, TypeError):
+                    pass
+
+        now = timezone.now()
+        assigned_exams_data = []
+        student_scores_list = []
+
+        for ex in assigned_exams_qs:
+            hist = exam_session_map.get(ex.id)
+            is_completed = hist is not None
+            is_expired = bool(ex.end_time and now > ex.end_time and not is_completed)
+            if is_completed:
+                student_scores_list.append(hist['score'])
+
+            assigned_exams_data.append({
+                'exam': ex,
+                'is_completed': is_completed,
+                'is_expired': is_expired,
+                'score': hist['score'] if hist else None,
+                'session_id': hist['session_id'] if hist else None,
+                'completed_at': hist['completed_at'] if hist else None,
+            })
+
+        total_exams = len(assigned_exams_data)
+        completed_count = len(student_scores_list)
+        avg_score = round(sum(student_scores_list) / completed_count, 2) if completed_count > 0 else None
+
+        classmates = class_obj.members.select_related('user').order_by('user__username')
+        assigned_ids = [ex.id for ex in assigned_exams_qs]
+        leaderboard = []
+        for cm in classmates:
+            cm_scores = []
+            for s in QuizSession.objects.filter(user=cm.user, completed=True, answers__has_key='__meta__'):
+                m = s.answers.get('__meta__', {})
+                src_id = m.get('source_id')
+                if src_id and str(src_id).isdigit() and int(src_id) in assigned_ids:
+                    cm_scores.append(m.get('score', 0))
+            cm_avg = round(sum(cm_scores) / len(cm_scores), 2) if cm_scores else None
+            leaderboard.append({
+                'profile': cm,
+                'user': cm.user,
+                'completed_count': len(cm_scores),
+                'average_score': cm_avg,
+                'is_current': cm.id == profile.id,
+            })
+
+        leaderboard.sort(key=lambda x: (x['average_score'] if x['average_score'] is not None else -1, x['completed_count']), reverse=True)
+        my_rank = None
+        for idx, entry in enumerate(leaderboard, start=1):
+            if entry['is_current']:
+                my_rank = idx
+                break
+
+        teachers = class_obj.admins.select_related('user')
+
+        context = {
+            'class_obj': class_obj,
+            'teachers': teachers,
+            'classmates': classmates,
+            'assigned_exams': assigned_exams_data,
+            'total_exams': total_exams,
+            'completed_count': completed_count,
+            'avg_score': avg_score,
+            'my_rank': my_rank,
+            'leaderboard': leaderboard[:15],
+            'title': f"Lớp học {class_obj.name}",
+        }
+        return render(request, 'quiz/class_student_view.html', context)
+
+
 class QuizClassGradebookView(View):
     """Dedicated Classroom Gradebook for Teachers."""
     def get(self, request, class_id):
@@ -2701,16 +3115,16 @@ class QuizClassGradebookView(View):
 
         # Check teacher permission
         teacher_mode = is_teacher(request.user)
-        if not teacher_mode:
-            return HttpResponseForbidden("Bạn không có quyền xem sổ điểm lớp này.")
-
-        if not request.user.is_superuser:
-            has_perm = (
-                (hasattr(request.user, 'profile') and class_obj.admins.filter(id=request.user.profile.id).exists()) or
-                (hasattr(request.user, 'profile') and request.user.profile.admin_of.filter(id=class_obj.organization_id).exists())
-            )
-            if not has_perm:
-                return HttpResponseForbidden("Bạn không phải giáo viên phụ trách lớp này.")
+        is_class_teacher = (
+            request.user.is_superuser or
+            (hasattr(request.user, 'profile') and class_obj.admins.filter(id=request.user.profile.id).exists()) or
+            (hasattr(request.user, 'profile') and request.user.profile.admin_of.filter(id=class_obj.organization_id).exists())
+        )
+        if not is_class_teacher:
+            # If student member, redirect to student view!
+            if hasattr(request.user, 'profile') and class_obj.members.filter(id=request.user.profile.id).exists():
+                return redirect('quiz_class_detail', class_id=class_obj.id)
+            return redirect('quiz_class_join_direct', class_id=class_obj.id)
 
         # Get all exams assigned to this class or its organization
         assigned_exams = QuizSource.objects.filter(

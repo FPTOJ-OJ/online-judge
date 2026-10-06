@@ -120,6 +120,8 @@ urlpatterns = [
     path('quiz/manage/', quiz_views.QuizManageDashboardView.as_view(), name='quiz_manage_dashboard'),
     path('quiz/manage/add/', quiz_views.QuizQuestionCreateEditView.as_view(), name='quiz_question_add'),
     path('quiz/manage/import/', quiz_views.QuizBulkImportView.as_view(), name='quiz_bulk_import'),
+    path('quiz/manage/ai-import/', quiz_views.QuizAIImportView.as_view(), name='quiz_ai_import'),
+    path('quiz/manage/ai-import/test-connection/', quiz_views.QuizAITestConnectionView.as_view(), name='quiz_ai_test_connection'),
     path('quiz/manage/edit/<int:question_id>/', quiz_views.QuizQuestionCreateEditView.as_view(), name='quiz_question_edit'),
     path('quiz/manage/delete/<int:question_id>/', quiz_views.QuizQuestionDeleteView.as_view(), name='quiz_question_delete'),
 

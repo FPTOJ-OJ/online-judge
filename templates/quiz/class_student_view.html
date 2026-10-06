@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title_content %}
+    <title>{{ class_obj.name }} - {{ SITE_NAME }}</title>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container" style="max-width: 1200px; margin: 15px auto; padding: 0 16px;">
+
+    <!-- Breadcrumb & Back -->
+    <div style="margin-bottom: 12px; font-size: 0.85rem; color: var(--quiz-text-muted);">
+        <a href="{{ url('quiz_hub') }}" style="color: var(--quiz-primary); text-decoration: none; font-weight: 600;">
+            ← {{ _('Lớp Học & Bài Thi') }}
+        </a>
+        <span style="margin: 0 6px;">/</span>
+        <span style="color: var(--quiz-text);">{{ class_obj.name }}</span>
+    </div>
+
+    {% if request.GET.get('view_as') == 'student' %}
+        <div style="background: rgba(37,99,235,0.08); border: 1px solid var(--quiz-primary); border-radius: 8px; padding: 12px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 0.9rem; color: var(--quiz-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fa fa-eye"></i>
+                <span>{{ _('Bạn đang xem trước giao diện Học sinh với tư cách Giáo viên / Quản trị viên.') }}</span>
+            </div>
+            <a href="{{ url('quiz_class_detail', class_id=class_obj.id) }}" style="padding: 6px 14px; background: var(--quiz-primary); color: #fff; border-radius: 6px; text-decoration: none; font-size: 0.82rem; font-weight: 700;">
+                ← {{ _('Quay lại Quản lý Lớp & Sổ điểm') }}
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Class Header Banner -->
+    <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div style="flex: 1; min-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; background: var(--quiz-primary); color: #fff; padding: 2px 8px; border-radius: 4px;">
+                        {{ _('LỚP HỌC') }}
+                    </span>
+                    <span style="font-size: 0.8rem; background: var(--quiz-card-bg-sub); color: var(--quiz-text); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--quiz-border); font-weight: 600;">
+                        {{ class_obj.organization.short_name or class_obj.organization.name }}
+                    </span>
+                    <span style="font-size: 0.8rem; background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                        {{ _('Đã tham gia') }}
+                    </span>
+                </div>
+                <h1 style="font-size: 1.6rem; font-weight: 800; margin: 4px 0 6px 0; color: var(--quiz-text); letter-spacing: -0.3px;">
+                    {{ class_obj.name }}
+                </h1>
+                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.85rem; color: var(--quiz-text-muted); flex-wrap: wrap;">
+                    <span>
+                        <strong>{{ _('Giáo viên:') }}</strong>
+                        {% for t in teachers %}
+                            {{ t.display_name or t.user.username }}{% if not loop.last %}, {% endif %}
+                        {% else %}
+                            <i>{{ _('Đang cập nhật') }}</i>
+                        {% endfor %}
+                    </span>
+                    <span>{{ classmates|length }} {{ _('học sinh') }}</span>
+                    <span>{{ _('Mã lớp:') }} <code style="font-weight: 700; color: var(--quiz-primary); background: var(--quiz-card-bg-sub); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--quiz-border);">{{ class_obj.access_code }}</code></span>
+                </div>
+            </div>
+
+            <!-- Quick Action button -->
+            <div>
+                <a href="{{ url('quiz_hub') }}" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    ← {{ _('Lớp Học & Bài Thi') }}
+                </a>
+            </div>
+        </div>
+
+        <!-- Teacher's Announcement Box -->
+        {% if class_obj.description %}
+            <div style="background: rgba(37,99,235,0.05); border-left: 3px solid var(--quiz-primary); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 16px;">
+                <div style="font-weight: 700; font-size: 0.82rem; color: var(--quiz-primary); display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                    <i class="fa fa-bullhorn"></i> <span>{{ _('Thông báo từ Thầy/Cô:') }}</span>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--quiz-text); line-height: 1.5; white-space: pre-line;">{{ class_obj.description }}</div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Student Stats Summary Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px;">
+        <!-- Card 1: Completed count -->
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(37,99,235,0.1); color: var(--quiz-primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                <i class="fa fa-tasks"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--quiz-text-muted); letter-spacing: 0.5px;">
+                    {{ _('Bài tập đã hoàn thành') }}
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--quiz-text); margin-top: 2px;">
+                    {{ completed_count }} <small style="font-size: 0.85rem; font-weight: normal; color: var(--quiz-text-muted);">/ {{ total_exams }} bài</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Average score -->
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16,185,129,0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                <i class="fa fa-line-chart"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--quiz-text-muted); letter-spacing: 0.5px;">
+                    {{ _('Điểm trung bình của bạn') }}
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: {% if avg_score and avg_score >= 8.0 %}#10b981{% elif avg_score and avg_score >= 5.0 %}var(--quiz-primary){% elif avg_score %}#ef4444{% else %}var(--quiz-text-muted){% endif %}; margin-top: 2px;">
+                    {% if avg_score is not none %}
+                        {{ "%.2f"|format(avg_score) }} <small style="font-size: 0.85rem; font-weight: normal; color: var(--quiz-text-muted);">/ 10</small>
+                    {% else %}
+                        <span style="font-size: 1rem; font-weight: normal; color: var(--quiz-text-muted);">{{ _('Chưa có điểm') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Class Rank -->
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245,158,11,0.1); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                <i class="fa fa-trophy"></i>
+            </div>
+            <div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--quiz-text-muted); letter-spacing: 0.5px;">
+                    {{ _('Thứ hạng trong lớp') }}
+                </div>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--quiz-text); margin-top: 2px;">
+                    {% if my_rank %}
+                        #{{ my_rank }} <small style="font-size: 0.85rem; font-weight: normal; color: var(--quiz-text-muted);">/ {{ classmates|length }} bạn</small>
+                    {% else %}
+                        <span style="font-size: 1rem; font-weight: normal; color: var(--quiz-text-muted);">—</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--quiz-border); margin-bottom: 20px; overflow-x: auto;">
+        <button type="button" class="tab-btn active" onclick="switchStudentTab('exams', this)" style="padding: 10px 16px; font-size: 0.92rem; font-weight: 700; border: none; background: none; color: var(--quiz-primary); border-bottom: 3px solid var(--quiz-primary); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-tasks"></i>
+            <span>{{ _('Bài Tập & Đề Thi') }}</span>
+            <span style="font-size: 0.75rem; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); padding: 1px 7px; border-radius: 10px;">
+                {{ assigned_exams|length }}
+            </span>
+        </button>
+        <button type="button" class="tab-btn" onclick="switchStudentTab('leaderboard', this)" style="padding: 10px 16px; font-size: 0.92rem; font-weight: 600; border: none; background: none; color: var(--quiz-text-muted); border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-trophy"></i>
+            <span>{{ _('Bảng Xếp Hạng') }}</span>
+        </button>
+        <button type="button" class="tab-btn" onclick="switchStudentTab('members', this)" style="padding: 10px 16px; font-size: 0.92rem; font-weight: 600; border: none; background: none; color: var(--quiz-text-muted); border-bottom: 3px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-users"></i>
+            <span>{{ _('Thành Viên Lớp') }}</span>
+            <span style="font-size: 0.75rem; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); padding: 1px 7px; border-radius: 10px;">
+                {{ classmates|length }}
+            </span>
+        </button>
+    </div>
+
+    <!-- TAB 1: Assigned Exams -->
+    <div id="tab-pane-exams" class="tab-pane">
+        <!-- Filter chips for exams -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+            <button type="button" class="exam-filter-chip active" onclick="filterExams('all', this)" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; border: 1px solid var(--quiz-primary); background: var(--quiz-primary); color: #fff; cursor: pointer;">
+                {{ _('Tất cả') }} ({{ assigned_exams|length }})
+            </button>
+            <button type="button" class="exam-filter-chip" onclick="filterExams('todo', this)" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 20px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); cursor: pointer;">
+                {{ _('Cần làm ngay') }}
+            </button>
+            <button type="button" class="exam-filter-chip" onclick="filterExams('done', this)" style="padding: 5px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 20px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg-sub); color: var(--quiz-text); cursor: pointer;">
+                {{ _('Đã hoàn thành') }}
+            </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+            {% for item in assigned_exams %}
+                {% set ex = item.exam %}
+                <div class="exam-card" data-status="{% if item.is_completed %}done{% else %}todo{% endif %}" style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.15s, box-shadow 0.15s;">
+                    <div>
+                        <!-- Header row: Type and Status -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text-muted); padding: 2px 7px; border-radius: 4px;">
+                                {{ ex.get_exam_type_display() if ex.get_exam_type_display else 'Bài kiểm tra' }}
+                            </span>
+
+                            {% if item.is_completed %}
+                                <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25);">
+                                    {{ _('Đã nộp bài') }} ({{ "%.2f"|format(item.score) }}đ)
+                                </span>
+                            {% elif item.is_expired %}
+                                <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25);">
+                                    {{ _('Quá hạn nộp') }}
+                                </span>
+                            {% else %}
+                                <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; background: rgba(245,158,11,0.12); color: #d97706; border: 1px solid rgba(245,158,11,0.25);">
+                                    {{ _('Chưa làm') }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Title -->
+                        <h3 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px 0; color: var(--quiz-text); line-height: 1.35;">
+                            {{ ex.name }}
+                        </h3>
+
+                        <!-- Meta details -->
+                        <div style="font-size: 0.8rem; color: var(--quiz-text-muted); display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px;">
+                            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                                <span><strong>{{ ex.default_duration }}</strong> {{ _('phút') }}</span>
+                                <span><strong>{{ ex.questions.count() }}</strong> {{ _('câu hỏi') }}</span>
+                                {% if ex.is_strict_anti_cheat %}
+                                    <span style="color: #dc3545; font-weight: 600;"><i class="fa fa-shield" style="margin-right: 3px;"></i> {{ _('Chống gian lận') }}</span>
+                                {% endif %}
+                            </div>
+
+                            {% if ex.end_time %}
+                                <div style="margin-top: 4px; font-size: 0.78rem; color: {% if item.is_expired %}#ef4444{% else %}var(--quiz-primary){% endif %}; font-weight: 600;">
+                                    <i class="fa fa-clock-o" style="margin-right: 3px;"></i> {{ _('Hạn nộp:') }} {{ ex.end_time.strftime('%H:%M ngày %d/%m/%Y') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Footer Action Button -->
+                    <div style="border-top: 1px solid var(--quiz-border); padding-top: 12px;">
+                        {% if item.is_completed and item.session_id %}
+                            <a href="{{ url('quiz_session_review', session_id=item.session_id) }}" style="display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; text-align: center; padding: 8px 12px; background: var(--quiz-card-bg-sub); color: var(--quiz-primary); border: 1px solid var(--quiz-border); border-radius: 6px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                                <span>{{ _('Xem lại bài làm') }}</span> →
+                            </a>
+                        {% else %}
+                            <form action="{{ url('quiz_start_exam', exam_id=ex.id) }}" method="post" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="width: 100%; padding: 9px 14px; background: var(--quiz-primary); color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <span>{{ _('Vào làm bài ngay') }}</span> →
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div style="grid-column: 1 / -1; padding: 40px 20px; text-align: center; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; color: var(--quiz-text-muted);">
+                    <div style="font-size: 2.2rem; color: var(--quiz-text-muted); margin-bottom: 8px;"><i class="fa fa-inbox"></i></div>
+                    <div style="font-weight: 700; color: var(--quiz-text); font-size: 1rem; margin-bottom: 4px;">{{ _('Chưa có bài kiểm tra nào được giao') }}</div>
+                    <div style="font-size: 0.85rem;">{{ _('Thầy/Cô sẽ sớm giao bài tập cho lớp. Hãy theo dõi bảng tin nhé!') }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- TAB 2: Class Leaderboard -->
+    <div id="tab-pane-leaderboard" class="tab-pane" style="display: none;">
+        <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--quiz-border); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--quiz-text);">
+                        <i class="fa fa-trophy" style="color: #f59e0b; margin-right: 6px;"></i> {{ _('Bảng Xếp Hạng Lớp') }}
+                    </h2>
+                    <div style="font-size: 0.78rem; color: var(--quiz-text-muted); margin-top: 2px;">
+                        {{ _('Xếp hạng theo điểm số trung bình các bài tập đã hoàn thành trong lớp.') }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+                    <thead>
+                        <tr style="background: var(--quiz-card-bg-sub); border-bottom: 1px solid var(--quiz-border);">
+                            <th style="padding: 10px 14px; width: 60px; text-align: center;">{{ _('Hạng') }}</th>
+                            <th style="padding: 10px 14px;">{{ _('Học sinh') }}</th>
+                            <th style="padding: 10px 14px; text-align: center;">{{ _('Bài đã nộp') }}</th>
+                            <th style="padding: 10px 14px; text-align: right;">{{ _('Điểm Trung Bình') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in leaderboard %}
+                            <tr style="border-bottom: 1px solid var(--quiz-border); {% if row.is_current %}background: rgba(37,99,235,0.06); font-weight: 700;{% endif %}">
+                                <td style="padding: 10px 14px; text-align: center;">
+                                    {% if loop.index == 1 %}
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #fef3c7; color: #b45309; font-weight: 700; font-size: 0.8rem;">1</span>
+                                    {% elif loop.index == 2 %}
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #475569; font-weight: 700; font-size: 0.8rem;">2</span>
+                                    {% elif loop.index == 3 %}
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #ffedd5; color: #c2410c; font-weight: 700; font-size: 0.8rem;">3</span>
+                                    {% else %}
+                                        <span style="color: var(--quiz-text-muted); font-weight: 600;">#{{ loop.index }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 10px 14px;">
+                                    <div style="color: var(--quiz-text); display: flex; align-items: center; gap: 8px;">
+                                        <span>{{ row.profile.display_name or row.user.username }}</span>
+                                        {% if row.is_current %}
+                                            <span style="font-size: 0.7rem; background: var(--quiz-primary); color: #fff; padding: 1px 6px; border-radius: 4px;">{{ _('Bạn') }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--quiz-text-muted); font-weight: normal;">
+                                        @{{ row.user.username }}
+                                    </div>
+                                </td>
+                                <td style="padding: 10px 14px; text-align: center; color: var(--quiz-text);">
+                                    {{ row.completed_count }} / {{ total_exams }}
+                                </td>
+                                <td style="padding: 10px 14px; text-align: right;">
+                                    {% if row.average_score is not none %}
+                                        <strong style="color: var(--quiz-primary); font-size: 0.95rem;">
+                                             {{ "%.2f"|format(row.average_score) }}
+                                        </strong>
+                                    {% else %}
+                                        <span style="color: var(--quiz-text-muted); font-weight: normal;">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="padding: 30px; text-align: center; color: var(--quiz-text-muted);">
+                                    {{ _('Chưa có dữ liệu xếp hạng.') }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: Classmates & Teachers -->
+    <div id="tab-pane-members" class="tab-pane" style="display: none;">
+        <!-- Teachers Section -->
+        <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; color: var(--quiz-text); text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fa fa-graduation-cap" style="margin-right: 6px;"></i> {{ _('Giáo Viên Phụ Trách') }}
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
+                {% for t in teachers %}
+                    <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(37,99,235,0.1); color: var(--quiz-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">
+                            {{ (t.display_name or t.user.username)[:1]|upper }}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: var(--quiz-text); font-size: 0.92rem;">
+                                {{ t.display_name or t.user.username }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--quiz-text-muted);">
+                                @{{ t.user.username }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Classmates Section -->
+        <div>
+            <h2 style="font-size: 1rem; font-weight: 700; margin: 0 0 10px 0; color: var(--quiz-text); text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fa fa-users" style="margin-right: 6px;"></i> {{ _('Danh Sách Học Sinh') }} ({{ classmates|length }})
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px;">
+                {% for cm in classmates %}
+                    <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--quiz-card-bg-sub); color: var(--quiz-text); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; border: 1px solid var(--quiz-border);">
+                            {{ (cm.display_name or cm.user.username)[:1]|upper }}
+                        </div>
+                        <div style="min-width: 0;">
+                            <div style="font-weight: 600; color: var(--quiz-text); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ cm.display_name or cm.user.username }}
+                            </div>
+                            <div style="font-size: 0.72rem; color: var(--quiz-text-muted);">
+                                @{{ cm.user.username }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="grid-column: 1 / -1; padding: 20px; text-align: center; color: var(--quiz-text-muted);">
+                        {{ _('Chưa có học sinh nào trong lớp.') }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function switchStudentTab(tabName, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.color = 'var(--quiz-text-muted)';
+        b.style.borderBottomColor = 'transparent';
+    });
+    btn.classList.add('active');
+    btn.style.color = 'var(--quiz-primary)';
+    btn.style.borderBottomColor = 'var(--quiz-primary)';
+
+    document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+    const target = document.getElementById('tab-pane-' + tabName);
+    if (target) target.style.display = 'block';
+}
+
+function filterExams(type, btn) {
+    document.querySelectorAll('.exam-filter-chip').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'var(--quiz-card-bg-sub)';
+        b.style.color = 'var(--quiz-text)';
+        b.style.borderColor = 'var(--quiz-border)';
+    });
+    btn.classList.add('active');
+    btn.style.background = 'var(--quiz-primary)';
+    btn.style.color = '#fff';
+    btn.style.borderColor = 'var(--quiz-primary)';
+
+    document.querySelectorAll('.exam-card').forEach(card => {
+        const st = card.getAttribute('data-status');
+        if (type === 'all' || type === st) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

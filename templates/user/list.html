@@ -11,7 +11,7 @@
     {% if available_classes %}
         <div style="background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem;">
-                <span>🏫</span>
+                <i class="fa fa-graduation-cap" style="color: var(--quiz-primary);"></i>
                 <strong style="color: var(--quiz-text);">{{ _('Lọc theo Lớp học:') }}</strong>
                 <select onchange="location.href = this.value ? '?class=' + this.value : '{{ url('user_list') }}';" style="padding: 5px 10px; border-radius: 4px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); font-size: 0.88rem; font-weight: 600;">
                     <option value="">-- {{ _('Tất cả người dùng / Toàn hệ thống') }} --</option>
@@ -24,7 +24,7 @@
             </div>
             {% if current_class %}
                 <div style="font-size: 0.85rem; color: var(--quiz-primary); font-weight: 600;">
-                    ✓ {{ _('Đang xem') }}: {{ current_class.name }} ({{ current_class.members.count() }} {{ _('thành viên') }})
+                    <i class="fa fa-check"></i> {{ _('Đang xem') }}: {{ current_class.name }} ({{ current_class.members.count() }} {{ _('thành viên') }})
                 </div>
             {% endif %}
         </div>

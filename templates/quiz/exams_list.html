@@ -165,13 +165,13 @@
                         <span class="quiz-q-tag year">{{ _('Năm') }} {{ exam.year }}</span>
                         <span class="quiz-q-tag type">{{ exam.type_label }}</span>
                         {% if exam.is_featured %}
-                            <span class="quiz-q-tag" style="background: var(--quiz-accent); color: #000; border-color: var(--quiz-accent);">★ {{ _('Nổi bật') }}</span>
+                            <span class="quiz-q-tag" style="background: var(--quiz-accent); color: #000; border-color: var(--quiz-accent);"><i class="fa fa-star"></i> {{ _('Nổi bật') }}</span>
                         {% endif %}
                         {% if exam.require_login %}
-                            <span class="quiz-q-tag" style="border-color: var(--quiz-warning); color: var(--quiz-warning);">🔒 {{ _('Yêu cầu đăng nhập') }}</span>
+                            <span class="quiz-q-tag" style="border-color: var(--quiz-warning); color: var(--quiz-warning);"><i class="fa fa-lock"></i> {{ _('Yêu cầu đăng nhập') }}</span>
                         {% endif %}
                         {% if exam.is_organization_only %}
-                            <span class="quiz-q-tag" style="border-color: var(--quiz-primary); color: var(--quiz-primary);">🏫 {{ _('Nội bộ trường') }}</span>
+                            <span class="quiz-q-tag" style="border-color: var(--quiz-primary); color: var(--quiz-primary);"><i class="fa fa-university"></i> {{ _('Nội bộ trường') }}</span>
                         {% endif %}
                         {% if exam.tf_count > 0 %}
                             <span class="quiz-q-tag orient">{{ _('Phần II: %(count)s câu đúng/sai', count=exam.tf_count) }}</span>
@@ -180,7 +180,7 @@
                     <h2 class="exam-title">
                         {{ exam.name }}
                         {% if exam.is_locked %}
-                            <span style="color: var(--quiz-danger); font-size: 0.8rem; margin-left: 8px;">🔐</span>
+                            <span style="color: var(--quiz-danger); font-size: 0.8rem; margin-left: 8px;"><i class="fa fa-lock"></i></span>
                         {% endif %}
                     </h2>
                     <p class="exam-snippet">
@@ -267,7 +267,7 @@
             
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
                 <div>
-                    <h4 style="font-size: 0.88rem; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; color: var(--quiz-text);">⏱️ {{ _('Chọn thời gian làm bài') }}</h4>
+                    <h4 style="font-size: 0.88rem; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; color: var(--quiz-text);">{{ _('Chọn thời gian làm bài') }}</h4>
                     <p style="font-size: 0.75rem; color: var(--quiz-text-muted); margin: 0 0 8px 0;">{{ _('Dùng thời gian mặc định hoặc tùy chỉnh riêng.') }}</p>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
@@ -293,7 +293,7 @@
                     
                     <div class="time-preset-option custom-time-option" onclick="selectTimePreset(this, 'custom')" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 10px;">
                         <div>
-                            <div style="font-weight: bold; font-size: 0.85rem;">⏱️ {{ _('Tùy chỉnh') }}</div>
+                            <div style="font-weight: bold; font-size: 0.85rem;">{{ _('Tùy chỉnh') }}</div>
                             <div style="font-size: 0.7rem; color: var(--quiz-text-muted);">{{ _('Nhập số phút mong muốn.') }}</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
@@ -306,15 +306,15 @@
                 </div>
                 
                 <div>
-                    <h4 style="font-size: 0.88rem; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; color: var(--quiz-text);">🎯 {{ _('Chọn định hướng') }}</h4>
+                    <h4 style="font-size: 0.88rem; margin: 0 0 4px 0; font-weight: 700; text-transform: uppercase; color: var(--quiz-text);">{{ _('Chọn định hướng') }}</h4>
                     <p style="font-size: 0.75rem; color: var(--quiz-text-muted); margin: 0 0 8px 0;">{{ _('Ưu tiên chuyên đề.') }}</p>
                     
                     <div class="orientation-option active" onclick="selectOrientation('KHMT')" id="orient-option-khmt" style="margin-bottom: 8px;">
-                        <div style="font-weight: bold; font-size: 0.85rem;">💻 KHMT</div>
+                        <div style="font-weight: bold; font-size: 0.85rem;">KHMT</div>
                         <div style="font-size: 0.68rem; color: var(--quiz-text-muted);">{{ _('Khoa học máy tính') }}</div>
                     </div>
                     <div class="orientation-option" onclick="selectOrientation('THUD')" id="orient-option-thud" style="margin-bottom: 10px;">
-                        <div style="font-weight: bold; font-size: 0.85rem;">📱 THUD</div>
+                        <div style="font-weight: bold; font-size: 0.85rem;">THUD</div>
                         <div style="font-size: 0.68rem; color: var(--quiz-text-muted);">{{ _('Tin học ứng dụng') }}</div>
                     </div>
                     
@@ -332,7 +332,7 @@
             
             <!-- Exam Config Options -->
             <div style="border-top: 1px solid var(--quiz-border); padding-top: 10px; margin-bottom: 10px;">
-                <h4 style="font-size: 0.85rem; font-weight: 700; margin: 0 0 8px 0; color: var(--quiz-text);">⚙️ {{ _('Tùy chọn hiển thị & bảng nháp') }}</h4>
+                <h4 style="font-size: 0.85rem; font-weight: 700; margin: 0 0 8px 0; color: var(--quiz-text);">{{ _('Tùy chọn hiển thị & bảng nháp') }}</h4>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 10px; background: rgba(0,0,0,0.03); border: 1px solid var(--quiz-border); border-radius: 6px;">
                         <input type="checkbox" name="show_score_per_question" value="1" style="width: 14px; height: 14px;">
@@ -344,7 +344,7 @@
                     </label>
                     <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 10px; background: rgba(0,0,0,0.03); border: 1px solid var(--quiz-border); border-radius: 6px;">
                         <input type="checkbox" name="enable_scratchpad" value="1" checked style="width: 14px; height: 14px;">
-                        <span style="font-size: 0.8rem; color: var(--quiz-text);">✏️ {{ _('Bật bảng nháp') }}</span>
+                        <span style="font-size: 0.8rem; color: var(--quiz-text);"><i class="fa fa-pencil"></i> {{ _('Bật bảng nháp') }}</span>
                     </label>
                 </div>
             </div>
@@ -360,7 +360,7 @@
             
             <div style="display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--quiz-border); padding-top: 10px;">
                 <button type="button" onclick="closeStartModal()" style="padding: 6px 14px; border-radius: 6px; border: 1px solid var(--quiz-border); background: var(--quiz-card-bg); color: var(--quiz-text); font-size: 0.85rem; font-weight: 600; cursor: pointer;">{{ _('Đóng') }}</button>
-                <button type="submit" class="quiz-btn-primary" style="padding: 7px 20px; font-weight: 700; font-size: 0.88rem;"><i class="fa fa-play"></i> {{ _('Bắt Đầu Làm Bài Ngay') }} 🚀</button>
+                <button type="submit" class="quiz-btn-primary" style="padding: 7px 20px; font-weight: 700; font-size: 0.88rem;"><i class="fa fa-play"></i> {{ _('Bắt Đầu Làm Bài Ngay') }}</button>
             </div>
         </form>
     </div>

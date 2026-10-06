@@ -7,8 +7,40 @@
 {% block title_ruler %}{% endblock %}
 
 {% block body %}
-<div class="quiz-container" style="max-width: 800px;">
+<div class="quiz-container" style="max-width: 900px;">
     
+    <!-- Clean Quiz Teacher Navigation Bar -->
+    <div class="quiz-subnav-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; padding: 10px 16px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px;">
+        <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-book"></i> {{ _('Quản lý đề thi') }}
+        </a>
+        <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-database"></i> {{ _('Ngân hàng câu hỏi') }}
+        </a>
+        <a href="{{ url('quiz_ai_import') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; color: #059669; border-color: #10b981; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-magic"></i> {{ _('Tạo đề bằng AI') }}
+        </a>
+        <div style="flex: 1;"></div>
+        <a href="{{ url('quiz_home') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 6px 12px; color: var(--quiz-text-muted); display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-pencil-square-o"></i> {{ _('Luyện tập (Học sinh)') }}
+        </a>
+    </div>
+
+    <!-- AI Import Recommendation Banner -->
+    <div class="quiz-q-card" style="margin-bottom: 20px; padding: 18px 22px; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--quiz-success); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="flex: 1; min-width: 280px;">
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--quiz-success); margin-bottom: 4px;">
+                <i class="fa fa-magic"></i> {{ _('Bạn đang có đề thi dạng PDF hoặc Ảnh chụp?') }}
+            </div>
+            <div style="font-size: 0.88rem; color: var(--quiz-text-muted);">
+                {{ _('Không cần tự tạo JSON phức tạp! Công cụ AI Vision mới sẽ tự động đọc tài liệu, nhận diện công thức LaTeX và đối soát bảng đáp án chỉ trong vài giây.') }}
+            </div>
+        </div>
+        <a href="{{ url('quiz_ai_import') }}" class="quiz-btn-primary" style="padding: 10px 20px; font-size: 0.92rem; background: #10b981; border: 1px solid #059669; text-decoration: none; white-space: nowrap;">
+            <i class="fa fa-rocket"></i> {{ _('Dùng AI Import Ngay') }}
+        </a>
+    </div>
+
     <div class="quiz-header-card" style="margin-bottom: 24px;">
         <h1 class="quiz-title"><i class="fa fa-upload"></i> {{ _('Nhập Câu Hỏi Hàng Loạt (Bulk Import JSON)') }}</h1>
         <p class="quiz-subtitle">{{ _('Tải lên file .json hoặc dán nội dung JSON để nhập hàng loạt câu hỏi trắc nghiệm vào ngân hàng đề thi.') }}</p>

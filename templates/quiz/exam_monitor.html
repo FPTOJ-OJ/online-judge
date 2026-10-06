@@ -456,14 +456,14 @@
                         toast: true,
                         position: 'top-end',
                         icon: 'warning',
-                        title: `⚠️ ${s.display_name} (@${s.username})`,
+                        title: `${s.display_name} (@${s.username})`,
                         html: `<b style="color:var(--quiz-danger)">${latestV.detail}</b><br><small style="color:var(--quiz-text-muted)">Lần thứ ${s.violation_count} • Lúc ${latestV.time || s.updated_at}</small>`,
                         showConfirmButton: false,
                         timer: 6000,
                         timerProgressBar: true,
                     });
 
-                    addActivityEvent(`<b style="color:var(--quiz-danger)">⚠️ ${s.display_name}</b>: ${latestV.detail} (Lần ${s.violation_count})`);
+                    addActivityEvent(`<b style="color:var(--quiz-danger)"><i class="fa fa-exclamation-triangle"></i> ${s.display_name}</b>: ${latestV.detail} (Lần ${s.violation_count})`);
                 }
 
                 // 2. New Submission Alert
@@ -472,14 +472,14 @@
                         toast: true,
                         position: 'top-end',
                         icon: 'success',
-                        title: `✅ ${s.display_name} vừa nộp bài!`,
+                        title: `${s.display_name} vừa nộp bài!`,
                         html: `Điểm số: <b style="color:#10b981; font-size:1.1rem;">${s.score !== null ? s.score + 'đ' : 'Đã nộp'}</b>`,
                         showConfirmButton: false,
                         timer: 5000,
                         timerProgressBar: true,
                     });
 
-                    addActivityEvent(`<b style="color:#10b981">✓ ${s.display_name}</b>: Nộp bài thi (${s.score !== null ? s.score + 'đ' : 'Xong'})`);
+                    addActivityEvent(`<b style="color:#10b981"><i class="fa fa-check"></i> ${s.display_name}</b>: Nộp bài thi (${s.score !== null ? s.score + 'đ' : 'Xong'})`);
                 }
 
                 lastKnownViolations[s.session_id] = s.violation_count;
@@ -549,7 +549,7 @@
             var statusBadge = '';
             if (s.is_completed) {
                 statusBadge = `<span style="background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
-                    ✓ Đã nộp (${s.score !== null ? s.score + 'đ' : 'Xong'})
+                    <i class="fa fa-check"></i> Đã nộp (${s.score !== null ? s.score + 'đ' : 'Xong'})
                 </span>`;
             } else if (s.is_paused) {
                 statusBadge = `<span style="background: rgba(234,179,8,0.15); color: #d97706; border: 1px solid rgba(234,179,8,0.35); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
@@ -566,7 +566,7 @@
             if (s.violation_count > 0) {
                 violationBadge = `<span style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border: 1px solid var(--quiz-danger); padding: 2px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; cursor: pointer;"
                                         onclick="showStudentLogs('${s.display_name}', ${encodeURIComponent(JSON.stringify(s.violations_log))})">
-                    ⚠️ ${s.violation_count} vi phạm
+                    <i class="fa fa-exclamation-triangle"></i> ${s.violation_count} vi phạm
                 </span>`;
             }
 
@@ -651,11 +651,11 @@
         students.forEach(function(s, idx) {
             var violationCell = '';
             if (s.violation_count === 0) {
-                violationCell = '<span style="color: var(--quiz-success); font-weight: 600; font-size: 0.78rem;">✓ 0</span>';
+                violationCell = '<span style="color: var(--quiz-success); font-weight: 600; font-size: 0.78rem;"><i class="fa fa-check"></i> 0</span>';
             } else {
                 violationCell = `<span class="quiz-q-tag" style="background: rgba(220,53,69,0.15); color: var(--quiz-danger); border-color: var(--quiz-danger); font-size: 0.74rem; font-weight: 700; cursor: pointer;"
                                        onclick="showStudentLogs('${s.display_name}', ${encodeURIComponent(JSON.stringify(s.violations_log))})">
-                    ⚠️ ${s.violation_count}
+                    <i class="fa fa-exclamation-triangle"></i> ${s.violation_count}
                 </span>`;
             }
 
@@ -770,7 +770,7 @@
                 }).join('') : '<div style="color: var(--quiz-text-muted); font-size: 0.85rem;">Thí sinh chưa chọn câu trả lời nào.</div>';
 
                 Swal.fire({
-                    title: '📝 ' + studentName + ' (Chi tiết bài làm)',
+                    title: studentName + ' (Chi tiết bài làm)',
                     html: `
                         <div style="text-align: left; font-size: 0.88rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding: 8px 12px; background: var(--quiz-card-bg-sub); border-radius: 6px;">
@@ -957,13 +957,13 @@
                     toast: true,
                     position: 'top-end',
                     icon: 'warning',
-                    title: `⚠️ ${msg.display_name} (@${msg.username})`,
+                    title: `${msg.display_name} (@${msg.username})`,
                     html: `<b style="color:var(--quiz-danger)">${vDetail}</b><br><small style="color:var(--quiz-text-muted)">Lần thứ ${msg.violation_count} • Lúc ${vTime}</small>`,
                     showConfirmButton: false,
                     timer: 6000,
                     timerProgressBar: true,
                 });
-                addActivityEvent(`<b style="color:var(--quiz-danger)">⚠️ ${msg.display_name}</b>: ${vDetail} (Lần ${msg.violation_count})`);
+                addActivityEvent(`<b style="color:var(--quiz-danger)"><i class="fa fa-exclamation-triangle"></i> ${msg.display_name}</b>: ${vDetail} (Lần ${msg.violation_count})`);
             }
             pollLiveMonitor();
         } else if (msg.type === 'submission') {
@@ -974,17 +974,17 @@
                     toast: true,
                     position: 'top-end',
                     icon: 'success',
-                    title: `✅ ${msg.display_name} vừa nộp bài!`,
+                    title: `${msg.display_name} vừa nộp bài!`,
                     html: `Điểm số: <b style="color:#10b981; font-size:1.1rem;">${msg.score !== null ? msg.score + 'đ' : 'Đã nộp'}</b>`,
                     showConfirmButton: false,
                     timer: 5000,
                     timerProgressBar: true,
                 });
-                addActivityEvent(`<b style="color:#10b981">✓ ${msg.display_name}</b>: Nộp bài thi (${msg.score !== null ? msg.score + 'đ' : 'Xong'})`);
+                addActivityEvent(`<b style="color:#10b981"><i class="fa fa-check"></i> ${msg.display_name}</b>: Nộp bài thi (${msg.score !== null ? msg.score + 'đ' : 'Xong'})`);
             }
             pollLiveMonitor();
         } else if (msg.type === 'student_joined') {
-            addActivityEvent(`<b style="color:var(--quiz-primary)">🟢 ${msg.display_name}</b>: Bắt đầu làm bài thi`);
+            addActivityEvent(`<b style="color:var(--quiz-primary)"><i class="fa fa-circle"></i> ${msg.display_name}</b>: Bắt đầu làm bài thi`);
             pollLiveMonitor();
         } else if (msg.type === 'progress_update') {
             if (cachedData && cachedData.students) {

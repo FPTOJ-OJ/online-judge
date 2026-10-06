@@ -51,8 +51,8 @@
                 <div class="quiz-form-group">
                     <label for="type-select">{{ _('Loại câu hỏi') }}</label>
                     <select id="type-select" name="type" class="quiz-select" onchange="toggleOptionForms(this.value)">
-                        <option value="choice" {% if question and question.type == 'choice' %}selected{% endif %}>🔘 {{ _('Trắc nghiệm nhiều lựa chọn (A/B/C/D)') }}</option>
-                        <option value="tf" {% if question and question.type == 'tf' %}selected{% endif %}>⚖️ {{ _('Trắc nghiệm Đúng / Sai (Bộ 4 ý)') }}</option>
+                        <option value="choice" {% if question and question.type == 'choice' %}selected{% endif %}>{{ _('Trắc nghiệm nhiều lựa chọn (A/B/C/D)') }}</option>
+                        <option value="tf" {% if question and question.type == 'tf' %}selected{% endif %}>{{ _('Trắc nghiệm Đúng / Sai (Bộ 4 ý)') }}</option>
                     </select>
                 </div>
 
@@ -80,7 +80,7 @@
 
                 <div class="quiz-form-group">
                     <label for="tags-input">{{ _('Chuyên đề / Thẻ phân loại (Nhập phân cách bằng dấu phẩy)') }}</label>
-                    <input type="text" id="tags-input" class="quiz-input" placeholder='{{ _("VD: Mạng máy tính, khmt, thud, SQL...") }}' style="margin-bottom: 8px;">
+                    <input type="text" id="tags-input" name="tags_text" class="quiz-input" placeholder='{{ _("VD: Mạng máy tính, khmt, thud, SQL...") }}' style="margin-bottom: 8px;">
                     <div style="font-size: 0.8rem; color: var(--quiz-text-muted); margin-bottom: 8px;">{{ _('Hoặc chọn thẻ có sẵn:') }}</div>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 100px; overflow-y: auto; padding: 6px; border: 1px solid var(--quiz-border); border-radius: 6px; background: var(--quiz-card-bg);">
                         {% for tag in tags %}

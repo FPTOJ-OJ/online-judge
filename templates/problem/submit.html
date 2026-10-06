@@ -269,8 +269,8 @@
                 function showAutoDetectToast(langName, sourceFileName) {
                     if (typeof Swal !== 'undefined') {
                         var titleHtml = sourceFileName 
-                            ? '{{ _("Đã tải file thành công:") }} <strong>' + sourceFileName + '</strong><br><span style="color:#2563eb; font-size:0.85em;">💡 {{ _("Tự động chọn:") }} <b>' + langName + '</b></span>'
-                            : '💡 {{ _("Tự động nhận diện:") }} <b>' + langName + '</b>';
+                            ? '{{ _("Đã tải file thành công:") }} <strong>' + sourceFileName + '</strong><br><span style="color:#2563eb; font-size:0.85em;"><i class="fa fa-magic"></i> {{ _("Tự động chọn:") }} <b>' + langName + '</b></span>'
+                            : '<i class="fa fa-magic"></i> {{ _("Tự động nhận diện:") }} <b>' + langName + '</b>';
 
                         Swal.fire({
                             toast: true,
@@ -293,7 +293,7 @@
                                 $('#submit-wrapper').prepend($badge);
                             }
                         }
-                        $badge.html('<span>💡 {{ _("Tự động chọn:") }} <strong>' + langName + '</strong></span>').stop(true, true).css('opacity', 1).show();
+                        $badge.html('<span><i class="fa fa-magic"></i> {{ _("Tự động chọn:") }} <strong>' + langName + '</strong></span>').stop(true, true).css('opacity', 1).show();
                         if (detectToastTimeout) clearTimeout(detectToastTimeout);
                         detectToastTimeout = setTimeout(function() { $badge.fadeOut(600); }, 4000);
                     }
@@ -331,7 +331,7 @@
 
                     if ($('.django-ace-toolbar').length) {
                         $('.django-ace-toolbar').append(
-                            '<label for="fileInput" style="font-size: 14px; margin-left: 10px; font-style: italic; cursor: pointer;">{{ _("📂 Paste, Drag & Drop your code file here or upload from file:") }}</label> ' +
+                            '<label for="fileInput" style="font-size: 14px; margin-left: 10px; font-style: italic; cursor: pointer;"><i class="fa fa-folder-open-o"></i> {{ _("Paste, Drag & Drop your code file here or upload from file:") }}</label> ' +
                             '<input type="file" id="fileInput" accept=".cpp,.c,.pas,.pp,.py,.py3,.java,.txt,.cc,.cxx,.hpp,.h" style="margin-left: 5px; margin-bottom: 10px; cursor: pointer;">'
                         );
                     }
@@ -387,8 +387,8 @@
     <!-- Modern Glassmorphism Drag & Drop Overlay Modal -->
     <div id="drag-drop-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; pointer-events: none; transition: all 0.2s ease;">
         <div style="background: rgba(30, 41, 59, 0.95); border: 3px dashed #3b82f6; border-radius: 20px; padding: 40px 50px; text-align: center; color: #ffffff; max-width: 520px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); pointer-events: none;">
-            <div style="font-size: 3.8rem; line-height: 1; margin-bottom: 16px; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.5));">
-                📥
+            <div style="font-size: 3.5rem; line-height: 1; margin-bottom: 16px; color: #60a5fa; filter: drop-shadow(0 4px 10px rgba(59, 130, 246, 0.5));">
+                <i class="fa fa-cloud-upload"></i>
             </div>
             <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 10px 0; color: #f8fafc; letter-spacing: -0.5px;">
                 {{ _("Thả file mã nguồn vào đây") }}
@@ -437,14 +437,14 @@
         {% if one_submission_only %}
             <div class="alert alert-warning alert-dismissable">
                 <a class="close">x</a>
-                <strong>⚠️ {{ _('Important Notice:') }}</strong>
+                <strong><i class="fa fa-exclamation-triangle"></i> {{ _('Important Notice:') }}</strong>
                 {{ _('This contest is configured for one-time submission only. After your first submission, you have a 120-second (2 minutes) grace period to modify or re-submit. After this period, you cannot submit further.') }}
             </div>
         {% endif %}
         {% if hide_scores_from_students %}
             <div class="alert alert-info alert-dismissable">
                 <a class="close">x</a>
-                <strong>ℹ️ {{ _('Notice:') }}</strong>
+                <strong><i class="fa fa-info-circle"></i> {{ _('Notice:') }}</strong>
                 {{ _('This contest has been configured to hide student scores. You will only see the "Received" status once grading is complete.') }}
             </div>
         {% endif %}
@@ -488,6 +488,6 @@
         {% endif %}
     </form>
     <p style="color: #d9534f; font-size: 14px; line-height: 1.6; margin: 10px 0;">
-      ⚠️ {{ _("When the problem requires file input/output, you must use the correct filename as specified in the Input: and Output: sections of the problem statement.") }}
+      <i class="fa fa-exclamation-triangle"></i> {{ _("When the problem requires file input/output, you must use the correct filename as specified in the Input: and Output: sections of the problem statement.") }}
     </p>
 {% endblock %}

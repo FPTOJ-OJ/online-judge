@@ -33,6 +33,9 @@
             <button type="button" onclick="bulkAddStudentsPrompt()" style="padding: 7px 14px; background: var(--quiz-primary); color: #fff; border: 1px solid var(--quiz-primary); border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                 {{ _('Thêm học sinh') }}
             </button>
+            <a href="{{ url('quiz_class_detail', class_id=class_obj.id) }}?view_as=student" target="_blank" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); border: 1px solid var(--quiz-border); color: var(--quiz-text); border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa fa-eye"></i> {{ _('Xem giao diện học sinh') }}
+            </a>
             <button type="button" onclick="openEditClassModal()" style="padding: 7px 14px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                 {{ _('Cài đặt lớp') }}
             </button>
@@ -96,7 +99,7 @@
                 {% if class_obj.description %}{{ class_obj.description }}{% else %}<i style="color: var(--quiz-text-muted);">{{ _('Chưa có thông báo.') }}</i>{% endif %}
             </span>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button type="button" onclick="editClassAnnouncementPrompt()" style="padding: 4px 10px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
                 {{ _('Sửa thông báo') }}
             </button>
@@ -108,6 +111,9 @@
                     {{ _('Sao chép') }}
                 </button>
             </div>
+            <button type="button" onclick="copyZaloInviteMessage(this)" style="padding: 4px 10px; background: rgba(37,99,235,0.08); color: var(--quiz-primary); border: 1px solid var(--quiz-primary); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fa fa-share-alt"></i> {{ _('Sao chép lời mời Zalo/Lớp') }}
+            </button>
         </div>
     </div>
 
@@ -138,8 +144,8 @@
                             <button type="button" onclick="handleMemberAction('approve', {{ req.id }})" style="padding: 3px 8px; background: #10b981; color: #fff; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
                                 {{ _('Duyệt') }}
                             </button>
-                            <button type="button" onclick="handleMemberAction('reject', {{ req.id }})" style="padding: 3px 6px; background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">
-                                ✕
+                            <button type="button" onclick="handleMemberAction('reject', {{ req.id }})" style="padding: 3px 6px; background: var(--quiz-card-bg-sub); color: var(--quiz-danger); border: 1px solid var(--quiz-border); border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" title="{{ _('Từ chối') }}">
+                                <i class="fa fa-times"></i>
                             </button>
                         </div>
                     </div>
@@ -265,7 +271,7 @@
                                                 </a>
                                                 {% if sc.violations > 0 %}
                                                     <span style="font-size: 0.68rem; color: var(--quiz-danger); font-weight: 700; margin-top: 2px;" title="Số lần vi phạm chuyển tab/thoát màn hình">
-                                                        ⚠️ {{ sc.violations }} vi phạm
+                                                        <i class="fa fa-exclamation-triangle" style="font-size: 0.65rem;"></i> {{ sc.violations }} vi phạm
                                                     </span>
                                                 {% endif %}
                                             </div>
@@ -289,14 +295,14 @@
                                 </td>
                                 <td style="padding: 10px 14px; text-align: center;">
                                     <button type="button" onclick="removeStudent({{ row.profile.id }}, '{{ row.profile.display_name or row.user.username }}')" style="background: none; border: none; color: var(--quiz-danger); cursor: pointer; opacity: 0.7; font-size: 0.85rem;" title="{{ _('Xóa khỏi lớp') }}" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
-                                        🗑️
+                                        <i class="fa fa-trash-o"></i>
                                     </button>
                                 </td>
                             </tr>
                         {% else %}
                             <tr id="gradebook-no-students-row">
                                 <td colspan="{{ assigned_exams|length + 5 }}" style="padding: 40px; text-align: center; color: var(--quiz-text-muted);">
-                                    <div style="font-size: 1.5rem; margin-bottom: 6px;">👥</div>
+                                    <div style="font-size: 1.8rem; margin-bottom: 6px;"><i class="fa fa-users"></i></div>
                                     <div>{{ _('Lớp học chưa có học sinh nào.') }}</div>
                                     <button type="button" onclick="bulkAddStudentsPrompt()" style="margin-top: 10px; padding: 8px 16px; background: var(--quiz-primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">
                                         + {{ _('Thêm học sinh ngay') }}
@@ -845,7 +851,7 @@
     function copyText(txt, btn) {
         navigator.clipboard.writeText(txt).then(() => {
             const old = btn.innerText;
-            btn.innerText = 'Đã chép! ✓';
+            btn.innerText = 'Đã chép!';
             setTimeout(() => btn.innerText = old, 2000);
         });
     }
@@ -853,6 +859,32 @@
     function copyJoinUrl(btn) {
         const inp = document.getElementById('class-join-url-input');
         copyText(inp.value, btn);
+    }
+
+    function copyZaloInviteMessage(btn) {
+        const className = "{{ class_obj.name|escapejs }}";
+        const accessCode = document.getElementById('class-code-badge') ? document.getElementById('class-code-badge').innerText.trim() : "{{ access_code }}";
+        const joinUrl = document.getElementById('class-join-url-input') ? document.getElementById('class-join-url-input').value.trim() : window.location.origin + "/quiz/join/" + accessCode + "/";
+
+        const msg = `THÔNG BÁO VÀO LỚP HỌC: ${className}\n` +
+                    `Các em học sinh vào lớp theo 1 trong 2 cách sau:\n` +
+                    `- Cách 1: Bấm trực tiếp link sau để vào lớp:\n${joinUrl}\n` +
+                    `- Cách 2: Truy cập trang web, bấm "Tham gia lớp học" và nhập Mã lớp: ${accessCode}\n` +
+                    `Chúc các em học tập tốt!`;
+
+        navigator.clipboard.writeText(msg).then(() => {
+            if (btn) {
+                const old = btn.innerText;
+                btn.innerText = 'Đã sao chép!';
+                setTimeout(() => btn.innerText = old, 2500);
+            }
+            Swal.fire({
+                icon: 'success',
+                title: "{{ _('Đã sao chép lời mời gửi học sinh!') }}",
+                html: `<div style="text-align: left; background: var(--quiz-card-bg-sub, #f8fafc); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 6px; padding: 10px; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; line-height: 1.5;">${msg}</div><div style="margin-top: 10px; font-size: 0.82rem; color: #64748b;">{{ _('Bạn có thể dán (Ctrl+V) tin nhắn này vào nhóm Zalo, Facebook hoặc gửi trực tiếp cho học sinh.') }}</div>`,
+                confirmButtonText: "{{ _('Xong') }}"
+            });
+        });
     }
 
     function regenerateCode() {
@@ -916,7 +948,7 @@
             html: `
                 <div style="text-align: left;">
                     <div style="background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.2); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.83rem;">
-                        <div style="font-weight: 700; color: var(--quiz-primary, #2563eb); margin-bottom: 4px;">💡 Hướng dẫn:</div>
+                        <div style="font-weight: 700; color: var(--quiz-primary, #2563eb); margin-bottom: 4px;">{{ _('Hướng dẫn:') }}</div>
                         <div style="color: var(--quiz-text, #334155); line-height: 1.5;">
                             Nhập <strong>username tài khoản FPTOJ</strong> (tên đăng nhập trên trang này, không phải email).
                             Ví dụ: nếu link hồ sơ là <code>/user/nguyenvana/</code> thì username là <code>nguyenvana</code>.
@@ -1173,7 +1205,7 @@
     function editClassAnnouncementPrompt() {
         const currentText = document.getElementById('class-announcement-display').innerText.trim();
         Swal.fire({
-            title: "{{ _('📢 Đăng / Sửa Thông Báo Cho Lớp') }}",
+            title: "{{ _('Đăng / Sửa Thông Báo Cho Lớp') }}",
             html: `
                 <div style="text-align: left;">
                     <label style="font-size: 0.85rem; font-weight: bold; color: var(--quiz-text); display: block; margin-bottom: 6px;">{{ _('Nội dung thông báo (học sinh sẽ nhìn thấy khi vào lớp):') }}</label>
@@ -1242,8 +1274,8 @@
                     </div>
                     <div style="border-top: 1px solid var(--quiz-border); padding-top: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 0.8rem; color: var(--quiz-text-muted);">{{ _('Khu vực nguy hiểm:') }}</span>
-                        <button type="button" onclick="deleteClassConfirm()" style="background: rgba(220, 53, 69, 0.1); color: #dc3545 !important; border: 1px solid rgba(220, 53, 69, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
-                            🗑️ {{ _('Xóa vĩnh viễn lớp học này') }}
+                        <button type="button" onclick="deleteClassConfirm()" style="background: rgba(220, 53, 69, 0.1); color: #dc3545 !important; border: 1px solid rgba(220, 53, 69, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-trash-o"></i> {{ _('Xóa vĩnh viễn lớp học này') }}
                         </button>
                     </div>
                 </div>
@@ -1340,11 +1372,11 @@
         .then(data => {
             if (data.success) {
                 if (data.is_active) {
-                    btn.innerHTML = '🟢 ' + '{{ _("Đang mở phòng") }}';
+                    btn.innerHTML = '<i class="fa fa-circle" style="color: #10b981; font-size: 0.65rem; margin-right: 4px;"></i> ' + '{{ _("Đang mở") }}';
                     btn.style.background = 'rgba(16,185,129,0.15)';
                     btn.style.color = '#047857';
                 } else {
-                    btn.innerHTML = '🔴 ' + '{{ _("Đang đóng phòng") }}';
+                    btn.innerHTML = '<i class="fa fa-circle" style="color: #ef4444; font-size: 0.65rem; margin-right: 4px;"></i> ' + '{{ _("Đang đóng") }}';
                     btn.style.background = 'rgba(239,68,68,0.15)';
                     btn.style.color = '#dc2626';
                 }
@@ -1367,7 +1399,7 @@
 
     function quickUpdateExamPin(examId) {
         Swal.fire({
-            title: '🎲 ' + '{{ _("Đổi / Sinh Mã PIN Mới") }}',
+            title: '{{ _("Đổi / Sinh Mã PIN Mới") }}',
             text: '{{ _("Bạn có muốn sinh ngẫu nhiên mã PIN mới 6 số cho đề thi này?") }}',
             icon: 'question',
             showCancelButton: true,
@@ -1413,7 +1445,7 @@
         navigator.clipboard.writeText(directUrl).then(() => {
             if (btn) {
                 const oldText = btn.innerText;
-                btn.innerText = '✓ ' + '{{ _("Đã Copy Link!") }}';
+                btn.innerText = '{{ _("Đã Copy Link!") }}';
                 setTimeout(() => { btn.innerText = oldText; }, 2000);
             }
             Swal.fire({
@@ -1466,7 +1498,7 @@
                 const namesForCopy = students.map(s => `${s.display_name} (@${s.username})`).join(', ');
 
                 Swal.fire({
-                    title: `⚠️ {{ _("Danh sách chưa nộp bài") }} (${students.length} {{ _("em") }})`,
+                    title: '{{ _("Danh sách chưa nộp bài") }}' + ' (' + students.length + ')',
                     html: `
                         <div style="text-align: left; margin-bottom: 10px; font-size: 0.85rem;">
                             <b>{{ _("Đề thi:") }}</b> <span style="color: var(--quiz-primary);">${examName}</span>
@@ -1476,11 +1508,11 @@
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: '📋 {{ _("Copy danh sách gửi Zalo / Lớp") }}',
+                    confirmButtonText: '{{ _("Sao chép danh sách nhắc nhở") }}',
                     cancelButtonText: '{{ _("Đóng") }}'
                 }).then(res => {
                     if (res.isConfirmed) {
-                        const copyTextContent = `📢 Nhắc nhở nộp bài "${examName}" (${students.length} bạn chưa nộp):\n${namesForCopy}`;
+                        const copyTextContent = `Nhắc nhở nộp bài "${examName}" (${students.length} bạn chưa nộp):\n${namesForCopy}`;
                         navigator.clipboard.writeText(copyTextContent).then(() => {
                             Swal.fire({
                                 icon: 'success',

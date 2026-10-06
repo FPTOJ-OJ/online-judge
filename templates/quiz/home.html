@@ -10,6 +10,32 @@
 
 {% block body %}
 <div class="quiz-container">
+    
+    <!-- Unified Quiz Subnav Bar -->
+    <div class="quiz-subnav-bar" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; padding: 12px 16px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 8px;">
+        <a href="{{ url('quiz_home') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 5px 12px; background: var(--quiz-primary-light); color: var(--quiz-primary); border-color: var(--quiz-primary); font-weight: 700;">
+            <i class="fa fa-pencil-square-o"></i> {{ _('Luyện tập') }}
+        </a>
+        <a href="{{ url('quiz_exams_list') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 5px 12px;">
+            <i class="fa fa-list-alt"></i> {{ _('Kho đề thi') }}
+        </a>
+        <a href="{{ url('quiz_hub') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 5px 12px;">
+            <i class="fa fa-users"></i> {{ _('Lớp học (Hub)') }}
+        </a>
+        <a href="{{ url('quiz_join_pin') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 5px 12px; color: var(--quiz-accent); border-color: var(--quiz-accent);">
+            <i class="fa fa-key"></i> {{ _('Vào thi bằng mã PIN') }}
+        </a>
+        {% if is_teacher %}
+            <div style="flex: 1;"></div>
+            <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.84rem; padding: 5px 12px; background: rgba(59, 130, 246, 0.1); color: var(--quiz-primary); border-color: var(--quiz-primary); font-weight: 600;">
+                <i class="fa fa-sliders"></i> {{ _('Khu vực Giáo viên') }}
+            </a>
+            <a href="{{ url('quiz_ai_import') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.84rem; padding: 5px 12px; background: rgba(16, 185, 129, 0.12); color: #059669; border-color: #10b981; font-weight: 600;">
+                <i class="fa fa-magic"></i> {{ _('Tạo đề bằng AI') }}
+            </a>
+        {% endif %}
+    </div>
+
     <!-- Header portal -->
     <div class="quiz-header-card">
         <div class="quiz-title-section">
@@ -36,9 +62,14 @@
                 </button>
             </form>
             {% if is_teacher %}
-                <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="margin-top: 10px; display: inline-flex;">
-                    <i class="fa fa-cog"></i> {{ _('Ngân hàng câu hỏi') }}
-                </a>
+                <div style="margin-top: 10px; display: flex; gap: 6px; justify-content: flex-end;">
+                    <a href="{{ url('quiz_ai_import') }}" class="quiz-session-btn" style="color: var(--quiz-success); border-color: var(--quiz-success);">
+                        <i class="fa fa-magic"></i> {{ _('AI Import') }}
+                    </a>
+                    <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn">
+                        <i class="fa fa-cog"></i> {{ _('Quản lý câu hỏi') }}
+                    </a>
+                </div>
             {% endif %}
         </div>
     </div>
@@ -53,7 +84,7 @@
                 </span>
             {% endfor %}
             <a href="{{ url('quiz_home') }}" class="quiz-q-tag type" style="background: rgba(255, 23, 68, 0.1); color: var(--quiz-danger); border: 1px solid var(--quiz-danger);">
-                ✕ {{ _('Xóa bộ lọc') }}
+                <i class="fa fa-times"></i> {{ _('Xóa bộ lọc') }}
             </a>
         </div>
     {% endif %}
@@ -63,6 +94,17 @@
         
         <!-- Left content pane: list of questions matching filters -->
         <div class="quiz-left-pane">
+
+            <!-- Prominent Mode Switcher Tabs -->
+            <div class="quiz-radio-tabs" style="margin-bottom: 6px; font-size: 0.95rem;">
+                <div class="quiz-radio-tab active" id="main-tab-questions" onclick="setMode('random')">
+                    <i class="fa fa-list"></i> {{ _('Luyện Tập Theo Câu Hỏi') }} ({{ total_matching }})
+                </div>
+                <div class="quiz-radio-tab" id="main-tab-exams" onclick="setMode('original')">
+                    <i class="fa fa-book"></i> {{ _('Luyện Theo Cấu Trúc Đề Thi Gốc') }} ({{ matching_sources|length }})
+                </div>
+            </div>
+
             <div id="questions-list-container">
                 <h2 style="font-size: 1.3rem; margin: 0 0 10px 0; color: var(--quiz-text);">
                     {{ _('Tìm thấy') }} <span style="color: var(--quiz-success); font-weight: 700;">{{ total_matching }}</span> {{ _('câu hỏi phù hợp') }}
@@ -128,7 +170,7 @@
 
                             {% if q.explanation %}
                                 <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--quiz-border); border-radius: 8px; padding: 16px; margin-top: 16px;">
-                                    <h5 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;">💡 {{ _('Lời giải & Phân tích chi tiết:') }}</h5>
+                                    <h5 style="color: var(--quiz-primary); margin: 0 0 8px 0; font-size: 0.95rem;"><i class="fa fa-lightbulb-o"></i> {{ _('Lời giải & Phân tích chi tiết:') }}</h5>
                                     <div class="quiz-explanation-body">{{ q.explanation|markdown('problem') }}</div>
                                 </div>
                             {% endif %}
@@ -222,10 +264,10 @@
                         <label for="diff-select">{{ _('Mức độ câu hỏi') }}</label>
                         <select id="diff-select" name="difficulty" class="quiz-select" onchange="this.form.submit()">
                             <option value="">{{ _('Tất cả mức độ') }}</option>
-                            <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>🟢 {{ _('Nhận biết (Dễ)') }}</option>
-                            <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>🟡 {{ _('Thông hiểu (Trung bình)') }}</option>
-                            <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>🔴 {{ _('Vận dụng (Khó)') }}</option>
-                            <option value="very_hard" {% if selected_difficulty == 'very_hard' %}selected{% endif %}>🟣 {{ _('Vận dụng cao (Rất khó)') }}</option>
+                            <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>{{ _('Nhận biết (Dễ)') }}</option>
+                            <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>{{ _('Thông hiểu (Trung bình)') }}</option>
+                            <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>{{ _('Vận dụng (Khó)') }}</option>
+                            <option value="very_hard" {% if selected_difficulty == 'very_hard' %}selected{% endif %}>{{ _('Vận dụng cao (Rất khó)') }}</option>
                         </select>
                     </div>
 
@@ -233,8 +275,8 @@
                         <label for="type-select">{{ _('Loại câu hỏi') }}</label>
                         <select id="type-select" name="type" class="quiz-select" onchange="this.form.submit()">
                             <option value="">{{ _('Tất cả dạng câu') }}</option>
-                            <option value="choice" {% if selected_type == 'choice' %}selected{% endif %}>🔘 {{ _('Trắc nghiệm 4 lựa chọn (A/B/C/D)') }}</option>
-                            <option value="tf" {% if selected_type == 'tf' %}selected{% endif %}>⚖️ {{ _('Trắc nghiệm Đúng / Sai') }}</option>
+                            <option value="choice" {% if selected_type == 'choice' %}selected{% endif %}>{{ _('Trắc nghiệm 4 lựa chọn (A/B/C/D)') }}</option>
+                            <option value="tf" {% if selected_type == 'tf' %}selected{% endif %}>{{ _('Trắc nghiệm Đúng / Sai') }}</option>
                         </select>
                     </div>
 
@@ -250,7 +292,7 @@
                     
                     <div class="quiz-form-group" style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="only-incorrect-checkbox" name="only_incorrect" value="true" {% if only_incorrect %}checked{% endif %} onchange="this.form.submit()" style="width: 18px; height: 18px; cursor: pointer;">
-                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: var(--quiz-text);">⚠️ {{ _('Chỉ luyện các câu từng làm sai') }}</label>
+                        <label for="only-incorrect-checkbox" style="margin: 0; cursor: pointer; color: var(--quiz-text);"><i class="fa fa-exclamation-triangle" style="color: var(--quiz-warning); margin-right: 4px;"></i> {{ _('Chỉ luyện các câu từng làm sai') }}</label>
                     </div>
 
                     {% if search_query %}
@@ -401,6 +443,9 @@
             el.classList.remove('show');
         } else {
             el.classList.add('show');
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([el]);
+            }
         }
     }
 
@@ -409,21 +454,25 @@
 
     function setMode(mode) {
         currentMode = mode;
-        document.getElementById('tab-random').classList.toggle('active', mode === 'random');
-        document.getElementById('tab-original').classList.toggle('active', mode === 'original');
-        document.getElementById('header-mode-input').value = mode;
+        if (document.getElementById('tab-random')) document.getElementById('tab-random').classList.toggle('active', mode === 'random');
+        if (document.getElementById('tab-original')) document.getElementById('tab-original').classList.toggle('active', mode === 'original');
+        if (document.getElementById('main-tab-questions')) document.getElementById('main-tab-questions').classList.toggle('active', mode === 'random');
+        if (document.getElementById('main-tab-exams')) document.getElementById('main-tab-exams').classList.toggle('active', mode === 'original');
+        if (document.getElementById('header-mode-input')) document.getElementById('header-mode-input').value = mode;
 
         var qContainer = document.getElementById('questions-list-container');
         var eContainer = document.getElementById('exams-list-container');
         
         if (mode === 'random') {
-            qContainer.style.display = 'block';
-            eContainer.style.display = 'none';
-            document.getElementById('num-questions-input').parentNode.style.display = 'block';
+            if (qContainer) qContainer.style.display = 'block';
+            if (eContainer) eContainer.style.display = 'none';
+            var numInput = document.getElementById('num-questions-input');
+            if (numInput && numInput.parentNode) numInput.parentNode.style.display = 'block';
         } else {
-            qContainer.style.display = 'none';
-            eContainer.style.display = 'block';
-            document.getElementById('num-questions-input').parentNode.style.display = 'none';
+            if (qContainer) qContainer.style.display = 'none';
+            if (eContainer) eContainer.style.display = 'block';
+            var numInput = document.getElementById('num-questions-input');
+            if (numInput && numInput.parentNode) numInput.parentNode.style.display = 'none';
         }
     }
 

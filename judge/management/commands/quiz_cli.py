@@ -159,6 +159,19 @@ class Command(BaseCommand):
         tag_del = tag_sub.add_parser('delete', help='Delete a tag')
         tag_del.add_argument('slug', help='Tag slug')
 
+        # ── import-ai ──
+        ai_p = sub.add_parser('import-ai', help='Import exam questions from PDF/Image/Text using OpenAI-compatible Vision AI')
+        ai_p.add_argument('file', help='Path to PDF, image (png/jpg/webp), or text file')
+        ai_p.add_argument('--exam', type=str, help='Exam name (creates new or attaches to existing)')
+        ai_p.add_argument('--duration', type=int, default=45, help='Duration in minutes for new exam')
+        ai_p.add_argument('--api-key', type=str, help='OpenAI-compatible API key')
+        ai_p.add_argument('--base-url', type=str, help='OpenAI-compatible Base URL')
+        ai_p.add_argument('--model', type=str, help='Model name (default: gpt-4o-mini)')
+        ai_p.add_argument('--no-vision', action='store_true', help='Disable vision (text only)')
+        ai_p.add_argument('--tag', type=str, action='append', default=[], help='Default tag to add to questions')
+        ai_p.add_argument('--author', type=str, help='Username of author')
+        ai_p.add_argument('--json', action='store_true', help='Output result as JSON')
+
     def handle(self, *args, **options):
         sub = options['subcommand']
         if sub == 'exam':
@@ -167,6 +180,8 @@ class Command(BaseCommand):
             self.handle_tag(options)
         elif sub == 'bulk':
             self.handle_bulk(options)
+        elif sub == 'import-ai':
+            self.handle_import_ai(options)
 
     # ════════════════ E X A M ════════════════
 
@@ -638,6 +653,63 @@ class Command(BaseCommand):
             self.stdout.write(f'\n{prefix} [{r["index"]}] {r["name"]}')
             for msg in r['messages']:
                 self.stdout.write(f'    {msg}')
+
+    # ════════════ I M P O R T   A I ════════════
+
+    def handle_import_ai(self, opts):
+        from judge.quiz_ai import parse_exam_with_ai, save_extracted_quiz_to_db
+        file_path = opts['file']
+        if not os.path.exists(file_path):
+            raise CommandError(f"Tệp tin không tồn tại: {file_path}")
+
+        file_name = os.path.basename(file_path)
+        with open(file_path, 'rb') as f:
+            file_bytes = f.read()
+
+        author = None
+        if opts.get('author'):
+            author = get_object_or_404(User, username=opts['author'])
+        else:
+            author = User.objects.filter(is_superuser=True).first()
+
+        self.stdout.write(f"Đang phân tích tệp '{file_name}' bằng AI Vision...")
+        try:
+            result = parse_exam_with_ai(
+                files=[(file_name, file_bytes)],
+                api_key=opts.get('api_key'),
+                base_url=opts.get('base_url'),
+                model=opts.get('model'),
+                use_vision=not opts.get('no_vision', False),
+            )
+        except Exception as e:
+            raise CommandError(f"Lỗi phân tích AI: {str(e)}")
+
+        target_exam_name = opts.get('exam') or result.get('exam_name') or 'Đề thi nhập bằng AI'
+        duration = opts.get('duration', 45)
+        default_tags = opts.get('tag', [])
+
+        source, q_count, opt_count = save_extracted_quiz_to_db(
+            extracted_data=result,
+            user=author,
+            create_new_exam=True,
+            exam_name=target_exam_name,
+            exam_duration=duration,
+            default_tags=default_tags,
+        )
+
+        if opts.get('json'):
+            data = {
+                'status': 'ok',
+                'exam_id': source.id if source else None,
+                'exam_name': source.name if source else None,
+                'question_count': q_count,
+                'option_count': opt_count,
+            }
+            self.stdout.write(json.dumps(data, indent=2, ensure_ascii=False))
+        else:
+            self.stdout.write(self.style.SUCCESS(
+                f"\n✓ Đã import thành công {q_count} câu hỏi ({opt_count} phương án) vào đề thi '{source.name}' (ID: {source.id})!"
+            ))
 
     # ════════════ T A G ════════════
 

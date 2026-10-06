@@ -12,15 +12,15 @@
     <div style="background: var(--quiz-card-bg, #ffffff); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 16px; padding: 36px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
         
         <!-- Trophy / Performance Icon -->
-        <div style="font-size: 3.8rem; line-height: 1; margin-bottom: 16px;">
+        <div style="font-size: 3.5rem; line-height: 1; margin-bottom: 16px;">
             {% if score >= 8.0 %}
-                🏆
+                <i class="fa fa-trophy" style="color: #f59e0b;"></i>
             {% elif score >= 6.5 %}
-                🌟
+                <i class="fa fa-star" style="color: #3b82f6;"></i>
             {% elif score >= 5.0 %}
-                🎯
+                <i class="fa fa-check-circle" style="color: #10b981;"></i>
             {% else %}
-                💪
+                <i class="fa fa-refresh" style="color: #64748b;"></i>
             {% endif %}
         </div>
         
@@ -58,13 +58,13 @@
                     {% endif %}
                 ">
                     {% if score >= 8.5 %}
-                        ✨ {{ _('Xuất sắc') }}
+                        <i class="fa fa-star"></i> {{ _('Xuất sắc') }}
                     {% elif score >= 6.5 %}
-                        ⭐ {{ _('Khá / Tốt') }}
+                        <i class="fa fa-thumbs-up"></i> {{ _('Khá / Tốt') }}
                     {% elif score >= 5.0 %}
-                        👍 {{ _('Đạt yêu cầu') }}
+                        <i class="fa fa-check"></i> {{ _('Đạt yêu cầu') }}
                     {% else %}
-                        📖 {{ _('Cần ôn tập thêm') }}
+                        <i class="fa fa-book"></i> {{ _('Cần ôn tập thêm') }}
                     {% endif %}
                 </span>
             </div>
@@ -90,16 +90,16 @@
         <div style="display: flex; flex-direction: column; gap: 10px;">
             {% if session and session.id %}
                 <a href="{{ url('quiz_session_review', session_id=session.id) }}" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 12px 20px; background: var(--quiz-primary, #2563eb); color: #fff; border-radius: 10px; font-weight: 700; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
-                    📋 {{ _('Xem Lời Giải & Chi Tiết Từng Câu') }} →
+                    <i class="fa fa-list-alt"></i> {{ _('Xem Lời Giải & Chi Tiết Từng Câu') }} <i class="fa fa-arrow-right" style="font-size: 0.85em;"></i>
                 </a>
             {% endif %}
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <a href="{{ url('quiz_home') }}" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; background: rgba(0,0,0,0.04); color: var(--quiz-text, #334155); border: 1px solid var(--quiz-border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none;">
-                    🎯 {{ _('Luyện tập tiếp') }}
+                    <i class="fa fa-repeat"></i> {{ _('Luyện tập tiếp') }}
                 </a>
                 <a href="{{ url('quiz_hub') }}" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; background: rgba(0,0,0,0.04); color: var(--quiz-text, #334155); border: 1px solid var(--quiz-border); border-radius: 8px; font-weight: 600; font-size: 0.88rem; text-decoration: none;">
-                    🏫 {{ _('Về Lớp Học') }}
+                    <i class="fa fa-graduation-cap"></i> {{ _('Về Lớp Học') }}
                 </a>
             </div>
         </div>

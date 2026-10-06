@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+
+{% block title_content %}
+    <title>{{ _('Nhập Đề Thi Bằng AI (PDF / Ảnh)') }} - {{ SITE_NAME }}</title>
+{% endblock %}
+
+{% block title_row %}{% endblock %}
+{% block title_ruler %}{% endblock %}
+
+{% block body %}
+<div class="quiz-container" style="max-width: 1000px;">
+
+    <!-- Clean Quiz Teacher Navigation Bar -->
+    <div class="quiz-subnav-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; padding: 10px 16px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px;">
+        <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-book"></i> {{ _('Quản lý đề thi') }}
+        </a>
+        <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-database"></i> {{ _('Ngân hàng câu hỏi') }}
+        </a>
+        <a href="{{ url('quiz_ai_import') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; background: rgba(16, 185, 129, 0.15); color: #059669; border-color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-magic"></i> {{ _('Tạo đề bằng AI') }}
+        </a>
+        <div style="flex: 1;"></div>
+        <a href="{{ url('quiz_home') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 6px 12px; color: var(--quiz-text-muted); display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-pencil-square-o"></i> {{ _('Luyện tập (Học sinh)') }}
+        </a>
+    </div>
+
+    <!-- Header Card -->
+    <div class="quiz-header-card" style="margin-bottom: 20px;">
+        <div>
+            <span class="quiz-q-tag difficulty" style="font-size: 0.78rem; margin-bottom: 8px; display: inline-block;">
+                {{ _('Dành cho Giáo viên') }}
+            </span>
+            <h1 style="font-size: 1.55rem; margin: 4px 0 8px 0;"><i class="fa fa-magic" style="color: #10b981;"></i> {{ _('Tạo Đề Thi Tự Động Bằng AI') }}</h1>
+            <p style="margin: 0; color: var(--quiz-text-muted); font-size: 0.95rem; line-height: 1.5;">{{ _('Tải lên tệp đề thi (PDF hoặc ảnh chụp). AI sẽ tự động đọc câu hỏi trắc nghiệm (Phần I), câu hỏi Đúng/Sai (Phần II), công thức toán LaTeX và tự động gắn đáp án.') }}</p>
+        </div>
+    </div>
+
+    <!-- Step 1: Upload Card -->
+    <div class="quiz-q-card" id="upload-section" style="padding: 24px; margin-bottom: 24px;">
+        <h3 style="font-size: 1.15rem; color: var(--quiz-text); margin: 0 0 16px 0; border-bottom: 1px solid var(--quiz-border); padding-bottom: 10px;">
+            <i class="fa fa-cloud-upload"></i> {{ _('Bước 1: Chọn Tài Liệu Đề Thi') }}
+        </h3>
+
+        <form id="ai-import-form" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Input Tabs: File Upload vs Raw Text -->
+            <div class="quiz-radio-tabs" style="margin-bottom: 16px; max-width: 400px;">
+                <div class="quiz-radio-tab active" id="tab-file-mode" onclick="switchInputMode('file')">
+                    <i class="fa fa-file-pdf-o"></i> {{ _('Tải tệp PDF / Ảnh đề thi') }}
+                </div>
+                <div class="quiz-radio-tab" id="tab-text-mode" onclick="switchInputMode('text')">
+                    <i class="fa fa-align-left"></i> {{ _('Dán văn bản đề thi') }}
+                </div>
+            </div>
+
+            <!-- Mode 1: File Dropzone -->
+            <div id="file-input-container">
+                <div id="dropzone" style="border: 2px dashed var(--quiz-border); border-radius: 10px; padding: 36px 20px; text-align: center; background: var(--quiz-card-bg-sub); cursor: pointer; transition: all 0.2s;"
+                     onclick="document.getElementById('file-input').click()"
+                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    <i class="fa fa-file-text-o" style="font-size: 2.8rem; color: var(--quiz-primary); margin-bottom: 12px; display: block;"></i>
+                    <div style="font-size: 1.05rem; font-weight: 600; color: var(--quiz-text); margin-bottom: 6px;">
+                        {{ _('Kéo thả tệp tin vào đây, hoặc nhấn để chọn tệp') }}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">
+                        {{ _('Hỗ trợ: PDF (.pdf), Ảnh (.png, .jpg, .jpeg, .webp), hoặc Văn bản (.txt, .md). Chọn được nhiều ảnh cùng lúc.') }}
+                    </div>
+                    <input type="file" id="file-input" name="exam_files" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md" style="display: none;" onchange="handleFileSelect(this.files)">
+                </div>
+
+                <!-- Selected Files List Preview -->
+                <div id="selected-files-list" style="margin-top: 14px; display: none;">
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--quiz-text); margin-bottom: 8px;">
+                        {{ _('Các tệp đã chọn:') }}
+                    </div>
+                    <div id="files-items" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+            </div>
+
+            <!-- Mode 2: Raw Text -->
+            <div id="text-input-container" style="display: none;">
+                <label class="quiz-form-label" for="raw-text-input">
+                    <i class="fa fa-pencil"></i> {{ _('Nội dung đề thi kèm bảng đáp án:') }}
+                </label>
+                <textarea id="raw-text-input" name="raw_text" rows="12" class="quiz-input" style="font-family: monospace; font-size: 0.9rem;" placeholder="{{ _('Dán nội dung đề bài tại đây... Ví dụ:&#10;Câu 1: ...&#10;A. ...&#10;B. ...&#10;&#10;BẢNG ĐÁP ÁN:&#10;1-A, 2-B, 3-C...') }}"></textarea>
+            </div>
+
+            <!-- Target Exam Settings -->
+            <div style="margin-top: 24px; padding: 18px; border: 1px solid var(--quiz-border); border-radius: 8px; background: rgba(255,255,255,0.01);">
+                <h4 style="font-size: 0.95rem; color: var(--quiz-text); margin: 0 0 12px 0;">
+                    <i class="fa fa-folder-open-o"></i> {{ _('Cấu hình lưu đề thi') }}
+                </h4>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                    <div>
+                        <label class="quiz-form-label">{{ _('Nơi lưu câu hỏi:') }}</label>
+                        <select id="target-mode" name="target_mode" class="quiz-select" style="width: 100%;" onchange="toggleTargetMode(this.value)">
+                            <option value="new_exam">{{ _('Tạo một Đề thi mới trong Kho đề') }}</option>
+                            <option value="existing_exam">{{ _('Thêm vào Đề thi có sẵn') }}</option>
+                            <option value="bank_only">{{ _('Chỉ thêm vào Ngân hàng câu hỏi (không gán đề)') }}</option>
+                        </select>
+                    </div>
+
+                    <div id="target-exam-name-group">
+                        <label class="quiz-form-label">{{ _('Tên Đề thi:') }}</label>
+                        <input type="text" id="target-exam-name" name="exam_name" class="quiz-input" placeholder="{{ _('Để trống để AI tự đặt theo đề...') }}" style="width: 100%;">
+                    </div>
+
+                    <div id="target-existing-exam-group" style="display: none;">
+                        <label class="quiz-form-label">{{ _('Chọn đề thi hiện có:') }}</label>
+                        <select id="existing-exam-id" name="existing_exam_id" class="quiz-select" style="width: 100%;">
+                            {% for src in sources %}
+                                <option value="{{ src.id }}">{{ src.name }} ({{ src.questions.count() }} {{ _('câu') }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="target-duration-group">
+                        <label class="quiz-form-label">{{ _('Thời lượng làm bài (phút):') }}</label>
+                        <input type="number" id="target-duration" name="exam_duration" value="45" min="5" max="300" class="quiz-input" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cấu hình AI tự động từ hệ thống (ẩn hoàn toàn với giáo viên) -->
+            <input type="hidden" id="ai-base-url" name="base_url" value="{{ default_base_url }}">
+            <input type="hidden" id="ai-model" name="model" value="{{ default_model }}">
+            <input type="hidden" id="ai-api-key" name="api_key" value="{{ default_api_key }}">
+            <input type="hidden" id="ai-custom-headers" name="custom_headers" value="{{ default_custom_headers }}">
+            <input type="hidden" id="ai-use-vision" name="use_vision" value="true">
+            <input type="hidden" name="orientation" value="">
+
+            <!-- Submit Button -->
+            <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+                <button type="button" id="btn-start-analyze" class="quiz-btn-primary" onclick="startAiAnalysis()" style="padding: 13px 36px; font-size: 1.05rem; font-weight: 600; background: #10b981; border: 1px solid #059669; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;">
+                    <i class="fa fa-rocket"></i> {{ _('Tải Đề Lên & Bắt Đầu Phân Tích') }}
+                </button>
+                <div id="analyze-error-msg" style="color: var(--quiz-danger); font-size: 0.88rem; display: none;"></div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Step 2: Loading & Progress Card -->
+    <div class="quiz-q-card" id="loading-section" style="display: none; padding: 40px 24px; text-align: center; margin-bottom: 24px;">
+        <div class="quiz-loading-spinner" style="width: 50px; height: 50px; border: 4px solid var(--quiz-border); border-top-color: var(--quiz-primary); border-radius: 50%; animation: spin 1s infinite linear; margin: 0 auto 20px auto;"></div>
+        <h3 id="loading-status-title" style="color: var(--quiz-text); font-size: 1.25rem; margin: 0 0 10px 0;">
+            {{ _('AI đang xử lý tài liệu đề thi...') }}
+        </h3>
+        <p id="loading-status-desc" style="color: var(--quiz-text-muted); font-size: 0.95rem; max-width: 500px; margin: 0 auto 24px auto;">
+            {{ _('Đang trích xuất nội dung các trang, bóc tách công thức toán LaTeX và đối chiếu bảng đáp án...') }}
+        </p>
+
+        <!-- Progress Steps -->
+        <div style="display: flex; justify-content: center; gap: 20px; max-width: 600px; margin: 0 auto; text-align: left; font-size: 0.85rem;">
+            <div id="step-1-indicator" style="color: var(--quiz-primary);"><i class="fa fa-check-circle"></i> {{ _('Tải tệp & Chuẩn bị') }}</div>
+            <div id="step-2-indicator" style="color: var(--quiz-text-muted);"><i class="fa fa-circle-o"></i> {{ _('AI Vision đọc đề') }}</div>
+            <div id="step-3-indicator" style="color: var(--quiz-text-muted);"><i class="fa fa-circle-o"></i> {{ _('Đối soát đáp án & JSON') }}</div>
+        </div>
+    </div>
+
+    <!-- Step 3: Interactive Review & Verification Section -->
+    <div id="review-section" style="display: none;">
+        
+        <!-- Summary Stats Header -->
+        <div class="quiz-header-card" style="margin-bottom: 20px; padding: 18px 24px;">
+            <div>
+                <span class="quiz-q-tag difficulty" style="font-size: 0.78rem; margin-bottom: 4px; display: inline-block;">
+                    {{ _('Bước 2: Đối Soát & Tinh Chỉnh Trước Khi Lưu') }}
+                </span>
+                <h2 style="font-size: 1.4rem; color: var(--quiz-text); margin: 4px 0;">
+                    {{ _('Đã bóc tách thành công:') }} <span id="stat-total-q" style="color: var(--quiz-success); font-weight: 700;">0</span> {{ _('câu hỏi') }}
+                </h2>
+                <div style="font-size: 0.88rem; color: var(--quiz-text-muted); display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap;">
+                    <span><i class="fa fa-dot-circle-o" style="color: var(--quiz-primary);"></i> <b><span id="stat-choice-q">0</span></b> {{ _('Trắc nghiệm 4 lựa chọn') }}</span>
+                    <span><i class="fa fa-check-square-o" style="color: var(--quiz-accent);"></i> <b><span id="stat-tf-q">0</span></b> {{ _('Chùm Đúng/Sai') }}</span>
+                    <span><i class="fa fa-clock-o"></i> <span id="stat-exam-info"></span></span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="quiz-session-btn" onclick="addNewQuestion()">
+                    <i class="fa fa-plus"></i> {{ _('Thêm câu hỏi') }}
+                </button>
+                <button type="button" class="quiz-btn-primary" onclick="commitVerifiedQuestions()" style="padding: 10px 24px; font-size: 1rem; background: #10b981; border-color: #059669;">
+                    <i class="fa fa-save"></i> {{ _('Lưu Tất Cả Vào Hệ Thống') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter bar for review -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+            <div class="quiz-radio-tabs" style="max-width: 380px;">
+                <div class="quiz-radio-tab active" id="filter-tab-all" onclick="filterReviewList('all')">{{ _('Tất cả') }} (<span id="count-all">0</span>)</div>
+                <div class="quiz-radio-tab" id="filter-tab-choice" onclick="filterReviewList('choice')">{{ _('Trắc nghiệm') }} (<span id="count-choice">0</span>)</div>
+                <div class="quiz-radio-tab" id="filter-tab-tf" onclick="filterReviewList('tf')">{{ _('Đúng/Sai') }} (<span id="count-tf">0</span>)</div>
+            </div>
+            
+            <div style="font-size: 0.85rem; color: var(--quiz-text-muted);">
+                <i class="fa fa-lightbulb-o"></i> {{ _('Gợi ý: Bạn có thể sửa trực tiếp đề bài, đổi đáp án đúng chỉ với 1 click chuột.') }}
+            </div>
+        </div>
+
+        <!-- Questions List Container -->
+        <div id="questions-review-list" style="display: flex; flex-direction: column; gap: 20px;"></div>
+
+        <!-- Bottom Action Bar -->
+        <div class="quiz-q-card" style="margin-top: 24px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <button type="button" class="quiz-session-btn" onclick="restartImport()" style="border-color: var(--quiz-danger); color: var(--quiz-danger);">
+                <i class="fa fa-trash-o"></i> {{ _('Hủy và làm lại từ đầu') }}
+            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button type="button" class="quiz-session-btn" onclick="addNewQuestion()">
+                    <i class="fa fa-plus"></i> {{ _('Thêm câu hỏi mới') }}
+                </button>
+                <button type="button" class="quiz-btn-primary" onclick="commitVerifiedQuestions()" style="padding: 10px 28px; font-size: 1rem; background: #10b981; border-color: #059669;">
+                    <i class="fa fa-save"></i> {{ _('Xác Nhận & Lưu Vào Hệ Thống') }}
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.file-item-chip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--quiz-card-bg);
+    border: 1px solid var(--quiz-border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+.q-review-card {
+    background: var(--quiz-card-bg);
+    border: 1px solid var(--quiz-border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+    transition: box-shadow 0.2s;
+}
+.q-review-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.q-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+</style>
+
+<script>
+    var currentInputMode = 'file';
+    var selectedFiles = [];
+    var extractedData = null;
+
+    function switchInputMode(mode) {
+        currentInputMode = mode;
+        document.getElementById('tab-file-mode').classList.toggle('active', mode === 'file');
+        document.getElementById('tab-text-mode').classList.toggle('active', mode === 'text');
+        document.getElementById('file-input-container').style.display = (mode === 'file' ? 'block' : 'none');
+        document.getElementById('text-input-container').style.display = (mode === 'text' ? 'block' : 'none');
+    }
+
+    function toggleTargetMode(mode) {
+        document.getElementById('target-exam-name-group').style.display = (mode === 'new_exam' ? 'block' : 'none');
+        document.getElementById('target-existing-exam-group').style.display = (mode === 'existing_exam' ? 'block' : 'none');
+        document.getElementById('target-duration-group').style.display = (mode === 'new_exam' ? 'block' : 'none');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('dropzone').style.borderColor = 'var(--quiz-primary)';
+        document.getElementById('dropzone').style.background = 'var(--quiz-primary-light)';
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('dropzone').style.borderColor = 'var(--quiz-border)';
+        document.getElementById('dropzone').style.background = 'var(--quiz-card-bg-sub)';
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleDragLeave(e);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            handleFileSelect(e.dataTransfer.files);
+        }
+    }
+
+    function handleFileSelect(files) {
+        for (var i = 0; i < files.length; i++) {
+            selectedFiles.push(files[i]);
+        }
+        renderFilesList();
+    }
+
+    function removeFile(idx) {
+        selectedFiles.splice(idx, 1);
+        renderFilesList();
+    }
+
+    function renderFilesList() {
+        var container = document.getElementById('selected-files-list');
+        var itemsContainer = document.getElementById('files-items');
+        if (selectedFiles.length === 0) {
+            container.style.display = 'none';
+            itemsContainer.innerHTML = '';
+            return;
+        }
+
+        container.style.display = 'block';
+        itemsContainer.innerHTML = '';
+        selectedFiles.forEach(function(file, idx) {
+            var sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+            if (file.size > 1024 * 1024) {
+                sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+            var iconClass = 'fa-file-o';
+            if (file.name.endsWith('.pdf')) iconClass = 'fa-file-pdf-o';
+            else if (file.name.match(/\.(png|jpg|jpeg|webp)$/i)) iconClass = 'fa-file-image-o';
+
+            var item = document.createElement('div');
+            item.className = 'file-item-chip';
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa ${iconClass}" style="color: var(--quiz-primary);"></i>
+                    <span style="font-weight: 600; color: var(--quiz-text);">${file.name}</span>
+                    <span style="color: var(--quiz-text-muted); font-size: 0.75rem;">(${sizeStr})</span>
+                </div>
+                <button type="button" onclick="removeFile(${idx})" style="background: none; border: none; color: var(--quiz-danger); cursor: pointer; padding: 4px;" title="{{ _('Xóa tệp') }}">
+                    <i class="fa fa-times"></i>
+                </button>
+            `;
+            itemsContainer.appendChild(item);
+        });
+    }
+
+    function startAiAnalysis() {
+        var errDiv = document.getElementById('analyze-error-msg');
+        errDiv.style.display = 'none';
+
+        if (currentInputMode === 'file' && selectedFiles.length === 0) {
+            errDiv.innerText = '{{ _("Vui lòng kéo thả hoặc chọn ít nhất 1 tệp tin đề thi.") }}';
+            errDiv.style.display = 'block';
+            return;
+        }
+        if (currentInputMode === 'text' && !document.getElementById('raw-text-input').value.trim()) {
+            errDiv.innerText = '{{ _("Vui lòng dán nội dung văn bản đề thi.") }}';
+            errDiv.style.display = 'block';
+            return;
+        }
+
+        // Show loading state
+        document.getElementById('upload-section').style.display = 'none';
+        document.getElementById('loading-section').style.display = 'block';
+        document.getElementById('review-section').style.display = 'none';
+
+        var formData = new FormData();
+        formData.append('action', 'analyze');
+        formData.append('api_key', document.getElementById('ai-api-key') ? document.getElementById('ai-api-key').value : '');
+        formData.append('base_url', document.getElementById('ai-base-url') ? document.getElementById('ai-base-url').value : '');
+        formData.append('model', document.getElementById('ai-model') ? document.getElementById('ai-model').value : '');
+        var visionEl = document.getElementById('ai-use-vision');
+        var visionVal = 'true';
+        if (visionEl) {
+            visionVal = (visionEl.type === 'checkbox') ? (visionEl.checked ? 'true' : 'false') : (visionEl.value || 'true');
+        }
+        formData.append('use_vision', visionVal);
+        var customHeadersEl = document.getElementById('ai-custom-headers');
+        if (customHeadersEl && customHeadersEl.value.trim()) {
+            formData.append('custom_headers', customHeadersEl.value.trim());
+        }
+
+        if (currentInputMode === 'file') {
+            for (var i = 0; i < selectedFiles.length; i++) {
+                formData.append('exam_files', selectedFiles[i]);
+            }
+        } else {
+            formData.append('raw_text', document.getElementById('raw-text-input').value);
+        }
+
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        // Progress simulation
+        setTimeout(() => {
+            document.getElementById('step-2-indicator').style.color = 'var(--quiz-primary)';
+            document.getElementById('step-2-indicator').innerHTML = '<i class="fa fa-check-circle"></i> {{ _("AI Vision đọc đề") }}';
+        }, 1500);
+
+        fetch("{{ url('quiz_ai_import') }}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.error || 'Lỗi không xác định khi phân tích đề thi.');
+            }
+
+            document.getElementById('step-3-indicator').style.color = 'var(--quiz-primary)';
+            document.getElementById('step-3-indicator').innerHTML = '<i class="fa fa-check-circle"></i> {{ _("Đối soát đáp án & JSON") }}';
+
+            extractedData = data.data;
+            renderReviewInterface(extractedData);
+        })
+        .catch(err => {
+            document.getElementById('loading-section').style.display = 'none';
+            document.getElementById('upload-section').style.display = 'block';
+            errDiv.innerText = err.message;
+            errDiv.style.display = 'block';
+            Swal.fire({
+                icon: 'error',
+                title: '{{ _("Phân tích đề thi thất bại") }}',
+                text: err.message,
+            });
+        });
+    }
+
+    function renderReviewInterface(data) {
+        document.getElementById('loading-section').style.display = 'none';
+        document.getElementById('review-section').style.display = 'block';
+
+        // Auto fill exam name if not provided
+        var nameInput = document.getElementById('target-exam-name');
+        if (!nameInput.value.trim() && data.exam_name) {
+            nameInput.value = data.exam_name;
+        }
+        if (data.duration) {
+            document.getElementById('target-duration').value = data.duration;
+        }
+
+        // Update stats
+        var choiceCount = 0;
+        var tfCount = 0;
+        data.questions.forEach(q => {
+            if (q.type === 'choice') choiceCount++;
+            else if (q.type === 'tf') tfCount++;
+        });
+
+        document.getElementById('stat-total-q').innerText = data.questions.length;
+        document.getElementById('stat-choice-q').innerText = choiceCount;
+        document.getElementById('stat-tf-q').innerText = tfCount;
+        document.getElementById('stat-exam-info').innerText = (nameInput.value || data.exam_name) + ' (' + (data.duration || 45) + 'p)';
+
+        document.getElementById('count-all').innerText = data.questions.length;
+        document.getElementById('count-choice').innerText = choiceCount;
+        document.getElementById('count-tf').innerText = tfCount;
+
+        renderQuestionsCards(data.questions);
+
+        // Trigger MathJax re-render
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise();
+        }
+    }
+
+    function renderQuestionsCards(questions) {
+        var container = document.getElementById('questions-review-list');
+        container.innerHTML = '';
+
+        questions.forEach((q, idx) => {
+            var card = document.createElement('div');
+            card.className = 'q-review-card';
+            card.id = `q-card-${idx}`;
+            card.dataset.type = q.type;
+
+            var typeBadge = q.type === 'choice' ? 
+                '<span class="quiz-q-tag type" style="background: rgba(37,99,235,0.1); color: var(--quiz-info); border-color: var(--quiz-info);">Trắc nghiệm (Choice)</span>' :
+                '<span class="quiz-q-tag type" style="background: rgba(236,72,153,0.1); color: var(--quiz-accent); border-color: var(--quiz-accent);">Đúng / Sai (TF)</span>';
+
+            var optionsHtml = '';
+            if (q.type === 'choice') {
+                optionsHtml = '<div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">';
+                (q.options || []).forEach(opt => {
+                    optionsHtml += `
+                        <div style="display: grid; grid-template-columns: 36px 1fr 140px; gap: 10px; align-items: center;">
+                            <span style="font-weight: 700; color: var(--quiz-primary); text-align: center;">${opt.label}</span>
+                            <input type="text" class="quiz-input opt-content-input" value="${escapeHtml(opt.content)}" data-idx="${idx}" data-label="${opt.label}" oninput="updateOptionContent(${idx}, '${opt.label}', this.value)">
+                            <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-size: 0.85rem; font-weight: 600; color: ${opt.is_correct ? 'var(--quiz-success)' : 'var(--quiz-text-muted)'};">
+                                <input type="radio" name="choice_correct_${idx}" ${opt.is_correct ? 'checked' : ''} onchange="setChoiceCorrect(${idx}, '${opt.label}')">
+                                <span>${opt.is_correct ? '<i class="fa fa-check"></i> {{ _("Đáp án ĐÚNG") }}' : '{{ _("Chọn làm đáp án") }}'}</span>
+                            </label>
+                        </div>
+                    `;
+                });
+                optionsHtml += '</div>';
+            } else {
+                // True / False
+                optionsHtml = '<div style="margin-top: 14px; display: flex; flex-direction: column; gap: 10px;">';
+                (q.options || []).forEach(opt => {
+                    optionsHtml += `
+                        <div style="display: grid; grid-template-columns: 36px 1fr 180px; gap: 10px; align-items: center;">
+                            <span style="font-weight: 700; color: var(--quiz-accent); text-align: center;">${opt.label})</span>
+                            <input type="text" class="quiz-input opt-content-input" value="${escapeHtml(opt.content)}" data-idx="${idx}" data-label="${opt.label}" oninput="updateOptionContent(${idx}, '${opt.label}', this.value)">
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" class="quiz-tf-btn true-btn ${opt.is_correct ? 'active' : ''}" style="flex: 1; padding: 4px;" onclick="setTFCorrect(${idx}, '${opt.label}', true)">{{ _("Đúng") }}</button>
+                                <button type="button" class="quiz-tf-btn false-btn ${!opt.is_correct ? 'active' : ''}" style="flex: 1; padding: 4px;" onclick="setTFCorrect(${idx}, '${opt.label}', false)">{{ _("Sai") }}</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                optionsHtml += '</div>';
+            }
+
+            var tagsStr = (q.tags || []).join(', ');
+
+            card.innerHTML = `
+                <div class="q-review-header">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--quiz-primary);">#${idx + 1}</span>
+                        ${typeBadge}
+                        <select class="quiz-select" style="padding: 2px 8px; font-size: 0.78rem;" onchange="updateQuestionDifficulty(${idx}, this.value)">
+                            <option value="easy" ${q.difficulty === 'easy' ? 'selected' : ''}>{{ _("Nhận biết (Dễ)") }}</option>
+                            <option value="medium" ${q.difficulty === 'medium' ? 'selected' : ''}>{{ _("Thông hiểu (Vừa)") }}</option>
+                            <option value="hard" ${q.difficulty === 'hard' ? 'selected' : ''}>{{ _("Vận dụng (Khó)") }}</option>
+                            <option value="very_hard" ${q.difficulty === 'very_hard' ? 'selected' : ''}>{{ _("Vận dụng cao") }}</option>
+                        </select>
+                        <select class="quiz-select" style="padding: 2px 8px; font-size: 0.78rem;" onchange="updateQuestionType(${idx}, this.value)">
+                            <option value="choice" ${q.type === 'choice' ? 'selected' : ''}>{{ _("Trắc nghiệm 4 lựa chọn") }}</option>
+                            <option value="tf" ${q.type === 'tf' ? 'selected' : ''}>{{ _("Chùm Đúng / Sai") }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="button" onclick="deleteQuestion(${idx})" class="quiz-session-btn" style="padding: 3px 8px; font-size: 0.75rem; border-color: var(--quiz-danger); color: var(--quiz-danger);">
+                            <i class="fa fa-trash"></i> {{ _("Xóa câu này") }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Stem Editor -->
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: var(--quiz-text-muted); display: block; margin-bottom: 4px;">{{ _("Nội dung đề bài (Hỗ trợ Markdown & công thức toán LaTeX $...$):") }}</label>
+                    <textarea class="quiz-input" rows="3" style="width: 100%; font-size: 0.92rem; line-height: 1.5;" oninput="updateQuestionContent(${idx}, this.value)">${escapeHtml(q.content)}</textarea>
+                </div>
+
+                <!-- Options -->
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 600; color: var(--quiz-text-muted); display: block; margin-bottom: 4px;">{{ _("Các lựa chọn & Đáp án chuẩn xác:") }}</label>
+                    ${optionsHtml}
+                </div>
+
+                <!-- Explanation & Tags -->
+                <div style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 600; color: var(--quiz-text-muted); display: block; margin-bottom: 2px;">{{ _("Lời giải chi tiết:") }}</label>
+                        <input type="text" class="quiz-input" style="width: 100%; font-size: 0.85rem;" value="${escapeHtml(q.explanation || '')}" placeholder="{{ _('Lời giải thích sau khi thi...') }}" oninput="updateQuestionExplanation(${idx}, this.value)">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 600; color: var(--quiz-text-muted); display: block; margin-bottom: 2px;">{{ _("Thẻ phân loại (ngăn cách bởi dấu phẩy):") }}</label>
+                        <input type="text" class="quiz-input" style="width: 100%; font-size: 0.85rem;" value="${escapeHtml(tagsStr)}" placeholder="{{ _('VD: khmt, Mạng máy tính...') }}" oninput="updateQuestionTags(${idx}, this.value)">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function updateQuestionContent(idx, val) {
+        if (extractedData && extractedData.questions[idx]) {
+            extractedData.questions[idx].content = val;
+        }
+    }
+
+    function updateQuestionExplanation(idx, val) {
+        if (extractedData && extractedData.questions[idx]) {
+            extractedData.questions[idx].explanation = val;
+        }
+    }
+
+    function updateQuestionDifficulty(idx, val) {
+        if (extractedData && extractedData.questions[idx]) {
+            extractedData.questions[idx].difficulty = val;
+        }
+    }
+
+    function updateQuestionType(idx, newType) {
+        if (extractedData && extractedData.questions[idx]) {
+            var q = extractedData.questions[idx];
+            q.type = newType;
+            if (newType === 'choice') {
+                q.options = [
+                    {label: 'A', content: q.options[0] ? q.options[0].content : '', is_correct: true},
+                    {label: 'B', content: q.options[1] ? q.options[1].content : '', is_correct: false},
+                    {label: 'C', content: q.options[2] ? q.options[2].content : '', is_correct: false},
+                    {label: 'D', content: q.options[3] ? q.options[3].content : '', is_correct: false},
+                ];
+            } else {
+                q.options = [
+                    {label: 'a', content: q.options[0] ? q.options[0].content : '', is_correct: true},
+                    {label: 'b', content: q.options[1] ? q.options[1].content : '', is_correct: false},
+                    {label: 'c', content: q.options[2] ? q.options[2].content : '', is_correct: true},
+                    {label: 'd', content: q.options[3] ? q.options[3].content : '', is_correct: false},
+                ];
+            }
+            renderReviewInterface(extractedData);
+        }
+    }
+
+    function updateQuestionTags(idx, val) {
+        if (extractedData && extractedData.questions[idx]) {
+            extractedData.questions[idx].tags = val.split(',').map(s => s.trim()).filter(Boolean);
+        }
+    }
+
+    function updateOptionContent(qIdx, label, val) {
+        if (extractedData && extractedData.questions[qIdx]) {
+            var opt = extractedData.questions[qIdx].options.find(o => o.label === label);
+            if (opt) opt.content = val;
+        }
+    }
+
+    function setChoiceCorrect(qIdx, label) {
+        if (extractedData && extractedData.questions[qIdx]) {
+            extractedData.questions[qIdx].options.forEach(o => {
+                o.is_correct = (o.label === label);
+            });
+            renderReviewInterface(extractedData);
+        }
+    }
+
+    function setTFCorrect(qIdx, label, val) {
+        if (extractedData && extractedData.questions[qIdx]) {
+            var opt = extractedData.questions[qIdx].options.find(o => o.label === label);
+            if (opt) opt.is_correct = val;
+            renderReviewInterface(extractedData);
+        }
+    }
+
+    function deleteQuestion(idx) {
+        if (confirm('{{ _("Bạn có chắc muốn xóa câu hỏi này?") }}')) {
+            extractedData.questions.splice(idx, 1);
+            renderReviewInterface(extractedData);
+        }
+    }
+
+    function addNewQuestion() {
+        if (!extractedData) return;
+        extractedData.questions.push({
+            index: extractedData.questions.length + 1,
+            content: 'Nội dung câu hỏi mới...',
+            type: 'choice',
+            difficulty: 'easy',
+            tags: [],
+            explanation: '',
+            options: [
+                {label: 'A', content: 'Phương án A', is_correct: true},
+                {label: 'B', content: 'Phương án B', is_correct: false},
+                {label: 'C', content: 'Phương án C', is_correct: false},
+                {label: 'D', content: 'Phương án D', is_correct: false},
+            ]
+        });
+        renderReviewInterface(extractedData);
+        // Scroll to new question
+        setTimeout(() => {
+            var lastCard = document.getElementById(`q-card-${extractedData.questions.length - 1}`);
+            if (lastCard) lastCard.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
+
+    function filterReviewList(filter) {
+        document.getElementById('filter-tab-all').classList.toggle('active', filter === 'all');
+        document.getElementById('filter-tab-choice').classList.toggle('active', filter === 'choice');
+        document.getElementById('filter-tab-tf').classList.toggle('active', filter === 'tf');
+
+        var cards = document.querySelectorAll('.q-review-card');
+        cards.forEach(c => {
+            if (filter === 'all' || c.dataset.type === filter) {
+                c.style.display = 'block';
+            } else {
+                c.style.display = 'none';
+            }
+        });
+    }
+
+    function restartImport() {
+        if (confirm('{{ _("Bạn có muốn hủy kết quả bóc tách hiện tại và tải lên lại?") }}')) {
+            extractedData = null;
+            selectedFiles = [];
+            renderFilesList();
+            document.getElementById('review-section').style.display = 'none';
+            document.getElementById('upload-section').style.display = 'block';
+            document.getElementById('step-2-indicator').style.color = 'var(--quiz-text-muted)';
+            document.getElementById('step-3-indicator').style.color = 'var(--quiz-text-muted)';
+        }
+    }
+
+    function commitVerifiedQuestions() {
+        if (!extractedData || extractedData.questions.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: '{{ _("Không có câu hỏi nào") }}',
+                text: '{{ _("Danh sách câu hỏi đang trống. Hãy thêm câu hỏi trước khi lưu.") }}',
+            });
+            return;
+        }
+
+        var targetMode = document.getElementById('target-mode').value;
+        var examName = document.getElementById('target-exam-name').value.trim();
+        var duration = document.getElementById('target-duration').value;
+        var existingExamId = document.getElementById('existing-exam-id').value;
+
+        var formData = new FormData();
+        formData.append('action', 'commit');
+        formData.append('verified_data', JSON.stringify(extractedData));
+        formData.append('target_mode', targetMode);
+        formData.append('exam_name', examName);
+        formData.append('exam_duration', duration);
+        formData.append('existing_exam_id', existingExamId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        Swal.fire({
+            title: '{{ _("Đang lưu vào cơ sở dữ liệu...") }}',
+            text: '{{ _("Hệ thống đang ghi nhận các câu hỏi và đáp án vào cơ sở dữ liệu.") }}',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        fetch("{{ url('quiz_ai_import') }}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '{{ _("Lưu thành công!") }}',
+                    text: `{{ _("Đã lưu ${data.count} câu hỏi vào hệ thống.") }}`,
+                    confirmButtonText: '{{ _("Đến xem đề thi") }}'
+                }).then(() => {
+                    window.location.href = data.redirect_url;
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: '{{ _("Lỗi khi lưu") }}',
+                    text: data.error || 'Lỗi không xác định khi lưu vào cơ sở dữ liệu.',
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: '{{ _("Lỗi mạng / Máy chủ") }}',
+                text: err.toString(),
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if preselected_exam %}
+        var targetSelect = document.getElementById('target-mode');
+        if (targetSelect) {
+            targetSelect.value = 'existing_exam';
+            toggleTargetMode('existing_exam');
+        }
+        {% endif %}
+    });
+</script>
+
+{% include "mathjax-load.html" %}
+{% endblock %}

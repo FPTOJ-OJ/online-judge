@@ -13,28 +13,69 @@
 {% block body %}
 <div class="quiz-container">
     
+    <!-- Clean Quiz Teacher Navigation Bar -->
+    <div class="quiz-subnav-bar" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; padding: 10px 16px; background: var(--quiz-card-bg); border: 1px solid var(--quiz-border); border-radius: 10px;">
+        <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; background: var(--quiz-primary-light); color: var(--quiz-primary); border-color: var(--quiz-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-book"></i> {{ _('Quản lý đề thi') }}
+        </a>
+        <a href="{{ url('quiz_manage_dashboard') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-database"></i> {{ _('Ngân hàng câu hỏi') }}
+        </a>
+        <a href="{{ url('quiz_ai_import') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.88rem; padding: 6px 14px; color: #059669; border-color: #10b981; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-magic"></i> {{ _('Tạo đề bằng AI') }}
+        </a>
+        <div style="flex: 1;"></div>
+        <a href="{{ url('quiz_home') }}" class="quiz-session-btn" style="text-decoration: none; font-size: 0.82rem; padding: 6px 12px; color: var(--quiz-text-muted); display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa fa-pencil-square-o"></i> {{ _('Luyện tập (Học sinh)') }}
+        </a>
+    </div>
+
     <div class="quiz-header-card">
         <div>
-            <span class="quiz-q-tag type" style="font-size: 0.8rem; margin-bottom: 8px; display: inline-block;">{{ _('Bảng Quản Trị Giáo Viên') }}</span>
-            <h1>{{ _('Quản Lý Ngân Hàng Đề Thi & Học Liệu') }}</h1>
-            <p>{{ _('Tạo và biên tập đề thi trong Kho học liệu. Để giao bài hoặc mở ca thi cho lớp học, hãy vào Quản lý Lớp học.') }}</p>
+            <span class="quiz-q-tag difficulty" style="font-size: 0.78rem; margin-bottom: 8px; display: inline-block;">{{ _('Dành cho Giáo viên') }}</span>
+            <h1 style="font-size: 1.55rem; margin: 4px 0 8px 0;"><i class="fa fa-book" style="color: var(--quiz-primary);"></i> {{ _('Quản Lý Đề Thi') }}</h1>
+            <p style="margin: 0; color: var(--quiz-text-muted); font-size: 0.95rem; line-height: 1.5;">{{ _('Danh sách đề thi trong hệ thống. Thầy cô có thể tạo nhanh đề thi bằng AI từ PDF / ảnh hoặc tự thêm đề thủ công.') }}</p>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-            <a href="{{ url('quiz_exam_builder') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px; background: var(--quiz-primary);">
-                {{ _('Tạo đề từ Ngân hàng câu hỏi') }}
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+            <a href="{{ url('quiz_ai_import') }}" class="quiz-btn-primary" style="text-decoration: none; font-size: 0.88rem; padding: 8px 18px; background: #10b981; border: 1px solid #059669; border-radius: 8px; font-weight: 600;">
+                <i class="fa fa-magic"></i> {{ _('Tạo đề bằng AI') }}
             </a>
-            <a href="{{ url('quiz_exam_add') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px;">
-                {{ _('Thêm đề mới') }}
-            </a>
-            <a href="{{ url('quiz_hub') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.88rem; padding: 7px 14px;">
-                {{ _('Về Exam Hub') }}
+            <a href="{{ url('quiz_exam_add') }}" class="quiz-btn-secondary" style="text-decoration: none; font-size: 0.88rem; padding: 8px 16px; border-radius: 8px;">
+                <i class="fa fa-plus"></i> {{ _('Thêm đề mới') }}
             </a>
         </div>
     </div>
 
+    <!-- Filter & Search Toolbar -->
+    <div class="quiz-q-card" style="padding: 14px 20px; margin-bottom: 16px;">
+        <form method="get" action="{{ url('quiz_exam_manage') }}" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 240px; position: relative;">
+                <input type="text" name="q" value="{{ search_query or '' }}" placeholder="{{ _('Tìm kiếm tên đề thi, mô tả...') }}" class="quiz-input" style="width: 100%; font-size: 0.88rem; padding-left: 32px;">
+                <i class="fa fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--quiz-text-muted);"></i>
+            </div>
+            <div>
+                <select name="status" class="quiz-select" style="font-size: 0.88rem; padding: 6px 12px;" onchange="this.form.submit()">
+                    <option value="">{{ _('Tất cả trạng thái') }}</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>{{ _('Đang mở') }}</option>
+                    <option value="locked" {% if status_filter == 'locked' %}selected{% endif %}>{{ _('Đã khóa') }}</option>
+                    <option value="visible" {% if status_filter == 'visible' %}selected{% endif %}>{{ _('Hiển thị') }}</option>
+                    <option value="hidden" {% if status_filter == 'hidden' %}selected{% endif %}>{{ _('Ẩn') }}</option>
+                </select>
+            </div>
+            <button type="submit" class="quiz-btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">
+                {{ _('Tìm kiếm') }}
+            </button>
+            {% if search_query or status_filter %}
+                <a href="{{ url('quiz_exam_manage') }}" class="quiz-session-btn" style="padding: 6px 10px; font-size: 0.85rem; text-decoration: none; color: var(--quiz-danger); border-color: var(--quiz-danger);">
+                    <i class="fa fa-times"></i> {{ _('Xóa lọc') }}
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
     {% if messages %}
         {% for message in messages %}
-            <div class="quiz-q-card" style="padding: 12px 16px; margin-bottom: 16px; background: var(--quiz-card-bg-sub); color: var(--quiz-text); border: 1px solid var(--quiz-border); border-radius: 6px;">
+            <div class="quiz-q-card" style="padding: 12px 16px; margin-bottom: 16px; background: rgba(16, 185, 129, 0.1); color: var(--quiz-success); border: 1px solid var(--quiz-success); border-radius: 6px;">
                 {{ message }}
             </div>
         {% endfor %}
@@ -79,7 +120,7 @@
                                 <td style="padding: 8px 6px; text-align: center; font-weight: 600; color: var(--quiz-text-muted); white-space: nowrap;">{{ exam.default_duration }}p</td>
                                 <td style="padding: 8px 6px; text-align: center;">
                                     {% if exam.is_visible %}
-                                        <span style="color: #10b981; font-weight: 700;">✓</span>
+                                        <i class="fa fa-check" style="color: #10b981;"></i>
                                     {% else %}
                                         <span style="color: var(--quiz-text-muted);">–</span>
                                     {% endif %}

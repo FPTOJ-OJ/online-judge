@@ -9,8 +9,8 @@
     
     <div style="background: var(--quiz-card-bg, #ffffff); border: 1px solid var(--quiz-border, #e2e8f0); border-radius: 12px; padding: 32px 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;">
         
-        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(37,99,235,0.1); color: var(--quiz-primary, #2563eb); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 16px;">
-            🏫
+        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(37,99,235,0.1); color: var(--quiz-primary, #2563eb); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 16px;">
+            <i class="fa fa-graduation-cap"></i>
         </div>
 
         <h2 style="font-size: 1.6rem; font-weight: 700; margin: 0 0 8px 0; color: var(--quiz-text, #1e293b);">
@@ -27,7 +27,7 @@
                     {{ _('LỚP HỌC') }}
                 </span>
                 <span style="font-size: 0.85rem; color: var(--quiz-text-muted, #64748b);">
-                    🏫 {{ class_obj.organization.short_name or class_obj.organization.name }}
+                    {{ class_obj.organization.short_name or class_obj.organization.name }}
                 </span>
             </div>
             <h3 style="font-size: 1.35rem; font-weight: 700; margin: 0 0 6px 0; color: var(--quiz-text, #1e293b);">
@@ -39,8 +39,8 @@
                 </p>
             {% endif %}
             <div style="display: flex; gap: 16px; font-size: 0.85rem; color: var(--quiz-text-muted, #64748b);">
-                <span>👥 {{ class_obj.members.count() }} {{ _('học sinh đã tham gia') }}</span>
-                <span>👨‍🏫 {{ class_obj.admins.count() }} {{ _('giáo viên phụ trách') }}</span>
+                <span>{{ class_obj.members.count() }} {{ _('học sinh đã tham gia') }}</span>
+                <span>{{ class_obj.admins.count() }} {{ _('giáo viên phụ trách') }}</span>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
             {% csrf_token %}
             <div style="margin-bottom: 16px; text-align: left;">
                 <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: var(--quiz-text, #1e293b);">
-                    🔑 {{ _('Mật khẩu / Mã vào lớp (Nếu có):') }}
+                    {{ _('Mật khẩu / Mã vào lớp (Nếu có):') }}
                 </label>
                 <input type="text" name="code" value="{{ code|default('') }}" placeholder="VD: CL7892" maxlength="20"
                        style="width: 100%; font-size: 1.3rem; letter-spacing: 4px; text-align: center; font-weight: 700; padding: 10px; border: 2px solid var(--quiz-border, #cbd5e1); border-radius: 8px; color: var(--quiz-text, #1e293b); background: var(--quiz-card-bg, #ffffff); text-transform: uppercase;">
@@ -59,7 +59,7 @@
 
             <div style="margin-bottom: 20px; text-align: left;">
                 <label style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; color: var(--quiz-text, #1e293b);">
-                    📝 {{ _('Lời nhắn xin vào lớp (Nếu không có mã):') }}
+                    {{ _('Lời nhắn xin vào lớp (Nếu không có mã):') }}
                 </label>
                 <input type="text" name="reason" value="Xin tham gia lớp {{ class_obj.name }}" placeholder="VD: Em là Nguyễn Văn A xin vào lớp..."
                        style="width: 100%; padding: 10px; border: 1px solid var(--quiz-border, #cbd5e1); border-radius: 8px; font-size: 0.9rem; color: var(--quiz-text, #1e293b); background: var(--quiz-card-bg, #ffffff);">
@@ -72,7 +72,7 @@
 
         <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--quiz-border, #e2e8f0); display: flex; justify-content: space-between; font-size: 0.85rem;">
             <a href="{{ url('quiz_hub') }}" style="color: var(--quiz-primary, #2563eb); text-decoration: none; font-weight: 600;">
-                ← {{ _('Về Exam Hub') }}
+                ← {{ _('Quay lại Lớp Học & Bài Thi') }}
             </a>
             <a href="{{ class_obj.organization.get_absolute_url() }}" style="color: var(--quiz-text-muted, #64748b); text-decoration: none;">
                 {{ _('Trang trường học') }}
